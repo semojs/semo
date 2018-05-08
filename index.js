@@ -7,7 +7,7 @@ const Utils = require('./src/common/utils')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
 const yargs = require('yargs').config(config)
-console.log(config)
+
 // Load local commands
 yargs.commandDir('src/commands')
 
