@@ -31,11 +31,11 @@ All plugins are all begin with: `zignis-plugin-`
 
 #### Plugin hooks
 
-##### __repl__
+##### `__repl__`
 
 Plugins can expose Object/Instance to Zignis REPL by this hook.
 
-### commands
+### command
 
 Command is everything for Zignis, we want to create more and more commands to help us do thos repeated and boring jobs.
 
@@ -47,7 +47,7 @@ Below commands are able to replace above commands if their name or alias same wi
 
 Anytime you can get Zignis help by execute: `Zignis` or `Zignis --help`, here we just show some core commands:
 
-##### __zignis new <name> [repo] [branch]__
+##### `__zignis new <name> [repo] [branch]__`
 
 Get a repo as the start point of you application. we do not want to suppose a dedicated repo, but if you do have a often used repo, you can config it in `.zignisrc.json`, and put it at your HOME directory.
 
@@ -63,11 +63,11 @@ example:
 }
 ```
 
-##### __zignis repl__
+##### `__zignis repl__`
 
 REPL is a interactive way to play with Zignis and your application.
 
-##### __zignis status [key]__
+##### `__zignis status [key]__`
 
 status command can tell you some Zignis and application information.
 
