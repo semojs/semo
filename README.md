@@ -2,6 +2,8 @@
 
 Zignis is a cross-project, extensible command line tool to help building application easier.
 
+__NOT_READY_FOR_PRODUCTION__
+
 ## Install
 
 ```
