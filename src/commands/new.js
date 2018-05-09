@@ -35,10 +35,10 @@ exports.handler = function (argv) {
       console.log(chalk.green('.git directory removed!'))
       shell.cd(argv.name)
       if (shell.test('-f', 'yarn.lock')) {
-        console.log(chalk.green('yarn.lock detected, yarn install running'))
+        console.log(chalk.green('yarn.lock detected, running yarn install'))
         shell.exec('yarn')
       } else {
-        console.log(chalk.green('yarn.lock not detected, npm install running'))
+        console.log(chalk.green('yarn.lock not detected, running npm install'))
         shell.exec('npm install')
       }
     }
