@@ -81,6 +81,7 @@ A way to talk with Zignis or Zignis plugins.
   - commandDefault: set default command arguments or options
   - pluginDir: locate custom plugins
     - Custom plugins can also define commands, so we put reusable plugins here and if ready we can publish these plugins to npm.
+  - extendDir: used to extend other plugins
 - Plugin's .zignisrc.json
   - Plugin exposed out some info in this way.
 

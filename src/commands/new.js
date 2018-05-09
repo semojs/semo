@@ -1,3 +1,6 @@
+const fs = require('fs')
+const path = require('path')
+
 const shell = require('shelljs')
 const chalk = require('chalk')
 const _ = require('lodash')
@@ -18,10 +21,17 @@ exports.handler = function (argv) {
     console.error('Repo url is nessary')
     process.exit(1)
   }
+
+  if (fs.existsSync(path.resolve(process.cwd(), argv.name)) && argv.force) {
+    console.log(chalk.yellow(`Existed ${argv.name} is deleted before downloading a new one`))
+    shell.rm('-rf', path.resolve(process.cwd(), argv.name))
+  }
+
+  console.log(chalk.green(`Downloading from ${argv.repo}`))
   shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (code, stdout, stderr) {
     if (!code) {
       console.log(chalk.green('Succeeded!'))
-      shell.rm('-rf', `${argv.name}/.git`)
+      shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
       console.log(chalk.green('.git directory removed!'))
       shell.cd(argv.name)
       if (shell.test('-f', 'yarn.lock')) {

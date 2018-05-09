@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const glob = require('glob')
-const table = require('table').table
+const { table, getBorderCharacters } = require('table')
 const findUp = require('find-up')
 const _ = require('lodash')
 
@@ -79,26 +79,14 @@ const getCombinedConfig = function () {
 const outputTable = function (columns) {
   // table config
   const config = {
-    border: {
-      topBody: ``,
-      topJoin: ``,
-      topLeft: ``,
-      topRight: ``,
-
-      bottomBody: ``,
-      bottomJoin: ``,
-      bottomLeft: ``,
-      bottomRight: ``,
-
-      bodyLeft: ``,
-      bodyRight: ``,
-      bodyJoin: `:`,
-
-      joinBody: ``,
-      joinLeft: ``,
-      joinRight: ``,
-      joinJoin: ``
-    }
+    drawHorizontalLine: () => {
+      return false
+    },
+    columnDefault: {
+      paddingLeft: 1,
+      paddingRight: 1
+    },
+    border: Object.assign(getBorderCharacters(`void`), { bodyJoin: `:` })
   }
 
   console.log(table(columns, config))

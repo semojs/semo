@@ -20,6 +20,8 @@ exports.handler = function (argv) {
       if (argv.key) {
 
       } else {
+        columns.push(['platform', process.platform])
+        columns.push(['node', process.version])
         columns.push(['plugins', Object.keys(plugins).join(', ')])
       }
       break

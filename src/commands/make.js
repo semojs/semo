@@ -12,18 +12,16 @@ exports.builder = function (yargs) {
   // Load plugin commands
   if (plugins) {
     Object.keys(plugins).map(function (plugin) {
-      if (fs.existsSync(path.resolve(plugins[plugin], 'src/commands', 'make'))) {
-        yargs.commandDir(path.resolve(plugins[plugin], 'src/commands', 'make'))
+      if (fs.existsSync(path.resolve(plugins[plugin], 'src/extends/zignis/commands', 'make'))) {
+        yargs.commandDir(path.resolve(plugins[plugin], 'src/extends/zignis/commands', 'make'))
       }
     })
   }
 
   // Load application commands
-  if (config.commandDir) {
-    yargs.commandDir(path.resolve(process.cwd(), config.commandDir, 'make'))
+  if (config.extendDir && fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/zignis/commands`, 'make'))) {
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/zignis/commands`, 'make'))
   }
-
-
 
   return yargs.commandDir('make')
 }
