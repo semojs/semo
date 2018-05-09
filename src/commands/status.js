@@ -1,4 +1,5 @@
-
+const path = require('path')
+const fs = require('fs')
 const Utils = require('../common/utils')
 
 exports.command = 'status [key]'
@@ -9,6 +10,7 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
+  console.log(argv)
   const plugins = Utils.getAllPluginsMapping()
   const columns = []
 
@@ -20,11 +22,36 @@ exports.handler = function (argv) {
       if (argv.key) {
 
       } else {
-        columns.push(['platform', process.platform])
-        columns.push(['node', process.version])
-        columns.push(['plugins', Object.keys(plugins).join(', ')])
+        let kvs = {}
+
+        if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+          const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
+          if (pkgConfig && pkgConfig.version) {
+            kvs.version = pkgConfig.version
+          }
+        }
+
+        kvs = Object.assign(kvs, {
+          platform: process.platform,
+          arch: process.arch,
+          hostname: require('os').hostname(),
+          node: process.version,
+          home: process.env.HOME,
+          cwd: process.cwd(),
+          plugins: Object.keys(plugins).join(', ')
+        })
+
+        Object.keys(plugins).map((plugin) => {
+          if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
+            const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
+            if (typeof loadedPlugin.status === 'function') {
+              kvs = Object.assign(kvs, loadedPlugin.status())
+            }
+          }
+        })
+
+        Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
       }
-      break
   }
 
   Utils.outputTable(columns)

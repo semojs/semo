@@ -29,6 +29,10 @@ Plugins are normal Node modules, but need to export some hook functions, those h
 
 All plugins are all begin with: `zignis-plugin-`
 
+#### CAUTION
+
+1. **Recursive plugins are not supported**
+
 #### Plugin hooks
 
 ##### `__repl__`
