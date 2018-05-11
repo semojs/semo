@@ -2,8 +2,6 @@ const chalk = require('chalk')
 const path = require('path')
 const fs = require('fs')
 const repl = require('repl')
-const colorize = require('json-colorizer')
-const stringify = require('json-stringify-pretty-compact')
 const co = require('co')
 
 const Utils = require('../common/utils')
@@ -11,6 +9,18 @@ const Utils = require('../common/utils')
 exports.command = 'repl'
 exports.aliases = 'r'
 exports.desc = 'Play with REPL'
+
+function * openRepl (pluginsReturn) {
+  const r = repl.start('>>> ')
+
+  // context即为REPL中的上下文环境
+  r.context.co = co
+  r.context.Utils = Utils
+
+  r.context = Object.assign(r.context, pluginsReturn)
+
+  corepl(r)
+}
 
 function corepl (cli) {
   var originalEval = cli.eval
@@ -22,7 +32,7 @@ function corepl (cli) {
     }
 
     if (cmd.match(/^yield\s+/)) {
-      cmd = 'co(function *() { _ = ' + cmd + '; _ ? console.log(colorize(stringify(_))) : null;})'
+      cmd = 'co(function *() { _ = ' + cmd + '; _ ? Utils.log(_) : null;})'
     } else if (cmd.match(/\W*yield\s+/)) {
       cmd = 'co(function *() {' + cmd.replace(/^\s*var\s+/, '') + '});'
     }
@@ -47,25 +57,19 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
-  var r = repl.start('>>> ')
+  co(function * () {
+    const plugins = Utils.getAllPluginsMapping()
+    let pluginsReturn = {}
 
-  // context即为REPL中的上下文环境
-  r.context.co = co
-  r.context.colorize = colorize
-  r.context.stringify = stringify
-
-  r.context.Utils = Utils
-
-  const plugins = Utils.getAllPluginsMapping()
-  Object.keys(plugins).map((plugin) => {
-    if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
-      const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
-      r.context = Object.assign(r.context, loadedPlugin.repl())
+    for (let i = 0; i < Object.keys(plugins).length; i++) {
+      let plugin = Object.keys(plugins)[i]
+      if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
+        const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
+        let pluginReturn = yield loadedPlugin.repl()
+        pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+      }
     }
+
+    return yield openRepl(pluginsReturn)
   })
-
-  corepl(r)
-
-  // Keep repl alive
-  return true
 }

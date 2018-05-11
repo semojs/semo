@@ -4,6 +4,21 @@ const glob = require('glob')
 const { table, getBorderCharacters } = require('table')
 const findUp = require('find-up')
 const _ = require('lodash')
+const colorize = require('json-colorizer')
+const stringify = require('json-stringify-pretty-compact')
+
+/**
+ * log method
+ * @param {mix} message message to log
+ * @param {String} label label for describing message
+ */
+const log = function (message, label = '') {
+  if (_.isArray(message) || _.isObject(message)) {
+    console.log(colorize(stringify(message)), label)
+  } else {
+    console.log(message)
+  }
+}
 
 /**
  * Get all plugins path mapping
@@ -93,6 +108,7 @@ const outputTable = function (columns) {
 }
 
 module.exports = {
+  log,
   outputTable,
   getAllPluginsMapping,
   getCombinedConfig,
