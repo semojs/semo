@@ -39,7 +39,9 @@ const getAllPluginsMapping = function () {
   glob.sync('zignis-plugin-*', {
     cwd: path.resolve(process.cwd(), 'node_modules')
   }).map(function (plugin) {
-    plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+    if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
+      plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+    }
   })
 
   if (fs.existsSync(config.pluginDir)) {
@@ -47,7 +49,9 @@ const getAllPluginsMapping = function () {
     glob.sync('zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), config.pluginDir)
     }).map(function (plugin) {
-      plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
+      if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
+        plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
+      }
     })
   }
 

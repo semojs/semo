@@ -10,7 +10,6 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
-  console.log(argv)
   const plugins = Utils.getAllPluginsMapping()
   const columns = []
 
@@ -36,6 +35,7 @@ exports.handler = function (argv) {
           arch: process.arch,
           hostname: require('os').hostname(),
           node: process.version,
+          zignis: require(path.resolve(__dirname, '../../package.json')).version,
           home: process.env.HOME,
           cwd: process.cwd(),
           plugins: Object.keys(plugins).join(', ')

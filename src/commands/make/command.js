@@ -22,7 +22,7 @@ exports.builder = function (yargs) {
 exports.handler = function (argv) {
   console.log('Start to draw your dream code!')
 }
-  `
+`
   fs.writeFileSync(path.resolve(argv.commandDir, `${argv.name}.js`), code)
   console.log(chalk.green('Done!'))
 }

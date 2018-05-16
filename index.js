@@ -21,7 +21,7 @@ if (plugins) {
 }
 
 // Load application commands
-if (config.commandDir) {
+if (config.commandDir && fs.existsSync(config.commandDir)) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }
 
