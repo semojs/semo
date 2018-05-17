@@ -6,6 +6,7 @@ const findUp = require('find-up')
 const _ = require('lodash')
 const colorize = require('json-colorizer')
 const stringify = require('json-stringify-pretty-compact')
+const chalk = require('chalk')
 
 /**
  * log method
@@ -25,7 +26,6 @@ const log = function (message, label = '') {
  * Cwd plugins can override local plugin if use same name
  */
 const getAllPluginsMapping = function () {
-  const config = getApplicationConfig()
   const plugins = {}
 
   // process core plugins
@@ -33,6 +33,15 @@ const getAllPluginsMapping = function () {
     cwd: path.resolve(__dirname, '../plugins')
   }).map(function (plugin) {
     plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
+  })
+
+  // process home npm plugins
+  glob.sync('zignis-plugin-*', {
+    cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+  }).map(function (plugin) {
+    if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+      plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+    }
   })
 
   // process npm plugins
@@ -44,6 +53,7 @@ const getAllPluginsMapping = function () {
     }
   })
 
+  const config = getApplicationConfig()
   if (fs.existsSync(config.pluginDir)) {
     // process local plugins
     glob.sync('zignis-plugin-*', {
@@ -62,8 +72,12 @@ const getAllPluginsMapping = function () {
  * Get only application config
  */
 const getApplicationConfig = function () {
-  const configPath = findUp.sync(['.zignisrc.json'])
-  return configPath ? JSON.parse(fs.readFileSync(configPath)) : {}
+  try {
+    const configPath = findUp.sync(['.zignisrc.json'])
+    return configPath ? require(configPath) : {}
+  } catch (e) {
+    console.log(chalk.red(`.zignisrc format has bad format.`))
+  }
 }
 
 /**
@@ -83,7 +97,7 @@ const getCombinedConfig = function () {
     })
 
     const configPath = findUp.sync(['.zignisrc.json'])
-    let rcConfig = configPath ? JSON.parse(fs.readFileSync(configPath)) : {}
+    let rcConfig = configPath ? require(configPath) : {}
 
     pluginConfigs = Object.assign({}, pluginConfigs, rcConfig)
   }

@@ -65,8 +65,10 @@ exports.handler = function (argv) {
       let plugin = Object.keys(plugins)[i]
       if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
         const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
-        let pluginReturn = yield loadedPlugin.repl()
-        pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+        if (loadedPlugin.repl && typeof loadedPlugin.repl === 'function') {
+          let pluginReturn = yield loadedPlugin.repl()
+          pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+        }
       }
     }
 
