@@ -154,19 +154,22 @@ const getCombinedConfig = function () {
  * Output a table
  * @param {*} columns table columns
  */
-const outputTable = function (columns) {
+const outputTable = function (columns, caption) {
   // table config
   const config = {
     drawHorizontalLine: () => {
       return false
     },
     columnDefault: {
-      paddingLeft: 1,
+      paddingLeft: 2,
       paddingRight: 1
     },
     border: Object.assign(getBorderCharacters(`void`), { bodyJoin: `:` })
   }
 
+  if (caption) {
+    console.log(chalk.green(caption))
+  }
   console.log(table(columns, config))
 }
 
