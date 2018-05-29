@@ -35,7 +35,7 @@ All plugins are all begin with: `zignis-plugin-`
 
 #### Plugin hooks
 
-##### `__repl__`
+##### `repl`
 
 Plugins can expose Object/Instance to Zignis REPL by this hook.
 
@@ -51,7 +51,7 @@ Below commands are able to replace above commands if their name or alias same wi
 
 Anytime you can get Zignis help by execute: `Zignis` or `Zignis --help`, here we just show some core commands:
 
-##### `__zignis new <name> [repo] [branch]__`
+##### `zignis new <name> [repo] [branch]`
 
 Get a repo as the start point of you application. we do not want to suppose a dedicated repo, but if you do have a often used repo, you can config it in `.zignisrc.json`, and put it at your HOME directory.
 
@@ -67,11 +67,11 @@ example:
 }
 ```
 
-##### `__zignis repl__`
+##### `zignis repl`
 
 REPL is a interactive way to play with Zignis and your application.
 
-##### `__zignis status [key]__`
+##### `zignis status [key]`
 
 status command can tell you some Zignis and application information.
 
@@ -88,6 +88,18 @@ A way to talk with Zignis or Zignis plugins.
   - extendDir: used to extend other plugins
 - Plugin's .zignisrc.json
   - Plugin exposed out some info in this way.
+
+## Roadmap
+
+- [ ] implement Utils.invokeHook and hook info
+- [ ] upgrade
+- [ ] beforeCommand / afterCommand
+- [ ] extendable commands into
+- [ ] implement script command
+- [ ] group status output
+- [ ] command auto complettion support
+- [ ] check if support repo tag, refer to yarn add or npm install
+
 
 
 

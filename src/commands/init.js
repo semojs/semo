@@ -15,7 +15,8 @@ exports.builder = function (yargs) {
 exports.handler = function (argv) {
   let defaultZignisrc = {
     commandDir: 'bin/zignis/commands',
-    pluginDir: 'bin/zignis/plugins'
+    pluginDir: 'bin/zignis/plugins',
+    extendDir: 'bin/zignis/extends'
   }
 
   let currentPath = path.resolve(process.cwd())
@@ -37,7 +38,7 @@ exports.handler = function (argv) {
     fs.writeFileSync(`${currentPath}/.zignisrc.json`, JSON.stringify(defaultZignisrc, null, 2))
     console.log(chalk.green('default .zignisrc created!'))
 
-    const dirs = ['commandDir', 'pluginDir']
+    const dirs = Object.keys(defaultZignisrc)
     dirs.forEach((dir) => {
       if (!fs.existsSync(`${currentPath}/${defaultZignisrc[dir]}`)) {
         shell.exec(`mkdir -p ${currentPath}/${defaultZignisrc[dir]}`)

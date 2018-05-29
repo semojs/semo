@@ -1,5 +1,6 @@
 const path = require('path')
 const fs = require('fs')
+const chalk = require('chalk')
 const Utils = require('../common/utils')
 
 exports.command = 'status [key]'
@@ -18,41 +19,39 @@ exports.handler = function (argv) {
       Object.keys(plugins).map((plugin) => columns.push([plugin, plugins[plugin]]))
       break
     default:
-      if (argv.key) {
+      let kvs = {}
 
-      } else {
-        let kvs = {}
+      if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+        const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
+        if (pkgConfig && pkgConfig.version) {
+          kvs.version = pkgConfig.version
+        }
+      }
 
-        if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-          const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-          if (pkgConfig && pkgConfig.version) {
-            kvs.version = pkgConfig.version
+      kvs = Object.assign(kvs, {
+        platform: process.platform,
+        arch: process.arch,
+        hostname: require('os').hostname(),
+        node: process.version,
+        zignis: require(path.resolve(__dirname, '../../package.json')).version,
+        home: process.env.HOME,
+        cwd: process.cwd(),
+        plugins: Object.keys(plugins).join(', ')
+      })
+
+      Object.keys(plugins).map((plugin) => {
+        if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
+          const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
+          if (typeof loadedPlugin.status === 'function') {
+            kvs = Object.assign(kvs, loadedPlugin.status())
           }
         }
+      })
 
-        kvs = Object.assign(kvs, {
-          platform: process.platform,
-          arch: process.arch,
-          hostname: require('os').hostname(),
-          node: process.version,
-          zignis: require(path.resolve(__dirname, '../../package.json')).version,
-          home: process.env.HOME,
-          cwd: process.cwd(),
-          plugins: Object.keys(plugins).join(', ')
-        })
-
-        Object.keys(plugins).map((plugin) => {
-          if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
-            const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
-            if (typeof loadedPlugin.status === 'function') {
-              kvs = Object.assign(kvs, loadedPlugin.status())
-            }
-          }
-        })
-
-        Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
-      }
+      Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
   }
+
+  console.log(chalk.green('Basic:'))
 
   Utils.outputTable(columns)
 }

@@ -8,6 +8,51 @@ const colorize = require('json-colorizer')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
 
+const invokeHook = function * (hook) {
+  const plugins = getAllPluginsMapping()
+  let pluginsReturn = {}
+  for (let i = 0; i < Object.keys(plugins).length; i++) {
+    let plugin = Object.keys(plugins)[i]
+    if (fs.existsSync(path.resolve(plugins[plugin]))) {
+      const loadedPlugin = require(path.resolve(plugins[plugin]))
+      if (loadedPlugin.repl && typeof loadedPlugin.repl === 'function') {
+        let pluginReturn = yield loadedPlugin[hook]()
+        pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+      }
+    }
+  }
+
+  return pluginsReturn
+}
+
+/**
+ * Extend Sub Command
+ * @param {String} command 
+ * @param {String} module 
+ * @param {Object} yargs 
+ */
+const extendSubCommand = function (command, module, yargs) {
+  const plugins = getAllPluginsMapping()
+  const config = getCombinedConfig()
+
+  // load default commands
+  yargs.commandDir(command)
+
+  // Load plugin commands
+  if (plugins) {
+    Object.keys(plugins).map(function (plugin) {
+      if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/commands`, command))) {
+        yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/commands`, command))
+      }
+    })
+  }
+
+  // Load application commands
+  if (config.extendDir && fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/${module}/commands`, command))) {
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/commands`, command))
+  }
+}
+
 /**
  * log method
  * @param {mix} message message to log
@@ -126,6 +171,8 @@ const outputTable = function (columns) {
 }
 
 module.exports = {
+  invokeHook,
+  extendSubCommand,
   log,
   outputTable,
   getAllPluginsMapping,

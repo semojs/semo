@@ -58,20 +58,7 @@ exports.builder = function (yargs) {
 
 exports.handler = function (argv) {
   co(function * () {
-    const plugins = Utils.getAllPluginsMapping()
-    let pluginsReturn = {}
-
-    for (let i = 0; i < Object.keys(plugins).length; i++) {
-      let plugin = Object.keys(plugins)[i]
-      if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
-        const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
-        if (loadedPlugin.repl && typeof loadedPlugin.repl === 'function') {
-          let pluginReturn = yield loadedPlugin.repl()
-          pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
-        }
-      }
-    }
-
+    const pluginsReturn = yield Utils.invokeHook('repl')
     return yield openRepl(pluginsReturn)
   })
 }
