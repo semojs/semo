@@ -3,6 +3,7 @@
 const fs = require('fs')
 const path = require('path')
 
+const co = require('co')
 const Utils = require('./src/common/utils')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
@@ -25,9 +26,15 @@ if (config.commandDir && fs.existsSync(config.commandDir)) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }
 
-// eslint-disable-next-line
-yargs
-  .demandCommand(1, 'You need at least one command before moving on')
-  .help('help')
-  .alias('h', 'help')
-  .argv
+co(function * () {
+  yield Utils.invokeHook('beforeCommand')
+
+  // eslint-disable-next-line
+  yargs
+    .demandCommand(1, 'You need at least one command before moving on')
+    .help('help')
+    .alias('h', 'help')
+    .argv
+
+  yield Utils.invokeHook('afterCommand')
+})
