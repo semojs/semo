@@ -16,7 +16,7 @@ const invokeHook = function * (hook) {
     if (fs.existsSync(path.resolve(plugins[plugin]))) {
       const loadedPlugin = require(path.resolve(plugins[plugin]))
       if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
-        let pluginReturn = yield loadedPlugin[hook]() || {}
+        let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
         pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
       }
     }

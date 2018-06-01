@@ -27,7 +27,10 @@ if (config.commandDir && fs.existsSync(config.commandDir)) {
 }
 
 co(function * () {
-  yield Utils.invokeHook('beforeCommand')
+  let beforeHooks = yield Utils.invokeHook('beforeCommand')
+  Object.keys(beforeHooks).map(function (hook) {
+    beforeHooks[hook]()
+  })
 
   // eslint-disable-next-line
   yargs
@@ -36,5 +39,8 @@ co(function * () {
     .alias('h', 'help')
     .argv
 
-  yield Utils.invokeHook('afterCommand')
+  let afterHooks = yield Utils.invokeHook('afterCommand')
+  Object.keys(afterHooks).map(function (hook) {
+    afterHooks[hook]()
+  })
 })

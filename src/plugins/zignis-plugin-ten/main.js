@@ -15,6 +15,10 @@ module.exports = {
       '十，充满解决问题的欲望，因为问题是用来解决的，不止是用来发现的。'
     ]
 
-    console.log(ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫')
+    return {
+      zignisPluginTen: function () {
+        console.log(ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫')
+      }
+    }
   }
 }
