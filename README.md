@@ -91,9 +91,9 @@ A way to talk with Zignis or Zignis plugins.
 
 ## Roadmap
 
-- [ ] implement Utils.invokeHook and hook info
+- [*] implement Utils.invokeHook and hook info
 - [ ] upgrade
-- [ ] beforeCommand / afterCommand
+- [*] beforeCommand / afterCommand
 - [ ] extendable commands into
 - [ ] implement script command
 - [ ] group status output
