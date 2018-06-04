@@ -47,7 +47,7 @@ exports.handler = function (argv) {
 
   Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
 
-  Utils.outputTable(columns)
+  Utils.outputTable(columns, 'Basic:')
 
   if (pluginsColumns.length > 0) {
     Utils.outputTable(pluginsColumns, 'Plugins:')

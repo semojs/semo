@@ -13,11 +13,15 @@ const invokeHook = function * (hook) {
   let pluginsReturn = {}
   for (let i = 0; i < Object.keys(plugins).length; i++) {
     let plugin = Object.keys(plugins)[i]
-    if (fs.existsSync(path.resolve(plugins[plugin]))) {
+    try {
       const loadedPlugin = require(path.resolve(plugins[plugin]))
       if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
         let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
         pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+      }
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') {
+        throw new Error(error)
       }
     }
   }

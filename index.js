@@ -37,10 +37,13 @@ co(function * () {
     .demandCommand(1, 'You need at least one command before moving on')
     .help('help')
     .alias('h', 'help')
+    .exitProcess(false)
     .argv
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
   Object.keys(afterHooks).map(function (hook) {
     afterHooks[hook]()
   })
+}).catch(function (err) {
+  console.error(err)
 })
