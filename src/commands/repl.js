@@ -1,8 +1,7 @@
 const chalk = require('chalk')
-const path = require('path')
-const fs = require('fs')
 const repl = require('repl')
 const co = require('co')
+
 
 const Utils = require('../common/utils')
 

@@ -174,6 +174,7 @@ const outputTable = function (columns, caption) {
 }
 
 module.exports = {
+  _,
   invokeHook,
   extendSubCommand,
   log,
