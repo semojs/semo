@@ -13,7 +13,10 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
-  let defaultZignisrc = {
+  let defaultZignisrc = argv.plugin ? {
+    commandDir: 'src/commands',
+    extendDir: 'src/extends'
+  } : {
     commandDir: 'bin/zignis/commands',
     pluginDir: 'bin/zignis/plugins',
     extendDir: 'bin/zignis/extends'

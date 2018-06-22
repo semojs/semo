@@ -2,7 +2,6 @@ const chalk = require('chalk')
 const repl = require('repl')
 const co = require('co')
 
-
 const Utils = require('../common/utils')
 
 exports.command = 'repl'

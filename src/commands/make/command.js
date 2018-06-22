@@ -9,8 +9,11 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
-  // Todo: check if command file exists
-  // path.resolve(argv.commandDir, argv.name)
+  const commandFile = path.resolve(argv.commandDir, `${argv.name}.js`)
+  if (fs.existsSync(commandFile)) {
+    console.log(chalk.red('Command file exist!'))
+    return
+  }
 
   const code = `
 exports.command = '${argv.name}'

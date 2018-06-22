@@ -40,7 +40,8 @@ const extendSubCommand = function (command, module, yargs) {
   const config = getCombinedConfig()
 
   // load default commands
-  yargs.commandDir(command)
+  yargs.commandDir(`../commands/${command}`)
+  // yargs.commandDir(path.resolve(__dirname, `../commands/${command}`))
 
   // Load plugin commands
   if (plugins) {
