@@ -7,6 +7,7 @@ const co = require('co')
 const Utils = require('./src/common/utils')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
+const argv = require('yargs').argv
 const yargs = require('yargs').config(config)
 
 // Load local commands
@@ -29,7 +30,7 @@ if (config.commandDir && fs.existsSync(config.commandDir)) {
 co(function * () {
   let beforeHooks = yield Utils.invokeHook('beforeCommand')
   Object.keys(beforeHooks).map(function (hook) {
-    beforeHooks[hook]()
+    beforeHooks[hook](argv)
   })
 
   // eslint-disable-next-line
@@ -41,7 +42,7 @@ co(function * () {
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
   Object.keys(afterHooks).map(function (hook) {
-    afterHooks[hook](yargs)
+    afterHooks[hook](argv)
   })
 }).catch(function (err) {
   console.error(err)

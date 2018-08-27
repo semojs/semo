@@ -1,9 +1,7 @@
 const chalk = require('chalk')
 
 module.exports = {
-  beforeCommand () {
-  },
-  * afterCommand () {
+  * beforeCommand () {
     let ten = [
       '通过利他来利己。',
       '所有的事情追求质量的极致，效率的极致，变态般的细致。',
@@ -18,12 +16,14 @@ module.exports = {
     ]
 
     return {
-      zignisPluginTen: function (yargs) {
-        if (yargs.argv.disableTen) {
+      zignisPluginTen: function (argv) {
+        if (argv.disableTen) {
           return
         }
         console.log(chalk.green(ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫'), '\n')
       }
     }
+  },
+  * afterCommand () {
   }
 }

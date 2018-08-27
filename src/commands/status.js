@@ -3,7 +3,7 @@ const fs = require('fs')
 const chalk = require('chalk')
 const Utils = require('../common/utils')
 
-exports.command = 'status [key]'
+exports.command = 'status'
 exports.aliases = 'st'
 exports.desc = 'Show Zignis status'
 
