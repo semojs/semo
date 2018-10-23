@@ -7,6 +7,7 @@ const shell = require('shelljs')
 
 exports.command = 'init'
 exports.desc = 'Init basic zignis config file and directories'
+exports.aliases = 'i'
 
 exports.builder = function (yargs) {}
 

@@ -200,6 +200,7 @@ const outputTable = function (columns, caption) {
 
 module.exports = {
   _,
+  chalk,
   invokeHook,
   extendSubCommand,
   log,
