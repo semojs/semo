@@ -7,7 +7,6 @@ const co = require('co')
 const Utils = require('./src/common/utils')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
-const argv = require('yargs').argv
 const yargs = require('yargs').config(config)
 
 // Load local commands
@@ -27,23 +26,21 @@ if (config.commandDir && fs.existsSync(config.commandDir)) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }
 
+const parsedArgv = require('yargs-parser')(process.argv.slice(2))
 co(function * () {
   let beforeHooks = yield Utils.invokeHook('beforeCommand')
   Object.keys(beforeHooks).map(function (hook) {
-    beforeHooks[hook](argv)
+    beforeHooks[hook](parsedArgv)
   })
 
   // eslint-disable-next-line
   yargs
-    .help('help')
+    .help()
     .alias('h', 'help')
-    .exitProcess(false)
-    .argv
+    .exitProcess(false).argv
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
   Object.keys(afterHooks).map(function (hook) {
-    afterHooks[hook](argv)
+    afterHooks[hook](parsedArgv)
   })
-}).catch(function (err) {
-  console.error(err)
-})
+}).catch(function () {})

@@ -1,21 +1,19 @@
 const path = require('path')
 const fs = require('fs')
-const chalk = require('chalk')
 const Utils = require('../common/utils')
 
 exports.command = 'status'
 exports.aliases = 'st'
-exports.desc = 'Show Zignis status'
+exports.desc = 'Show Zignis status. alias: st'
 
-exports.builder = function (yargs) {
-}
+exports.builder = function (yargs) {}
 
 exports.handler = function (argv) {
   const plugins = Utils.getAllPluginsMapping()
   const pluginsColumns = []
   const columns = []
 
-  Object.keys(plugins).map((plugin) => pluginsColumns.push([plugin, plugins[plugin]]))
+  Object.keys(plugins).map(plugin => pluginsColumns.push([plugin, plugins[plugin]]))
 
   let kvs = {}
 
@@ -36,7 +34,7 @@ exports.handler = function (argv) {
     cwd: process.cwd()
   })
 
-  Object.keys(plugins).map((plugin) => {
+  Object.keys(plugins).map(plugin => {
     if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
       const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
       if (typeof loadedPlugin.status === 'function') {
@@ -45,7 +43,7 @@ exports.handler = function (argv) {
     }
   })
 
-  Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
+  Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
 
   Utils.outputTable(columns, 'Basic:')
 
