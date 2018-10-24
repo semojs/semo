@@ -37,6 +37,7 @@ co(function * () {
   yargs
     .help('help')
     .alias('h', 'help')
+    .default('disable-ten-temporarily', false)
     .exitProcess(false)
     .argv
 

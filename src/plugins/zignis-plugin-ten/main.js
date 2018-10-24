@@ -17,7 +17,7 @@ module.exports = {
 
     return {
       zignisPluginTen: function (argv) {
-        if (argv.disableTen) {
+        if (argv.disableTenTemporarily) {
           return
         }
         console.log(chalk.green(ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫'), '\n')
