@@ -1,6 +1,6 @@
 {
   "name": "zignis",
-  "version": "0.0.2",
+  "version": "0.0.3",
   "description": "A tool to speed up building applications",
   "keywords": [
     "cli",
