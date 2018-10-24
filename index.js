@@ -22,7 +22,7 @@ if (plugins) {
 }
 
 // Load application commands
-if (config.commandDir && fs.existsSync(config.commandDir)) {
+if (config.name !== 'zignis' && config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }
 
