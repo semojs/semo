@@ -96,7 +96,7 @@ const getAllPluginsMapping = function () {
       cwd: path.resolve(__dirname, '../../../')
     })
     .map(function (plugin) {
-      plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
+      plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
     })
 
   // process home npm plugins
