@@ -157,7 +157,11 @@ const getCombinedConfig = function () {
   let pluginConfigs = null
 
   if (_.isNil(pluginConfigs)) {
-    pluginConfigs = require('../../package.json')
+    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+      pluginConfigs = require(path.resolve(process.cwd(), 'package.json'))
+    } else {
+      pluginConfigs = {}
+    }
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
