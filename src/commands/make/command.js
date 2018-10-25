@@ -15,8 +15,9 @@ exports.handler = function (argv) {
     return
   }
 
+  const name = argv.name.split('/').pop()
   const code = `
-exports.command = '${argv.name}'
+exports.command = '${name}'
 exports.desc = '${argv.description}'
 
 exports.builder = function (yargs) {
