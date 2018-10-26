@@ -32,7 +32,7 @@ function corepl (cli) {
     if (cmd.match(/^yield\s+/)) {
       cmd = 'co(function *() { _ = ' + cmd + '; _ ? Utils.log(_) : null;})'
     } else if (cmd.match(/\W*yield\s+/)) {
-      cmd = 'co(function *() {' + cmd.replace(/^\s*var\s+/, '') + '});'
+      cmd = 'co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '});'
     }
 
     originalEval.call(cli, cmd, context, filename, function (err, res) {

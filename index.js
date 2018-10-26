@@ -45,4 +45,4 @@ co(function * () {
   Object.keys(afterHooks).map(function (hook) {
     afterHooks[hook](parsedArgv)
   })
-}).catch(function () {})
+}).catch(function (e) { console.log(e) })

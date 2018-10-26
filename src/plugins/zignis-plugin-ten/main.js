@@ -20,7 +20,10 @@ module.exports = {
         if (argv.disableTenTemporarily) {
           return
         }
-        console.log(chalk.green(ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫'), '\n')
+
+        const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development' // development/production/test
+        const envColor = env === 'production' ? 'yellow' : 'green'
+        console.log(chalk[envColor](ten[Math.floor((Math.random() * ten.length))], '-- 智课十诫'), '\n')
       }
     }
   },

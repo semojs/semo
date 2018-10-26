@@ -35,8 +35,8 @@ exports.handler = function (argv) {
   })
 
   Object.keys(plugins).map(plugin => {
-    if (fs.existsSync(path.resolve(plugins[plugin], 'index.js'))) {
-      const loadedPlugin = require(path.resolve(plugins[plugin], 'index.js'))
+    if (fs.existsSync(path.resolve(plugins[plugin]))) {
+      const loadedPlugin = require(path.resolve(plugins[plugin]))
       if (typeof loadedPlugin.status === 'function') {
         kvs = Object.assign(kvs, loadedPlugin.status())
       }
