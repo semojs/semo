@@ -30,9 +30,15 @@ function corepl (cli) {
     }
 
     if (cmd.match(/^yield\s+/)) {
-      cmd = 'co(function *() { _ = ' + cmd + '; _ ? Utils.log(_) : null;})'
+      cmd = 'co(function *() { let _ = ' + cmd + '; _ ? Utils.log(_) : null;})'
     } else if (cmd.match(/\W*yield\s+/)) {
-      cmd = 'co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '});'
+      cmd = 'co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})'
+    }
+
+    if (cmd.match(/^await\s+/)) {
+      cmd = '(async function() { let _ = ' + cmd + '; _ ? Utils.log(_) : null;})()'
+    } else if (cmd.match(/\W*await\s+/)) {
+      cmd = '(async function() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})()'
     }
 
     originalEval.call(cli, cmd, context, filename, function (err, res) {
