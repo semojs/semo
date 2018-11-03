@@ -26,6 +26,12 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'use yarn command'
   })
+
+  yargs.option('yes', {
+    alias: 'y',
+    default: false,
+    describe: 'use yarn command'
+  })
 }
 
 exports.handler = function (argv) {
@@ -42,9 +48,17 @@ exports.handler = function (argv) {
     shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
     shell.cd(argv.name)
     if (argv.yarn) {
-      shell.exec('yarn init -y')
+      if (argv.yes) {
+        shell.exec('yarn init -y')
+      } else {
+        shell.exec('yarn init')
+      }
     } else {
-      shell.exec('npm init -y')
+      if (argv.yes) {
+        shell.exec('npm init -y')
+      } else {
+        shell.exec('npm init')
+      }
     }
   } else {
     console.log(chalk.green(`Downloading from ${argv.repo}`))
