@@ -2,7 +2,7 @@
 
 Zignis is a cross-project, extensible command line tool to help building application easier.
 
-__NOT_READY_FOR_PRODUCTION__
+**NOT_READY_FOR_PRODUCTION**
 
 ## Install
 
@@ -14,13 +14,13 @@ npm install -g zignis
 
 ### Plugin
 
-Plugin is the main way to extend the power of Zignis to meet our needs. There are 3 types of plugins: 
+Plugin is the main way to extend the power of Zignis to meet our needs. There are 3 types of plugins:
 
 - Core plugins
 - Npm plugins
 - Custom plugins
 
-Below plugins are able to replace above plugins totally. So it is recommended to name your plugins with 
+Below plugins are able to replace above plugins totally. So it is recommended to name your plugins with
 a specific prefix, and if you know what you are doing, you can override any plugins.
 
 Plugins are normal Node modules, but need to export some hook functions, those hook functions are invoked by Zignis.
@@ -56,6 +56,7 @@ Anytime you can get Zignis help by execute: `Zignis` or `Zignis --help`, here we
 Get a repo as the start point of you application. we do not want to suppose a dedicated repo, but if you do have a often used repo, you can config it in `.zignisrc.json`, and put it at your HOME directory.
 
 example:
+
 ```
 {
   "commandDefault": {
@@ -75,10 +76,9 @@ REPL is a interactive way to play with Zignis and your application.
 
 status command can tell you some Zignis and application information.
 
-
 ### .zignisrc.json
 
-A way to talk with Zignis or Zignis plugins. 
+A way to talk with Zignis or Zignis plugins.
 
 - Application's .zignisrc.json
   - commandDir: locate custom commands
@@ -88,18 +88,3 @@ A way to talk with Zignis or Zignis plugins.
   - extendDir: used to extend other plugins
 - Plugin's .zignisrc.json
   - Plugin exposed out some info in this way.
-
-## Roadmap
-
-- [*] implement Utils.invokeHook and hook info
-- [ ] upgrade
-- [*] beforeCommand / afterCommand
-- [ ] extendable commands into
-- [ ] implement script command
-- [ ] group status output
-- [ ] command auto complettion support
-- [ ] check if support repo tag, refer to yarn add or npm install
-
-
-
-
