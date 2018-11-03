@@ -165,23 +165,28 @@ const getCombinedConfig = function () {
   let pluginConfigs = null
 
   if (_.isNil(pluginConfigs)) {
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-      pluginConfigs = require(path.resolve(process.cwd(), 'package.json'))
+    if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
+      pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
     } else {
       pluginConfigs = {}
     }
+
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
         const pluginConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
-        pluginConfigs = Object.assign({}, pluginConfigs, pluginConfig)
+        pluginConfigs = _.merge(pluginConfigs, pluginConfig)
       }
     })
+
+    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+      pluginConfigs = _.merge(pluginConfigs, require(path.resolve(process.cwd(), 'package.json')))
+    }
 
     const configPath = findUp.sync(['.zignisrc.json'])
     let rcConfig = configPath ? require(configPath) : {}
 
-    pluginConfigs = Object.assign({}, pluginConfigs, rcConfig)
+    pluginConfigs = _.merge(pluginConfigs, rcConfig)
   }
 
   return pluginConfigs

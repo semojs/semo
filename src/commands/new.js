@@ -12,35 +12,58 @@ exports.aliases = 'n'
 exports.desc = 'Create a new project from specific repo'
 
 exports.builder = function (yargs) {
-  yargs.default('repo', _.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || '')
-  yargs.default('branch', _.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master')
+  yargs.option('repo', {
+    default: _.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || '',
+    describe: 'repo url to clone'
+  })
+
+  yargs.option('branch', {
+    default: _.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master',
+    describe: 'repo branch to clone'
+  })
+
+  yargs.option('yarn', {
+    default: false,
+    describe: 'use yarn command'
+  })
 }
 
 exports.handler = function (argv) {
-  if (!argv.repo) {
-    console.error('Repo url is nessary')
-    process.exit(1)
-  }
-
-  if (fs.existsSync(path.resolve(process.cwd(), argv.name)) && argv.force) {
-    console.log(chalk.yellow(`Existed ${argv.name} is deleted before downloading a new one`))
-    shell.rm('-rf', path.resolve(process.cwd(), argv.name))
-  }
-
-  console.log(chalk.green(`Downloading from ${argv.repo}`))
-  shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (code, stdout, stderr) {
-    if (!code) {
-      console.log(chalk.green('Succeeded!'))
-      shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
-      console.log(chalk.green('.git directory removed!'))
-      shell.cd(argv.name)
-      if (shell.test('-f', 'yarn.lock')) {
-        console.log(chalk.green('yarn.lock detected, running yarn install'))
-        shell.exec('yarn')
-      } else {
-        console.log(chalk.green('yarn.lock not detected, running npm install'))
-        shell.exec('npm install')
-      }
+  if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
+    if (argv.force) {
+      console.log(chalk.yellow(`Existed ${argv.name} is deleted before downloading a new one!`))
+      shell.rm('-rf', path.resolve(process.cwd(), argv.name))
+    } else {
+      console.log(chalk.yellow(`Destination existed, command abort!`))
     }
-  })
+  }
+
+  if (!argv.repo) {
+    shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
+    shell.cd(argv.name)
+    if (argv.yarn) {
+      shell.exec('yarn init -y')
+    } else {
+      shell.exec('npm init -y')
+    }
+  } else {
+    console.log(chalk.green(`Downloading from ${argv.repo}`))
+    shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (
+      code,
+      stdout,
+      stderr
+    ) {
+      if (!code) {
+        console.log(chalk.green('Succeeded!'))
+        shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
+        console.log(chalk.green('.git directory removed!'))
+        shell.cd(argv.name)
+        if (argv.yarn) {
+          shell.exec('yarn')
+        } else {
+          shell.exec('npm install')
+        }
+      }
+    })
+  }
 }
