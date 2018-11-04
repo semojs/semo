@@ -9,7 +9,12 @@ exports.command = 'init'
 exports.desc = 'Init basic zignis config file and directories'
 exports.aliases = 'i'
 
-exports.builder = function (yargs) {}
+exports.builder = function (yargs) {
+  yargs.option('plugin', {
+    default: false,
+    describe: 'init for plugin'
+  })
+}
 
 exports.handler = function (argv) {
   let defaultZignisrc = argv.plugin
