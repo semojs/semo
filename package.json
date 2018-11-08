@@ -1,6 +1,6 @@
 {
   "name": "zignis",
-  "version": "1.0.7",
+  "version": "1.0.9",
   "description": "A tool to speed up building applications",
   "keywords": [
     "cli",
@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "bin": {
-    "zignis": "index.js"
+    "zignis": "main.js"
   },
   "dependencies": {
     "chalk": "^2.4.1",

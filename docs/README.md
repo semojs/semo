@@ -199,3 +199,11 @@ zignis make command
 
 **repl**
 **status**
+
+### 被插件依赖
+
+由于 Zignis 的插件其实就是按照约定路径放置的一些 js 代码，而且为了最小的可以被调用执行这个目的，是不需要依赖 `zignis` 包的，但是 Zignis 也尝试向外暴露一些常用库，如果被插件依赖可以让插件少引入几个 npm 包。
+
+如果插件依赖 `zignis` 要放到 `peerDependencies`，这样可以有更好的一致性，当然如果你的插件真针对部分 `zignis` 版本有效，那还是要放到 `dependencies` 里。
+
+Zignis 向外暴露的支持将放到 `jsdoc` 文档中，敬请期待。
