@@ -8,7 +8,7 @@
   ],
   "license": "MIT",
   "bin": {
-    "zignis": "index.js"
+    "zignis": "main.js"
   },
   "dependencies": {
     "chalk": "^2.4.1",
