@@ -5,15 +5,34 @@ const chalk = require('chalk')
 exports.command = 'command [name] [description]'
 exports.desc = 'Generate a command template'
 
-exports.builder = function (yargs) {}
+exports.builder = function (yargs) {
+  yargs.option('extend', {
+    default: false,
+    describe: 'generate command in extend directory, e.g. extend=zignis'
+  })
+
+  yargs.option('plugin', {
+    default: false,
+    describe: 'generate command in plugin directory, e.g. extend=zignis-plugin-xxx'
+  })
+}
 
 exports.handler = function (argv) {
-  if (!argv.commandDir || !fs.existsSync(argv.commandDir)) {
+  let commandDir
+  if (argv.extend) {
+    commandDir = `${argv.extendDir}/${argv.extend}/src/commands`
+  } else if (argv.plugin) {
+    commandDir = `${argv.pluginDir}/${argv.plugin}/src/commands`
+  } else {
+    commandDir = argv.commandDir
+  }
+
+  if (!commandDir || !fs.existsSync(commandDir)) {
     console.log(chalk.red('"commandDir" missing in config file or not exist in current directory!'))
     return
   }
 
-  const commandFilePath = path.resolve(argv.commandDir, `${argv.name}.js`)
+  const commandFilePath = path.resolve(commandDir, `${argv.name}.js`)
   if (fs.existsSync(commandFilePath)) {
     console.log(chalk.red('Command file exist!'))
     return

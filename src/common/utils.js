@@ -48,8 +48,8 @@ const extendSubCommand = function (command, module, yargs) {
   // Load plugin commands
   if (plugins) {
     Object.keys(plugins).map(function (plugin) {
-      if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/commands`, command))) {
-        yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/commands`, command))
+      if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
+        yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
       }
     })
   }
@@ -57,9 +57,9 @@ const extendSubCommand = function (command, module, yargs) {
   // Load application commands
   if (
     config.extendDir &&
-    fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/${module}/commands`, command))
+    fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   ) {
-    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/commands`, command))
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   }
 }
 
