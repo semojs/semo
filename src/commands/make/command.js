@@ -9,8 +9,13 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
-  const commandFile = path.resolve(argv.commandDir, `${argv.name}.js`)
-  if (fs.existsSync(commandFile)) {
+  if (!argv.commandFilePath || !fs.existsSync(argv.commandFilePath)) {
+    console.log(chalk.red('"commandFilePath" missing in config file or not exist in current directory!'))
+    return
+  }
+
+  const commandFilePath = path.resolve(argv.commandDir, `${argv.name}.js`)
+  if (fs.existsSync(commandFilePath)) {
     console.log(chalk.red('Command file exist!'))
     return
   }
@@ -29,7 +34,6 @@ exports.handler = function (argv) {
   console.log('Start to draw your dream code!')
 }
 `
-  const commandFilePath = path.resolve(argv.commandDir, `${argv.name}.js`)
   if (!fs.existsSync(commandFilePath)) {
     fs.writeFileSync(commandFilePath, code)
     console.log(chalk.green(`${commandFilePath} created!`))
