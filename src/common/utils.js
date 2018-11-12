@@ -196,7 +196,7 @@ const getCombinedConfig = function () {
  * Output a table
  * @param {*} columns table columns
  */
-const outputTable = function (columns, caption) {
+const outputTable = function (columns, caption, borderOptions = {}) {
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -206,7 +206,7 @@ const outputTable = function (columns, caption) {
       paddingLeft: 2,
       paddingRight: 1
     },
-    border: Object.assign(getBorderCharacters(`void`), { bodyJoin: `:` })
+    border: Object.assign(getBorderCharacters(`void`), { bodyJoin: `:` }, borderOptions)
   }
 
   if (caption) {
@@ -222,6 +222,7 @@ module.exports = {
   extendSubCommand,
   log,
   outputTable,
+  table,
   getAllPluginsMapping,
   getCombinedConfig,
   getApplicationConfig
