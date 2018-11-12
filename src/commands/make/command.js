@@ -19,14 +19,19 @@ exports.handler = function (argv) {
   const code = `
 exports.command = '${name}'
 exports.desc = '${argv.description}'
+// exports.alias = ''
 
 exports.builder = function (yargs) {
+  // yargs.option('option', {default, describe, alias})
 }
 
 exports.handler = function (argv) {
   console.log('Start to draw your dream code!')
 }
 `
-  fs.writeFileSync(path.resolve(argv.commandDir, `${argv.name}.js`), code)
-  console.log(chalk.green('Done!'))
+  const commandFilePath = path.resolve(argv.commandDir, `${argv.name}.js`)
+  if (!fs.existsSync(commandFilePath)) {
+    fs.writeFileSync(commandFilePath, code)
+    console.log(chalk.green(`${commandFilePath} created!`))
+  }
 }
