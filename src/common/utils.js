@@ -7,6 +7,7 @@ const _ = require('lodash')
 const colorize = require('json-colorizer')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
+const seedrandom = require('seedrandom')
 
 const invokeHook = function * (hook) {
   const plugins = getAllPluginsMapping()
@@ -215,12 +216,18 @@ const outputTable = function (columns, caption, borderOptions = {}) {
   console.log(table(columns, config))
 }
 
+const random = (min, max) => {
+  if (max < min) throw new Error('无效参数')
+  return Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1) + min
+}
+
 module.exports = {
   _,
   chalk,
   invokeHook,
   extendSubCommand,
   log,
+  random,
   outputTable,
   table,
   getAllPluginsMapping,
