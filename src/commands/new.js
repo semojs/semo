@@ -32,6 +32,11 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'use yarn command'
   })
+
+  yargs.option('empty', {
+    default: false,
+    describe: 'force empty project, ignore repo'
+  })
 }
 
 exports.handler = function (argv) {
@@ -44,7 +49,7 @@ exports.handler = function (argv) {
     }
   }
 
-  if (!argv.repo) {
+  if (!argv.repo || argv.empty) {
     shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
     shell.cd(argv.name)
     if (argv.yarn) {

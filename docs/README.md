@@ -73,6 +73,8 @@ Generate component sample code
   zignis make command [name] [description]  Generate a command template
 ```
 
+make 命令用于生成一些样板文件，默认内置了 command 和 script 子命令，用于快速生成符合 Zignis 机制的样板文件，插件也可以注册新的子命令来生成适合自己应用场景的样板文件。
+
 ### zignis repl
 
 ```
@@ -81,7 +83,7 @@ zignis repl
 Play with REPL
 ```
 
-这个命令会进入 node 交互模式，与普通的 node 交互模式相比，不同的地方在于可以让 Zignis 插件为 REPL 注入变量，可以是普通的变量，也可以是一些方法，同时支持 await 和 yield。 REPL 模式的 hook 是 `repl`，具体 hook 方式请看进阶部分的钩子扩展方式。
+repl 命令会进入 node 交互模式，与普通的 node 交互模式相比，不同的地方在于可以让 Zignis 插件为 REPL 注入变量，可以是普通的变量，也可以是一些方法，同时支持 await 和 yield。 REPL 模式的 hook 是 `repl`，具体 hook 方式请看进阶部分的钩子扩展方式。
 
 ### zignis status
 
@@ -91,6 +93,8 @@ zignis status
 Show Zignis status. alias: st
 ```
 
+status 命令用于显示当前命令所处的环境信息，所安装的插件等，其他插件也可以通过 status 钩子注册属性到 status 命令。
+
 ### zignis script
 
 ```
@@ -98,6 +102,19 @@ zignis script [file]
 
 Execute a script
 ```
+
+script 命令用于启动一个 Zignis 脚本，Zignis 脚本是一个 node 脚本/模块，但约束了基本的书写方式，从而可以让插件为环境注入一些上下文。
+
+基本的 script 文件结构如下：
+
+```
+module.exports = function * (components) {
+  console.log('Start to draw your dream code!')
+  process.exit(0)
+}
+```
+
+exports 一个 generator 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
 
 ## 设计原则
 
@@ -145,6 +162,10 @@ Zignis 有多重扩展机制，只为了能得到良好的扩展性，满足各�
 创建子命令时只要目录结构符合 $extendDir/zignis/make/subcommand.js，就可以实现 zignis make subcommand 子命令了。
 
 ### 钩子扩展
+
+插件可以在入口文件中暴露出一些 generator 方法，这些方法名如果是某一个钩子，则会在 Zignis 中发挥作用，所以尽量不要勿用钩子。
+
+目前支持的钩子列表在『开发插件』小节描述。
 
 ## 开发插件
 
@@ -198,7 +219,24 @@ zignis make command
 目前已知的核心钩子如下，另外第三方插件也可以定义自己的钩子
 
 **repl**
+
+repl 钩子可以为 `repl` 命令注册一些变量或方法，这样可以在 repl 进行访问，但是通常的用法是注入项目的上下文进去，这样可以通过 repl 与项目进行交互，而不仅仅是与 node 环境进行交互。
+
 **status**
+
+status 钩子可以为 `status` 命令注册一些状态信息，这样可以在调用 `status` 时随时查看。
+
+**components**
+
+components 钩子可以为 `script` 命令文件注入上下文，这样可以对脚本进行统一初始化。
+
+**beforeCommand**
+
+beforeCommand 钩子统一在每一个 `zignis` 命令执行前执行。
+
+**afterCommand**
+
+afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
 
 ### 被插件依赖
 
