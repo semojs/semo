@@ -8,6 +8,7 @@ const colorize = require('json-colorizer')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
 const seedrandom = require('seedrandom')
+const day = require('dayjs')
 
 const invokeHook = function * (hook) {
   const plugins = getAllPluginsMapping()
@@ -218,7 +219,7 @@ const outputTable = function (columns, caption, borderOptions = {}) {
 
 const random = (min, max) => {
   if (max < min) throw new Error('无效参数')
-  return Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1) + min
+  return (Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1)) + min
 }
 
 module.exports = {
@@ -230,6 +231,7 @@ module.exports = {
   random,
   outputTable,
   table,
+  day,
   getAllPluginsMapping,
   getCombinedConfig,
   getApplicationConfig

@@ -2,6 +2,7 @@ const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
 const _ = require('lodash')
+const dayjs = require('dayjs')
 
 exports.command = 'script [name]'
 exports.desc = 'Create a zignis script'
@@ -17,7 +18,8 @@ exports.handler = function (argv) {
     return
   }
 
-  const scriptFile = path.resolve(argv.scriptDir, `${new Date().getTime()}_${_.kebabCase(argv.name)}.js`)
+  const filePrefix = dayjs().format('YYYYMMDDHHmmssSSS')
+  const scriptFile = path.resolve(argv.scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.js`)
   if (fs.existsSync(scriptFile)) {
     console.log(chalk.red('Scritp file exist!'))
     return
