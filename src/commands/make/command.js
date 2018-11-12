@@ -5,12 +5,11 @@ const chalk = require('chalk')
 exports.command = 'command [name] [description]'
 exports.desc = 'Generate a command template'
 
-exports.builder = function (yargs) {
-}
+exports.builder = function (yargs) {}
 
 exports.handler = function (argv) {
-  if (!argv.commandFilePath || !fs.existsSync(argv.commandFilePath)) {
-    console.log(chalk.red('"commandFilePath" missing in config file or not exist in current directory!'))
+  if (!argv.commandDir || !fs.existsSync(argv.commandDir)) {
+    console.log(chalk.red('"commandDir" missing in config file or not exist in current directory!'))
     return
   }
 
