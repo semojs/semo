@@ -245,3 +245,19 @@ afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
 如果插件依赖 `zignis` 要放到 `peerDependencies`，这样可以有更好的一致性，当然如果你的插件真针对部分 `zignis` 版本有效，那还是要放到 `dependencies` 里。
 
 Zignis 向外暴露的支持将放到 `jsdoc` 文档中，敬请期待。
+
+### 默认配置和优先配置
+
+在目录 `$HOME/.zignis/.zignisrc.json` 文件中，我们可以写一些配置，这些配置分成两种，一种是做为配置的覆盖层次中的低优先级的一环提供一些默认值，另外还可以做为高优先级进行强制覆盖，高优先级的使用不是自动的，需要各个命令在代码中自己实现，对于已经实现的才支持，具体可以看核心代码，这里展示几个例子：
+
+```
+{
+    "disableTenTemporarily": false, # 默认关闭每次执行命令的智课十诫的显示
+    "commandDefault": {
+        "new": {
+            "repo": "git@code.smartstudy.com:service/backend-scaffold.git" # 新建项目时的默认仓库
+            "branch": "master" # 新建项目时的默认仓库分支
+        },
+    }
+}
+```
