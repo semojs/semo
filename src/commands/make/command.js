@@ -42,7 +42,7 @@ exports.handler = function (argv) {
   const code = `
 exports.command = '${name}'
 exports.desc = '${argv.description}'
-// exports.alias = ''
+// exports.aliases = ''
 
 exports.builder = function (yargs) {
   // yargs.option('option', {default, describe, alias})
