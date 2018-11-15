@@ -66,14 +66,33 @@ const extendSubCommand = function (command, module, yargs) {
 /**
  * log method
  * @param {mix} message message to log
- * @param {String} label label for describing message
+ * @param {string} label label for describing message
  */
 const log = function (message, label = '') {
+  if (label) {
+    console.log(label)
+  }
+
   if (_.isArray(message) || _.isObject(message)) {
-    console.log(colorize(stringify(message)), label)
+    console.log(colorize(stringify(message)))
   } else {
     console.log(message)
   }
+}
+
+/**
+ * error log method
+ * @param {mix} message error message to log
+ * @param {string} label error log label
+ * @param {integer} errorCode error code
+ */
+const error = function (message, label = '', errorCode = 1) {
+  if (label) {
+    console.log(chalk.red(label))
+  }
+
+  console.log(chalk.red(message))
+  process.exit(errorCode)
 }
 
 /**
@@ -228,6 +247,7 @@ module.exports = {
   invokeHook,
   extendSubCommand,
   log,
+  error,
   random,
   outputTable,
   table,
