@@ -35,10 +35,18 @@ exports.handler = function (argv) {
   })
 
   Object.keys(plugins).map(plugin => {
-    if (fs.existsSync(path.resolve(plugins[plugin]))) {
-      const loadedPlugin = require(path.resolve(plugins[plugin]))
-      if (typeof loadedPlugin.status === 'function') {
-        kvs = Object.assign(kvs, loadedPlugin.status())
+    try {
+      if (fs.existsSync(path.resolve(plugins[plugin]))) {
+        const loadedPlugin = require(path.resolve(plugins[plugin]))
+        if (typeof loadedPlugin.status === 'function') {
+          kvs = Object.assign(kvs, loadedPlugin.status())
+        }
+      }
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') {
+        throw new Error(error)
+      } else {
+        console.log(error.message)
       }
     }
   })

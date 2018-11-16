@@ -24,6 +24,8 @@ const invokeHook = function * (hook) {
     } catch (error) {
       if (error.code !== 'MODULE_NOT_FOUND') {
         throw new Error(error)
+      } else {
+        console.log(error.message)
       }
     }
   }
@@ -131,9 +133,31 @@ const getAllPluginsMapping = function () {
       }
     })
 
-  // process npm plugins
+  // process home npm scope plugins
+  glob
+    .sync('@*/zignis-plugin-*', {
+      cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+    })
+    .map(function (plugin) {
+      if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+        plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+      }
+    })
+
+  // process cwd npm plugins
   glob
     .sync('zignis-plugin-*', {
+      cwd: path.resolve(process.cwd(), 'node_modules')
+    })
+    .map(function (plugin) {
+      if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+      }
+    })
+
+  // process cwd npm scope plugins
+  glob
+    .sync('@*/zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), 'node_modules')
     })
     .map(function (plugin) {
