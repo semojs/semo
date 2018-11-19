@@ -16,10 +16,21 @@ const invokeHook = function * (hook) {
   for (let i = 0; i < Object.keys(plugins).length; i++) {
     let plugin = Object.keys(plugins)[i]
     try {
-      const loadedPlugin = require(path.resolve(plugins[plugin]))
-      if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
-        let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
-        pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+      let pluginEntry = 'index.js'
+      if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+        const pkgConfig = path.resolve(plugins[plugin], 'package.json')
+        if (pkgConfig.main) {
+          pluginEntry = pkgConfig.main
+        }
+      }
+
+      // 模块 entry 不存在则不加载
+      if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
+        const loadedPlugin = require(path.resolve(plugins[plugin]))
+        if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
+          let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+          pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+        }
       }
     } catch (error) {
       if (error.code !== 'MODULE_NOT_FOUND') {
