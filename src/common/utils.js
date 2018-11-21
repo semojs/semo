@@ -18,7 +18,7 @@ const invokeHook = function * (hook) {
     try {
       let pluginEntry = 'index.js'
       if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
-        const pkgConfig = path.resolve(plugins[plugin], 'package.json')
+        const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
         if (pkgConfig.main) {
           pluginEntry = pkgConfig.main
         }
