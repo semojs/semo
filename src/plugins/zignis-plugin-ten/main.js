@@ -26,7 +26,7 @@ module.exports = {
 
         const env = process.env.NODE_ENV ? process.env.NODE_ENV : 'development' // development/production/test
         const envColor = env === 'production' ? 'yellow' : 'green'
-        console.log(chalk[envColor](ten[Math.floor(Math.random() * ten.length)], '-- 智课十诫'), '\n')
+        console.log(chalk[envColor](ten[Math.floor(Math.random() * ten.length)]), '\n')
       }
     }
   },
