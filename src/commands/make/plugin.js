@@ -1,6 +1,5 @@
 const fs = require('fs')
 const path = require('path')
-const chalk = require('chalk')
 const Utils = require('../../common/utils')
 const shell = require('shelljs')
 
@@ -23,7 +22,7 @@ exports.handler = function (argv) {
 
   const pluginNamePattern = /[a-z0-9]+/
   if (!pluginNamePattern.test(argv.pluginName)) {
-    Utils.error('Plugin name invalid')
+    Utils.error('Plugin name invalid!')
   }
 
   const pluginPath = path.resolve(argv.pluginDir, `zignis-plugin-${argv.pluginName}`)
