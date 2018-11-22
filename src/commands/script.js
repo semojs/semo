@@ -3,7 +3,7 @@ const path = require('path')
 const Utils = require('../common/utils')
 
 exports.command = 'script [file]'
-exports.alias = 'scr'
+exports.aliases = 'scr'
 exports.desc = 'Execute a script'
 
 exports.builder = function (yargs) {}
