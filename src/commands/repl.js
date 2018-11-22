@@ -12,6 +12,7 @@ function * openRepl (pluginsReturn) {
   const r = repl.start('>>> ')
 
   // context即为REPL中的上下文环境
+  r.context.co = co
   r.context.Utils = Utils
 
   r.context = Object.assign(r.context, pluginsReturn)
