@@ -111,6 +111,20 @@ const error = function (message, label = '', errorCode = 1) {
 }
 
 /**
+ * error log method
+ * @param {mix} message error message to log
+ * @param {string} label error log label
+ * @param {integer} errorCode error code
+ */
+const warn = function (message, label = '') {
+  if (label) {
+    console.log(chalk.yellow(label))
+  }
+
+  console.log(chalk.yellow(message))
+}
+
+/**
  * Get all plugins path mapping
  * Cwd plugins can override local plugin if use same name
  */
@@ -293,6 +307,7 @@ module.exports = {
 
   // custom functions
   log,
+  warn,
   error,
   random,
   outputTable,

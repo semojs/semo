@@ -71,6 +71,13 @@ Generate component sample code
 
 命令：
   zignis make command [name] [description]  Generate a command template
+  zignis make plugin <pluginName>           Generate a plugin structure
+  zignis make script [name]                 Create a zignis script
+
+选项：
+  --version                  显示版本号                                   [布尔]
+  -h, --help                 显示帮助信息                                 [布尔]
+  --disable-ten-temporarily                                      [默认值: false]
 ```
 
 make 命令用于生成一些样板文件，默认内置了 command 和 script 子命令，用于快速生成符合 Zignis 机制的样板文件，插件也可以注册新的子命令来生成适合自己应用场景的样板文件。
@@ -148,7 +155,7 @@ Zignis 有多重扩展机制，只为了能得到良好的扩展性，满足各�
 
 在 Zignis 的架构下，配置统一都使用 .zignisrc.json 文件保存，采用了类似于模块的查找方式，也有自己的特殊考量，整个配置的覆盖关系如下：
 
-- $HOME/.zignis/.zignisrc.json # 家目录的配置文件用于保存默认配置，同时也可以提供配置的覆盖机制
+- \$HOME/.zignis/.zignisrc.json # 家目录的配置文件用于保存默认配置，同时也可以提供配置的覆盖机制
 - 插件目录下的 .zignisrc.json 的配置
 - 应用目录的 package.json 的配置
 - 应用目录的 .zignisrc.json 的配置
@@ -159,7 +166,7 @@ Zignis 有多重扩展机制，只为了能得到良好的扩展性，满足各�
 
 应用目录可以有一个 `extendDir` 目录，可以在此目录扩展一些可以扩展的插件，比如内置命令的 `make` 命令，默认只有一个 command 子命令，我们可以在应用的 extendDir 目录添加应用相关的 make 子命令，例如生成控制器文件的 controller 子命令，生成模型文件的 model 子命令。
 
-创建子命令时只要目录结构符合 $extendDir/zignis/make/subcommand.js，就可以实现 zignis make subcommand 子命令了。
+创建子命令时只要目录结构符合 \$extendDir/zignis/make/subcommand.js，就可以实现 zignis make subcommand 子命令了。
 
 ### 钩子扩展
 
@@ -173,7 +180,7 @@ Zignis 的插件的命名必须是 `zignis-plugin-*` 这样的格式；开发插
 
 - Zignis 内置插件
 - 跟 Zignis 同级的插件，这个目录使得插件 global 安装成为可能
-- $HOME/.zignis/node_modules 这里的插件可以理解成跨项目全局生效的插件，是应用无关的
+- \$HOME/.zignis/node_modules 这里的插件可以理解成跨项目全局生效的插件，是应用无关的
 - 应用的 node_modules 目录里的插件
 - 应用的 config.pluginDir 插件目录
 - [optional] 如果当前目录刚好是一个插件，则会最后加载，这会获得最高的优先级，从而可以在开发插件时覆盖正常安装时的优先级。

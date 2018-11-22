@@ -49,7 +49,7 @@ exports.handler = function (argv) {
     }
 
     fs.writeFileSync(`${currentPath}/.zignisrc.json`, JSON.stringify(defaultZignisrc, null, 2))
-    console.log(chalk.green('default .zignisrc created!'))
+    console.log(chalk.green('Default .zignisrc created!'))
 
     const dirs = Object.keys(defaultZignisrc)
     dirs.forEach(dir => {

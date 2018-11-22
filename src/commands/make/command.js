@@ -13,7 +13,7 @@ exports.builder = function (yargs) {
 
   yargs.option('plugin', {
     default: false,
-    describe: 'generate command in plugin directory, e.g. extend=zignis-plugin-xxx'
+    describe: 'generate command in plugin directory, e.g. plugin=xxx'
   })
 }
 
@@ -22,7 +22,7 @@ exports.handler = function (argv) {
   if (argv.extend) {
     commandDir = `${argv.extendDir}/${argv.extend}/src/commands`
   } else if (argv.plugin) {
-    commandDir = `${argv.pluginDir}/${argv.plugin}/src/commands`
+    commandDir = `${argv.pluginDir}/zignis-plugin-${argv.plugin}/src/commands`
   } else {
     commandDir = argv.commandDir
   }
