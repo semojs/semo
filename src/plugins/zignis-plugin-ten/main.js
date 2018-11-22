@@ -3,6 +3,9 @@ const Utils = require('../../common/utils')
 const _ = require('lodash')
 
 module.exports = {
+  status () {
+    return {a: 1}
+  },
   * beforeCommand () {
     let ten = [
       '通过利他来利己。 -- 智课十诫',

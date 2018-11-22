@@ -1,3 +1,4 @@
 {
-  "commandDir": "src/commands"
+  "commandDir": "src/commands",
+  "pluginDir": "src/plugins"
 }
