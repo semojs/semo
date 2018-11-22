@@ -30,7 +30,13 @@ exports.builder = function (yargs) {
   yargs.option('yes', {
     alias: 'y',
     default: false,
-    describe: 'use yarn command'
+    describe: 'run npm/yarn init with --yes'
+  })
+
+  yargs.option('force', {
+    alias: 'f',
+    default: false,
+    describe: 'force download, existed folder will be deleted!'
   })
 
   yargs.option('empty', {

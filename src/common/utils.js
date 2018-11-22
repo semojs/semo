@@ -9,6 +9,8 @@ const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
 const seedrandom = require('seedrandom')
 const day = require('dayjs')
+const co = require('co')
+const shell = require('shelljs')
 
 const invokeHook = function * (hook) {
   const plugins = getAllPluginsMapping()
@@ -277,16 +279,25 @@ const random = (min, max) => {
 }
 
 module.exports = {
+  // npm packages
   _,
   chalk,
-  invokeHook,
-  extendSubCommand,
+  table,
+  day,
+  colorize,
+  stringify,
+  glob,
+  findUp,
+  co,
+  shell,
+
+  // custom functions
   log,
   error,
   random,
   outputTable,
-  table,
-  day,
+  invokeHook,
+  extendSubCommand,
   getAllPluginsMapping,
   getCombinedConfig,
   getApplicationConfig
