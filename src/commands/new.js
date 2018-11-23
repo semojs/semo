@@ -70,11 +70,6 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'init the project use Zignis'
   })
-
-  yargs.option('plugin', {
-    default: false,
-    describe: 'init the project as a plugin, used under init option'
-  })
 }
 
 exports.handler = function (argv) {
@@ -145,7 +140,7 @@ exports.handler = function (argv) {
 
   // init basic zignis structure
   if (argv.init) {
-    if (argv.plugin) {
+    if (argv.name.indexOf('zignis-plugin-') === 0) {
       shell.exec('zignis init --plugin --disable-ten-temporarily')
     } else {
       shell.exec('zignis init --disable-ten-temporarily')
