@@ -7,6 +7,18 @@ const _ = require('lodash')
 
 const Utils = require('../common/utils')
 
+const getPackageNames = function (input) {
+  if (_.isString(input)) {
+    return input.split(',')
+  }
+
+  if (_.isArray(input)) {
+    return _.flatten(input.map(item => item.split(',')))
+  }
+
+  return []
+}
+
 exports.command = 'new <name> [repo] [branch]'
 exports.aliases = 'n'
 exports.desc = 'Create a new project from specific repo'
@@ -43,15 +55,35 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'force empty project, ignore repo'
   })
+
+  yargs.option('add', {
+    default: false,
+    describe: 'add npm package to package.json dependencies'
+  })
+
+  yargs.option('add-dev', {
+    default: false,
+    describe: 'add npm package to package.json devDependencies'
+  })
+
+  yargs.option('init', {
+    default: false,
+    describe: 'init the project use Zignis'
+  })
+
+  yargs.option('plugin', {
+    default: false,
+    describe: 'init the project as a plugin, used under init option'
+  })
 }
 
 exports.handler = function (argv) {
   if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
     if (argv.force) {
-      console.log(chalk.yellow(`Existed ${argv.name} is deleted before downloading a new one!`))
+      Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', path.resolve(process.cwd(), argv.name))
     } else {
-      console.log(chalk.yellow(`Destination existed, command abort!`))
+      Utils.error(`Destination existed, command abort!`)
     }
   }
 
@@ -90,5 +122,33 @@ exports.handler = function (argv) {
         }
       }
     })
+  }
+
+  // add packages
+  const addPackage = getPackageNames(argv.add)
+  const addPackageDev = getPackageNames(argv.addDev)
+  if (addPackage.length > 0) {
+    if (argv.yarn) {
+      shell.exec(`yarn add ${addPackage.join(' ')}`)
+    } else {
+      shell.exec(`npm install ${addPackage.join(' ')}`)
+    }
+  }
+
+  if (addPackageDev.length > 0) {
+    if (argv.yarn) {
+      shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
+    } else {
+      shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+    }
+  }
+
+  // init basic zignis structure
+  if (argv.init) {
+    if (argv.plugin) {
+      shell.exec('zignis init --plugin --disable-ten-temporarily')
+    } else {
+      shell.exec('zignis init --disable-ten-temporarily')
+    }
   }
 }

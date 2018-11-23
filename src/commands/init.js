@@ -12,7 +12,7 @@ exports.aliases = 'i'
 exports.builder = function (yargs) {
   yargs.option('plugin', {
     default: false,
-    describe: 'init for plugin'
+    describe: 'plugin mode'
   })
 }
 

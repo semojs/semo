@@ -1,6 +1,6 @@
 const Utils = require('../common/utils')
 
-exports.command = 'make'
+exports.command = 'make <template>'
 exports.desc = 'Generate component sample code'
 exports.aliases = 'm'
 
