@@ -51,6 +51,12 @@ exports.builder = function (yargs) {
     describe: 'force download, existed folder will be deleted!'
   })
 
+  yargs.option('merge', {
+    alias: 'f',
+    default: false,
+    describe: 'merge config with exist project folder!'
+  })
+
   yargs.option('empty', {
     default: false,
     describe: 'force empty project, ignore repo'
@@ -77,46 +83,50 @@ exports.handler = function (argv) {
     if (argv.force) {
       Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', path.resolve(process.cwd(), argv.name))
-    } else {
+    } else if (!argv.merge) {
       Utils.error(`Destination existed, command abort!`)
     }
   }
 
-  if (!argv.repo || argv.empty) {
-    shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
+  if (argv.merge) {
     shell.cd(argv.name)
-    if (argv.yarn) {
-      if (argv.yes) {
-        shell.exec('yarn init -y')
-      } else {
-        shell.exec('yarn init')
-      }
-    } else {
-      if (argv.yes) {
-        shell.exec('npm init -y')
-      } else {
-        shell.exec('npm init')
-      }
-    }
   } else {
-    console.log(chalk.green(`Downloading from ${argv.repo}`))
-    shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (
-      code,
-      stdout,
-      stderr
-    ) {
-      if (!code) {
-        console.log(chalk.green('Succeeded!'))
-        shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
-        console.log(chalk.green('.git directory removed!'))
-        shell.cd(argv.name)
-        if (argv.yarn) {
-          shell.exec('yarn')
+    if (!argv.repo || argv.empty) {
+      shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
+      shell.cd(argv.name)
+      if (argv.yarn) {
+        if (argv.yes) {
+          shell.exec('yarn init -y')
         } else {
-          shell.exec('npm install')
+          shell.exec('yarn init')
+        }
+      } else {
+        if (argv.yes) {
+          shell.exec('npm init -y')
+        } else {
+          shell.exec('npm init')
         }
       }
-    })
+    } else {
+      console.log(chalk.green(`Downloading from ${argv.repo}`))
+      shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (
+        code,
+        stdout,
+        stderr
+      ) {
+        if (!code) {
+          console.log(chalk.green('Succeeded!'))
+          shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
+          console.log(chalk.green('.git directory removed!'))
+          shell.cd(argv.name)
+          if (argv.yarn) {
+            shell.exec('yarn')
+          } else {
+            shell.exec('npm install')
+          }
+        }
+      })
+    }
   }
 
   // add packages
