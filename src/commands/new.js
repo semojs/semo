@@ -52,7 +52,7 @@ exports.builder = function (yargs) {
   })
 
   yargs.option('merge', {
-    alias: 'f',
+    alias: 'm',
     default: false,
     describe: 'merge config with exist project folder!'
   })
