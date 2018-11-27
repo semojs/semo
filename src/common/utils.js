@@ -226,7 +226,7 @@ const getApplicationConfig = function () {
     const configPath = findUp.sync(['.zignisrc.json'])
     return configPath ? require(configPath) : {}
   } catch (e) {
-    console.log(chalk.red(`.zignisrc format has bad format.`))
+    error(`Application .zignisrc.json can not be parsed!`)
   }
 }
 
