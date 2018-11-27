@@ -109,23 +109,22 @@ exports.handler = function (argv) {
       }
     } else {
       console.log(chalk.green(`Downloading from ${argv.repo}`))
-      shell.exec(`git clone ${argv.repo} ${argv.name} --branch ${argv.branch} --progress`, function (
-        code,
-        stdout,
-        stderr
-      ) {
-        if (!code) {
-          console.log(chalk.green('Succeeded!'))
-          shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
-          console.log(chalk.green('.git directory removed!'))
-          shell.cd(argv.name)
-          if (argv.yarn) {
-            shell.exec('yarn')
-          } else {
-            shell.exec('npm install')
+      shell.exec(
+        `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`,
+        function (code, stdout, stderr) {
+          if (!code) {
+            console.log(chalk.green('Succeeded!'))
+            shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
+            console.log(chalk.green('.git directory removed!'))
+            shell.cd(argv.name)
+            if (argv.yarn) {
+              shell.exec('yarn')
+            } else {
+              shell.exec('npm install')
+            }
           }
         }
-      })
+      )
     }
   }
 
