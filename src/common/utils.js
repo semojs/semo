@@ -3,6 +3,7 @@
  * Utils include some common api functions and some module references, and also exported in Zignis module, so it can be used in Zignis plugins
  */
 
+const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
 const glob = require('glob')
@@ -130,6 +131,14 @@ const warn = function (message, label = '') {
   }
 
   console.log(chalk.yellow(message))
+}
+
+/**
+ * compute md5
+ * @param {string} s
+ */
+const md5 = function (s) {
+  return crypto.createHash('md5').update(s, 'utf8').digest('hex');
 }
 
 /**
@@ -333,6 +342,7 @@ module.exports = {
   shell,
 
   // custom functions
+  md5,
   log,
   warn,
   error,
