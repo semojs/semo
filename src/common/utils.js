@@ -1,3 +1,8 @@
+/**
+ * @file
+ * Utils include some common api functions and some module references, and also exported in Zignis module, so it can be used in Zignis plugins
+ */
+
 const path = require('path')
 const fs = require('fs')
 const glob = require('glob')
@@ -12,6 +17,10 @@ const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
 
+/**
+ * Run hook in all valid plugins and return the combined results.
+ * @param {string} hook
+ */
 const invokeHook = function * (hook) {
   const plugins = getAllPluginsMapping()
   let pluginsReturn = {}
@@ -47,7 +56,7 @@ const invokeHook = function * (hook) {
 }
 
 /**
- * Extend Sub Command
+ * Extend Sub Command.
  * @param {String} command
  * @param {String} module
  * @param {Object} yargs
@@ -79,7 +88,7 @@ const extendSubCommand = function (command, module, yargs) {
 }
 
 /**
- * log method
+ * Print message with format and color.
  * @param {mix} message message to log
  * @param {string} label label for describing message
  */
@@ -96,7 +105,7 @@ const log = function (message, label = '') {
 }
 
 /**
- * error log method
+ * Print error message, and exit process.
  * @param {mix} message error message to log
  * @param {string} label error log label
  * @param {integer} errorCode error code
@@ -111,10 +120,9 @@ const error = function (message, label = '', errorCode = 1) {
 }
 
 /**
- * error log method
+ * Print warn message with yellow color.
  * @param {mix} message error message to log
  * @param {string} label error log label
- * @param {integer} errorCode error code
  */
 const warn = function (message, label = '') {
   if (label) {
@@ -125,8 +133,8 @@ const warn = function (message, label = '') {
 }
 
 /**
- * Get all plugins path mapping
- * Cwd plugins can override local plugin if use same name
+ * Get all plugins path mapping.
+ * Same name plugin would be overriden orderly
  */
 const getAllPluginsMapping = function () {
   const plugins = {}
@@ -219,7 +227,7 @@ const getAllPluginsMapping = function () {
 }
 
 /**
- * Get only application config
+ * Get application zignis config only
  */
 const getApplicationConfig = function () {
   try {
@@ -231,7 +239,7 @@ const getApplicationConfig = function () {
 }
 
 /**
- * Get commbined config
+ * Get commbined config from whole environment
  */
 const getCombinedConfig = function () {
   let pluginConfigs = null
@@ -265,7 +273,7 @@ const getCombinedConfig = function () {
 }
 
 /**
- * Output a table
+ * Print a simple table
  * @param {*} columns table columns
  */
 const outputTable = function (columns, caption, borderOptions = {}) {
@@ -287,22 +295,41 @@ const outputTable = function (columns, caption, borderOptions = {}) {
   console.log(table(columns, config))
 }
 
+/**
+ * Get a random number in a range
+ * @param {integer} min
+ * @param {integer} max
+ */
 const random = (min, max) => {
   if (max < min) throw new Error('无效参数')
   return (Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1)) + min
 }
 
+/**
+ * Zignis utils functions and references to common modules
+ * @module Utils
+ */
 module.exports = {
   // npm packages
+  /** [lodash](https://www.npmjs.com/package/lodash) reference */
   _,
+  /** [chalk](https://www.npmjs.com/package/chalk) reference */
   chalk,
+  /** [table](https://www.npmjs.com/package/table) reference */
   table,
+  /** [day.js](https://www.npmjs.com/package/dayjs) reference */
   day,
+  /** [json-colorizer](https://www.npmjs.com/package/json-colorizer) reference */
   colorize,
+  /** [json-stringify-pretty-compact](https://www.npmjs.com/package/json-stringify-pretty-compact) reference */
   stringify,
+  /** [glob](https://www.npmjs.com/package/glob) reference */
   glob,
+  /** [find-up](https://www.npmjs.com/package/find-up) reference */
   findUp,
+  /** [co](https://www.npmjs.com/package/co) reference */
   co,
+  /** [shelljs](https://www.npmjs.com/package/shelljs) reference */
   shell,
 
   // custom functions
