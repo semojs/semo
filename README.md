@@ -1,12 +1,21 @@
 # Zignis
 
-Zignis is a command-line tool framework, based on Yargs. Use Zignis, It can be used to let your commands, scripts interact with your project.
+Zignis is a command-line tool framework, based on Yargs. It can be used to make your commands and scripts interact with your project.
 
 # Principles
 
 - Usability
 - Flexibility
 - Efficiency
+
+# Installation & Usage
+
+```
+npm i -g zignis
+zignis help
+```
+
+Please refer to the documentation to learn how to use Zignis, because you need to do the integration by yourself to make Zignis work for your project.
 
 # Documentation
 
