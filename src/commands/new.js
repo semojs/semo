@@ -152,9 +152,9 @@ exports.handler = function (argv) {
   // init basic zignis structure
   if (argv.init) {
     if (argv.name.indexOf('zignis-plugin-') === 0) {
-      shell.exec('zignis init --plugin --disable-ten-temporarily --yes')
+      shell.exec('zignis init --plugin --disable-ten-temporarily --force')
     } else {
-      shell.exec('zignis init --disable-ten-temporarily --yes')
+      shell.exec('zignis init --disable-ten-temporarily --force')
     }
   }
 }

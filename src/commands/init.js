@@ -15,10 +15,8 @@ exports.builder = function (yargs) {
     describe: 'plugin mode'
   })
 
-  yargs.option('yes', {
-    default: false,
-    describe: 'plugin mode',
-    alias: 'y'
+  yargs.option('force', {
+    default: false
   })
 }
 
@@ -38,7 +36,7 @@ exports.handler = function (argv) {
   let currentPath = path.resolve(process.cwd())
 
   return co(function * () {
-    const override = fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.yes
+    const override = fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
       ? yield inquirer.prompt([
         {
           type: 'confirm',
