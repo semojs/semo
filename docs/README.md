@@ -122,6 +122,7 @@ module.exports = function * (components) {
 ```
 
 exports 一个 generator 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
+参数 components 是一个函数，可以用 yield 或者 await 执行，取出里面的组件对象
 
 ## 设计原则
 
