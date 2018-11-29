@@ -109,22 +109,24 @@ exports.handler = function (argv) {
       }
     } else {
       console.log(chalk.green(`Downloading from ${argv.repo}`))
-      shell.exec(
-        `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`,
-        function (code, stdout, stderr) {
-          if (!code) {
-            console.log(chalk.green('Succeeded!'))
-            shell.rm('-rf', path.resolve(process.cwd(), `${argv.name}/.git`))
-            console.log(chalk.green('.git directory removed!'))
-            shell.cd(argv.name)
-            if (argv.yarn) {
-              shell.exec('yarn')
-            } else {
-              shell.exec('npm install')
-            }
-          }
+      try {
+        shell.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
+
+        console.log(chalk.green('Succeeded!'))
+        shell.cd(argv.name)
+        shell.rm('-rf', path.resolve(process.cwd(), `.git`))
+        console.log(chalk.green('.git directory removed!'))
+        if (argv.yarn) {
+          shell.exec('yarn')
+        } else {
+          shell.exec('npm install')
         }
-      )
+
+        shell.exec('git init')
+        console.log(chalk.green('New .git directory created!'))
+      } catch (e) {
+        Utils.error(e.message)
+      }
     }
   }
 
@@ -150,9 +152,9 @@ exports.handler = function (argv) {
   // init basic zignis structure
   if (argv.init) {
     if (argv.name.indexOf('zignis-plugin-') === 0) {
-      shell.exec('zignis init --plugin --disable-ten-temporarily')
+      shell.exec('zignis init --plugin --disable-ten-temporarily --yes')
     } else {
-      shell.exec('zignis init --disable-ten-temporarily')
+      shell.exec('zignis init --disable-ten-temporarily --yes')
     }
   }
 }

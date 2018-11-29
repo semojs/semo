@@ -43,6 +43,7 @@ co(function * () {
     .alias('h', 'help')
     .default('disable-ten-temporarily', false)
     .exitProcess(false)
+    .wrap(Math.min(120, yargs.terminalWidth()))
     .argv
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
