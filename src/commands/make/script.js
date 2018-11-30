@@ -5,7 +5,7 @@ const _ = require('lodash')
 const dayjs = require('dayjs')
 
 exports.command = 'script [name]'
-exports.desc = 'Create a zignis script'
+exports.desc = 'Generate a zignis script file'
 // exports.alias = ''
 
 exports.builder = function (yargs) {

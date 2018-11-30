@@ -2,7 +2,7 @@ const Utils = require('../common/utils')
 
 exports.command = 'make <template>'
 exports.desc = 'Generate component sample code'
-exports.aliases = 'm'
+exports.aliases = ['m', 'generate', 'g']
 
 exports.builder = function (yargs) {
   yargs.demandCommand(1, 'You need at least one command before moving on')
