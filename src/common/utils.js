@@ -57,10 +57,12 @@ const invokeHook = function * (hook) {
 }
 
 /**
- * Extend Sub Command.
+ * Extend Sub Command
+ * Make it can be extended by other plugins
  * @param {String} command
  * @param {String} module
  * @param {Object} yargs
+ * @param {String} basePath
  */
 const extendSubCommand = function (command, module, yargs, basePath) {
   const plugins = getAllPluginsMapping()
