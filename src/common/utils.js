@@ -62,13 +62,12 @@ const invokeHook = function * (hook) {
  * @param {String} module
  * @param {Object} yargs
  */
-const extendSubCommand = function (command, module, yargs) {
+const extendSubCommand = function (command, module, yargs, basePath) {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
 
   // load default commands
-  yargs.commandDir(`../commands/${command}`)
-  // yargs.commandDir(path.resolve(__dirname, `../commands/${command}`))
+  yargs.commandDir(path.resolve(basePath, command))
 
   // Load plugin commands
   if (plugins) {
