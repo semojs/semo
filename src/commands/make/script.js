@@ -6,7 +6,6 @@ const dayjs = require('dayjs')
 
 exports.command = 'script [name]'
 exports.desc = 'Generate a zignis script file'
-// exports.alias = ''
 
 exports.builder = function (yargs) {
   // yargs.option('option', {default, describe, alias})

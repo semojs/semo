@@ -5,7 +5,7 @@ const Utils = require('../common/utils')
 
 exports.command = 'status'
 exports.aliases = 'st'
-exports.desc = 'Show Zignis status. alias: st'
+exports.desc = 'Show environment status info'
 
 exports.builder = function (yargs) {}
 
