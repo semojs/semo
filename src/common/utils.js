@@ -134,11 +134,30 @@ const warn = function (message, label = '') {
 }
 
 /**
- * compute md5
+ * Compute md5
  * @param {string} s
  */
 const md5 = function (s) {
   return crypto.createHash('md5').update(s, 'utf8').digest('hex');
+}
+
+/**
+ * Delay a while
+ * @param {integer} ms
+ */
+const delay = function (ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms)
+  })
+}
+
+/**
+ * Split input by comma and blank
+ * @param {string} input
+ * @returns {array} input separated by comma
+ */
+const splitComma = function (input) {
+  return input.replace(/,/g, ' ').split(/\s+/)
 }
 
 /**
@@ -343,6 +362,8 @@ module.exports = {
 
   // custom functions
   md5,
+  delay,
+  splitComma,
   log,
   warn,
   error,
