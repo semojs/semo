@@ -1,8 +1,3 @@
-/**
- * @file
- * Utils include some common api functions and some module references, and also exported in Zignis module, so it can be used in Zignis plugins
- */
-
 const crypto = require('crypto')
 const path = require('path')
 const fs = require('fs')
@@ -22,7 +17,7 @@ const shell = require('shelljs')
  * Run hook in all valid plugins and return the combined results.
  * @param {string} hook
  */
-const invokeHook = function * (hook) {
+const invokeHook = function*(hook) {
   const plugins = getAllPluginsMapping()
   let pluginsReturn = {}
   for (let i = 0; i < Object.keys(plugins).length; i++) {
@@ -57,14 +52,14 @@ const invokeHook = function * (hook) {
 }
 
 /**
- * Extend Sub Command
- * Make it can be extended by other plugins
+ * Extend Sub Command, make it can be extended by other plugins.
+ * Often set basePath to `__dirname`.
  * @param {String} command
  * @param {String} module
  * @param {Object} yargs
  * @param {String} basePath
  */
-const extendSubCommand = function (command, module, yargs, basePath) {
+const extendSubCommand = function(command, module, yargs, basePath) {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
 
@@ -73,7 +68,7 @@ const extendSubCommand = function (command, module, yargs, basePath) {
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin) {
+    Object.keys(plugins).map(function(plugin) {
       if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
         yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
       }
@@ -94,7 +89,7 @@ const extendSubCommand = function (command, module, yargs, basePath) {
  * @param {mix} message message to log
  * @param {string} label label for describing message
  */
-const log = function (message, label = '') {
+const log = function(message, label = '') {
   if (label) {
     console.log(label)
   }
@@ -112,7 +107,7 @@ const log = function (message, label = '') {
  * @param {string} label error log label
  * @param {integer} errorCode error code
  */
-const error = function (message, label = '', errorCode = 1) {
+const error = function(message, label = '', errorCode = 1) {
   if (label) {
     console.log(chalk.red(label))
   }
@@ -126,7 +121,7 @@ const error = function (message, label = '', errorCode = 1) {
  * @param {mix} message error message to log
  * @param {string} label error log label
  */
-const warn = function (message, label = '') {
+const warn = function(message, label = '') {
   if (label) {
     console.log(chalk.yellow(label))
   }
@@ -135,29 +130,32 @@ const warn = function (message, label = '') {
 }
 
 /**
- * Compute md5
+ * Compute md5.
  * @param {string} s
  */
-const md5 = function (s) {
-  return crypto.createHash('md5').update(s, 'utf8').digest('hex');
+const md5 = function(s) {
+  return crypto
+    .createHash('md5')
+    .update(s, 'utf8')
+    .digest('hex')
 }
 
 /**
- * Delay a while
+ * Delay a while.
  * @param {integer} ms
  */
-const delay = function (ms) {
-  return new Promise(function (resolve) {
+const delay = function(ms) {
+  return new Promise(function(resolve) {
     return setTimeout(resolve, ms)
   })
 }
 
 /**
- * Split input by comma and blank
+ * Split input by comma and blank.
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitComma = function (input) {
+const splitComma = function(input) {
   return input.replace(/,/g, ' ').split(/\s+/)
 }
 
@@ -165,7 +163,7 @@ const splitComma = function (input) {
  * Get all plugins path mapping.
  * Same name plugin would be overriden orderly
  */
-const getAllPluginsMapping = function () {
+const getAllPluginsMapping = function() {
   const plugins = {}
 
   // process core plugins
@@ -173,7 +171,7 @@ const getAllPluginsMapping = function () {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(__dirname, '../plugins')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
     })
 
@@ -182,7 +180,7 @@ const getAllPluginsMapping = function () {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(__dirname, '../../../')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
     })
 
@@ -191,7 +189,7 @@ const getAllPluginsMapping = function () {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
       }
@@ -202,7 +200,7 @@ const getAllPluginsMapping = function () {
     .sync('@*/zignis-plugin-*', {
       cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
       }
@@ -213,7 +211,7 @@ const getAllPluginsMapping = function () {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), 'node_modules')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       }
@@ -224,7 +222,7 @@ const getAllPluginsMapping = function () {
     .sync('@*/zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), 'node_modules')
     })
-    .map(function (plugin) {
+    .map(function(plugin) {
       if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       }
@@ -237,7 +235,7 @@ const getAllPluginsMapping = function () {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(process.cwd(), config.pluginDir)
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
           plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
         }
@@ -256,9 +254,9 @@ const getAllPluginsMapping = function () {
 }
 
 /**
- * Get application zignis config only
+ * Get application zignis config only.
  */
-const getApplicationConfig = function () {
+const getApplicationConfig = function() {
   try {
     const configPath = findUp.sync(['.zignisrc.json'])
     return configPath ? require(configPath) : {}
@@ -268,9 +266,9 @@ const getApplicationConfig = function () {
 }
 
 /**
- * Get commbined config from whole environment
+ * Get commbined config from whole environment.
  */
-const getCombinedConfig = function () {
+const getCombinedConfig = function() {
   let pluginConfigs = null
 
   if (_.isNil(pluginConfigs)) {
@@ -302,10 +300,10 @@ const getCombinedConfig = function () {
 }
 
 /**
- * Print a simple table
+ * Print a simple table.
  * @param {*} columns table columns
  */
-const outputTable = function (columns, caption, borderOptions = {}) {
+const outputTable = function(columns, caption, borderOptions = {}) {
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -325,7 +323,7 @@ const outputTable = function (columns, caption, borderOptions = {}) {
 }
 
 /**
- * Get a random number in a range
+ * Get a random number in a range.
  * @param {integer} min
  * @param {integer} max
  */
@@ -335,30 +333,30 @@ const random = (min, max) => {
 }
 
 /**
- * Zignis utils functions and references to common modules
+ * Zignis utils functions and references to common modules.
  * @module Utils
  */
 module.exports = {
   // npm packages
-  /** [lodash](https://www.npmjs.com/package/lodash) reference */
+  /** [lodash](https://www.npmjs.com/package/lodash) reference, check [doc](https://lodash.com/docs). */
   _,
   /** [chalk](https://www.npmjs.com/package/chalk) reference */
   chalk,
   /** [table](https://www.npmjs.com/package/table) reference */
   table,
-  /** [day.js](https://www.npmjs.com/package/dayjs) reference */
+  /** [day.js](https://www.npmjs.com/package/dayjs) reference, check [api](https://github.com/iamkun/dayjs/blob/HEAD/docs/en/API-reference.md) documentation.*/
   day,
   /** [json-colorizer](https://www.npmjs.com/package/json-colorizer) reference */
   colorize,
-  /** [json-stringify-pretty-compact](https://www.npmjs.com/package/json-stringify-pretty-compact) reference */
+  /** [json-stringify-pretty-compact](https://www.npmjs.com/package/json-stringify-pretty-compact) reference. */
   stringify,
-  /** [glob](https://www.npmjs.com/package/glob) reference */
+  /** [glob](https://www.npmjs.com/package/glob) reference. */
   glob,
-  /** [find-up](https://www.npmjs.com/package/find-up) reference */
+  /** [find-up](https://www.npmjs.com/package/find-up) reference. */
   findUp,
-  /** [co](https://www.npmjs.com/package/co) reference */
+  /** [co](https://www.npmjs.com/package/co) reference. */
   co,
-  /** [shelljs](https://www.npmjs.com/package/shelljs) reference */
+  /** [shelljs](https://www.npmjs.com/package/shelljs) reference. */
   shell,
 
   // custom functions

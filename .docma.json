@@ -1,0 +1,12 @@
+{
+  "src": ["./src/common/utils.js"],
+  "dest": "./docs/api",
+  "clean": true,
+  "jsdoc": {
+    "sort": "grouped",
+    "plugins": ["plugins/markdown"]
+  },
+  "app": {
+    "title": "Zignis Documentation"
+  }
+}
