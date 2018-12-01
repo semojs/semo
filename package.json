@@ -27,7 +27,7 @@
     "yargs-parser": "^11.0.0"
   },
   "devDependencies": {
-    "docma": "^3.0.0",
+    "documentation": "^8.1.2",
     "eslint": "^4.19.1",
     "eslint-config-standard": "^12.0.0-alpha.0",
     "eslint-plugin-import": "^2.11.0",
@@ -36,6 +36,6 @@
     "eslint-plugin-standard": "^3.1.0"
   },
   "scripts": {
-    "jsdoc": "docma -c .docma.json"
+    "jsdoc": "documentation build  src/common/utils.js -f md > docs/API.md"
   }
 }

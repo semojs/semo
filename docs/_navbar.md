@@ -1,2 +1,2 @@
-* [首页](/)
-* [API手册](https://zhike-team.github.io/zignis/api/)
+- [首页](/)
+- [API 手册](/API.md)
