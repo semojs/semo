@@ -11,4 +11,3 @@ deploy:
   on:
     branch: master
     tags: true
-  tag: latest
