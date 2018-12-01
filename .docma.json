@@ -9,9 +9,7 @@
   "app": {
     "title": "Zignis Documentation",
     "base": "/zignis/api/",
-    "entrance": "content:readme",
-    "routing": "path",
-    "server": "github"
+    "entrance": "content:readme"
   },
   "template": {
     "options": {
