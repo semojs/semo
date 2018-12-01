@@ -4,9 +4,10 @@ node_js:
 script: npm run jsdoc
 deploy:
   provider: pages
-  local-dir: docs
+  local-dir: docs/public
   skip-cleanup: true
   github-token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
   keep-history: true
   on:
-    branch: master
+    tags: true
+  tag: latest
