@@ -36,6 +36,6 @@
     "eslint-plugin-standard": "^3.1.0"
   },
   "scripts": {
-    "jsdoc": "documentation build  src/common/utils.js -f md > docs/API.md"
+    "jsdoc": "documentation build  src/common/utils.js -f md --markdown-toc=false > docs/API.md"
   }
 }
