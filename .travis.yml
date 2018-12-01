@@ -9,5 +9,6 @@ deploy:
   github-token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
   keep-history: true
   on:
-    master: true
+    branch: master
     tags: true
+  tag: latest
