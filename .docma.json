@@ -8,6 +8,36 @@
   },
   "app": {
     "title": "Zignis Documentation",
-    "base": "zignis/api"
+    "base": "https://zhike-team.github.io/zignis/api/"
+  },
+  "template": {
+    "options": {
+      "title": {
+        "label": "Zignis",
+        "href": "https://zhike-team.github.io/zignis/"
+      },
+      "sidebar": {
+        "enabled": true,
+        "collapsed": true
+      },
+      "navbar": {
+        "menu": [
+          {
+            "label": "Home",
+            "href": "https://zhike-team.github.io/zignis/"
+          },
+          {
+            "label": "API Peference",
+            "href": "https://zhike-team.github.io/zignis/api/"
+          },
+          {
+            "iconClass": "fab fa-lg fa-github",
+            "label": "",
+            "href": "https://github.com/zhike-team/zignis",
+            "target": "_blank"
+          }
+        ]
+      }
+    }
   }
 }
