@@ -14,7 +14,7 @@ Zignis is a command-line tool framework, based on [Yargs](https://www.npmjs.com/
 
 # Principles
 
-- Usability
+- Consistency
 - Flexibility
 - Efficiency
 

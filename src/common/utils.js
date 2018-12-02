@@ -15,11 +15,29 @@ const shell = require('shelljs')
 
 /**
  * Run hook in all valid plugins and return the combined results.
- * @param {string} hook
+ * Plugins implement hook in `module.exports`, could be generator function or promise function
+ * @example
+ * const hookReturn = yield Utils.invokeHook('hook')
+ * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
+ * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`.
  */
-const invokeHook = function*(hook) {
+const invokeHook = function * (hook, mode = 'assign') {
   const plugins = getAllPluginsMapping()
-  let pluginsReturn = {}
+  let pluginsReturn
+  switch (mode) {
+    case 'push':
+      pluginsReturn = []
+      break
+    case 'replace':
+      pluginsReturn = ''
+      break
+    case 'assign':
+    case 'merge':
+    default:
+      pluginsReturn = {}
+      break
+  }
+
   for (let i = 0; i < Object.keys(plugins).length; i++) {
     let plugin = Object.keys(plugins)[i]
     try {
@@ -36,7 +54,22 @@ const invokeHook = function*(hook) {
         const loadedPlugin = require(path.resolve(plugins[plugin]))
         if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
           let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
-          pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+
+          switch (mode) {
+            case 'push':
+              pluginsReturn.push(pluginReturn)
+              break
+            case 'replace':
+              pluginsReturn = pluginReturn
+              break
+            case 'merge':
+              pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+              break
+            case 'assign':
+            default:
+              pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+              break
+          }
         }
       }
     } catch (error) {
@@ -52,14 +85,18 @@ const invokeHook = function*(hook) {
 }
 
 /**
- * Extend Sub Command, make it can be extended by other plugins.
- * Often set basePath to `__dirname`.
- * @param {String} command
- * @param {String} module
- * @param {Object} yargs
- * @param {String} basePath
+ * Extend command's sub command, it give other plugins an opportunity to extend it's sub command.
+ * So if you want other plugins to extend your sub commands, you can use this util function to replace default `yargs.commandDir`
+ * @example
+ * exports.builder = function (yargs) {
+ *   Utils.extendSubCommand('make', 'zignis', yargs, __dirname)
+ * }
+ * @param {String} command Current command name.
+ * @param {String} module Current plugin name.
+ * @param {Object} yargs Yargs reference.
+ * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function(command, module, yargs, basePath) {
+const extendSubCommand = function (command, module, yargs, basePath) {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
 
@@ -68,7 +105,7 @@ const extendSubCommand = function(command, module, yargs, basePath) {
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function(plugin) {
+    Object.keys(plugins).map(function (plugin) {
       if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
         yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
       }
@@ -85,85 +122,11 @@ const extendSubCommand = function(command, module, yargs, basePath) {
 }
 
 /**
- * Print message with format and color.
- * @param {mix} message message to log
- * @param {string} label label for describing message
- */
-const log = function(message, label = '') {
-  if (label) {
-    console.log(label)
-  }
-
-  if (_.isArray(message) || _.isObject(message)) {
-    console.log(colorize(stringify(message)))
-  } else {
-    console.log(message)
-  }
-}
-
-/**
- * Print error message, and exit process.
- * @param {mix} message error message to log
- * @param {string} label error log label
- * @param {integer} errorCode error code
- */
-const error = function(message, label = '', errorCode = 1) {
-  if (label) {
-    console.log(chalk.red(label))
-  }
-
-  console.log(chalk.red(message))
-  process.exit(errorCode)
-}
-
-/**
- * Print warn message with yellow color.
- * @param {mix} message error message to log
- * @param {string} label error log label
- */
-const warn = function(message, label = '') {
-  if (label) {
-    console.log(chalk.yellow(label))
-  }
-
-  console.log(chalk.yellow(message))
-}
-
-/**
- * Compute md5.
- * @param {string} s
- */
-const md5 = function(s) {
-  return crypto
-    .createHash('md5')
-    .update(s, 'utf8')
-    .digest('hex')
-}
-
-/**
- * Delay a while.
- * @param {integer} ms
- */
-const delay = function(ms) {
-  return new Promise(function(resolve) {
-    return setTimeout(resolve, ms)
-  })
-}
-
-/**
- * Split input by comma and blank.
- * @param {string} input
- * @returns {array} input separated by comma
- */
-const splitComma = function(input) {
-  return input.replace(/,/g, ' ').split(/\s+/)
-}
-
-/**
  * Get all plugins path mapping.
- * Same name plugin would be overriden orderly
+ * Same name plugins would be overriden orderly.
+ * This function also influence final valid commands and configs.
  */
-const getAllPluginsMapping = function() {
+const getAllPluginsMapping = function () {
   const plugins = {}
 
   // process core plugins
@@ -171,7 +134,7 @@ const getAllPluginsMapping = function() {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(__dirname, '../plugins')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
     })
 
@@ -180,7 +143,7 @@ const getAllPluginsMapping = function() {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(__dirname, '../../../')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
     })
 
@@ -189,7 +152,7 @@ const getAllPluginsMapping = function() {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
       }
@@ -200,7 +163,7 @@ const getAllPluginsMapping = function() {
     .sync('@*/zignis-plugin-*', {
       cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
       }
@@ -211,7 +174,7 @@ const getAllPluginsMapping = function() {
     .sync('zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), 'node_modules')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       }
@@ -222,7 +185,7 @@ const getAllPluginsMapping = function() {
     .sync('@*/zignis-plugin-*', {
       cwd: path.resolve(process.cwd(), 'node_modules')
     })
-    .map(function(plugin) {
+    .map(function (plugin) {
       if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       }
@@ -235,7 +198,7 @@ const getAllPluginsMapping = function() {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(process.cwd(), config.pluginDir)
       })
-      .map(function(plugin) {
+      .map(function (plugin) {
         if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
           plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
         }
@@ -256,7 +219,7 @@ const getAllPluginsMapping = function() {
 /**
  * Get application zignis config only.
  */
-const getApplicationConfig = function() {
+const getApplicationConfig = function () {
   try {
     const configPath = findUp.sync(['.zignisrc.json'])
     return configPath ? require(configPath) : {}
@@ -268,7 +231,7 @@ const getApplicationConfig = function() {
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function() {
+const getCombinedConfig = function () {
   let pluginConfigs = null
 
   if (_.isNil(pluginConfigs)) {
@@ -300,10 +263,91 @@ const getCombinedConfig = function() {
 }
 
 /**
- * Print a simple table.
- * @param {*} columns table columns
+ * Print message with format and color.
+ * @param {mix} message Message to log
+ * @param {string} label Label for describing message
  */
-const outputTable = function(columns, caption, borderOptions = {}) {
+const log = function (message, label = '') {
+  if (label) {
+    console.log(label)
+  }
+
+  if (_.isArray(message) || _.isObject(message)) {
+    console.log(colorize(stringify(message)))
+  } else {
+    console.log(message)
+  }
+}
+
+/**
+ * Print error message, and exit process.
+ * @param {mix} message Error message to log
+ * @param {string} label Error log label
+ * @param {integer} errorCode Error code
+ */
+const error = function (message, label = '', errorCode = 1) {
+  if (label) {
+    console.log(chalk.red(label))
+  }
+
+  console.log(chalk.red(message))
+  process.exit(errorCode)
+}
+
+/**
+ * Print warn message with yellow color.
+ * @param {mix} message Error message to log
+ * @param {string} label Error log label
+ */
+const warn = function (message, label = '') {
+  if (label) {
+    console.log(chalk.yellow(label))
+  }
+
+  console.log(chalk.yellow(message))
+}
+
+/**
+ * Compute md5.
+ * @param {string} s
+ */
+const md5 = function (s) {
+  return crypto
+    .createHash('md5')
+    .update(s, 'utf8')
+    .digest('hex')
+}
+
+/**
+ * Delay a while.
+ * @param {integer} ms
+ * @return {Promise}
+ */
+const delay = function (ms) {
+  return new Promise(function (resolve) {
+    return setTimeout(resolve, ms)
+  })
+}
+
+/**
+ * Split input by comma and blank.
+ * @example
+ * const = Utils.splitComma('a, b , c,d')
+ * @param {string} input
+ * @returns {array} input separated by comma
+ */
+const splitComma = function (input) {
+  return input.replace(/,/g, ' ').split(/\s+/)
+}
+
+/**
+ * Print a simple table.
+ * A table style for `zignis status`, if you don't like this style, can use Utils.table
+ * @param {array} columns Table columns
+ * @param {string} caption Table caption
+ * @param {object} borderOptions Border options
+ */
+const outputTable = function (columns, caption, borderOptions = {}) {
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -328,7 +372,7 @@ const outputTable = function(columns, caption, borderOptions = {}) {
  * @param {integer} max
  */
 const random = (min, max) => {
-  if (max < min) throw new Error('无效参数')
+  if (max < min) throw new Error('Input max must bigger than min')
   return (Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1)) + min
 }
 
@@ -344,7 +388,7 @@ module.exports = {
   chalk,
   /** [table](https://www.npmjs.com/package/table) reference */
   table,
-  /** [day.js](https://www.npmjs.com/package/dayjs) reference, check [api](https://github.com/iamkun/dayjs/blob/HEAD/docs/en/API-reference.md) documentation.*/
+  /** [day.js](https://www.npmjs.com/package/dayjs) reference, check [api](https://github.com/iamkun/dayjs/blob/HEAD/docs/en/API-reference.md) documentation. */
   day,
   /** [json-colorizer](https://www.npmjs.com/package/json-colorizer) reference */
   colorize,

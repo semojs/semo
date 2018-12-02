@@ -24,16 +24,6 @@ exports.aliases = 'n'
 exports.desc = 'Create a new project from specific repo'
 
 exports.builder = function (yargs) {
-  yargs.option('repo', {
-    default: _.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || '',
-    describe: 'repo url to clone'
-  })
-
-  yargs.option('branch', {
-    default: _.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master',
-    describe: 'repo branch to clone'
-  })
-
   yargs.option('yarn', {
     default: false,
     describe: 'use yarn command'
@@ -79,6 +69,9 @@ exports.builder = function (yargs) {
 }
 
 exports.handler = function (argv) {
+  argv.repo = argv.repo || _.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
+  argv.branch = argv.branch || _.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
+
   if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
     if (argv.force) {
       Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
