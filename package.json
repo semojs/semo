@@ -6,6 +6,10 @@
     "cli",
     "command"
   ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/zhike-team/zignis"
+  },
   "license": "MIT",
   "bin": {
     "zignis": "main.js"
