@@ -145,6 +145,7 @@ const invokeHook = function * (hook, mode = 'assign') {
  * So if you want other plugins to extend your sub commands, you can use this util function to replace default `yargs.commandDir`
  * @example
  * exports.builder = function (yargs) {
+ *   // The first param could be a/b/c if you want to extend subcommand's subcommand
  *   Utils.extendSubCommand('make', 'zignis', yargs, __dirname)
  * }
  * @param {String} command Current command name.
@@ -157,7 +158,8 @@ const extendSubCommand = function (command, module, yargs, basePath) {
   const config = getCombinedConfig()
 
   // load default commands
-  yargs.commandDir(path.resolve(basePath, command))
+  const currentCommand = command.split('/').pop()
+  yargs.commandDir(path.resolve(basePath, currentCommand))
 
   // Load plugin commands
   if (plugins) {
