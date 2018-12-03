@@ -38,11 +38,6 @@ exports.handler = function (argv) {
     // plugin information
     const plugins = Utils.getAllPluginsMapping()
     const pluginsStatus = yield Utils.invokeHook('status', 'group')
-    // const pluginsColumns = []
-    // Object.keys(plugins).map(plugin => pluginsColumns.push([plugin, plugins[plugin]]))
-    // if (pluginsColumns.length > 0) {
-    //   Utils.outputTable(pluginsColumns, 'Active Plugins')
-    // }
 
     Object.keys(plugins).forEach(plugin => {
       const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
@@ -65,6 +60,18 @@ exports.handler = function (argv) {
 
       Utils.outputTable(columns, `Plugin Information: [${plugin}]`)
     })
+
+    // application information
+    if (pluginsStatus['application']) {
+      let plugin = 'application'
+      const columns = []
+      if (pluginsStatus && pluginsStatus[plugin]) {
+        Object.keys(pluginsStatus[plugin]).forEach(function (key) {
+          columns.push([key, pluginsStatus[plugin][key]])
+        })
+      }
+      Utils.outputTable(columns, 'Application Information')
+    }
 
     process.exit(0)
   }).catch(function (e) {

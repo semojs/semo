@@ -63,3 +63,4 @@ typings/
 .vscode
 docs/public
 docs/API.md
+package-lock.json

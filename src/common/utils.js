@@ -15,11 +15,12 @@ const shell = require('shelljs')
 
 /**
  * Run hook in all valid plugins and return the combined results.
- * Plugins implement hook in `module.exports`, could be generator function or promise function
+ * Plugins implement hook in `module.exports`, could be generator function or promise function or non-function
+ * For non-function, it will be used as hook data directly, likely to be returned by function
  * @example
  * const hookReturn = yield Utils.invokeHook('hook')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
- * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`.
+ * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
  */
 const invokeHook = function * (hook, mode = 'assign') {
   const plugins = getAllPluginsMapping()
@@ -54,11 +55,17 @@ const invokeHook = function * (hook, mode = 'assign') {
       // 模块 entry 不存在则不加载
       if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
         const loadedPlugin = require(path.resolve(plugins[plugin]))
-        if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
-          let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+        if (loadedPlugin[hook]) {
+          let pluginReturn
+          if (_.isFunction(loadedPlugin[hook])) {
+            pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+          } else {
+            pluginReturn = loadedPlugin[hook]
+          }
 
           switch (mode) {
             case 'group':
+              pluginReturn = pluginReturn || {}
               pluginsReturn[plugin] = pluginReturn
               break
             case 'push':
@@ -68,10 +75,12 @@ const invokeHook = function * (hook, mode = 'assign') {
               pluginsReturn = pluginReturn
               break
             case 'merge':
+              pluginReturn = pluginReturn || {}
               pluginsReturn = _.merge(pluginsReturn, pluginReturn)
               break
             case 'assign':
             default:
+              pluginReturn = pluginReturn || {}
               pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
               break
           }
@@ -85,16 +94,21 @@ const invokeHook = function * (hook, mode = 'assign') {
       }
     }
   }
-
   // Execute application level hook
   if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
     let plugin = 'application'
     try {
       const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
-      if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
-        let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+      if (loadedPlugin[hook]) {
+        let pluginReturn
+        if (_.isFunction(loadedPlugin[hook])) {
+          pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+        } else {
+          pluginReturn = loadedPlugin[hook]
+        }
         switch (mode) {
           case 'group':
+            pluginReturn = pluginReturn || {}
             pluginsReturn[plugin] = pluginReturn
             break
           case 'push':
@@ -104,10 +118,12 @@ const invokeHook = function * (hook, mode = 'assign') {
             pluginsReturn = pluginReturn
             break
           case 'merge':
+            pluginReturn = pluginReturn || {}
             pluginsReturn = _.merge(pluginsReturn, pluginReturn)
             break
           case 'assign':
           default:
+            pluginReturn = pluginReturn || {}
             pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
             break
         }

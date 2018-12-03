@@ -79,12 +79,11 @@ init 命令有几个作用：
 }
 ```
 
-相应的也会自动生成这些目录，注意项目级配置可能不止这5个，插件可以会定义和读取其他 key。
+相应的也会自动生成这些目录，注意项目级配置可能不止这 5 个，插件可以会定义和读取其他 key。
 
 2、添加依赖 package
 
 通过 `--add` 和 `--add-dev` 可以添加项目依赖，`--add` 添加的是项目运行依赖，`--add-dev` 添加的是开发依赖，支持重复指定，也支持逗号分隔，例如：`--add=package1,package2` 或者 `--add=package1 --add=package2`。
-
 
 ### zignis new
 
@@ -239,9 +238,8 @@ Zignis 的插件的命名必须是 `zignis-plugin-*` 这样的格式；开发插
 
 ```
 zignis init
+zignis make plugin PLUGIN_NAME
 ```
-
-init 命令还有一个参数是 `--plugin`，当明确知道是为开发复用插件，则应该加上这个参数。上面的 init 命令执行之后，会在 `./bin/zignis` 目录下初始化几个目录：`plugins`, `extends`, `commands`。需要考虑的是如果明确知道我们要开发的
 
 ### 创建一个命令
 
@@ -252,17 +250,17 @@ Zignis 里的按顺序加载的，除了配置和插件之外，还有一个就�
 - 加载插件里的命令
 - 加载当前应用中的命令
 
-假设我们是在项目的 `./bin/zignis/commands` 中创建命令，则执行一下命令即可：
-
 ```
-zignis make command
+zignis make command COMMAND_NAME // 在项目的Zignis命令目录创建命令
+zignis make command COMMAND_NAME --plugin=PLUGIN_NAME // 在项目的Zignis插件目录里的命令目录创建命令
+zignis make command COMMAND_NAME --extend=PLUGIN_NAME // 在项目的Zignis扩展目录为其他插件创建子命令
 ```
 
 这里生成的命令文件，文件格式是基于 `yargs` 的，我们可以基于自动生成的代码再做扩展。
 
 ### 实现一个钩子
 
-目前已知的核心钩子如下，另外第三方插件也可以定义自己的钩子
+目前已知的核心钩子如下，另外第三方插件也可以定义自己的钩子，每个钩子可以是函数，也可以不是函数，如果是函数时，函数可以是 generator 或者 promise，对函数进行 yield 之后的返回值作为 hook 信息被搜集，如果不是函数，则直接用于 hook 信息会搜集。
 
 **repl**
 
