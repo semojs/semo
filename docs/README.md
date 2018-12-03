@@ -46,41 +46,80 @@ Zignis 命令自带了一个插件，用于在执行任何命令时随机展示�
 zignis init
 
 Init basic zignis config file and directories
+
+选项：
+  --plugin                   plugin mode                                      [默认值: false]
+  --force                                                                     [默认值: false]
+  --add                      add npm package to package.json dependencies     [默认值: false]
+  --add-dev                  add npm package to package.json devDependencies  [默认值: false]
 ```
+
+init 命令有几个作用：
+
+1、生成 `.zignisrc.json` 配置文件
+
+默认生成的是项目级配置：
+
+```
+{
+  "commandDir": "bin/zignis/commands", // 命令目录
+  "pluginDir": "bin/zignis/plugins",   // 插件目录
+  "extendDir": "bin/zignis/extends",   // 扩展目录
+  "scriptDir": "bin/zignis/scripts",   // 脚本目录
+  "hookDir": "bin/zignis/hooks"        // 钩子目录
+}
+```
+
+如果带上参数 `--plugin`， 则是生成插件级配置
+
+```
+{
+  "commandDir": "src/commands",        // 命令目录
+  "extendDir": "src/extends"           // 扩展目录
+}
+```
+
+相应的也会自动生成这些目录，注意项目级配置可能不止这5个，插件可以会定义和读取其他 key。
+
+2、添加依赖 package
+
+通过 `--add` 和 `--add-dev` 可以添加项目依赖，`--add` 添加的是项目运行依赖，`--add-dev` 添加的是开发依赖，支持重复指定，也支持逗号分隔，例如：`--add=package1,package2` 或者 `--add=package1 --add=package2`。
+
 
 ### zignis new
 
 ```
-zignis new <name> [repo][branch]
+zignis new <name> [repo] [branch]
 
 Create a new project from specific repo
 
 选项：
---repo repo url to clone [默认值: ""]
---branch repo branch to clone [默认值: "master"]
---yarn use yarn command [默认值: false]
---yes, -y use yarn command [默认值: false]
+  --yarn                     use yarn command                                   [默认值: false]
+  --yes, -y                  run npm/yarn init with --yes                       [默认值: false]
+  --force, -f                force download, existed folder will be deleted!    [默认值: false]
+  --merge, -m                merge config with exist project folder!            [默认值: false]
+  --empty                    force empty project, ignore repo                   [默认值: false]
+  --add                      add npm package to package.json dependencies       [默认值: false]
+  --add-dev                  add npm package to package.json devDependencies    [默认值: false]
+  --init                     init the project use Zignis                        [默认值: false]
 ```
+
+new 命令用于创建一个项目，支持创建空项目，也支持基于某个指定的 git 代码仓库及分支进行创建。如果是 git 仓库，下载后去自动删除 `.git` 目录，并重新生成一个新的 `.git` 目录。需要注意的是，`[repo]` 和 `[branch]` 本地开发环境的全局默认配置 `~/.zignis/.zignisrc.json` 中指定。支持通过 `--init` 在新生成的项目目录里执行 `zignis init` 命令，也支持 init 命令的 `--add` 和 `--add-save` 选项。
 
 ### zignis make
 
 ```
-zignis make
+zignis make <component>
 
 Generate component sample code
 
 命令：
   zignis make command [name] [description]  Generate a command template
   zignis make plugin <pluginName>           Generate a plugin structure
-  zignis make script [name]                 Create a zignis script
-
-选项：
-  --version                  显示版本号                                   [布尔]
-  -h, --help                 显示帮助信息                                 [布尔]
-  --disable-ten-temporarily                                      [默认值: false]
+  zignis make script [name]                 Generate a zignis script file
 ```
 
-make 命令用于生成一些样板文件，默认内置了 command 和 script 子命令，用于快速生成符合 Zignis 机制的样板文件，插件也可以注册新的子命令来生成适合自己应用场景的样板文件。
+make 命令用于生成一些样板文件，默认内置了 `command`，`script`，`plugin` 子命令，用于快速生成符合 Zignis 机制的样板文件，插件也可以注册新的子命令来生成适合自己应用场景的样板文件。
 
 ### zignis repl
 
@@ -97,10 +136,10 @@ repl 命令会进入 node 交互模式，与普通的 node 交互模式相比，
 ```
 zignis status
 
-Show Zignis status. alias: st
+Show environment status info
 ```
 
-status 命令用于显示当前命令所处的环境信息，所安装的插件等，其他插件也可以通过 status 钩子注册属性到 status 命令。
+status 命令用于显示当前命令所处的环境信息，所安装的插件等，其他插件也可以通过 status 钩子注册环境信息到 status 命令。
 
 ### zignis script
 
@@ -115,13 +154,13 @@ script 命令用于启动一个 Zignis 脚本，Zignis 脚本是一个 node 脚�
 基本的 script 文件结构如下：
 
 ```
-module.exports = function * (components) {
+module.exports = await function (components) {
   console.log('Start to draw your dream code!')
   process.exit(0)
 }
 ```
 
-exports 一个 generator 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
+exports 一个 generator 或者 promise 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
 参数 components 是一个函数，可以用 yield 或者 await 执行，取出里面的组件对象
 
 ## 设计原则
@@ -247,11 +286,9 @@ afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
 
 ### 被插件依赖
 
-由于 Zignis 的插件其实就是按照约定路径放置的一些 js 代码，而且为了最小的可以被调用执行这个目的，是不需要依赖 `zignis` 包的，但是 Zignis 也尝试向外暴露一些常用库，如果被插件依赖可以让插件少引入几个 npm 包。
+由于 Zignis 的插件其实就是按照约定路径放置的一些 js 代码，而且为了最小的可以被调用执行这个目的，是不需要依赖 `zignis` 包的，但是 Zignis 也尝试向外暴露一些常用库和方法，如果被插件依赖可以让插件少引入几个 npm 包。
 
-如果插件依赖 `zignis` 要放到 `peerDependencies`，这样可以有更好的一致性，当然如果你的插件真针对部分 `zignis` 版本有效，那还是要放到 `dependencies` 里。
-
-Zignis 向外暴露的支持将放到 `jsdoc` 文档中，敬请期待。
+如果插件依赖 `zignis` 要放到 `peerDependencies`，这样可以有更好的一致性，当然如果你的插件只针对部分 `zignis` 版本有效，那还是要放到 `dependencies` 里。
 
 ### 默认配置和优先配置
 

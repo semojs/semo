@@ -32,6 +32,7 @@ const invokeHook = function * (hook, mode = 'assign') {
     case 'replace':
       pluginsReturn = ''
       break
+    case 'group':
     case 'assign':
     case 'merge':
     default:
@@ -57,6 +58,9 @@ const invokeHook = function * (hook, mode = 'assign') {
           let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
 
           switch (mode) {
+            case 'group':
+              pluginsReturn[plugin] = pluginReturn
+              break
             case 'push':
               pluginsReturn.push(pluginReturn)
               break
@@ -84,11 +88,15 @@ const invokeHook = function * (hook, mode = 'assign') {
 
   // Execute application level hook
   if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
+    let plugin = 'application'
     try {
       const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
       if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
         let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
         switch (mode) {
+          case 'group':
+            pluginsReturn[plugin] = pluginReturn
+            break
           case 'push':
             pluginsReturn.push(pluginReturn)
             break
@@ -426,6 +434,20 @@ const parsePackageNames = function (input) {
 }
 
 /**
+ * Load any package's package.json
+ * @param {string} pkg package name
+ * @param {array} paths search paths
+ */
+const loadPackageInfo = function (pkg, paths) {
+  console.log(paths)
+  console.log(path.dirname(require.resolve(pkg), { paths }))
+  const packagePath = findUp.sync('package.json', {
+    cwd: path.dirname(require.resolve(pkg, { paths }))
+  })
+  return packagePath ? require(packagePath) : {}
+}
+
+/**
  * Zignis utils functions and references to common modules.
  * @module Utils
  */
@@ -466,5 +488,6 @@ module.exports = {
   getAllPluginsMapping,
   getCombinedConfig,
   getApplicationConfig,
-  parsePackageNames
+  parsePackageNames,
+  loadPackageInfo
 }
