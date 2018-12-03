@@ -439,8 +439,6 @@ const parsePackageNames = function (input) {
  * @param {array} paths search paths
  */
 const loadPackageInfo = function (pkg, paths) {
-  console.log(paths)
-  console.log(path.dirname(require.resolve(pkg), { paths }))
   const packagePath = findUp.sync('package.json', {
     cwd: path.dirname(require.resolve(pkg, { paths }))
   })
