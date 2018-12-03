@@ -4,7 +4,7 @@ const fs = require('fs')
 const path = require('path')
 
 const co = require('co')
-const Utils = require('./src/common/utils')
+const { Utils } = require('.')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
 const yargs = require('yargs').config(config)
@@ -50,4 +50,4 @@ co(function * () {
   Object.keys(afterHooks).map(function (hook) {
     afterHooks[hook](parsedArgv)
   })
-}).catch(function (e) { console.log(e) })
+}).catch(function (e) { Utils.error(e.stack) })

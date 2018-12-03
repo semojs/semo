@@ -4,6 +4,7 @@ const fs = require('fs')
 const path = require('path')
 const co = require('co')
 const shell = require('shelljs')
+const { Utils } = require('../../')
 
 exports.command = 'init'
 exports.desc = 'Init basic zignis config file and directories'
@@ -63,5 +64,7 @@ exports.handler = function (argv) {
         console.log(chalk.green(`${currentPath}/${defaultZignisrc[dir]} created!`))
       }
     })
+  }).catch(function (e) {
+    Utils.error(e.stack)
   })
 }

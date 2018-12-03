@@ -1,6 +1,6 @@
 const co = require('co')
 const path = require('path')
-const Utils = require('../common/utils')
+const { Utils } = require('../../')
 
 exports.command = 'script [file]'
 exports.aliases = 'scr'
@@ -12,5 +12,7 @@ exports.handler = function (argv) {
   co(function * () {
     const components = Utils.invokeHook('components')
     yield require(path.resolve(process.cwd(), argv.file))(() => components)
+  }).catch(function (e) {
+    Utils.error(e.stack)
   })
 }

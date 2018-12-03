@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const co = require('co')
-const Utils = require('../common/utils')
+const { Utils } = require('../../')
 
 exports.command = 'status'
 exports.aliases = 'st'
@@ -47,5 +47,7 @@ exports.handler = function (argv) {
     }
 
     process.exit(0)
+  }).catch(function (e) {
+    Utils.error(e.stack)
   })
 }

@@ -2,7 +2,7 @@ const chalk = require('chalk')
 const repl = require('repl')
 const co = require('co')
 
-const Utils = require('../common/utils')
+const { Utils } = require('../../')
 
 exports.command = 'repl'
 exports.aliases = 'r'
@@ -63,5 +63,7 @@ exports.handler = function (argv) {
   co(function * () {
     const pluginsReturn = yield Utils.invokeHook('repl')
     return yield openRepl(pluginsReturn)
+  }).catch(function (e) {
+    Utils.error(e.stack)
   })
 }
