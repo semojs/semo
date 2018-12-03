@@ -409,6 +409,23 @@ const random = (min, max) => {
 }
 
 /**
+ * Parse packages from yargs option
+ * @param {*} input yarns option input, could be string or array
+ * @returns {array} Package list
+ */
+const parsePackageNames = function (input) {
+  if (_.isString(input)) {
+    return splitComma(input)
+  }
+
+  if (_.isArray(input)) {
+    return _.flatten(input.map(item => splitComma(item)))
+  }
+
+  return []
+}
+
+/**
  * Zignis utils functions and references to common modules.
  * @module Utils
  */
@@ -448,5 +465,6 @@ module.exports = {
   extendSubCommand,
   getAllPluginsMapping,
   getCombinedConfig,
-  getApplicationConfig
+  getApplicationConfig,
+  parsePackageNames
 }

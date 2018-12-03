@@ -7,18 +7,6 @@ const _ = require('lodash')
 
 const Utils = require('../common/utils')
 
-const getPackageNames = function (input) {
-  if (_.isString(input)) {
-    return input.split(',')
-  }
-
-  if (_.isArray(input)) {
-    return _.flatten(input.map(item => item.split(',')))
-  }
-
-  return []
-}
-
 exports.command = 'new <name> [repo] [branch]'
 exports.aliases = 'n'
 exports.desc = 'Create a new project from specific repo'
@@ -124,8 +112,8 @@ exports.handler = function (argv) {
   }
 
   // add packages
-  const addPackage = getPackageNames(argv.add)
-  const addPackageDev = getPackageNames(argv.addDev)
+  const addPackage = Utils.parsePackageNames(argv.add)
+  const addPackageDev = Utils.parsePackageNames(argv.addDev)
   if (addPackage.length > 0) {
     if (argv.yarn) {
       shell.exec(`yarn add ${addPackage.join(' ')}`)

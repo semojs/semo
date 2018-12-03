@@ -19,6 +19,16 @@ exports.builder = function (yargs) {
   yargs.option('force', {
     default: false
   })
+
+  yargs.option('add', {
+    default: false,
+    describe: 'add npm package to package.json dependencies'
+  })
+
+  yargs.option('add-dev', {
+    default: false,
+    describe: 'add npm package to package.json devDependencies'
+  })
 }
 
 exports.handler = function (argv) {
@@ -64,6 +74,25 @@ exports.handler = function (argv) {
         console.log(chalk.green(`${currentPath}/${defaultZignisrc[dir]} created!`))
       }
     })
+
+    // add packages
+    const addPackage = Utils.parsePackageNames(argv.add)
+    const addPackageDev = Utils.parsePackageNames(argv.addDev)
+    if (addPackage.length > 0) {
+      if (argv.yarn) {
+        shell.exec(`yarn add ${addPackage.join(' ')}`)
+      } else {
+        shell.exec(`npm install ${addPackage.join(' ')}`)
+      }
+    }
+
+    if (addPackageDev.length > 0) {
+      if (argv.yarn) {
+        shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
+      } else {
+        shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+      }
+    }
   }).catch(function (e) {
     Utils.error(e.stack)
   })
