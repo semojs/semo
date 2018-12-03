@@ -23,6 +23,7 @@ const shell = require('shelljs')
  */
 const invokeHook = function * (hook, mode = 'assign') {
   const plugins = getAllPluginsMapping()
+  const appConfig = getApplicationConfig()
   let pluginsReturn
   switch (mode) {
     case 'push':
@@ -70,6 +71,37 @@ const invokeHook = function * (hook, mode = 'assign') {
               pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
               break
           }
+        }
+      }
+    } catch (error) {
+      if (error.code !== 'MODULE_NOT_FOUND') {
+        throw new Error(error)
+      } else {
+        console.log(error.message)
+      }
+    }
+  }
+
+  // Execute application level hook
+  if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
+    try {
+      const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
+      if (loadedPlugin[hook] && typeof loadedPlugin[hook] === 'function') {
+        let pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+        switch (mode) {
+          case 'push':
+            pluginsReturn.push(pluginReturn)
+            break
+          case 'replace':
+            pluginsReturn = pluginReturn
+            break
+          case 'merge':
+            pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+            break
+          case 'assign':
+          default:
+            pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+            break
         }
       }
     } catch (error) {

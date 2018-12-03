@@ -1,6 +1,8 @@
 const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
+const Utils = require('../../common/utils')
+const shell = require('shelljs')
 
 exports.command = 'command [name] [description]'
 exports.desc = 'Generate a command template'
@@ -15,27 +17,48 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'generate command in plugin directory, e.g. plugin=xxx'
   })
+
+  yargs.option('force', {
+    default: false,
+    describe: 'force create non-existen directory'
+  })
 }
 
 exports.handler = function (argv) {
   let commandDir
   if (argv.extend) {
-    commandDir = `${argv.extendDir}/${argv.extend}/src/commands`
+    let extendName = argv.extend
+    if (extendName !== 'zignis' && extendName.indexOf('zignis-plugin-') !== 0) {
+      extendName = `zignis-plugin-${extendName}`
+    }
+    commandDir = `${argv.extendDir}/${extendName}/src/commands`
   } else if (argv.plugin) {
-    commandDir = `${argv.pluginDir}/zignis-plugin-${argv.plugin}/src/commands`
+    let pluginName = argv.plugin
+    if (pluginName.indexOf('zignis-plugin-') !== 0) {
+      pluginName = `zignis-plugin-${pluginName}`
+    }
+    commandDir = `${argv.pluginDir}/${pluginName}/src/commands`
   } else {
     commandDir = argv.commandDir
   }
 
-  if (!commandDir || !fs.existsSync(commandDir)) {
-    console.log(chalk.red('"commandDir" missing in config file or not exist in current directory!'))
-    return
+  if (!commandDir) {
+    Utils.error(chalk.red('"commandDir" missing in config file!'))
   }
 
   const commandFilePath = path.resolve(commandDir, `${argv.name}.js`)
+  const commandFileDir = path.dirname(commandFilePath)
+
+  if (!fs.existsSync(commandFileDir)) {
+    if (argv.force) {
+      shell.mkdir('-p', commandFileDir)
+    } else {
+      Utils.error(chalk.red(`Command directory: ${commandFileDir} not exist!`))
+    }
+  }
+
   if (fs.existsSync(commandFilePath)) {
-    console.log(chalk.red('Command file exist!'))
-    return
+    Utils.error(chalk.red('Command file exist!'))
   }
 
   const name = argv.name.split('/').pop()

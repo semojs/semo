@@ -30,7 +30,8 @@ exports.handler = function (argv) {
       commandDir: 'bin/zignis/commands',
       pluginDir: 'bin/zignis/plugins',
       extendDir: 'bin/zignis/extends',
-      scriptDir: 'bin/zignis/scripts'
+      scriptDir: 'bin/zignis/scripts',
+      hookDir: 'bin/zignis/hooks'
     }
 
   let currentPath = path.resolve(process.cwd())
