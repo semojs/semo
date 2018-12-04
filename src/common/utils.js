@@ -87,11 +87,11 @@ const invokeHook = function (hook, mode = 'assign') {
             }
           }
         }
-      } catch (error) {
-        if (error.code !== 'MODULE_NOT_FOUND') {
-          throw new Error(error)
+      } catch (e) {
+        if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
+          throw new Error(e.stack)
         } else {
-          console.log(error.message)
+          error(error.message, 0)
         }
       }
     }
@@ -129,11 +129,11 @@ const invokeHook = function (hook, mode = 'assign') {
               break
           }
         }
-      } catch (error) {
-        if (error.code !== 'MODULE_NOT_FOUND') {
-          throw new Error(error)
+      } catch (e) {
+        if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
+          throw new Error(e.stack)
         } else {
-          console.log(error.message)
+          error(e.message, 0)
         }
       }
     }
@@ -353,7 +353,9 @@ const error = function (message, label = '', errorCode = 1) {
   }
 
   console.log(chalk.red(message))
-  process.exit(errorCode)
+  if (errorCode) {
+    process.exit(errorCode)
+  }
 }
 
 /**

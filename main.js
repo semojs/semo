@@ -49,4 +49,8 @@ co(function * () {
   Object.keys(afterHooks).map(function (hook) {
     afterHooks[hook](parsedArgv)
   })
-}).catch(e => Utils.error(e.stack))
+}).catch(e => {
+  if (!e.name || e.name !== 'YError') {
+    Utils.error(e.stack)
+  }
+})
