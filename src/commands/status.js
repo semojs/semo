@@ -74,7 +74,5 @@ exports.handler = function (argv) {
     }
 
     process.exit(0)
-  }).catch(function (e) {
-    Utils.error(e.stack)
-  })
+  }).catch(e => Utils.error(e.stack))
 }

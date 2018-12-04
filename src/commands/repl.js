@@ -8,14 +8,11 @@ exports.command = 'repl'
 exports.aliases = 'r'
 exports.desc = 'Play with REPL'
 
-function * openRepl (pluginsReturn) {
+function * openRepl (context) {
   const r = repl.start('>>> ')
 
   // context即为REPL中的上下文环境
-  r.context.co = co
-  r.context.Utils = Utils
-
-  r.context = Object.assign(r.context, pluginsReturn)
+  r.context = Object.assign(r.context, context)
 
   corepl(r)
 }
@@ -61,9 +58,9 @@ exports.builder = function (yargs) {}
 
 exports.handler = function (argv) {
   co(function * () {
+    let context = { co, Utils, argv }
     const pluginsReturn = yield Utils.invokeHook('repl')
-    return yield openRepl(pluginsReturn)
-  }).catch(function (e) {
-    Utils.error(e.stack)
-  })
+    context = Object.assign(context, pluginsReturn)
+    return yield openRepl(context)
+  }).catch(e => Utils.error(e.stack))
 }

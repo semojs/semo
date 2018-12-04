@@ -48,16 +48,17 @@ exports.handler = function (argv) {
   let currentPath = path.resolve(process.cwd())
 
   return co(function * () {
-    const override = fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
-      ? yield inquirer.prompt([
-        {
-          type: 'confirm',
-          name: 'override',
-          message: '.zignisrc.json exists, override?',
-          default: false
-        }
-      ])
-      : true
+    const override =
+      fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
+        ? yield inquirer.prompt([
+          {
+            type: 'confirm',
+            name: 'override',
+            message: '.zignisrc.json exists, override?',
+            default: false
+          }
+        ])
+        : true
 
     if (override === false) {
       console.log(chalk.yellow('User aborted!'))
@@ -93,7 +94,5 @@ exports.handler = function (argv) {
         shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
       }
     }
-  }).catch(function (e) {
-    Utils.error(e.stack)
-  })
+  }).catch(e => Utils.error(e.stack))
 }

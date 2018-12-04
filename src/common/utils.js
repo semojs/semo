@@ -22,39 +22,84 @@ const shell = require('shelljs')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
  * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
  */
-const invokeHook = function * (hook, mode = 'assign') {
-  const plugins = getAllPluginsMapping()
-  const appConfig = getApplicationConfig()
-  let pluginsReturn
-  switch (mode) {
-    case 'push':
-      pluginsReturn = []
-      break
-    case 'replace':
-      pluginsReturn = ''
-      break
-    case 'group':
-    case 'assign':
-    case 'merge':
-    default:
-      pluginsReturn = {}
-      break
-  }
+const invokeHook = function (hook, mode = 'assign') {
+  return co(function * () {
+    const plugins = getAllPluginsMapping()
+    const appConfig = getApplicationConfig()
+    let pluginsReturn
+    switch (mode) {
+      case 'push':
+        pluginsReturn = []
+        break
+      case 'replace':
+        pluginsReturn = ''
+        break
+      case 'group':
+      case 'assign':
+      case 'merge':
+      default:
+        pluginsReturn = {}
+        break
+    }
 
-  for (let i = 0; i < Object.keys(plugins).length; i++) {
-    let plugin = Object.keys(plugins)[i]
-    try {
-      let pluginEntry = 'index.js'
-      if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
-        const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
-        if (pkgConfig.main) {
-          pluginEntry = pkgConfig.main
+    for (let i = 0; i < Object.keys(plugins).length; i++) {
+      let plugin = Object.keys(plugins)[i]
+      try {
+        let pluginEntry = 'index.js'
+        if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+          const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
+          if (pkgConfig.main) {
+            pluginEntry = pkgConfig.main
+          }
+        }
+
+        // 模块 entry 不存在则不加载
+        if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
+          const loadedPlugin = require(path.resolve(plugins[plugin]))
+          if (loadedPlugin[hook]) {
+            let pluginReturn
+            if (_.isFunction(loadedPlugin[hook])) {
+              pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+            } else {
+              pluginReturn = loadedPlugin[hook]
+            }
+
+            switch (mode) {
+              case 'group':
+                pluginReturn = pluginReturn || {}
+                pluginsReturn[plugin] = pluginReturn
+                break
+              case 'push':
+                pluginsReturn.push(pluginReturn)
+                break
+              case 'replace':
+                pluginsReturn = pluginReturn
+                break
+              case 'merge':
+                pluginReturn = pluginReturn || {}
+                pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+                break
+              case 'assign':
+              default:
+                pluginReturn = pluginReturn || {}
+                pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+                break
+            }
+          }
+        }
+      } catch (error) {
+        if (error.code !== 'MODULE_NOT_FOUND') {
+          throw new Error(error)
+        } else {
+          console.log(error.message)
         }
       }
-
-      // 模块 entry 不存在则不加载
-      if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
-        const loadedPlugin = require(path.resolve(plugins[plugin]))
+    }
+    // Execute application level hook
+    if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
+      let plugin = 'application'
+      try {
+        const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
         if (loadedPlugin[hook]) {
           let pluginReturn
           if (_.isFunction(loadedPlugin[hook])) {
@@ -62,7 +107,6 @@ const invokeHook = function * (hook, mode = 'assign') {
           } else {
             pluginReturn = loadedPlugin[hook]
           }
-
           switch (mode) {
             case 'group':
               pluginReturn = pluginReturn || {}
@@ -85,59 +129,19 @@ const invokeHook = function * (hook, mode = 'assign') {
               break
           }
         }
-      }
-    } catch (error) {
-      if (error.code !== 'MODULE_NOT_FOUND') {
-        throw new Error(error)
-      } else {
-        console.log(error.message)
-      }
-    }
-  }
-  // Execute application level hook
-  if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
-    let plugin = 'application'
-    try {
-      const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
-      if (loadedPlugin[hook]) {
-        let pluginReturn
-        if (_.isFunction(loadedPlugin[hook])) {
-          pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+      } catch (error) {
+        if (error.code !== 'MODULE_NOT_FOUND') {
+          throw new Error(error)
         } else {
-          pluginReturn = loadedPlugin[hook]
+          console.log(error.message)
         }
-        switch (mode) {
-          case 'group':
-            pluginReturn = pluginReturn || {}
-            pluginsReturn[plugin] = pluginReturn
-            break
-          case 'push':
-            pluginsReturn.push(pluginReturn)
-            break
-          case 'replace':
-            pluginsReturn = pluginReturn
-            break
-          case 'merge':
-            pluginReturn = pluginReturn || {}
-            pluginsReturn = _.merge(pluginsReturn, pluginReturn)
-            break
-          case 'assign':
-          default:
-            pluginReturn = pluginReturn || {}
-            pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
-            break
-        }
-      }
-    } catch (error) {
-      if (error.code !== 'MODULE_NOT_FOUND') {
-        throw new Error(error)
-      } else {
-        console.log(error.message)
       }
     }
-  }
 
-  return pluginsReturn
+    return pluginsReturn
+  }).catch(e => {
+    throw new Error(e.stack)
+  })
 }
 
 /**

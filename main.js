@@ -43,11 +43,10 @@ co(function * () {
     .alias('h', 'help')
     .default('disable-ten-temporarily', false)
     .exitProcess(false)
-    .wrap(Math.min(120, yargs.terminalWidth()))
-    .argv
+    .wrap(Math.min(120, yargs.terminalWidth())).argv
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
   Object.keys(afterHooks).map(function (hook) {
     afterHooks[hook](parsedArgv)
   })
-}).catch(function (e) { Utils.error(e.stack) })
+}).catch(e => Utils.error(e.stack))
