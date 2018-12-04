@@ -11,6 +11,6 @@ exports.builder = function (yargs) {}
 exports.handler = function (argv) {
   co(function * () {
     const components = Utils.invokeHook('components')
-    yield require(path.resolve(process.cwd(), argv.file))(() => components)
+    yield require(path.resolve(process.cwd(), argv.file))(() => components, argv)
   }).catch(e => Utils.error(e.stack))
 }
