@@ -71,7 +71,7 @@ exports.handler = function (argv) {
     const dirs = Object.keys(defaultZignisrc)
     dirs.forEach(dir => {
       if (!fs.existsSync(`${currentPath}/${defaultZignisrc[dir]}`)) {
-        shell.exec(`mkdir -p ${currentPath}/${defaultZignisrc[dir]}`)
+        Utils.exec(`mkdir -p ${currentPath}/${defaultZignisrc[dir]}`)
         console.log(chalk.green(`${currentPath}/${defaultZignisrc[dir]} created!`))
       }
     })
@@ -81,17 +81,17 @@ exports.handler = function (argv) {
     const addPackageDev = Utils.parsePackageNames(argv.addDev)
     if (addPackage.length > 0) {
       if (argv.yarn) {
-        shell.exec(`yarn add ${addPackage.join(' ')}`)
+        Utils.exec(`yarn add ${addPackage.join(' ')}`)
       } else {
-        shell.exec(`npm install ${addPackage.join(' ')}`)
+        Utils.exec(`npm install ${addPackage.join(' ')}`)
       }
     }
 
     if (addPackageDev.length > 0) {
       if (argv.yarn) {
-        shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
+        Utils.exec(`yarn add ${addPackageDev.join(' ')} -D`)
       } else {
-        shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+        Utils.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
       }
     }
   }).catch(e => Utils.error(e.stack))

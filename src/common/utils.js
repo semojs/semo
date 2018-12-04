@@ -12,6 +12,7 @@ const seedrandom = require('seedrandom')
 const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
+const { execSync } = require('child_process')
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -458,6 +459,18 @@ const loadPackageInfo = function (pkg, paths) {
 }
 
 /**
+ * Execute command, because npm install running info can not be catched by shelljs, temporarily use this one
+ * @param {string} command Command to exec
+ * @param {object} options Options stdio default is [0, 1, 2]
+ */
+const exec = function (command, options = {}) {
+  if (!options.stdio) {
+    options.stdio = [0, 1, 2]
+  }
+  return execSync(command, options)
+}
+
+/**
  * Zignis utils functions and references to common modules.
  * @module Utils
  */
@@ -499,5 +512,6 @@ module.exports = {
   getCombinedConfig,
   getApplicationConfig,
   parsePackageNames,
-  loadPackageInfo
+  loadPackageInfo,
+  exec
 }

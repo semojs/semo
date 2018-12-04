@@ -77,33 +77,33 @@ exports.handler = function (argv) {
       shell.cd(argv.name)
       if (argv.yarn) {
         if (argv.yes) {
-          shell.exec('yarn init -y')
+          Utils.exec('yarn init -y')
         } else {
-          shell.exec('yarn init')
+          Utils.exec('yarn init')
         }
       } else {
         if (argv.yes) {
-          shell.exec('npm init -y')
+          Utils.exec('npm init -y')
         } else {
-          shell.exec('npm init')
+          Utils.exec('npm init')
         }
       }
     } else {
       console.log(chalk.green(`Downloading from ${argv.repo}`))
       try {
-        shell.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
+        Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
 
         console.log(chalk.green('Succeeded!'))
         shell.cd(argv.name)
         shell.rm('-rf', path.resolve(process.cwd(), `.git`))
         console.log(chalk.green('.git directory removed!'))
         if (argv.yarn) {
-          shell.exec('yarn')
+          Utils.exec('yarn')
         } else {
-          shell.exec('npm install')
+          Utils.exec('npm install')
         }
 
-        shell.exec('git init')
+        Utils.exec('git init')
         console.log(chalk.green('New .git directory created!'))
       } catch (e) {
         Utils.error(e.message)
@@ -116,26 +116,26 @@ exports.handler = function (argv) {
   const addPackageDev = Utils.parsePackageNames(argv.addDev)
   if (addPackage.length > 0) {
     if (argv.yarn) {
-      shell.exec(`yarn add ${addPackage.join(' ')}`)
+      Utils.exec(`yarn add ${addPackage.join(' ')}`)
     } else {
-      shell.exec(`npm install ${addPackage.join(' ')}`)
+      Utils.exec(`npm install ${addPackage.join(' ')}`)
     }
   }
 
   if (addPackageDev.length > 0) {
     if (argv.yarn) {
-      shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
+      Utils.exec(`yarn add ${addPackageDev.join(' ')} -D`)
     } else {
-      shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+      Utils.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
     }
   }
 
   // init basic zignis structure
   if (argv.init) {
     if (argv.name.indexOf('zignis-plugin-') === 0) {
-      shell.exec('zignis init --plugin --disable-ten-temporarily --force')
+      Utils.exec('zignis init --plugin --disable-ten-temporarily --force')
     } else {
-      shell.exec('zignis init --disable-ten-temporarily --force')
+      Utils.exec('zignis init --disable-ten-temporarily --force')
     }
   }
 }
