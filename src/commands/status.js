@@ -40,25 +40,27 @@ exports.handler = function (argv) {
     const pluginsStatus = yield Utils.invokeHook('status', 'group')
 
     Object.keys(plugins).forEach(plugin => {
-      const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
-      const columns = []
-      if (pkgConfig.version) {
-        columns.push(['version', pkgConfig.version])
-      }
+      if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+        const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
+        const columns = []
+        if (pkgConfig.version) {
+          columns.push(['version', pkgConfig.version])
+        }
 
-      if (pluginsStatus && pluginsStatus[plugin]) {
-        Object.keys(pluginsStatus[plugin]).map(function (key) {
-          columns.push([key, pluginsStatus[plugin][key]])
-        })
-      }
+        if (pluginsStatus && pluginsStatus[plugin]) {
+          Object.keys(pluginsStatus[plugin]).map(function (key) {
+            columns.push([key, pluginsStatus[plugin][key]])
+          })
+        }
 
-      if (plugins[plugin].indexOf(process.env.HOME) === 0) {
-        columns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
-      } else {
-        columns.push(['location', plugins[plugin]])
-      }
+        if (plugins[plugin].indexOf(process.env.HOME) === 0) {
+          columns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
+        } else {
+          columns.push(['location', plugins[plugin]])
+        }
 
-      Utils.outputTable(columns, `Plugin Information: [${plugin}]`)
+        Utils.outputTable(columns, `[${plugin}]`)
+      }
     })
 
     // application information

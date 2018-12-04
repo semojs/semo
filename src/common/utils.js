@@ -91,7 +91,7 @@ const invokeHook = function (hook, mode = 'assign') {
         if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
           throw new Error(e.stack)
         } else {
-          error(error.message, 0)
+          error(e.message, 0)
         }
       }
     }
@@ -329,11 +329,7 @@ const getCombinedConfig = function () {
  * @param {mix} message Message to log
  * @param {string} label Label for describing message
  */
-const log = function (message, label = '') {
-  if (label) {
-    console.log(label)
-  }
-
+const log = function (message) {
   if (_.isArray(message) || _.isObject(message)) {
     console.log(colorize(stringify(message)))
   } else {
@@ -347,11 +343,7 @@ const log = function (message, label = '') {
  * @param {string} label Error log label
  * @param {integer} errorCode Error code
  */
-const error = function (message, label = '', errorCode = 1) {
-  if (label) {
-    console.log(chalk.red(label))
-  }
-
+const error = function (message, errorCode = 1) {
   console.log(chalk.red(message))
   if (errorCode) {
     process.exit(errorCode)
@@ -363,11 +355,7 @@ const error = function (message, label = '', errorCode = 1) {
  * @param {mix} message Error message to log
  * @param {string} label Error log label
  */
-const warn = function (message, label = '') {
-  if (label) {
-    console.log(chalk.yellow(label))
-  }
-
+const warn = function (message) {
   console.log(chalk.yellow(message))
 }
 

@@ -43,6 +43,8 @@ co(function * () {
     .alias('h', 'help')
     .default('disable-ten-temporarily', false)
     .exitProcess(false)
+    .recommendCommands()
+    .epilog('Find more information at https://zhike-team.github.io/zignis')
     .wrap(Math.min(120, yargs.terminalWidth())).argv
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
