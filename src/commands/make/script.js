@@ -25,7 +25,7 @@ exports.handler = function (argv) {
   }
 
   const code = `
-  module.exports = async function () {
+  module.exports = async function (argv, components) {
     console.log('Start to draw your dream code!')
     process.exit(0)
   }
