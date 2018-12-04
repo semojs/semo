@@ -88,6 +88,10 @@ exports.handler = function (argv) {
           Utils.exec('npm init')
         }
       }
+
+      Utils.exec(`echo "node_modules" > .gitignore`)
+      Utils.exec('git init')
+      console.log(chalk.green('New .git directory created!'))
     } else {
       console.log(chalk.green(`Downloading from ${argv.repo}`))
       try {
