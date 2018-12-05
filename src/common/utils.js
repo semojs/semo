@@ -312,10 +312,6 @@ const getCombinedConfig = function () {
       }
     })
 
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-      pluginConfigs = _.merge(pluginConfigs, require(path.resolve(process.cwd(), 'package.json')))
-    }
-
     const configPath = findUp.sync(['.zignisrc.json'])
     let rcConfig = configPath ? require(configPath) : {}
 

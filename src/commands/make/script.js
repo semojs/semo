@@ -25,10 +25,10 @@ exports.handler = function (argv) {
   }
 
   const code = `
-  module.exports = async function (argv, components) {
-    console.log('Start to draw your dream code!')
-    process.exit(0)
-  }
+module.exports = async function (argv, components) {
+  console.log('Start to draw your dream code!')
+  process.exit(0)
+}
 `
   if (!fs.existsSync(scriptFile)) {
     fs.writeFileSync(scriptFile, code)

@@ -19,8 +19,7 @@ module.exports = {
 
     return {
       zignisPluginTen: function (argv) {
-        let config = _.merge(Utils.getCombinedConfig(), argv) // use zignis config as default args
-        if (config.disableTenTemporarily) {
+        if (argv.disableTenTemporarily) {
           return
         }
 
