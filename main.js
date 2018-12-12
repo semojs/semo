@@ -8,9 +8,10 @@ const { Utils } = require('.')
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
 const yargs = require('yargs').config(config)
+const packageConfig = Utils.loadPackageInfo()
 
 // Load local commands
-if (config.name !== 'zignis') {
+if (packageConfig.name !== 'zignis') {
   yargs.commandDir('src/commands')
 } else if (config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
@@ -26,7 +27,11 @@ if (plugins) {
 }
 
 // Load application commands
-if (config.name !== 'zignis' && config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
+if (
+  packageConfig.name !== 'zignis' &&
+  config.commandDir &&
+  fs.existsSync(path.resolve(process.cwd(), config.commandDir))
+) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }
 

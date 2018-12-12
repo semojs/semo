@@ -96,6 +96,7 @@ const invokeHook = function (hook, mode = 'assign') {
         }
       }
     }
+
     // Execute application level hook
     if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
       let plugin = 'application'
@@ -449,7 +450,7 @@ const parsePackageNames = function (input) {
  */
 const loadPackageInfo = function (pkg, paths) {
   const packagePath = findUp.sync('package.json', {
-    cwd: path.dirname(require.resolve(pkg, { paths }))
+    cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd()
   })
   return packagePath ? require(packagePath) : {}
 }
