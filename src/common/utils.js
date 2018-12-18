@@ -325,7 +325,6 @@ const getCombinedConfig = function () {
 /**
  * Print message with format and color.
  * @param {mix} message Message to log
- * @param {string} label Label for describing message
  */
 const log = function (message) {
   if (_.isArray(message) || _.isObject(message)) {
@@ -351,10 +350,17 @@ const error = function (message, errorCode = 1) {
 /**
  * Print warn message with yellow color.
  * @param {mix} message Error message to log
- * @param {string} label Error log label
  */
 const warn = function (message) {
   console.log(chalk.yellow(message))
+}
+
+/**
+ * Print info message with green color.
+ * @param {mix} message Error message to log
+ */
+const info = function (message) {
+  console.log(chalk.green(message))
 }
 
 /**
@@ -500,6 +506,7 @@ module.exports = {
   splitComma,
   log,
   warn,
+  info,
   error,
   random,
   outputTable,
