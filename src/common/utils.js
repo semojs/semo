@@ -272,7 +272,7 @@ const getAllPluginsMapping = function () {
   // process plugin project
   if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
     const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-    if (pkgConfig.name && pkgConfig.name.indexOf('zignis-plugin-') === 0) {
+    if (pkgConfig.name && /^(@[^/]+\/)?zignis-plugin-/.test(pkgConfig.name)) {
       plugins[pkgConfig.name] = path.resolve(process.cwd())
     }
   }
