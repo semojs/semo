@@ -12,6 +12,7 @@ const seedrandom = require('seedrandom')
 const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
+const debug = require('debug')
 const { execSync } = require('child_process')
 
 /**
@@ -499,6 +500,8 @@ module.exports = {
   co,
   /** [shelljs](https://www.npmjs.com/package/shelljs) reference. */
   shell,
+  /** [shelljs](https://www.npmjs.com/package/debug) reference. */
+  debug,
 
   // custom functions
   md5,
