@@ -1,6 +1,8 @@
 const chalk = require('chalk')
 const repl = require('repl')
+const replHistory = require('repl.history')
 const co = require('co')
+const fs = require('fs')
 
 const { Utils } = require('../../')
 
@@ -10,6 +12,11 @@ exports.desc = 'Play with REPL'
 
 function * openRepl (context) {
   const r = repl.start('>>> ')
+  const zignisHome = process.env.HOME + '/.zignis'
+  if (!fs.existsSync(zignisHome)) {
+    Utils.exec(`mkdir -p ${zignisHome}`)
+  }
+  replHistory(r, `${zignisHome}/.zignis_history`)
 
   // context即为REPL中的上下文环境
   r.context = Object.assign(r.context, context)
