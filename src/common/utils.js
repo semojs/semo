@@ -24,8 +24,14 @@ const { execSync } = require('child_process')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
  * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
  */
-const invokeHook = function (hook, mode = 'assign') {
+ const invokedHookCache = {}
+ const invokeHook = function (hook, mode = 'assign', useCache = false) {
   return co(function * () {
+    const cacheKey = `${hook}:${mode}`
+    if (useCache && invokedHookCache[cacheKey]) {
+      return invokedHookCache[cacheKey]
+    }
+
     const plugins = getAllPluginsMapping()
     const appConfig = getApplicationConfig()
     let pluginsReturn
@@ -140,6 +146,8 @@ const invokeHook = function (hook, mode = 'assign') {
         }
       }
     }
+
+    invokedHookCache[cacheKey] = pluginsReturn
 
     return pluginsReturn
   }).catch(e => {
