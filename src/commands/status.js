@@ -37,7 +37,7 @@ exports.handler = function (argv) {
 
     // plugin information
     const plugins = Utils.getAllPluginsMapping()
-    const pluginsStatus = yield Utils.invokeHook('status', 'group')
+    const pluginsStatus = yield Utils.invokeHook('status', { mode: 'group' })
 
     Object.keys(plugins).forEach(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {

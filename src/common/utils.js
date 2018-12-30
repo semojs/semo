@@ -22,20 +22,38 @@ const { execSync } = require('child_process')
  * @example
  * const hookReturn = yield Utils.invokeHook('hook')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
- * @param {string} mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
+ * @param {string} options Options
+ * @param {string} options.mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
+ * @param {bool} options.useCache If or not use cached hook result
+ * @param {array} options.include set plugins to be used in invoking
+ * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  */
- const invokedHookCache = {}
- const invokeHook = function (hook, mode = 'assign', useCache = false) {
+const invokedHookCache = {}
+const invokeHook = function (hook, options = {}) {
+  options = Object.assign(
+    {
+      mode: 'assign',
+      useCache: false,
+      include: [],
+      exclude: []
+    },
+    options
+  )
+
   return co(function * () {
-    const cacheKey = `${hook}:${mode}`
-    if (useCache && invokedHookCache[cacheKey]) {
+    const cacheKey = `${hook}:${options.mode}`
+    if (options.useCache && invokedHookCache[cacheKey]) {
       return invokedHookCache[cacheKey]
     }
 
     const plugins = getAllPluginsMapping()
     const appConfig = getApplicationConfig()
+    if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
+      plugins['application'] = path.resolve(appConfig.hookDir, 'index.js')
+    }
+
     let pluginsReturn
-    switch (mode) {
+    switch (options.mode) {
       case 'push':
         pluginsReturn = []
         break
@@ -52,6 +70,15 @@ const { execSync } = require('child_process')
 
     for (let i = 0; i < Object.keys(plugins).length; i++) {
       let plugin = Object.keys(plugins)[i]
+
+      if (_.isArray(options.include) && options.include.length > 0 && options.include.indexOf(plugin) === -1) {
+        continue
+      }
+
+      if (_.isArray(options.exclude) && options.exclude.length > 0 && options.exclude.indexOf(plugin) > -1) {
+        continue
+      }
+
       try {
         let pluginEntry = 'index.js'
         if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
@@ -72,7 +99,7 @@ const { execSync } = require('child_process')
               pluginReturn = loadedPlugin[hook]
             }
 
-            switch (mode) {
+            switch (options.mode) {
               case 'group':
                 pluginReturn = pluginReturn || {}
                 pluginsReturn[plugin] = pluginReturn
@@ -93,49 +120,6 @@ const { execSync } = require('child_process')
                 pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
                 break
             }
-          }
-        }
-      } catch (e) {
-        if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
-          throw new Error(e.stack)
-        } else {
-          error(e.message, 0)
-        }
-      }
-    }
-
-    // Execute application level hook
-    if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
-      let plugin = 'application'
-      try {
-        const loadedPlugin = require(path.resolve(appConfig.hookDir, 'index.js'))
-        if (loadedPlugin[hook]) {
-          let pluginReturn
-          if (_.isFunction(loadedPlugin[hook])) {
-            pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
-          } else {
-            pluginReturn = loadedPlugin[hook]
-          }
-          switch (mode) {
-            case 'group':
-              pluginReturn = pluginReturn || {}
-              pluginsReturn[plugin] = pluginReturn
-              break
-            case 'push':
-              pluginsReturn.push(pluginReturn)
-              break
-            case 'replace':
-              pluginsReturn = pluginReturn
-              break
-            case 'merge':
-              pluginReturn = pluginReturn || {}
-              pluginsReturn = _.merge(pluginsReturn, pluginReturn)
-              break
-            case 'assign':
-            default:
-              pluginReturn = pluginReturn || {}
-              pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
-              break
           }
         }
       } catch (e) {

@@ -3,6 +3,7 @@ const repl = require('repl')
 const replHistory = require('repl.history')
 const co = require('co')
 const fs = require('fs')
+const _ = require('lodash')
 
 const { Utils } = require('../../')
 
@@ -61,13 +62,23 @@ function corepl (cli) {
   return cli
 }
 
-exports.builder = function (yargs) {}
+exports.builder = function (yargs) {
+  yargs.option('hook', {
+    default: false,
+    describe: 'if or not load all plugins repl hook'
+  })
+}
 
 exports.handler = function (argv) {
+  argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
   co(function * () {
     let context = { co, Utils, argv }
-    const pluginsReturn = yield Utils.invokeHook('repl')
-    context = Object.assign(context, pluginsReturn)
+
+    if (argv.hook) {
+      const pluginsReturn = yield Utils.invokeHook('repl')
+      context = Object.assign(context, pluginsReturn)
+    }
+
     return yield openRepl(context)
   }).catch(e => Utils.error(e.stack))
 }
