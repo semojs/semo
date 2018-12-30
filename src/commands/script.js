@@ -21,6 +21,8 @@ exports.handler = function (argv) {
     let filePath = argv.file
     if (!fs.existsSync(filePath)) {
       filePath = path.resolve(process.cwd(), argv.file)
+    } else {
+      filePath = path.resolve(argv.file)
     }
 
     yield require(filePath)(argv, () => (argv.hook ? Utils.invokeHook('components') : {}))
