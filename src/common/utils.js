@@ -13,6 +13,9 @@ const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
 const debug = require('debug')
+const inquirer = require('inquirer')
+inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
+const fuzzy = require('fuzzy')
 const { execSync } = require('child_process')
 
 /**
@@ -492,8 +495,12 @@ module.exports = {
   co,
   /** [shelljs](https://www.npmjs.com/package/shelljs) reference. */
   shell,
-  /** [shelljs](https://www.npmjs.com/package/debug) reference. */
+  /** [debug](https://www.npmjs.com/package/debug) reference. */
   debug,
+  /** [fuzzy](https://www.npmjs.com/package/fuzzy) reference. */
+  fuzzy,
+  /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
+  inquirer,
 
   // custom functions
   md5,
