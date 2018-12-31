@@ -25,7 +25,11 @@ exports.handler = function (argv) {
   }
 
   const code = `
-module.exports = async function (argv, components) {
+exports.builder = function (yargs) {
+  // yargs.option('option', {default, describe, alias})
+}
+
+exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
   process.exit(0)
 }

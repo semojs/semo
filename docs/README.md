@@ -153,13 +153,16 @@ script 命令用于启动一个 Zignis 脚本，Zignis 脚本是一个 node 脚�
 基本的 script 文件结构如下：
 
 ```
-module.exports = await function (components) {
+exports.builder = function (yargs) {
+  // yargs.option('option', {default, describe, alias})
+}
+exports.handler = await function (argv) {
   console.log('Start to draw your dream code!')
   process.exit(0)
 }
 ```
 
-exports 一个 generator 或者 promise 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
+exports.handler 定义一个 generator 或者 promise 方法，可以在里面进行 yield，或 async 方法，可以在里面进行 await。
 参数 components 是一个函数，可以用 yield 或者 await 执行，取出里面的组件对象
 
 ## 设计原则
@@ -300,6 +303,13 @@ afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
             "repo": "git@code.smartstudy.com:service/backend-scaffold.git" # 新建项目时的默认仓库
             "branch": "master" # 新建项目时的默认仓库分支
         },
+        "script": {
+          "hook": false # 是否加载 components hook
+        },
+        "repl": {
+          "hook": false # 是否加载 repl hook
+        }
+
     }
 }
 ```
