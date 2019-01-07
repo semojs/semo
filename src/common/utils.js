@@ -1,6 +1,6 @@
 const crypto = require('crypto')
 const path = require('path')
-const fs = require('fs')
+const fs = require('fs-extra')
 const glob = require('glob')
 const { table, getBorderCharacters } = require('table')
 const findUp = require('find-up')
@@ -501,6 +501,8 @@ module.exports = {
   fuzzy,
   /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
   inquirer,
+  /** [inquirer](https://www.npmjs.com/package/fs) reference */
+  fs,
 
   // custom functions
   md5,
