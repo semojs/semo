@@ -1,14 +1,9 @@
-
 const { Utils } = require('../../')
 
 exports.command = 'hook'
 exports.desc = 'Show hook info'
-// exports.aliases = ''
 
-exports.builder = function (yargs) {
-  // yargs.option('option', { default, describe, alias })
-  // yargs.commandDir('hook')
-}
+exports.builder = function (yargs) {}
 
 exports.handler = function (argv) {
   Utils.co(function * () {
@@ -18,7 +13,16 @@ exports.handler = function (argv) {
     const columns = [['Package', 'Hook', 'Description']]
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {
-        const realHook = k === 'zignis' || hook.indexOf(k) === 0 ? hook : `${k}_${hook}`
+        let realHook
+        if (k === 'zignis') {
+          realHook = hook
+        } else {
+          let pluginShortName = k.substring('zignis-plugin-'.length)
+          realHook =
+            hook.indexOf(`${pluginShortName}_`) === 0
+              ? hook
+              : `${pluginShortName}_${hook}`
+        }
         columns.push([k, realHook, hookInfo[k][hook]])
       })
     })
