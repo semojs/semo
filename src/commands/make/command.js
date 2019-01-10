@@ -68,7 +68,8 @@ exports.desc = '${argv.description}'
 // exports.aliases = ''
 
 exports.builder = function (yargs) {
-  // yargs.option('option', {default, describe, alias})
+  // yargs.option('option', { default, describe, alias })
+  // yargs.commandDir('${name}')
 }
 
 exports.handler = function (argv) {

@@ -8,7 +8,7 @@ const _ = require('lodash')
 const colorize = require('json-colorizer')
 const stringify = require('json-stringify-pretty-compact')
 const chalk = require('chalk')
-const seedrandom = require('seedrandom')
+const randomatic = require('randomatic')
 const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
@@ -419,16 +419,6 @@ const outputTable = function (columns, caption, borderOptions = {}) {
 }
 
 /**
- * Get a random number in a range.
- * @param {integer} min
- * @param {integer} max
- */
-const random = (min, max) => {
-  if (max < min) throw new Error('Input max must bigger than min')
-  return (Math.floor(seedrandom()() * (max - min + 1)) % (max - min + 1)) + min
-}
-
-/**
  * Parse packages from yargs option
  * @param {*} input yarns option input, could be string or array
  * @returns {array} Package list
@@ -470,6 +460,12 @@ const exec = function (command, options = {}) {
 }
 
 /**
+ * Sleep a while of ms
+ * @param {integer} ms
+ */
+const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+
+/**
  * Zignis utils functions and references to common modules.
  * @module Utils
  */
@@ -501,8 +497,10 @@ module.exports = {
   fuzzy,
   /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
   inquirer,
-  /** [inquirer](https://www.npmjs.com/package/fs) reference */
+  /** [inquirer](https://www.npmjs.com/package/fs-extra) reference */
   fs,
+  /** [inquirer](https://www.npmjs.com/package/randomatic) reference */
+  randomatic,
 
   // custom functions
   md5,
@@ -512,7 +510,6 @@ module.exports = {
   warn,
   info,
   error,
-  random,
   outputTable,
   invokeHook,
   extendSubCommand,
@@ -521,5 +518,6 @@ module.exports = {
   getApplicationConfig,
   parsePackageNames,
   loadPackageInfo,
-  exec
+  exec,
+  sleep
 }
