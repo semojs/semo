@@ -52,7 +52,7 @@ const invokeHook = function (hook, options = {}) {
     const plugins = getAllPluginsMapping()
     const appConfig = getApplicationConfig()
     if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
-      plugins['application'] = path.resolve(appConfig.hookDir, 'index.js')
+      plugins['application'] = path.resolve(appConfig.hookDir)
     }
 
     let pluginsReturn
