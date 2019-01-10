@@ -17,6 +17,8 @@ const inquirer = require('inquirer')
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 const fuzzy = require('fuzzy')
 const { execSync } = require('child_process')
+const objectHash = require('node-object-hash')
+const { hash } = objectHash({ sort: true })
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -30,6 +32,7 @@ const { execSync } = require('child_process')
  * @param {bool} options.useCache If or not use cached hook result
  * @param {array} options.include set plugins to be used in invoking
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
+ * @param {array} options.opts opts will be sent to hook implementation
  */
 const invokedHookCache = {}
 const invokeHook = function (hook, options = {}) {
@@ -38,18 +41,21 @@ const invokeHook = function (hook, options = {}) {
       mode: 'assign',
       useCache: false,
       include: [],
-      exclude: []
+      exclude: [],
+      opts: {}
     },
     options
   )
 
   return co(function * () {
-    const cacheKey = `${hook}:${options.mode}`
+    const cacheKey = `${hook}:${hash(options)}`
     if (options.useCache && invokedHookCache[cacheKey]) {
       return invokedHookCache[cacheKey]
     }
 
-    const plugins = getAllPluginsMapping()
+    const plugins = Object.assign({}, {
+      zignis: path.resolve(__dirname, '../../')
+    }, getAllPluginsMapping())
     const appConfig = getApplicationConfig()
     if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
       plugins['application'] = path.resolve(appConfig.hookDir)
@@ -97,7 +103,7 @@ const invokeHook = function (hook, options = {}) {
           if (loadedPlugin[hook]) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = yield loadedPlugin[hook](pluginsReturn) || {}
+              pluginReturn = yield loadedPlugin[hook](options.opts, pluginsReturn) || {}
             } else {
               pluginReturn = loadedPlugin[hook]
             }

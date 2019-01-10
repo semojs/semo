@@ -1,7 +1,6 @@
 const chalk = require('chalk')
 const repl = require('repl')
 const replHistory = require('repl.history')
-const co = require('co')
 const fs = require('fs')
 const _ = require('lodash')
 
@@ -35,9 +34,9 @@ function corepl (cli) {
     }
 
     if (cmd.match(/^yield\s+/)) {
-      cmd = 'co(function *() { let _ = ' + cmd + '; return _;})'
+      cmd = 'Utils.co(function *() { let _ = ' + cmd + '; return _;})'
     } else if (cmd.match(/\W*yield\s+/)) {
-      cmd = 'co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})'
+      cmd = 'Utils.co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})'
     }
 
     if (cmd.match(/^await\s+/)) {
@@ -71,8 +70,8 @@ exports.builder = function (yargs) {
 
 exports.handler = function (argv) {
   argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
-  co(function * () {
-    let context = { co, Utils, argv }
+  Utils.co(function * () {
+    let context = { Utils, argv }
 
     if (argv.hook) {
       const pluginsReturn = yield Utils.invokeHook('repl')

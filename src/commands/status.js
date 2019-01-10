@@ -12,33 +12,15 @@ exports.builder = function (yargs) {}
 exports.handler = function (argv) {
   co(function * () {
     // basic information
+    const hookStatus = yield Utils.invokeHook('status', { mode: 'group' })
     const columns = []
-    let kvs = {}
-
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-      const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-      if (pkgConfig && pkgConfig.version) {
-        kvs.version = pkgConfig.version
-      }
-    }
-
-    kvs = Object.assign(kvs, {
-      platform: process.platform,
-      arch: process.arch,
-      hostname: require('os').hostname(),
-      node: process.version,
-      zignis: require(path.resolve(__dirname, '../../package.json')).version,
-      home: process.env.HOME,
-      cwd: process.cwd()
-    })
+    let kvs = hookStatus.zignis ? hookStatus.zignis : {}
 
     Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
     Utils.outputTable(columns, 'Core Information')
 
     // plugin information
     const plugins = Utils.getAllPluginsMapping()
-    const pluginsStatus = yield Utils.invokeHook('status', { mode: 'group' })
-
     Object.keys(plugins).forEach(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
         const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
@@ -47,9 +29,9 @@ exports.handler = function (argv) {
           columns.push(['version', pkgConfig.version])
         }
 
-        if (pluginsStatus && pluginsStatus[plugin]) {
-          Object.keys(pluginsStatus[plugin]).map(function (key) {
-            columns.push([key, pluginsStatus[plugin][key]])
+        if (hookStatus && hookStatus[plugin]) {
+          Object.keys(hookStatus[plugin]).map(function (key) {
+            columns.push([key, hookStatus[plugin][key]])
           })
         }
 
@@ -64,12 +46,12 @@ exports.handler = function (argv) {
     })
 
     // application information
-    if (pluginsStatus['application']) {
+    if (hookStatus['application']) {
       let plugin = 'application'
       const columns = []
-      if (pluginsStatus && pluginsStatus[plugin]) {
-        Object.keys(pluginsStatus[plugin]).forEach(function (key) {
-          columns.push([key, pluginsStatus[plugin][key]])
+      if (hookStatus && hookStatus[plugin]) {
+        Object.keys(hookStatus[plugin]).forEach(function (key) {
+          columns.push([key, hookStatus[plugin][key]])
         })
       }
       Utils.outputTable(columns, 'Application Information')

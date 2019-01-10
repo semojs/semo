@@ -3,7 +3,6 @@ const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
 const co = require('co')
-const shell = require('shelljs')
 const { Utils } = require('../../')
 
 exports.command = 'init'
