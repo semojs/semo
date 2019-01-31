@@ -61,7 +61,7 @@ const invokeHook = function (hook, options = {}) {
 
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
-    if (appConfig && appConfig.name !== 'zignis' && appConfig.applicationDir) {
+    if (appConfig && appConfig.name !== 'zignis' && !plugins[appConfig.name] && appConfig.applicationDir) {
       plugins['application'] = appConfig.applicationDir
     }
 
