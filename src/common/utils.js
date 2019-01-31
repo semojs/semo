@@ -36,6 +36,7 @@ const { hash } = objectHash({ sort: true })
  */
 const invokedHookCache = {}
 const invokeHook = function (hook, options = {}) {
+  hook = `hook_${hook}`
   options = Object.assign(
     {
       mode: 'assign',

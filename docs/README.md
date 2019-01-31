@@ -263,25 +263,25 @@ zignis make command COMMAND_NAME --extend=PLUGIN_NAME // 在项目的Zignis扩�
 
 ### 实现一个钩子
 
-目前已知的核心钩子如下，另外第三方插件也可以定义自己的钩子，每个钩子可以是函数，也可以不是函数，如果是函数时，函数可以是 generator 或者 promise，对函数进行 yield 之后的返回值作为 hook 信息被搜集，如果不是函数，则直接用于 hook 信息会搜集。
+钩子在调用时使用核心工具方法：`Utils.invokeHook('HOOK')`，钩子在定义时使用形如：`hook_HOOK`的方式定义在插件模块和核心模块的入口文件里。目前已知的核心钩子如下，另外第三方插件也可以定义自己的钩子，每个钩子可以是函数，也可以不是函数，如果是函数时，函数可以是 generator 或者 promise，对函数进行 yield 之后的返回值作为 hook 信息被搜集，如果不是函数，则直接用于 hook 信息会搜集。
 
-**repl**
+**hook_repl**
 
 repl 钩子可以为 `repl` 命令注册一些变量或方法，这样可以在 repl 进行访问，但是通常的用法是注入项目的上下文进去，这样可以通过 repl 与项目进行交互，而不仅仅是与 node 环境进行交互。
 
-**status**
+**hook_status**
 
 status 钩子可以为 `status` 命令注册一些状态信息，这样可以在调用 `status` 时随时查看。
 
-**components**
+**hook_components**
 
 components 钩子可以为 `script` 命令文件注入上下文，这样可以对脚本进行统一初始化。
 
-**beforeCommand**
+**hook_beforeCommand**
 
 beforeCommand 钩子统一在每一个 `zignis` 命令执行前执行。
 
-**afterCommand**
+**hook_afterCommand**
 
 afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
 

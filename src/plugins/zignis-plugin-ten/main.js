@@ -3,7 +3,7 @@ const Utils = require('../../common/utils')
 const _ = require('lodash')
 
 module.exports = {
-  * beforeCommand () {
+  * hook_beforeCommand () {
     let ten = [
       '通过利他来利己。 -- 智课十诫',
       '所有的事情追求质量的极致，效率的极致，变态般的细致。 -- 智课十诫',
@@ -29,5 +29,5 @@ module.exports = {
       }
     }
   },
-  * afterCommand () {}
+  * hook_afterCommand () {}
 }
