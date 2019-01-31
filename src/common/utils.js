@@ -54,12 +54,15 @@ const invokeHook = function (hook, options = {}) {
       return invokedHookCache[cacheKey]
     }
 
+    // Make Zignis core supporting hook invocation
     const plugins = Object.assign({}, {
       zignis: path.resolve(__dirname, '../../')
     }, getAllPluginsMapping())
+
+    // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
-    if (appConfig && appConfig.hookDir && fs.existsSync(path.resolve(appConfig.hookDir, 'index.js'))) {
-      plugins['application'] = path.resolve(appConfig.hookDir)
+    if (appConfig && appConfig.name !== 'zignis' && appConfig.applicationDir) {
+      plugins['application'] = appConfig.applicationDir
     }
 
     let pluginsReturn
@@ -98,9 +101,17 @@ const invokeHook = function (hook, options = {}) {
           }
         }
 
+        // hookDir
+        if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
+          const zignisConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
+          if (zignisConfig.hookDir && fs.existsSync(path.resolve(plugins[plugin], zignisConfig.hookDir, 'index.js'))) {
+            pluginEntry = path.join(zignisConfig.hookDir, 'index.js')
+          }
+        }
+
         // 模块 entry 不存在则不加载
         if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
-          const loadedPlugin = require(path.resolve(plugins[plugin]))
+          const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
@@ -289,7 +300,14 @@ const getAllPluginsMapping = function () {
 const getApplicationConfig = function () {
   try {
     const configPath = findUp.sync(['.zignisrc.json'])
-    return configPath ? require(configPath) : {}
+    let applicationConfig = configPath ? require(configPath) : {}
+    if (configPath) {
+      applicationConfig.applicationDir = path.dirname(configPath)
+      if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
+        applicationConfig = Object.assign({}, applicationConfig, require(path.resolve(applicationConfig.applicationDir, 'package.json')))
+      }
+    }
+    return applicationConfig
   } catch (e) {
     error(`Application .zignisrc.json can not be parsed!`)
   }
