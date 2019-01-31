@@ -1,5 +1,8 @@
 const fs = require('fs')
 const path = require('path')
+const os = require('os')
+const envinfo = require('envinfo')
+const { Utils } = require('../../')
 
 module.exports = {
   hook_hook: {
@@ -10,7 +13,12 @@ module.exports = {
     repl: 'Hook triggered in zignis repl command.',
     status: 'Hook triggered in zignis status command.'
   },
-  hook_status () {
+  * hook_status () {
+    let info = JSON.parse(yield envinfo.run({
+      System: ['OS', 'Shell'],
+      Binaries: ['Node', 'Yarn', 'npm']
+    }, { json: true }))
+
     let kvs = {}
     if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
       const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
@@ -20,11 +28,13 @@ module.exports = {
     }
 
     kvs = Object.assign(kvs, {
-      platform: process.platform,
-      arch: process.arch,
-      hostname: require('os').hostname(),
-      node: process.version,
-      zignis: require(path.resolve(__dirname, 'package.json')).version,
+      hostname: os.hostname(),
+      os: info.System.OS,
+      shell: info.System.Shell.path,
+      node: info.Binaries.Node.version,
+      npm: info.Binaries.npm.version,
+      yarn: info.Binaries.Yarn.version,
+      zignis: Utils.getApplicationConfig().version,
       home: process.env.HOME,
       cwd: process.cwd()
     })
