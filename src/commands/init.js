@@ -34,7 +34,8 @@ exports.handler = function (argv) {
   let defaultZignisrc = argv.plugin
     ? {
       commandDir: 'src/commands',
-      extendDir: 'src/extends'
+      extendDir: 'src/extends',
+      hookDir: 'src/hooks'
     }
     : {
       commandDir: 'bin/zignis/commands',
