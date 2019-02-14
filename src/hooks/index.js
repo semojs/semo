@@ -11,8 +11,10 @@ module.exports = {
     components: 'Hook triggered in zignis script command.',
     hook: 'Hook triggered in zignis hook command.',
     repl: 'Hook triggered in zignis repl command.',
-    status: 'Hook triggered in zignis status command.'
+    status: 'Hook triggered in zignis status command.',
+    new_repo: 'Hook triggered in zignis new command.'
   },
+
   * hook_status () {
     let info = JSON.parse(yield envinfo.run({
       System: ['OS', 'Shell'],

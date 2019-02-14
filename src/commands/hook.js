@@ -10,7 +10,7 @@ exports.handler = function (argv) {
     const hookInfo = yield Utils.invokeHook('hook', {
       mode: 'group'
     })
-    const columns = [['Package', 'Hook', 'Description']]
+    const columns = [['Hook', 'Package', 'Description']]
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {
         let realHook
@@ -23,7 +23,7 @@ exports.handler = function (argv) {
               ? hook
               : `${pluginShortName}_${hook}`
         }
-        columns.push([k, realHook, hookInfo[k][hook]])
+        columns.push([`hook_${realHook}`, k, hookInfo[k][hook]])
       })
     })
     Utils.log(Utils.table(columns))
