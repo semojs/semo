@@ -361,9 +361,9 @@ const log = function (message) {
  * @param {string} label Error log label
  * @param {integer} errorCode Error code
  */
-const error = function (message, errorCode = 1) {
+const error = function (message, exit = true, errorCode = 1) {
   console.log(chalk.red(message))
-  if (errorCode) {
+  if (exit) {
     process.exit(errorCode)
   }
 }
@@ -372,16 +372,22 @@ const error = function (message, errorCode = 1) {
  * Print warn message with yellow color.
  * @param {mix} message Error message to log
  */
-const warn = function (message) {
+const warn = function (message, exit = false, errorCode = 0) {
   console.log(chalk.yellow(message))
+  if (exit) {
+    process.exit(errorCode)
+  }
 }
 
 /**
  * Print info message with green color.
  * @param {mix} message Error message to log
  */
-const info = function (message) {
+const info = function (message, exit = false, errorCode = 0) {
   console.log(chalk.green(message))
+  if (exit) {
+    process.exit(errorCode)
+  }
 }
 
 /**

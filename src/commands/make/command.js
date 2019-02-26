@@ -22,6 +22,11 @@ exports.builder = function (yargs) {
     default: false,
     describe: 'force create non-existen directory'
   })
+
+  yargs.option('yield', {
+    default: false,
+    describe: 'use yield style for generator and promoise'
+  })
 }
 
 exports.handler = function (argv) {
@@ -62,7 +67,25 @@ exports.handler = function (argv) {
   }
 
   const name = argv.name.split('/').pop()
+
+  let handerTpl
+  if (argv.yield) {
+    handerTpl = `exports.handler = function (argv) {
+  Utils.co(function * () {
+    console.log('Start to draw your dream code!')
+    Utils.info('Finished successfully!')
+  }).catch(e => Utils.error(e.stack))
+}`
+  } else {
+    handerTpl = `exports.handler = async function (argv) {
+  console.log('Start to draw your dream code!')
+  Utils.info('Finished successfully!')
+}`
+  }
+
   const code = `
+const { Utils } = require('zignis')
+
 exports.command = '${name}'
 exports.desc = '${argv.description}'
 // exports.aliases = ''
@@ -72,9 +95,7 @@ exports.builder = function (yargs) {
   // yargs.commandDir('${name}')
 }
 
-exports.handler = function (argv) {
-  console.log('Start to draw your dream code!')
-}
+${handerTpl}
 `
   if (!fs.existsSync(commandFilePath)) {
     fs.writeFileSync(commandFilePath, code)
