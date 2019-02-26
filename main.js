@@ -11,8 +11,8 @@ const yargs = require('yargs').config(config)
 const packageConfig = Utils.loadPackageInfo()
 
 const updateNotifier = require('update-notifier')
-const pkg = require('./package.json');
-updateNotifier({ pkg, updateCheckInterval: 0 }).notify({ defer: false, isGlobal: true })
+const pkg = require('./package.json')
+updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({ defer: false, isGlobal: true })
 
 // Load local commands
 if (packageConfig.name !== 'zignis') {
