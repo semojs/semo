@@ -46,7 +46,7 @@ Please refer to the documentation to learn how to use Zignis, because you need t
 
 # Documentation
 
-- [Chinese(中文)](https://zhike-team.github.io/zignis/)
+- [Chinese(中文)](https://zignis.js.org/)
 - [English(英文)], TBD
 
 # License

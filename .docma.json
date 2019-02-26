@@ -23,7 +23,7 @@
     "options": {
       "title": {
         "label": "Zignis",
-        "href": "https://zhike-team.github.io/zignis/"
+        "href": "https://zignis.js.org"
       },
       "sidebar": {
         "enabled": true,
