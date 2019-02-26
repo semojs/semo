@@ -10,6 +10,9 @@ const config = Utils.getCombinedConfig()
 const yargs = require('yargs').config(config)
 const packageConfig = Utils.loadPackageInfo()
 
+const updateNotifier = require('update-notifier')
+updateNotifier({ pkg: packageConfig, updateCheckInterval: 0 }).notify({ defer: false, isGlobal: true })
+
 // Load local commands
 if (packageConfig.name !== 'zignis') {
   yargs.commandDir('src/commands')

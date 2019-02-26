@@ -1,6 +1,6 @@
 {
   "name": "zignis",
-  "version": "1.2.13",
+  "version": "1.2.11",
   "description": "A tool to speed up building applications",
   "keywords": [
     "cli",
@@ -34,6 +34,7 @@
     "repl.history": "^0.1.4",
     "shelljs": "^0.8.1",
     "table": "^4.0.3",
+    "update-notifier": "^2.5.0",
     "yargs": "^12.0.2",
     "yargs-parser": "^11.0.0"
   },
