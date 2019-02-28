@@ -19,6 +19,7 @@ const fuzzy = require('fuzzy')
 const { execSync } = require('child_process')
 const objectHash = require('node-object-hash')
 const { hash } = objectHash({ sort: true })
+const emoji = require('node-emoji')
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -362,7 +363,8 @@ const log = function (message) {
  * @param {integer} errorCode Error code
  */
 const error = function (message, exit = true, errorCode = 1) {
-  console.log(chalk.red(message))
+  message = _.isString(message) ? { message } : message
+  console.log(emoji.get(message.emoji || 'x'), ' ', chalk.red(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -373,7 +375,8 @@ const error = function (message, exit = true, errorCode = 1) {
  * @param {mix} message Error message to log
  */
 const warn = function (message, exit = false, errorCode = 0) {
-  console.log(chalk.yellow(message))
+  message = _.isString(message) ? { message } : message
+  console.log(emoji.get(message.emoji || 'warning'), ' ', chalk.yellow(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -384,7 +387,20 @@ const warn = function (message, exit = false, errorCode = 0) {
  * @param {mix} message Error message to log
  */
 const info = function (message, exit = false, errorCode = 0) {
-  console.log(chalk.green(message))
+  message = _.isString(message) ? { message } : message
+  console.log(emoji.get(message.emoji || 'pencil2'), ' ', chalk.cyan(message.message))
+  if (exit) {
+    process.exit(errorCode)
+  }
+}
+
+/**
+ * Print success message with green color.
+ * @param {mix} message Error message to log
+ */
+const success = function (message, exit = false, errorCode = 0) {
+  message = _.isString(message) ? { message } : message
+  console.log(emoji.get(message.emoji || 'white_check_mark'), ' ', chalk.green(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -528,10 +544,12 @@ module.exports = {
   fuzzy,
   /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
   inquirer,
-  /** [inquirer](https://www.npmjs.com/package/fs-extra) reference */
+  /** [fs-extra](https://www.npmjs.com/package/fs-extra) reference */
   fs,
-  /** [inquirer](https://www.npmjs.com/package/randomatic) reference */
+  /** [randomatic](https://www.npmjs.com/package/randomatic) reference */
   randomatic,
+  /** [node-emoji](https://www.npmjs.com/package/node-emoji) reference */
+  emoji,
 
   // custom functions
   md5,
@@ -540,6 +558,7 @@ module.exports = {
   log,
   warn,
   info,
+  success,
   error,
   outputTable,
   invokeHook,

@@ -79,7 +79,7 @@ exports.handler = function (argv) {
   } else {
     handerTpl = `exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
-  Utils.info('Finished successfully!')
+  Utils.info('Finished successfully!', true)
 }`
   }
 
