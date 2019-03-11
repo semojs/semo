@@ -110,7 +110,11 @@ const invokeHook = function (hook, options = {}) {
           }
         }
 
-        // 模块 entry 不存在则不加载
+        // For application, do not accept default index.js
+        if (plugin === 'application' && pluginEntry === 'index.js') {
+          continue
+        }
+
         if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
@@ -388,7 +392,7 @@ const warn = function (message, exit = false, errorCode = 0) {
  */
 const info = function (message, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
-  console.log(emoji.get(message.emoji || 'pencil2'), ' ', chalk.cyan(message.message))
+  console.log(emoji.get(message.emoji || 'star'), ' ', chalk.cyan(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -460,7 +464,7 @@ const outputTable = function (columns, caption, borderOptions = {}) {
   }
 
   if (caption) {
-    console.log(chalk.green(caption))
+    info(caption)
   }
   console.log(table(columns, config))
 }
