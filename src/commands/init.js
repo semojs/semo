@@ -76,6 +76,16 @@ exports.handler = function (argv) {
       }
     })
 
+    // add Zignis first
+    if (argv.plugin) {
+      if (argv.yarn) {
+        Utils.exec(`yarn add -P zignis`)
+      } else {
+        Utils.warn('npm do not support install peerDependencies, you need to move zignis package to peerDependencies by yourself.')
+        Utils.exec(`npm install zignis --save-dev`)
+      }
+    }
+
     // add packages
     const addPackage = Utils.parsePackageNames(argv.add)
     const addPackageDev = Utils.parsePackageNames(argv.addDev)
