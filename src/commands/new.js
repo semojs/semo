@@ -175,10 +175,11 @@ exports.handler = function (argv) {
 
     // init basic zignis structure
     if (argv.init) {
+      const initExtra = argv.yarn ? '--yarn' : ''
       if (argv.name.indexOf('zignis-plugin-') === 0) {
-        Utils.exec('zignis init --plugin --disable-ten-temporarily --force')
+        Utils.exec(`zignis init --plugin --disable-ten-temporarily --force ${initExtra}`)
       } else {
-        Utils.exec('zignis init --disable-ten-temporarily --force')
+        Utils.exec(`zignis init --disable-ten-temporarily --force  ${initExtra}`)
       }
     }
   }).catch(e => Utils.error(e.stack))
