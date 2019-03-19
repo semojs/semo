@@ -20,6 +20,7 @@ const { execSync } = require('child_process')
 const objectHash = require('node-object-hash')
 const { hash } = objectHash({ sort: true })
 const emoji = require('node-emoji')
+const { dd, dump } = require('dumper.js')
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -563,6 +564,8 @@ module.exports = {
   warn,
   info,
   success,
+  dd,
+  dump,
   error,
   outputTable,
   invokeHook,

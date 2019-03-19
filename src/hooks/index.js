@@ -25,21 +25,20 @@ module.exports = {
     if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
       const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
       if (pkgConfig && pkgConfig.version) {
-        kvs.version = pkgConfig.version
+        kvs.application = `${pkgConfig.version} ${path.resolve(process.cwd())}`
       }
     }
 
-    kvs = Object.assign(kvs, {
+    kvs = Object.assign(kvs, Utils._.pickBy({
+      zignis: `${Utils.getApplicationConfig().version} ${Utils.getApplicationConfig().applicationDir}`,
+      home: process.env.HOME,
       hostname: os.hostname(),
       os: info.System.OS,
       shell: info.System.Shell.path,
-      node: info.Binaries.Node.version,
-      npm: info.Binaries.npm.version,
-      yarn: info.Binaries.Yarn.version,
-      zignis: Utils.getApplicationConfig().version,
-      home: process.env.HOME,
-      cwd: process.cwd()
-    })
+      node: info.Binaries.Node ? info.Binaries.Node.version : null,
+      npm: info.Binaries.npm ? info.Binaries.npm.version : null,
+      yarn: info.Binaries.Yarn ? info.Binaries.Yarn.version : null,
+    }, Utils._.identity))
 
     return kvs
   }

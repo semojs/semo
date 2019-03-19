@@ -15,7 +15,6 @@ exports.handler = function (argv) {
     const hookStatus = yield Utils.invokeHook('status', { mode: 'group' })
     const columns = []
     let kvs = hookStatus.zignis ? hookStatus.zignis : {}
-
     Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
     Utils.outputTable(columns, 'Core Information')
 
