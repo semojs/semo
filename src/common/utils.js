@@ -57,9 +57,13 @@ const invokeHook = function (hook, options = {}) {
     }
 
     // Make Zignis core supporting hook invocation
-    const plugins = Object.assign({}, {
-      zignis: path.resolve(__dirname, '../../')
-    }, getAllPluginsMapping())
+    const plugins = Object.assign(
+      {},
+      {
+        zignis: path.resolve(__dirname, '../../')
+      },
+      getAllPluginsMapping()
+    )
 
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
@@ -303,14 +307,20 @@ const getAllPluginsMapping = function () {
 /**
  * Get application zignis config only.
  */
-const getApplicationConfig = function () {
+const getApplicationConfig = function (cwd) {
   try {
-    const configPath = findUp.sync(['.zignisrc.json'])
+    const configPath = findUp.sync(['.zignisrc.json'], {
+      cwd
+    })
     let applicationConfig = configPath ? require(configPath) : {}
     if (configPath) {
       applicationConfig.applicationDir = path.dirname(configPath)
       if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
-        applicationConfig = Object.assign({}, applicationConfig, require(path.resolve(applicationConfig.applicationDir, 'package.json')))
+        applicationConfig = Object.assign(
+          {},
+          applicationConfig,
+          require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+        )
       }
     }
     return applicationConfig

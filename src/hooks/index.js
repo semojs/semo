@@ -1,4 +1,3 @@
-const fs = require('fs')
 const path = require('path')
 const os = require('os')
 const envinfo = require('envinfo')
@@ -16,31 +15,39 @@ module.exports = {
   },
 
   * hook_status () {
-    let info = JSON.parse(yield envinfo.run({
-      System: ['OS', 'Shell'],
-      Binaries: ['Node', 'Yarn', 'npm']
-    }, { json: true }))
+    let info = JSON.parse(
+      yield envinfo.run(
+        {
+          System: ['OS', 'Shell'],
+          Binaries: ['Node', 'Yarn', 'npm']
+        },
+        { json: true }
+      )
+    )
 
     let kvs = {}
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-      const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-      if (pkgConfig && pkgConfig.version) {
-        kvs.application = `${pkgConfig.version} ${path.resolve(process.cwd())}`
-      }
-    }
-
-    kvs = Object.assign(kvs, Utils._.pickBy({
-      zignis: `${Utils.getApplicationConfig().version} ${Utils.getApplicationConfig().applicationDir}`,
-      home: process.env.HOME,
-      hostname: os.hostname(),
-      os: info.System.OS,
-      shell: info.System.Shell.path,
-      node: info.Binaries.Node ? info.Binaries.Node.version : null,
-      npm: info.Binaries.npm ? info.Binaries.npm.version : null,
-      yarn: info.Binaries.Yarn ? info.Binaries.Yarn.version : null,
-    }, Utils._.identity))
+    const appConfig = Utils.getApplicationConfig(path.resolve(__dirname, '../../'))
+    kvs = Object.assign(
+      kvs,
+      Utils._.pickBy(
+        {
+          version: appConfig.version,
+          location:
+            appConfig.applicationDir.indexOf(process.env.HOME) === 0
+              ? appConfig.applicationDir.replace(process.env.HOME, '~')
+              : appConfig.applicationDir,
+          os: info.System.OS,
+          node: info.Binaries.Node ? info.Binaries.Node.version : null,
+          npm: info.Binaries.npm ? info.Binaries.npm.version : null,
+          yarn: info.Binaries.Yarn ? info.Binaries.Yarn.version : null,
+          hostname: os.hostname(),
+          home: process.env.HOME,
+          shell: info.System.Shell.path
+        },
+        Utils._.identity
+      )
+    )
 
     return kvs
   }
-
 }
