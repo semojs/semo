@@ -21,15 +21,9 @@ exports.builder = function (yargs) {
   if (_.isFunction(scriptModule.builder)) {
     scriptModule.builder(yargs)
   }
-
-  yargs.option('hook', {
-    default: false,
-    describe: 'if or not load all plugins components hook'
-  })
 }
 
 exports.handler = function (argv) {
-  argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.script.hook') || false
   co(function * () {
     let filePath = argv.file
     if (!fs.existsSync(filePath)) {
@@ -42,6 +36,6 @@ exports.handler = function (argv) {
     if (!_.isFunction(scriptModule.handler)) {
       throw new Error('Script handler not exist!')
     }
-    yield scriptModule.handler(argv, () => (argv.hook ? Utils.invokeHook('components') : {}))
+    yield scriptModule.handler(argv)
   }).catch(e => Utils.error(e.stack))
 }

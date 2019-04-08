@@ -74,7 +74,9 @@ exports.handler = function (argv) {
     let context = { Utils, argv }
 
     if (argv.hook) {
-      const pluginsReturn = yield Utils.invokeHook('repl')
+      const pluginsReturn = yield Utils.invokeHook('repl', _.isBoolean(argv.hook) ? {} : {
+        include: Utils.splitComma(argv.hook)
+      })
       context = Object.assign(context, pluginsReturn)
     }
 
