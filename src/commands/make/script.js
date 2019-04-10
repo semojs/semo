@@ -4,7 +4,7 @@ const chalk = require('chalk')
 const _ = require('lodash')
 const dayjs = require('dayjs')
 
-exports.command = 'script [name]'
+exports.command = 'script <name>'
 exports.desc = 'Generate a zignis script file'
 
 exports.builder = function (yargs) {

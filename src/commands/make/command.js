@@ -4,7 +4,7 @@ const chalk = require('chalk')
 const Utils = require('../../common/utils')
 const shell = require('shelljs')
 
-exports.command = 'command [name] [description]'
+exports.command = 'command <name> <description>'
 exports.desc = 'Generate a command template'
 
 exports.builder = function (yargs) {

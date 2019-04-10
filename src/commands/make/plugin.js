@@ -3,7 +3,7 @@ const path = require('path')
 const Utils = require('../../common/utils')
 const shell = require('shelljs')
 
-exports.command = 'plugin <pluginName>'
+exports.command = 'plugin <name>'
 exports.desc = 'Generate a plugin structure'
 // exports.aliases = ''
 
@@ -20,15 +20,15 @@ exports.handler = function (argv) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }
 
-  const pluginNamePattern = /[a-z0-9]+/
-  if (!pluginNamePattern.test(argv.pluginName)) {
+  const namePattern = /[a-z0-9]+/
+  if (!namePattern.test(argv.name)) {
     Utils.error('Plugin name invalid!')
   }
 
-  const pluginPath = path.resolve(argv.pluginDir, `zignis-plugin-${argv.pluginName}`)
+  const pluginPath = path.resolve(argv.pluginDir, `zignis-plugin-${argv.name}`)
   if (fs.existsSync(pluginPath)) {
     if (argv.force) {
-      Utils.warn(`Existed zignis-plugin-${argv.pluginName} is deleted before creating a new one!`)
+      Utils.warn(`Existed zignis-plugin-${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', pluginPath)
     } else {
       Utils.error(`Destination existed, command abort!`)
