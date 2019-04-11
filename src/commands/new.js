@@ -100,11 +100,11 @@ exports.handler = function (argv) {
         console.log(chalk.green('New .git directory created!'))
       } else {
         if (argv.select) {
-          const select = argv.select
           const defaultRepos = yield Utils.invokeHook('new_repo')
           if (Object.keys(defaultRepos).length === 0) {
             Utils.error('No pre-defined repos available.')
           }
+          const select = defaultRepos[argv.select] ? argv.select : Object.keys(defaultRepos).find(key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1)
           if (defaultRepos[select]) {
             argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
             argv.branch = defaultRepos[select].branch || 'master'
@@ -116,7 +116,7 @@ exports.handler = function (argv) {
                   name: 'selected',
                   message: `Please choose a pre-defined repo to continue:`,
                   choices: Object.keys(defaultRepos).map(key => {
-                    return { name: key, value: key }
+                    return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
                   }),
                   validate: function (answers) {
                     if (answers.length < 1) {
