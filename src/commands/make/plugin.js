@@ -37,6 +37,6 @@ exports.handler = function (argv) {
 
   shell.mkdir('-p', pluginPath)
   shell.cd(pluginPath)
-  shell.exec('zignis init --plugin')
+  shell.exec('zignis init --plugin --exec-mode')
   shell.exec('npm init --yes')
 }

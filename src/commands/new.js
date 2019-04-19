@@ -177,9 +177,9 @@ exports.handler = function (argv) {
     if (argv.init) {
       const initExtra = argv.yarn ? '--yarn' : ''
       if (argv.name.indexOf('zignis-plugin-') === 0) {
-        Utils.exec(`zignis init --plugin --force ${initExtra}`)
+        Utils.exec(`zignis init --exec-mode --plugin --force ${initExtra}`)
       } else {
-        Utils.exec(`zignis init --force  ${initExtra}`)
+        Utils.exec(`zignis init --exec-mode --force  ${initExtra}`)
       }
     }
   }).catch(e => Utils.error(e.stack))
