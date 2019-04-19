@@ -16,7 +16,6 @@ Zignis 作为一个调度所有子命令的入口命令，一般建议全局安�
 
 ```
 $ zignis --help
-做一个传递正能量的人，不要抱怨。 -- 智课十诫
 
 zignis [命令]
 
@@ -31,10 +30,7 @@ zignis status Show Zignis status. alias: st [aliases: st] # 查看基本信息�
 选项：
 --version 显示版本号 [布尔]
 -h, --help 显示帮助信息 [布尔]
---disable-ten-temporarily [默认值: false]
 ```
-
-Zignis 命令自带了一个插件，用于在执行任何命令时随机展示智课十诫，通过 `--disable-ten-temporarily` 可以临时关闭。这个效果的目的一方面是演示一下插件的写法，另外一方面也是希望通过将智课十诫与工程师的日常工作联系起来，对公司企业文化在技术部门落地有促进作用。
 
 ## 命令说明
 
@@ -297,7 +293,6 @@ afterCommand 钩子统一在每一个 `zignis` 命令执行后执行。
 
 ```
 {
-    "disableTenTemporarily": false, # 默认关闭每次执行命令的智课十诫的显示
     "commandDefault": {
         "new": {
             "repo": "git@code.smartstudy.com:service/backend-scaffold.git" # 新建项目时的默认仓库

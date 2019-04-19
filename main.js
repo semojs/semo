@@ -50,7 +50,6 @@ co(function * () {
   yargs
     .help()
     .alias('h', 'help')
-    .default('disable-ten-temporarily', false)
     .exitProcess(false)
     .recommendCommands()
     .epilog('Find more information at https://zignis.js.org')

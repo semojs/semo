@@ -37,6 +37,6 @@ exports.handler = function (argv) {
 
   shell.mkdir('-p', pluginPath)
   shell.cd(pluginPath)
-  shell.exec('zignis init --plugin --disable-ten-temporarily')
+  shell.exec('zignis init --plugin')
   shell.exec('npm init --yes')
 }
