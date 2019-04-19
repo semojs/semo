@@ -43,7 +43,7 @@ const parsedArgv = require('yargs-parser')(process.argv.slice(2))
 co(function * () {
   let beforeHooks = yield Utils.invokeHook('beforeCommand')
   Object.keys(beforeHooks).map(function (hook) {
-    beforeHooks[hook](parsedArgv)
+    beforeHooks[hook](parsedArgv, yargs)
   })
 
   // eslint-disable-next-line
@@ -57,7 +57,7 @@ co(function * () {
 
   let afterHooks = yield Utils.invokeHook('afterCommand')
   Object.keys(afterHooks).map(function (hook) {
-    afterHooks[hook](parsedArgv)
+    afterHooks[hook](parsedArgv, yargs)
   })
 }).catch(e => {
   if (!e.name || e.name !== 'YError') {
