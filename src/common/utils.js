@@ -433,17 +433,6 @@ const md5 = function (s) {
 }
 
 /**
- * Delay a while.
- * @param {integer} ms
- * @return {Promise}
- */
-const delay = function (ms) {
-  return new Promise(function (resolve) {
-    return setTimeout(resolve, ms)
-  })
-}
-
-/**
  * Split input by comma and blank.
  * @example
  * const = Utils.splitComma('a, b , c,d')
@@ -526,6 +515,7 @@ const exec = function (command, options = {}) {
  * @param {integer} ms
  */
 const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const delay = sleep
 
 /**
  * Zignis utils functions and references to common modules.
