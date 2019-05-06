@@ -61,18 +61,6 @@ function corepl (cli) {
     }
 
     return callback()
-
-    // originalEval.call(cli, cmd, context, filename, function (err, res) {
-    //   if (err || !res || typeof res.then !== 'function') {
-    //     return callback(err, res)
-    //   } else {
-    //     return res.then(done, callback)
-    //   }
-    // })
-
-    // function done (val) {
-    //   return callback(null, val)
-    // }
   }
 
   return cli
