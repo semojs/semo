@@ -40,14 +40,17 @@ function corepl (cli) {
         ['quit', 'Quit the shell, alias: exit, q.'],
         ['prefix', 'You can change prefix optioin at any time.'],
         ['?', 'Show this help info.']
-      ], 'Internal commands.')
+      ], 'Internal commands:')
+
+      Utils.info(`Current prefix: ${Utils.chalk.yellow(context.argv.prefix)}`)
+      console.log()
       return callback()
     }
 
     if (cmd.match(/^prefix[\s|=]+/)) {
       let prefix = Utils.splitByChar(cmd, '=')
-      context.argv.prefix = prefix[1]
-      console.log(context.argv.prefix)
+      prefix.shift()
+      context.argv.prefix = prefix.join(' ').trim()
       Utils.success(`Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`)
       return callback()
     }

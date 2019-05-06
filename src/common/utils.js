@@ -440,7 +440,7 @@ const md5 = function (s) {
  * @returns {array} input separated by comma
  */
 const splitComma = function (input) {
-  return splitByChar(input, ',', 'g')
+  return splitByChar(input, ',')
 }
 
 /**
@@ -450,8 +450,8 @@ const splitComma = function (input) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitByChar = function (input, char, flags = '') {
-  const exp = new RegExp(char, flags)
+const splitByChar = function (input, char) {
+  const exp = new RegExp(char, 'g')
   return input.replace(exp, ' ').split(/\s+/)
 }
 
