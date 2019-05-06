@@ -391,7 +391,7 @@ const error = function (message, exit = true, errorCode = 1) {
  */
 const warn = function (message, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
-  console.log(emoji.get(message.emoji || 'warning'), ' ', chalk.yellow(message.message))
+  console.log(chalk.yellow(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -403,7 +403,7 @@ const warn = function (message, exit = false, errorCode = 0) {
  */
 const info = function (message, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
-  console.log(emoji.get(message.emoji || 'star'), ' ', chalk.cyan(message.message))
+  console.log(chalk.cyan(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -415,7 +415,7 @@ const info = function (message, exit = false, errorCode = 0) {
  */
 const success = function (message, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
-  console.log(emoji.get(message.emoji || 'white_check_mark'), ' ', chalk.green(message.message))
+  console.log(chalk.green(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -440,7 +440,19 @@ const md5 = function (s) {
  * @returns {array} input separated by comma
  */
 const splitComma = function (input) {
-  return input.replace(/,/g, ' ').split(/\s+/)
+  return splitByChar(input, ',', 'g')
+}
+
+/**
+ * Split input by a specific char and blank.
+ * @example
+ * const = Utils.splitByChar('a, b , c=d', '=')
+ * @param {string} input
+ * @returns {array} input separated by comma
+ */
+const splitByChar = function (input, char, flags = '') {
+  const exp = new RegExp(char, flags)
+  return input.replace(exp, ' ').split(/\s+/)
 }
 
 /**
@@ -560,6 +572,7 @@ module.exports = {
   md5,
   delay,
   splitComma,
+  splitByChar,
   log,
   warn,
   info,

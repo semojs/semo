@@ -1,0 +1,94 @@
+const replHistory = require('repl.history')
+const fs = require('fs')
+const repl = require('repl')
+
+const { Utils } = require('../../')
+
+exports.command = 'shell'
+exports.desc = 'Shell for Zignis'
+exports.aliases = 'sh'
+
+function * openRepl (context) {
+  const r = repl.start('$ ')
+  const zignisHome = process.env.HOME + '/.zignis'
+  if (!fs.existsSync(zignisHome)) {
+    Utils.exec(`mkdir -p ${zignisHome}`)
+  }
+  replHistory(r, `${zignisHome}/.zignis_shell_history`)
+
+  // context即为REPL中的上下文环境
+  r.context = Object.assign(r.context, context)
+
+  corepl(r)
+}
+
+function corepl (cli) {
+  cli.eval = function coEval (cmd, context, filename, callback) {
+    if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
+      Utils.info('Bye.')
+      process.exit(0)
+    }
+
+    if (cmd.match(/^shell\s+/)) {
+      Utils.warn('Recursive call shell not allowed!')
+      return callback()
+    }
+
+    if (cmd.trim() === '?') {
+      console.log()
+      Utils.outputTable([
+        ['quit', 'Quit the shell, alias: exit, q.'],
+        ['prefix', 'You can change prefix optioin at any time.'],
+        ['?', 'Show this help info.']
+      ], 'Internal commands.')
+      return callback()
+    }
+
+    if (cmd.match(/^prefix[\s|=]+/)) {
+      let prefix = Utils.splitByChar(cmd, '=')
+      context.argv.prefix = prefix[1]
+      console.log(context.argv.prefix)
+      Utils.success(`Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`)
+      return callback()
+    }
+
+    cmd = `${context.argv.prefix} ${cmd}`.trim()
+
+    try {
+      cmd && Utils.exec(cmd)
+    } catch (e) {
+      Utils.error(e.stack, false)
+    }
+
+    return callback()
+
+    // originalEval.call(cli, cmd, context, filename, function (err, res) {
+    //   if (err || !res || typeof res.then !== 'function') {
+    //     return callback(err, res)
+    //   } else {
+    //     return res.then(done, callback)
+    //   }
+    // })
+
+    // function done (val) {
+    //   return callback(null, val)
+    // }
+  }
+
+  return cli
+}
+
+exports.builder = function (yargs) {
+  yargs.option('prefix', {
+    default: 'zignis',
+    describe: 'Make input zignis command a little bit faster.'
+  })
+}
+
+exports.handler = function (argv) {
+  Utils.co(function * () {
+    let context = { argv }
+
+    return yield openRepl(context)
+  }).catch(e => Utils.error(e.stack))
+}
