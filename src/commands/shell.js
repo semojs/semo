@@ -38,7 +38,7 @@ function corepl (cli) {
       console.log()
       Utils.outputTable([
         ['quit', 'Quit the shell, alias: exit, q.'],
-        ['prefix', 'You can change prefix optioin at any time.'],
+        ['prefix', 'You can change prefix option at any time.'],
         ['?', 'Show this help info.']
       ], 'Internal commands:')
 

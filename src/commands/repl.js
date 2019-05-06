@@ -28,6 +28,18 @@ function corepl (cli) {
   var originalEval = cli.eval
 
   cli.eval = function coEval (cmd, context, filename, callback) {
+    if (cmd.trim() === '?') {
+      console.log()
+      Utils.outputTable([
+        ['quit', 'Quit the REPL, alias: exit, q.'],
+        ['yield/await', 'Run generator or promise function.'],
+        ['?', 'Show this help info.']
+      ], 'Internal commands:')
+
+      console.log()
+      return callback()
+    }
+
     if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       console.log(chalk.yellow('Bye!'))
       process.exit(0)
