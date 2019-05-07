@@ -60,7 +60,11 @@ function corepl (cli) {
     try {
       cmd && Utils.exec(cmd)
     } catch (e) {
-      Utils.error(e.stack, false)
+      if (context.argv.debug) {
+        Utils.error(e.stack, false)
+      } else {
+        Utils.error(e.message, false)
+      }
     }
 
     return callback()
@@ -73,6 +77,11 @@ exports.builder = function (yargs) {
   yargs.option('prefix', {
     default: 'zignis',
     describe: 'Make input zignis command a little bit faster.'
+  })
+
+  yargs.option('debug', {
+    default: false,
+    describe: 'Debug mode, show error stack'
   })
 }
 
