@@ -49,7 +49,7 @@ function corepl (cli) {
         ['?', 'Show this help info.']
       ], 'Internal commands:')
 
-      Utils.info(`Current prefix: ${Utils.chalk.yellow(context.argv.prefix)}`)
+      Utils.info(`Current prefix: ${Utils.chalk.yellow(context.argv.prefix || '[empty]')}`)
       console.log()
       return callback()
     }
