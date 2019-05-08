@@ -9,7 +9,14 @@ exports.desc = 'Shell for Zignis'
 exports.aliases = 'sh'
 
 function * openRepl (context) {
-  const r = repl.start('$ ')
+  const r = repl.start({
+    prompt: context.argv.prompt,
+    completer: (line) => {
+      // TODO: implments auto completion in REPL by Shell suggestions.
+      // For now, it is just for disabling Node completion.
+      return []
+    }
+  })
   const zignisHome = process.env.HOME + '/.zignis'
   if (!fs.existsSync(zignisHome)) {
     Utils.exec(`mkdir -p ${zignisHome}`)
@@ -74,6 +81,11 @@ function corepl (cli) {
 }
 
 exports.builder = function (yargs) {
+  yargs.option('prompt', {
+    default: '$ ',
+    describe: 'Prompt for input.'
+  })
+
   yargs.option('prefix', {
     default: 'zignis',
     describe: 'Make input zignis command a little bit faster.'
