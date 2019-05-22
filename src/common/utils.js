@@ -189,7 +189,9 @@ const extendSubCommand = function (command, module, yargs, basePath) {
 
   // load default commands
   const currentCommand = command.split('/').pop()
-  yargs.commandDir(path.resolve(basePath, currentCommand))
+  if (fs.existsSync(path.resolve(basePath, currentCommand))) {
+    yargs.commandDir(path.resolve(basePath, currentCommand))
+  }
 
   // Load plugin commands
   if (plugins) {
