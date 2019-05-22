@@ -20,12 +20,15 @@ $ zignis --help
 zignis [命令]
 
 命令：
-zignis init Init basic zignis config file and directories [aliases: i] # 初始化项目的基本 Zignis 配置文件和目录
-zignis make Generate component sample code [aliases: m] # 自动生成组件初始代码
-zignis new <name> [repo][branch] Create a new project from specific repo [aliases: n] # 初始化新项目
-zignis repl Play with REPL [aliases: r] # 进入 REPL 命令行交互模式
-zignis script [file] Execute a script # 执行脚本
-zignis status Show Zignis status. alias: st [aliases: st] # 查看基本信息和状态
+zignis application                 Application command namespace                                        [aliases: app]
+zignis hook                        Show hook info
+zignis init                        Init basic zignis config file and directories                          [aliases: i]
+zignis make <component>            Generate component sample code                               [aliases: generate, g]
+zignis new <name> [repo] [branch]  Create a new project from specific repo                                [aliases: n]
+zignis repl                        Play with REPL                                                         [aliases: r]
+zignis script [file]               Execute a script                                                     [aliases: scr]
+zignis shell                       Shell for Zignis                                                      [aliases: sh]
+zignis status                      Show environment status info                                          [aliases: st]
 
 选项：
 --version 显示版本号 [布尔]
@@ -35,6 +38,16 @@ zignis status Show Zignis status. alias: st [aliases: st] # 查看基本信息�
 ## 命令说明
 
 !> 注意：文档命令说明部分因为活跃开发，可能会滞后和不那么准确，请直接安装最新版本尝试这些命令
+
+### zignis application
+
+`Zignis` 的一个使用场景就是整合到具体的业务中，另外 `Zignis` 的第一级子命令是有限的，考虑到 `Zignis` 的扩展性，可能第一级子命令会被各种插件占用，因此不建议业务项目随意定义子命令，防止未来某些插件可能由于命名冲突用不了。
+为了统一规范业务项目定义子命令的灵活性，这里建议业务项目把子命令都定义到 `application` 子命令的下一级，例如，如果想定义一个 `test` 子命令，可以这么调用代码生成器生成样本代码。
+
+```
+zignis make command application/test 'test application' --extend=zignis
+zignis application test
+```
 
 ### zignis init
 

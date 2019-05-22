@@ -2,9 +2,8 @@ const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
 const Utils = require('../../common/utils')
-const shell = require('shelljs')
 
-exports.command = 'command <name> <description>'
+exports.command = 'command <name> [description]'
 exports.desc = 'Generate a command template'
 
 exports.builder = function (yargs) {
@@ -16,11 +15,6 @@ exports.builder = function (yargs) {
   yargs.option('plugin', {
     default: false,
     describe: 'generate command in plugin directory, e.g. plugin=xxx'
-  })
-
-  yargs.option('force', {
-    default: false,
-    describe: 'force create non-existen directory'
   })
 
   yargs.option('yield', {
@@ -54,13 +48,7 @@ exports.handler = function (argv) {
   const commandFilePath = path.resolve(commandDir, `${argv.name}.js`)
   const commandFileDir = path.dirname(commandFilePath)
 
-  if (!fs.existsSync(commandFileDir)) {
-    if (argv.force) {
-      shell.mkdir('-p', commandFileDir)
-    } else {
-      Utils.error(chalk.red(`Command directory: ${commandFileDir} not exist!`))
-    }
-  }
+  Utils.fs.ensureDirSync(commandFileDir)
 
   if (fs.existsSync(commandFilePath)) {
     Utils.error(chalk.red('Command file exist!'))
@@ -87,7 +75,7 @@ exports.handler = function (argv) {
 const { Utils } = require('zignis')
 
 exports.command = '${name}'
-exports.desc = '${argv.description}'
+exports.desc = '${argv.description || name}'
 // exports.aliases = ''
 
 exports.builder = function (yargs) {
@@ -101,4 +89,6 @@ ${handerTpl}
     fs.writeFileSync(commandFilePath, code)
     console.log(chalk.green(`${commandFilePath} created!`))
   }
+
+  // TODO: check zignis installed or not, if not ask if add, check yarn.lock, if exist use yarn or use npm
 }
