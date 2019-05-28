@@ -21,6 +21,7 @@ const objectHash = require('node-object-hash')
 const { hash } = objectHash({ sort: true })
 const emoji = require('node-emoji')
 const { dd, dump } = require('dumper.js')
+const getStdin = require('get-stdin')
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -569,6 +570,8 @@ module.exports = {
   randomatic,
   /** [node-emoji](https://www.npmjs.com/package/node-emoji) reference */
   emoji,
+  /** [get-stdin](https://www.npmjs.com/package/get-stdin) reference */
+  getStdin,
 
   // custom functions
   md5,
