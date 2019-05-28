@@ -229,13 +229,24 @@ const getAllPluginsMapping = function () {
       plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
     })
 
-  // process same directory plugins
+  // process core same directory plugins
   glob
     .sync('zignis-plugin-*', {
       cwd: path.resolve(__dirname, '../../../')
     })
     .map(function (plugin) {
       plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+    })
+
+  // process core same directory npm plugins
+  glob
+    .sync('@*/zignis-plugin-*', {
+      cwd: path.resolve(__dirname, '../../../')
+    })
+    .map(function (plugin) {
+      if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
+        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+      }
     })
 
   // process home npm plugins
