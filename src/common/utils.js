@@ -13,6 +13,7 @@ const day = require('dayjs')
 const co = require('co')
 const shell = require('shelljs')
 const debug = require('debug')
+const debugCore = debug('zignis-core')
 const inquirer = require('inquirer')
 inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
 const fuzzy = require('fuzzy')
@@ -22,6 +23,43 @@ const { hash } = objectHash({ sort: true })
 const emoji = require('node-emoji')
 const { dd, dump } = require('dumper.js')
 const getStdin = require('get-stdin')
+const NodeCache = require('node-cache')
+
+let cacheInstance
+/**
+ * Get Zignis internal cache instance
+ * @returns {NodeCache}
+ */
+const getInternalCache = function () {
+  if (!cacheInstance) {
+    cacheInstance = new NodeCache({
+      useClones: false
+    })
+  }
+  return cacheInstance
+}
+cacheInstance = getInternalCache()
+
+/**
+ * Get Zignis cache instance by namespace
+ * @param {string} namespace
+ * @returns {NodeCache}
+ */
+const getCache = function (namespace) {
+  let cacheNamespaces = cacheInstance.get('cacheNamespaces')
+
+  if (!cacheNamespaces) {
+    cacheNamespaces = {}
+  }
+
+  if (!cacheNamespaces[namespace]) {
+    cacheNamespaces[namespace] = new NodeCache({
+      useClones: false
+    })
+    cacheInstance.set('cacheNamespaces', cacheNamespaces)
+  }
+  return cacheNamespaces[namespace]
+}
 
 /**
  * Run hook in all valid plugins and return the combined results.
@@ -88,7 +126,7 @@ const invokeHook = function (hook, options = {}) {
         break
     }
 
-    for (let i = 0; i < Object.keys(plugins).length; i++) {
+    for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
       let plugin = Object.keys(plugins)[i]
 
       if (_.isArray(options.include) && options.include.length > 0 && options.include.indexOf(plugin) === -1) {
@@ -122,6 +160,7 @@ const invokeHook = function (hook, options = {}) {
         }
 
         if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
+          debugCore(`zignis invoke hook: ${hook}, plugin: ${plugin}`)
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
             let pluginReturn
@@ -218,101 +257,106 @@ const extendSubCommand = function (command, module, yargs, basePath) {
  * This function also influence final valid commands and configs.
  */
 const getAllPluginsMapping = function () {
-  const plugins = {}
+  let plugins = cacheInstance.get('plugins')
+  if (!plugins) {
+    plugins = {}
 
-  // process core plugins
-  glob
-    .sync('zignis-plugin-*', {
-      cwd: path.resolve(__dirname, '../plugins')
-    })
-    .map(function (plugin) {
-      plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
-    })
-
-  // process core same directory plugins
-  glob
-    .sync('zignis-plugin-*', {
-      cwd: path.resolve(__dirname, '../../../')
-    })
-    .map(function (plugin) {
-      plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-    })
-
-  // process core same directory npm plugins
-  glob
-    .sync('@*/zignis-plugin-*', {
-      cwd: path.resolve(__dirname, '../../../')
-    })
-    .map(function (plugin) {
-      if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
-        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-      }
-    })
-
-  // process home npm plugins
-  glob
-    .sync('zignis-plugin-*', {
-      cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
-    })
-    .map(function (plugin) {
-      if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-        plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
-      }
-    })
-
-  // process home npm scope plugins
-  glob
-    .sync('@*/zignis-plugin-*', {
-      cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
-    })
-    .map(function (plugin) {
-      if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-        plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
-      }
-    })
-
-  // process cwd npm plugins
-  glob
-    .sync('zignis-plugin-*', {
-      cwd: path.resolve(process.cwd(), 'node_modules')
-    })
-    .map(function (plugin) {
-      if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-      }
-    })
-
-  // process cwd npm scope plugins
-  glob
-    .sync('@*/zignis-plugin-*', {
-      cwd: path.resolve(process.cwd(), 'node_modules')
-    })
-    .map(function (plugin) {
-      if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-      }
-    })
-
-  const config = getApplicationConfig()
-  if (fs.existsSync(config.pluginDir)) {
-    // process local plugins
+    // process core plugins
     glob
       .sync('zignis-plugin-*', {
-        cwd: path.resolve(process.cwd(), config.pluginDir)
+        cwd: path.resolve(__dirname, '../plugins')
       })
       .map(function (plugin) {
-        if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
-          plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
+        plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
+      })
+
+    // process core same directory plugins
+    glob
+      .sync('zignis-plugin-*', {
+        cwd: path.resolve(__dirname, '../../../')
+      })
+      .map(function (plugin) {
+        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+      })
+
+    // process core same directory npm plugins
+    glob
+      .sync('@*/zignis-plugin-*', {
+        cwd: path.resolve(__dirname, '../../../')
+      })
+      .map(function (plugin) {
+        if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
+          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
         }
       })
-  }
 
-  // process plugin project
-  if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
-    const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-    if (pkgConfig.name && /^(@[^/]+\/)?zignis-plugin-/.test(pkgConfig.name)) {
-      plugins[pkgConfig.name] = path.resolve(process.cwd())
+    // process home npm plugins
+    glob
+      .sync('zignis-plugin-*', {
+        cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+      })
+      .map(function (plugin) {
+        if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+          plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+        }
+      })
+
+    // process home npm scope plugins
+    glob
+      .sync('@*/zignis-plugin-*', {
+        cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+      })
+      .map(function (plugin) {
+        if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+          plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+        }
+      })
+
+    // process cwd npm plugins
+    glob
+      .sync('zignis-plugin-*', {
+        cwd: path.resolve(process.cwd(), 'node_modules')
+      })
+      .map(function (plugin) {
+        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
+          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+        }
+      })
+
+    // process cwd npm scope plugins
+    glob
+      .sync('@*/zignis-plugin-*', {
+        cwd: path.resolve(process.cwd(), 'node_modules')
+      })
+      .map(function (plugin) {
+        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
+          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+        }
+      })
+
+    const config = getApplicationConfig()
+    if (fs.existsSync(config.pluginDir)) {
+      // process local plugins
+      glob
+        .sync('zignis-plugin-*', {
+          cwd: path.resolve(process.cwd(), config.pluginDir)
+        })
+        .map(function (plugin) {
+          if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
+            plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
+          }
+        })
     }
+
+    // process plugin project
+    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+      const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
+      if (pkgConfig.name && /^(@[^/]+\/)?zignis-plugin-/.test(pkgConfig.name)) {
+        plugins[pkgConfig.name] = path.resolve(process.cwd())
+      }
+    }
+
+    cacheInstance.set('plugins', plugins)
   }
 
   return plugins
@@ -583,6 +627,8 @@ module.exports = {
   emoji,
   /** [get-stdin](https://www.npmjs.com/package/get-stdin) reference */
   getStdin,
+  /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
+  NodeCache,
 
   // custom functions
   md5,
@@ -605,5 +651,7 @@ module.exports = {
   parsePackageNames,
   loadPackageInfo,
   exec,
-  sleep
+  sleep,
+  getInternalCache,
+  getCache
 }
