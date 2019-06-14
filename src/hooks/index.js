@@ -14,6 +14,14 @@ module.exports = {
     new_repo: 'Hook triggered in zignis new command.'
   },
 
+  hook_new_repo: {
+    zignis_plugin_starter: {
+      repo: 'git@github.com:zhike-team/zignis-plugin-starter.git',
+      branch: 'master',
+      alias: ['zignis-plugin-starter', 'plugin']
+    }
+  },
+
   * hook_status () {
     let info = JSON.parse(
       yield envinfo.run(
