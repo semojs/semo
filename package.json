@@ -1,6 +1,6 @@
 {
   "name": "zignis",
-  "version": "1.5.4",
+  "version": "1.5.5",
   "description": "A tool to speed up building applications",
   "keywords": [
     "cli",
@@ -50,6 +50,5 @@
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0"
   },
-  "scripts": {
-  }
+  "scripts": {}
 }
