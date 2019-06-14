@@ -43,7 +43,6 @@
     "yargs-parser": "^13.1.0"
   },
   "devDependencies": {
-    "documentation": "^11.0.0",
     "eslint": "^5.16.0",
     "eslint-config-standard": "^12.0.0",
     "eslint-plugin-import": "^2.17.3",
@@ -52,6 +51,5 @@
     "eslint-plugin-standard": "^4.0.0"
   },
   "scripts": {
-    "jsdoc": "documentation build  src/common/utils.js -f md --markdown-toc=false > docs/API.md"
   }
 }

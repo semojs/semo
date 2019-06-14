@@ -25,20 +25,20 @@ const { dd, dump } = require('dumper.js')
 const getStdin = require('get-stdin')
 const NodeCache = require('node-cache')
 
-let cacheInstance
+let cachedInstance
 /**
  * Get Zignis internal cache instance
  * @returns {NodeCache}
  */
 const getInternalCache = function () {
-  if (!cacheInstance) {
-    cacheInstance = new NodeCache({
+  if (!cachedInstance) {
+    cachedInstance = new NodeCache({
       useClones: false
     })
   }
-  return cacheInstance
+  return cachedInstance
 }
-cacheInstance = getInternalCache()
+cachedInstance = getInternalCache()
 
 /**
  * Get Zignis cache instance by namespace
@@ -46,19 +46,23 @@ cacheInstance = getInternalCache()
  * @returns {NodeCache}
  */
 const getCache = function (namespace) {
-  let cacheNamespaces = cacheInstance.get('cacheNamespaces')
-
-  if (!cacheNamespaces) {
-    cacheNamespaces = {}
+  if (!namespace) {
+    throw Error('Namespace is necessary.')
   }
 
-  if (!cacheNamespaces[namespace]) {
-    cacheNamespaces[namespace] = new NodeCache({
+  let cachedNamespaceInstances = cachedInstance.get('cachedNamespaceInstances')
+
+  if (!cachedNamespaceInstances) {
+    cachedNamespaceInstances = {}
+  }
+
+  if (!cachedNamespaceInstances[namespace]) {
+    cachedNamespaceInstances[namespace] = new NodeCache({
       useClones: false
     })
-    cacheInstance.set('cacheNamespaces', cacheNamespaces)
+    cachedInstance.set('cachedNamespaceInstances', cachedNamespaceInstances)
   }
-  return cacheNamespaces[namespace]
+  return cachedNamespaceInstances[namespace]
 }
 
 /**
@@ -75,8 +79,8 @@ const getCache = function (namespace) {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {array} options.opts opts will be sent to hook implementation
  */
-const invokedHookCache = {}
 const invokeHook = function (hook, options = {}) {
+  const invokedHookCache = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
     {
@@ -203,6 +207,7 @@ const invokeHook = function (hook, options = {}) {
     }
 
     invokedHookCache[cacheKey] = pluginsReturn
+    cachedInstance.set('invokedHookCache', invokedHookCache)
 
     return pluginsReturn
   }).catch(e => {
@@ -257,7 +262,7 @@ const extendSubCommand = function (command, module, yargs, basePath) {
  * This function also influence final valid commands and configs.
  */
 const getAllPluginsMapping = function () {
-  let plugins = cacheInstance.get('plugins')
+  let plugins = cachedInstance.get('plugins')
   if (!plugins) {
     plugins = {}
 
@@ -356,7 +361,7 @@ const getAllPluginsMapping = function () {
       }
     }
 
-    cacheInstance.set('plugins', plugins)
+    cachedInstance.set('plugins', plugins)
   }
 
   return plugins
@@ -391,9 +396,9 @@ const getApplicationConfig = function (cwd) {
  * Get commbined config from whole environment.
  */
 const getCombinedConfig = function () {
-  let pluginConfigs = null
+  let pluginConfigs = cachedInstance.get('pluginConfigs')
 
-  if (_.isNil(pluginConfigs)) {
+  if (!pluginConfigs) {
     if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
       pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
     } else {
@@ -412,6 +417,7 @@ const getCombinedConfig = function () {
     let rcConfig = configPath ? require(configPath) : {}
 
     pluginConfigs = _.merge(pluginConfigs, rcConfig)
+    cachedInstance.set('pluginConfigs', pluginConfigs)
   }
 
   return pluginConfigs

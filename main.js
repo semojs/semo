@@ -11,6 +11,7 @@ const updateNotifier = require('update-notifier')
 const pkg = require('./package.json')
 updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({ defer: false, isGlobal: true })
 debug('zignis update notifier')
+
 const parsedArgv = require('yargs-parser')(process.argv.slice(2))
 const cache = Utils.getInternalCache()
 cache.set('argv', parsedArgv)
