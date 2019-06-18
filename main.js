@@ -51,11 +51,13 @@ if (
 debug('zignis set commands')
 
 co(function * () {
-  debug('zignis before command hook')
-  let beforeHooks = yield Utils.invokeHook('beforeCommand')
-  Object.keys(beforeHooks).map(function (hook) {
-    beforeHooks[hook](parsedArgv, yargs)
-  })
+  if (!parsedArgv.getYargsCompletions) {
+    debug('zignis before command hook')
+    let beforeHooks = yield Utils.invokeHook('beforeCommand')
+    Object.keys(beforeHooks).map(function (hook) {
+      beforeHooks[hook](parsedArgv, yargs)
+    })
+  }
 
   // eslint-disable-next-line
   yargs
@@ -67,11 +69,13 @@ co(function * () {
     .epilog('Find more information at https://zignis.js.org')
     .wrap(Math.min(120, yargs.terminalWidth())).argv
 
-  let afterHooks = yield Utils.invokeHook('afterCommand')
-  Object.keys(afterHooks).map(function (hook) {
-    afterHooks[hook](parsedArgv, yargs)
-  })
-  debug('zignis after command hook')
+  if (!parsedArgv.getYargsCompletions) {
+    let afterHooks = yield Utils.invokeHook('afterCommand')
+    Object.keys(afterHooks).map(function (hook) {
+      afterHooks[hook](parsedArgv, yargs)
+    })
+    debug('zignis after command hook')
+  }
 }).catch(e => {
   if (!e.name || e.name !== 'YError') {
     Utils.error(e.stack)
