@@ -60,6 +60,7 @@ co(function * () {
   // eslint-disable-next-line
   yargs
     .help()
+    .completion('completion', false)
     .alias('h', 'help')
     .exitProcess(false)
     .recommendCommands()
