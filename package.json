@@ -12,8 +12,9 @@
   },
   "license": "MIT",
   "bin": {
-    "zignis": "main.js"
+    "zignis": "src/main.js"
   },
+  "main": "src/index.js",
   "dependencies": {
     "chalk": "^2.4.2",
     "co": "^4.6.0",
@@ -50,5 +51,7 @@
     "eslint-plugin-promise": "^4.1.1",
     "eslint-plugin-standard": "^4.0.0"
   },
-  "scripts": {}
+  "scripts": {
+    "zignis": "node src/main.js"
+  }
 }

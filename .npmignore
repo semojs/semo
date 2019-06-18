@@ -1,1 +1,9 @@
 docs
+.docma.json
+.editorconfig
+.eslintrc.js
+.travis.yml
+PRINCIPLE.md
+yarn-error.log
+yarn.lock
+.vscode/settings.json

@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
 const chalk = require('chalk')
-const Utils = require('../../common/utils')
+const { Utils } = require('../..')
 
 exports.command = 'command <name> [description]'
 exports.desc = 'Generate a command template'

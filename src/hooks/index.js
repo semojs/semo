@@ -1,7 +1,7 @@
 const path = require('path')
 const os = require('os')
 const envinfo = require('envinfo')
-const { Utils } = require('../../')
+const { Utils } = require('../')
 
 module.exports = {
   hook_hook: {

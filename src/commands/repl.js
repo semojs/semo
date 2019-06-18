@@ -4,7 +4,7 @@ const replHistory = require('repl.history')
 const fs = require('fs')
 const _ = require('lodash')
 
-const { Utils } = require('../../')
+const { Utils } = require('..')
 
 exports.command = 'repl'
 exports.aliases = 'r'

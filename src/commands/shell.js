@@ -2,7 +2,7 @@ const replHistory = require('repl.history')
 const fs = require('fs')
 const repl = require('repl')
 
-const { Utils } = require('../../')
+const { Utils } = require('..')
 
 exports.command = 'shell'
 exports.desc = 'Shell for Zignis'
@@ -36,11 +36,6 @@ function corepl (cli) {
       process.exit(0)
     }
 
-    if (cmd.match(/^shell\s+/)) {
-      Utils.warn('Recursive call shell not allowed!')
-      return callback()
-    }
-
     if (cmd.trim() === '?') {
       console.log()
       Utils.outputTable([
@@ -59,6 +54,11 @@ function corepl (cli) {
       prefix.shift()
       context.argv.prefix = prefix.join(' ').trim()
       Utils.success(`Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`)
+      return callback()
+    }
+
+    if (`${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+shell\s+/) || `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+sh\s+/)) {
+      Utils.warn('Recursive call shell not allowed!')
       return callback()
     }
 

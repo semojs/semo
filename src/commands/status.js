@@ -1,7 +1,7 @@
 const path = require('path')
 const fs = require('fs')
 const co = require('co')
-const { Utils } = require('../../')
+const { Utils } = require('..')
 
 exports.command = 'status'
 exports.aliases = 'st'

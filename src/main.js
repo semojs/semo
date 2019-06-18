@@ -8,7 +8,7 @@ const path = require('path')
 
 const co = require('co')
 const updateNotifier = require('update-notifier')
-const pkg = require('./package.json')
+const pkg = require('../package.json')
 updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({ defer: false, isGlobal: true })
 debug('zignis update notifier')
 
@@ -22,10 +22,10 @@ const yargs = require('yargs').config(config)
 const packageConfig = Utils.loadPackageInfo()
 const plugins = Utils.getAllPluginsMapping()
 debug('zignis get plugins')
-
+console.log(parsedArgv)
 // Load local commands
 if (packageConfig.name !== 'zignis') {
-  yargs.commandDir('src/commands')
+  yargs.commandDir('commands')
 } else if (config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
   yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
 }

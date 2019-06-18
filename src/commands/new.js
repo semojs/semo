@@ -2,10 +2,8 @@ const fs = require('fs')
 const path = require('path')
 
 const shell = require('shelljs')
-const chalk = require('chalk')
-const _ = require('lodash')
 
-const Utils = require('../common/utils')
+const { Utils } = require('..')
 
 exports.command = 'new <name> [repo] [branch]'
 exports.aliases = 'n'
@@ -19,29 +17,25 @@ exports.builder = function (yargs) {
 
   yargs.option('yes', {
     alias: 'y',
-    default: false,
     describe: 'run npm/yarn init with --yes'
   })
 
   yargs.option('force', {
     alias: 'f',
-    default: false,
     describe: 'force download, existed folder will be deleted!'
   })
 
   yargs.option('merge', {
     alias: 'm',
-    default: false,
     describe: 'merge config with exist project folder!'
   })
 
   yargs.option('empty', {
-    default: false,
     describe: 'force empty project, ignore repo'
   })
 
   yargs.option('select', {
-    default: false,
+    alias: 's',
     describe: 'select from default repos'
   })
 
@@ -56,29 +50,30 @@ exports.builder = function (yargs) {
   })
 
   yargs.option('init', {
-    default: false,
-    describe: 'init the project use Zignis'
+    alias: 'i',
+    describe: 'init new project use Zignis'
   })
 }
 
 exports.handler = function (argv) {
-  argv.repo = argv.repo || _.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
-  argv.branch = argv.branch || _.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
+  argv.repo = argv.repo || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
+  argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
 
   Utils.co(function * () {
     if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
-        Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
         shell.rm('-rf', path.resolve(process.cwd(), argv.name))
+        Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
       } else if (!argv.merge) {
         Utils.error(`Destination existed, command abort!`)
       }
     }
 
     if (argv.merge) {
+      // Nothing happened.
       shell.cd(argv.name)
     } else {
-      if (argv.empty) {
+      if (argv.empty || !argv.repo) {
         shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
         shell.cd(argv.name)
         if (argv.yarn) {
@@ -97,7 +92,7 @@ exports.handler = function (argv) {
 
         Utils.exec(`echo "node_modules" > .gitignore`)
         Utils.exec('git init')
-        console.log(chalk.green('New .git directory created!'))
+        Utils.success('New .git directory has been created!')
       } else {
         if (argv.select) {
           const defaultRepos = yield Utils.invokeHook('new_repo')
@@ -132,14 +127,14 @@ exports.handler = function (argv) {
           }
         }
 
-        console.log(chalk.green(`Downloading from ${argv.repo}`))
+        Utils.info(`Downloading from ${argv.repo}`)
         try {
           Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
 
-          console.log(chalk.green('Succeeded!'))
+          Utils.success('Succeeded!')
           shell.cd(argv.name)
           shell.rm('-rf', path.resolve(process.cwd(), `.git`))
-          console.log(chalk.green('.git directory removed!'))
+          Utils.success('.git directory removed!')
           if (argv.yarn) {
             Utils.exec('yarn')
           } else {
@@ -147,7 +142,7 @@ exports.handler = function (argv) {
           }
 
           Utils.exec('git init')
-          console.log(chalk.green('New .git directory created!'))
+          Utils.success('New .git directory has been created!')
         } catch (e) {
           Utils.error(e.message)
         }
@@ -181,6 +176,7 @@ exports.handler = function (argv) {
       } else {
         Utils.exec(`zignis init --exec-mode --force  ${initExtra}`)
       }
+      Utils.success('Initial basic zignis structure complete!')
     }
   }).catch(e => Utils.error(e.stack))
 }

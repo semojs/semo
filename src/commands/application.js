@@ -1,5 +1,5 @@
 
-const { Utils } = require('zignis')
+const { Utils } = require('..')
 
 exports.command = 'application'
 exports.desc = 'Application command namespace.'
@@ -10,4 +10,4 @@ exports.builder = function (yargs) {
   Utils.extendSubCommand('application', 'zignis', yargs, __dirname)
 }
 
-exports.handler = async function (argv) {}
+exports.handler = function (argv) {}

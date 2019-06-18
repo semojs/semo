@@ -1,6 +1,6 @@
 const fs = require('fs')
 const path = require('path')
-const Utils = require('../../common/utils')
+const { Utils } = require('../..')
 const shell = require('shelljs')
 
 exports.command = 'plugin <name>'

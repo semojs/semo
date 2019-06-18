@@ -1,4 +1,4 @@
-const Utils = require('../common/utils')
+const { Utils } = require('..')
 
 exports.command = 'make <component>'
 exports.desc = 'Generate component sample code'
