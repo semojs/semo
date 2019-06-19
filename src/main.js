@@ -22,7 +22,7 @@ const yargs = require('yargs').config(config)
 const packageConfig = Utils.loadPackageInfo()
 const plugins = Utils.getAllPluginsMapping()
 debug('zignis get plugins')
-console.log(parsedArgv)
+
 // Load local commands
 if (packageConfig.name !== 'zignis') {
   yargs.commandDir('commands')
