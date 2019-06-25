@@ -1,4 +1,4 @@
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'make <component>'
 exports.desc = 'Generate component sample code'

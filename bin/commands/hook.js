@@ -1,4 +1,4 @@
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'hook'
 exports.desc = 'Show hook info'

@@ -1,7 +1,7 @@
 const fs = require('fs')
 const path = require('path')
-const { Utils } = require('../..')
 const shell = require('shelljs')
+const { Utils } = require('../../../lib')
 
 exports.command = 'plugin <name>'
 exports.desc = 'Generate a plugin structure'

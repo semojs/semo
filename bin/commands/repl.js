@@ -4,25 +4,7 @@ const replHistory = require('repl.history')
 const fs = require('fs')
 const _ = require('lodash')
 
-const { Utils } = require('..')
-
-exports.command = 'repl'
-exports.aliases = 'r'
-exports.desc = 'Play with REPL'
-
-function * openRepl (context) {
-  const r = repl.start('>>> ')
-  const zignisHome = process.env.HOME + '/.zignis'
-  if (!fs.existsSync(zignisHome)) {
-    Utils.exec(`mkdir -p ${zignisHome}`)
-  }
-  replHistory(r, `${zignisHome}/.zignis_history`)
-
-  // context即为REPL中的上下文环境
-  r.context = Object.assign(r.context, context)
-
-  corepl(r)
-}
+const { Utils } = require('../../lib')
 
 function corepl (cli) {
   var originalEval = cli.eval
@@ -57,6 +39,10 @@ function corepl (cli) {
       cmd = '(async function() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})()'
     }
 
+    function done (val) {
+      return callback(null, val)
+    }
+
     originalEval.call(cli, cmd, context, filename, function (err, res) {
       if (err || !res || typeof res.then !== 'function') {
         return callback(err, res)
@@ -64,13 +50,27 @@ function corepl (cli) {
         return res.then(done, callback)
       }
     })
-
-    function done (val) {
-      return callback(null, val)
-    }
   }
 
   return cli
+}
+
+exports.command = 'repl'
+exports.aliases = 'r'
+exports.desc = 'Play with REPL'
+
+function * openRepl (context) {
+  const r = repl.start('>>> ')
+  const zignisHome = process.env.HOME + '/.zignis'
+  if (!fs.existsSync(zignisHome)) {
+    Utils.exec(`mkdir -p ${zignisHome}`)
+  }
+  replHistory(r, `${zignisHome}/.zignis_history`)
+
+  // context即为REPL中的上下文环境
+  r.context = Object.assign(r.context, context)
+
+  corepl(r)
 }
 
 exports.builder = function (yargs) {

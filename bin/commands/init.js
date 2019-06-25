@@ -3,7 +3,7 @@ const chalk = require('chalk')
 const fs = require('fs')
 const path = require('path')
 const co = require('co')
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'init'
 exports.desc = 'Init basic zignis config file and directories'

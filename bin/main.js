@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 
-const { Utils } = require('.')
-const debug = Utils.debug('zignis-core')
-debug('zignis started')
+const { Utils } = require('../lib')
 const fs = require('fs')
 const path = require('path')
-
 const co = require('co')
 const updateNotifier = require('update-notifier')
 const pkg = require('../package.json')
+
+const debug = Utils.debug('zignis-core')
+debug('zignis started')
 updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({ defer: false, isGlobal: true })
 debug('zignis update notifier')
 

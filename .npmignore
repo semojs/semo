@@ -7,3 +7,6 @@ PRINCIPLE.md
 yarn-error.log
 yarn.lock
 .vscode/settings.json
+src
+tsconfig.json
+.eslintignore

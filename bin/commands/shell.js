@@ -2,32 +2,11 @@ const replHistory = require('repl.history')
 const fs = require('fs')
 const repl = require('repl')
 
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'shell'
 exports.desc = 'Shell for Zignis'
 exports.aliases = 'sh'
-
-function * openRepl (context) {
-  const r = repl.start({
-    prompt: context.argv.prompt,
-    completer: (line) => {
-      // TODO: implments auto completion in REPL by Shell suggestions.
-      // For now, it is just for disabling Node completion.
-      return []
-    }
-  })
-  const zignisHome = process.env.HOME + '/.zignis'
-  if (!fs.existsSync(zignisHome)) {
-    Utils.exec(`mkdir -p ${zignisHome}`)
-  }
-  replHistory(r, `${zignisHome}/.zignis_shell_history`)
-
-  // context即为REPL中的上下文环境
-  r.context = Object.assign(r.context, context)
-
-  corepl(r)
-}
 
 function corepl (cli) {
   cli.eval = function coEval (cmd, context, filename, callback) {
@@ -78,6 +57,27 @@ function corepl (cli) {
   }
 
   return cli
+}
+
+function * openRepl (context) {
+  const r = repl.start({
+    prompt: context.argv.prompt,
+    completer: (line) => {
+      // TODO: implments auto completion in REPL by Shell suggestions.
+      // For now, it is just for disabling Node completion.
+      return []
+    }
+  })
+  const zignisHome = process.env.HOME + '/.zignis'
+  if (!fs.existsSync(zignisHome)) {
+    Utils.exec(`mkdir -p ${zignisHome}`)
+  }
+  replHistory(r, `${zignisHome}/.zignis_shell_history`)
+
+  // context即为REPL中的上下文环境
+  r.context = Object.assign(r.context, context)
+
+  corepl(r)
 }
 
 exports.builder = function (yargs) {

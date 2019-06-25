@@ -1,5 +1,5 @@
 {
-  "commandDir": "src/commands",
-  "hookDir": "src/hooks",
-  "pluginDir": "src/plugins"
+  "commandDir": "bin/commands",
+  "hookDir": "bin/hooks",
+  "pluginDir": "bin/plugins"
 }

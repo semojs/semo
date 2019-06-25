@@ -1,36 +1,39 @@
-const crypto = require('crypto')
-const path = require('path')
-const fs = require('fs-extra')
-const glob = require('glob')
-const { table, getBorderCharacters } = require('table')
-const findUp = require('find-up')
-const _ = require('lodash')
-const colorize = require('json-colorizer')
-const stringify = require('json-stringify-pretty-compact')
-const chalk = require('chalk')
-const randomatic = require('randomatic')
-const day = require('dayjs')
-const co = require('co')
-const shell = require('shelljs')
-const debug = require('debug')
-const debugCore = debug('zignis-core')
-const inquirer = require('inquirer')
-inquirer.registerPrompt('autocomplete', require('inquirer-autocomplete-prompt'))
-const fuzzy = require('fuzzy')
-const { execSync } = require('child_process')
-const objectHash = require('node-object-hash')
-const { hash } = objectHash({ sort: true })
-const emoji = require('node-emoji')
-const { dd, dump } = require('dumper.js')
-const getStdin = require('get-stdin')
-const NodeCache = require('node-cache')
+import crypto from 'crypto'
+import path from 'path'
+import fs from 'fs-extra'
+import glob from 'glob'
+import { table, getBorderCharacters } from 'table'
+import findUp from 'find-up'
+import _ from 'lodash'
+import colorize from 'json-colorizer'
+import stringify from 'json-stringify-pretty-compact'
+import chalk from 'chalk'
+import randomatic from 'randomatic'
+import day from 'dayjs'
+import co from 'co'
+import shell from 'shelljs'
+import debug from 'debug'
+import inquirer from 'inquirer'
+import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt'
+import fuzzy from 'fuzzy'
+import { execSync } from 'child_process'
+import objectHash from 'node-object-hash'
+import emoji from 'node-emoji'
+import { dd, dump } from 'dumper.js'
+import getStdin from 'get-stdin'
+import NodeCache from 'node-cache'
+import yargs from 'yargs'
 
-let cachedInstance
+inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt)
+const { hash } = objectHash({ sort: true })
+const debugCore = debug('zignis-core')
+
+let cachedInstance: NodeCache
 /**
  * Get Zignis internal cache instance
  * @returns {NodeCache}
  */
-const getInternalCache = function () {
+const getInternalCache = function (): NodeCache {
   if (!cachedInstance) {
     cachedInstance = new NodeCache({
       useClones: false
@@ -40,17 +43,22 @@ const getInternalCache = function () {
 }
 cachedInstance = getInternalCache()
 
+interface CachedNamespaceInstance {
+  [propName: string]: NodeCache;
+}
+
 /**
  * Get Zignis cache instance by namespace
  * @param {string} namespace
  * @returns {NodeCache}
  */
-const getCache = function (namespace) {
+const getCache = function (namespace: string): NodeCache {
   if (!namespace) {
     throw Error('Namespace is necessary.')
   }
 
-  let cachedNamespaceInstances = cachedInstance.get('cachedNamespaceInstances')
+  let cachedNamespaceInstances: CachedNamespaceInstance | undefined
+  cachedNamespaceInstances = cachedInstance.get('cachedNamespaceInstances')
 
   if (!cachedNamespaceInstances) {
     cachedNamespaceInstances = {}
@@ -63,6 +71,14 @@ const getCache = function (namespace) {
     cachedInstance.set('cachedNamespaceInstances', cachedNamespaceInstances)
   }
   return cachedNamespaceInstances[namespace]
+}
+
+interface IHookOption {
+  mode: 'assign' | 'merge' | 'push' | 'replace' | 'group';
+  useCache?: boolean;
+  include?: boolean | string[];
+  exclude?: boolean | string[];
+  opts?: any;
 }
 
 /**
@@ -79,8 +95,8 @@ const getCache = function (namespace) {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {array} options.opts opts will be sent to hook implementation
  */
-const invokeHook = function (hook, options = {}) {
-  const invokedHookCache = cachedInstance.get('invokedHookCache') || {}
+const invokeHook = function (hook: string, options: IHookOption = { mode: 'assign'}) {
+  const invokedHookCache: {[propName: string]: any} = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
     {
@@ -201,7 +217,7 @@ const invokeHook = function (hook, options = {}) {
         if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
           throw new Error(e.stack)
         } else {
-          error(e.message, 0)
+          error(e.message, false)
         }
       }
     }
@@ -228,19 +244,19 @@ const invokeHook = function (hook, options = {}) {
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function (command, module, yargs, basePath) {
+const extendSubCommand = function (command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
-
+  
   // load default commands
-  const currentCommand = command.split('/').pop()
-  if (fs.existsSync(path.resolve(basePath, currentCommand))) {
+  const currentCommand: string | undefined = command.split('/').pop()
+  if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
     yargs.commandDir(path.resolve(basePath, currentCommand))
   }
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin) {
+    Object.keys(plugins).map(function (plugin): void {
       if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
         yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
       }
@@ -261,9 +277,9 @@ const extendSubCommand = function (command, module, yargs, basePath) {
  * Same name plugins would be overriden orderly.
  * This function also influence final valid commands and configs.
  */
-const getAllPluginsMapping = function () {
-  let plugins = cachedInstance.get('plugins')
-  if (!plugins) {
+const getAllPluginsMapping = function (): {[propName: string]: string} {
+  let plugins: {[propName: string]: any} = cachedInstance.get('plugins') || {}
+  if (_.isEmpty(plugins)) {
     plugins = {}
 
     // process core plugins
@@ -271,7 +287,7 @@ const getAllPluginsMapping = function () {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../plugins')
       })
-      .map(function (plugin) {
+      .map(function (plugin): void {
         plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
@@ -280,7 +296,7 @@ const getAllPluginsMapping = function () {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../../../')
       })
-      .map(function (plugin) {
+      .map(function (plugin): void {
         plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
       })
 
@@ -289,33 +305,36 @@ const getAllPluginsMapping = function () {
       .sync('@*/zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../../../')
       })
-      .map(function (plugin) {
+      .map(function (plugin): void {
         if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
           plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
         }
       })
 
-    // process home npm plugins
-    glob
-      .sync('zignis-plugin-*', {
-        cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
-      })
-      .map(function (plugin) {
-        if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
-        }
-      })
+    if (process.env.HOME) {
+      // process home npm plugins
+      glob
+        .sync('zignis-plugin-*', {
+          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        })
+        .map(function (plugin): void {
+          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          }
+        })
+  
+      // process home npm scope plugins
+      glob
+        .sync('@*/zignis-plugin-*', {
+          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        })
+        .map(function (plugin): void {
+          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          }
+        })
 
-    // process home npm scope plugins
-    glob
-      .sync('@*/zignis-plugin-*', {
-        cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
-      })
-      .map(function (plugin) {
-        if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
-        }
-      })
+    }
 
     // process cwd npm plugins
     glob
@@ -370,7 +389,7 @@ const getAllPluginsMapping = function () {
 /**
  * Get application zignis config only.
  */
-const getApplicationConfig = function (cwd) {
+const getApplicationConfig = function (cwd: string | undefined = undefined) {
   try {
     const configPath = findUp.sync(['.zignisrc.json'], {
       cwd
@@ -395,11 +414,11 @@ const getApplicationConfig = function (cwd) {
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function () {
-  let pluginConfigs = cachedInstance.get('pluginConfigs')
+const getCombinedConfig = function (): {[propName: string]: any} {
+  let pluginConfigs: {[propName: string]: any} | undefined = cachedInstance.get('pluginConfigs')
 
   if (!pluginConfigs) {
-    if (fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
+    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
       pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
     } else {
       pluginConfigs = {}
@@ -420,14 +439,14 @@ const getCombinedConfig = function () {
     cachedInstance.set('pluginConfigs', pluginConfigs)
   }
 
-  return pluginConfigs
+  return pluginConfigs || {}
 }
 
 /**
  * Print message with format and color.
  * @param {mix} message Message to log
  */
-const log = function (message) {
+const log = function (message: any) {
   if (_.isArray(message) || _.isObject(message)) {
     console.log(colorize(stringify(message)))
   } else {
@@ -441,7 +460,7 @@ const log = function (message) {
  * @param {string} label Error log label
  * @param {integer} errorCode Error code
  */
-const error = function (message, exit = true, errorCode = 1) {
+const error = function (message: any, exit = true, errorCode = 1) {
   message = _.isString(message) ? { message } : message
   console.log(emoji.get(message.emoji || 'x'), ' ', chalk.red(message.message))
   if (exit) {
@@ -453,7 +472,7 @@ const error = function (message, exit = true, errorCode = 1) {
  * Print warn message with yellow color.
  * @param {mix} message Error message to log
  */
-const warn = function (message, exit = false, errorCode = 0) {
+const warn = function (message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.yellow(message.message))
   if (exit) {
@@ -465,7 +484,7 @@ const warn = function (message, exit = false, errorCode = 0) {
  * Print info message with green color.
  * @param {mix} message Error message to log
  */
-const info = function (message, exit = false, errorCode = 0) {
+const info = function (message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.cyan(message.message))
   if (exit) {
@@ -477,7 +496,7 @@ const info = function (message, exit = false, errorCode = 0) {
  * Print success message with green color.
  * @param {mix} message Error message to log
  */
-const success = function (message, exit = false, errorCode = 0) {
+const success = function (message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.green(message.message))
   if (exit) {
@@ -489,7 +508,7 @@ const success = function (message, exit = false, errorCode = 0) {
  * Compute md5.
  * @param {string} s
  */
-const md5 = function (s) {
+const md5 = function (s: string) {
   return crypto
     .createHash('md5')
     .update(s, 'utf8')
@@ -503,7 +522,7 @@ const md5 = function (s) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitComma = function (input) {
+const splitComma = function (input: string) {
   return splitByChar(input, ',')
 }
 
@@ -514,7 +533,7 @@ const splitComma = function (input) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitByChar = function (input, char) {
+const splitByChar = function (input: string, char: string) {
   const exp = new RegExp(char, 'g')
   return input.replace(exp, ' ').split(/\s+/)
 }
@@ -526,7 +545,7 @@ const splitByChar = function (input, char) {
  * @param {string} caption Table caption
  * @param {object} borderOptions Border options
  */
-const outputTable = function (columns, caption, borderOptions = {}) {
+const outputTable = function (columns: string[][], caption: string, borderOptions = {}) {
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -550,7 +569,7 @@ const outputTable = function (columns, caption, borderOptions = {}) {
  * @param {*} input yarns option input, could be string or array
  * @returns {array} Package list
  */
-const parsePackageNames = function (input) {
+const parsePackageNames = function (input: string | string[]) {
   if (_.isString(input)) {
     return splitComma(input)
   }
@@ -567,7 +586,7 @@ const parsePackageNames = function (input) {
  * @param {string} pkg package name
  * @param {array} paths search paths
  */
-const loadPackageInfo = function (pkg, paths) {
+const loadPackageInfo = function (pkg: string | undefined = undefined, paths = []): any {
   const packagePath = findUp.sync('package.json', {
     cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd()
   })
@@ -579,7 +598,7 @@ const loadPackageInfo = function (pkg, paths) {
  * @param {string} command Command to exec
  * @param {object} options Options stdio default is [0, 1, 2]
  */
-const exec = function (command, options = {}) {
+const exec = function (command: string, options: any = {}): any {
   if (!options.stdio) {
     options.stdio = [0, 1, 2]
   }
@@ -590,14 +609,14 @@ const exec = function (command, options = {}) {
  * Sleep a while of ms
  * @param {integer} ms
  */
-const sleep = ms => new Promise(resolve => setTimeout(resolve, ms))
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const delay = sleep
 
 /**
  * Zignis utils functions and references to common modules.
  * @module Utils
  */
-module.exports = {
+export {
   // npm packages
   /** [lodash](https://www.npmjs.com/package/lodash) reference, check [doc](https://lodash.com/docs). */
   _,

@@ -3,7 +3,7 @@ const path = require('path')
 
 const shell = require('shelljs')
 
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'new <name> [repo] [branch]'
 exports.aliases = 'n'

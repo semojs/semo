@@ -2,7 +2,7 @@ const co = require('co')
 const fs = require('fs')
 const path = require('path')
 const _ = require('lodash')
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'script [file]'
 exports.aliases = 'scr'

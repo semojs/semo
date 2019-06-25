@@ -1,15 +1,15 @@
 const path = require('path')
 const fs = require('fs')
 const co = require('co')
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'status'
 exports.aliases = 'st'
 exports.desc = 'Show environment status info'
 
-exports.builder = function (yargs) {}
+exports.builder = function () {}
 
-exports.handler = function (argv) {
+exports.handler = function () {
   co(function * () {
     // basic information
     const hookStatus = yield Utils.invokeHook('status', { mode: 'group' })

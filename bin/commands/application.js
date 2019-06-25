@@ -1,5 +1,5 @@
 
-const { Utils } = require('..')
+const { Utils } = require('../../lib')
 
 exports.command = 'application'
 exports.desc = 'Application command namespace.'
