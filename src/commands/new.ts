@@ -32,6 +32,7 @@ exports.builder = function(yargs: yargs.Argv) {
   })
 
   yargs.option('empty', {
+    alias: 'e',
     describe: 'force empty project, ignore repo'
   })
 
@@ -42,11 +43,13 @@ exports.builder = function(yargs: yargs.Argv) {
 
   yargs.option('add', {
     default: false,
+    alias: 'A',
     describe: 'add npm package to package.json dependencies'
   })
 
   yargs.option('add-dev', {
     default: false,
+    alias: 'D',
     describe: 'add npm package to package.json devDependencies'
   })
 

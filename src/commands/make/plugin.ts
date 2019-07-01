@@ -10,7 +10,6 @@ exports.desc = 'Generate a plugin structure'
 
 exports.builder = function(yargs: yargs.Argv) {
   yargs.option('force', {
-    default: false,
     describe: 'force creation, remove existed one',
     alias: 'f'
   })

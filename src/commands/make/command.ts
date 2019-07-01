@@ -10,16 +10,19 @@ exports.desc = 'Generate a command template'
 exports.builder = function(yargs: yargs.Argv) {
   yargs.option('extend', {
     default: false,
+    alias: 'E',
     describe: 'generate command in extend directory, e.g. extend=zignis'
   })
 
   yargs.option('plugin', {
     default: false,
+    alias: 'P',
     describe: 'generate command in plugin directory, e.g. plugin=xxx'
   })
 
   yargs.option('yield', {
     default: false,
+    alias: 'Y',
     describe: 'use yield style for generator and promoise'
   })
 }

@@ -11,13 +11,15 @@ exports.aliases = 'sh'
 
 function corepl(cli: repl.REPLServer) {
   // @ts-ignore
-  cli.eval = function coEval(cmd, context, filename, callback) {
+  cli.eval = function coEval(cmd: string, context, filename, callback) {
+    cmd = cmd.trim()
+
     if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       Utils.info('Bye.')
       process.exit(0)
     }
 
-    if (cmd.trim() === '?') {
+    if (cmd === '?') {
       console.log()
       Utils.outputTable(
         [
@@ -44,14 +46,18 @@ function corepl(cli: repl.REPLServer) {
     }
 
     if (
-      `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+shell\s+/) ||
-      `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+sh\s+/)
+      `${context.argv.prefix} ${cmd}`.match(/^zignis\s+shell\s+/) ||
+      `${context.argv.prefix} ${cmd}`.match(/^zignis\s+sh\s+/)
     ) {
       Utils.warn('Recursive call shell not allowed!')
       return callback()
     }
 
-    cmd = `${context.argv.prefix} ${cmd}`.trim()
+    if (`${context.argv.prefix} ${cmd}`.match(/^zignis\s+/)) {
+      cmd = `${context.argv.prefix} ${cmd} --exec-mode`
+    } else {
+      cmd = `${context.argv.prefix} ${cmd}`
+    }
 
     try {
       cmd && Utils.exec(cmd)

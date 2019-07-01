@@ -13,26 +13,32 @@ exports.aliases = 'i'
 exports.builder = function(yargs: yargs.Argv) {
   yargs.option('plugin', {
     default: false,
+    alias: 'P',
     describe: 'plugin mode'
   })
 
   yargs.option('force', {
-    default: false
+    alias: 'f',
+    describe: 'force init!'
   })
 
   yargs.option('add', {
     default: false,
+    alias: 'A',
     describe: 'add npm package to package.json dependencies'
   })
 
   yargs.option('add-dev', {
     default: false,
+    alias: 'D',
     describe: 'add npm package to package.json devDependencies'
   })
 }
 
 exports.handler = function(
   argv: yargs.Arguments & {
+    plugin: string
+    force: boolean
     add: string
     addDev: string
   }
@@ -54,7 +60,7 @@ exports.handler = function(
   let currentPath = path.resolve(process.cwd())
 
   return co(function*() {
-    const override =
+    const { override } =
       fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
         ? yield inquirer.prompt([
             {

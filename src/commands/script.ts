@@ -13,7 +13,7 @@ exports.desc = 'Execute a script'
 exports.builder = function(yargs: yargs.Argv) {
   const parsedArgv = yParser(process.argv.slice(2))
   let filePath = parsedArgv._[1]
-  if (!parsedArgv.help) {
+  if (!parsedArgv.help && !parsedArgv.h) {
     if (!fs.existsSync(filePath)) {
       filePath = path.resolve(process.cwd(), filePath)
     } else {
