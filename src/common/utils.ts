@@ -33,7 +33,7 @@ let cachedInstance: NodeCache
  * Get Zignis internal cache instance
  * @returns {NodeCache}
  */
-const getInternalCache = function (): NodeCache {
+const getInternalCache = function(): NodeCache {
   if (!cachedInstance) {
     cachedInstance = new NodeCache({
       useClones: false
@@ -44,7 +44,7 @@ const getInternalCache = function (): NodeCache {
 cachedInstance = getInternalCache()
 
 interface CachedNamespaceInstance {
-  [propName: string]: NodeCache;
+  [propName: string]: NodeCache
 }
 
 /**
@@ -52,7 +52,7 @@ interface CachedNamespaceInstance {
  * @param {string} namespace
  * @returns {NodeCache}
  */
-const getCache = function (namespace: string): NodeCache {
+const getCache = function(namespace: string): NodeCache {
   if (!namespace) {
     throw Error('Namespace is necessary.')
   }
@@ -74,11 +74,11 @@ const getCache = function (namespace: string): NodeCache {
 }
 
 interface IHookOption {
-  mode: 'assign' | 'merge' | 'push' | 'replace' | 'group';
-  useCache?: boolean;
-  include?: boolean | string[];
-  exclude?: boolean | string[];
-  opts?: any;
+  mode: 'assign' | 'merge' | 'push' | 'replace' | 'group'
+  useCache?: boolean
+  include?: boolean | string[]
+  exclude?: boolean | string[]
+  opts?: any
 }
 
 /**
@@ -95,8 +95,8 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {array} options.opts opts will be sent to hook implementation
  */
-const invokeHook = function (hook: string, options: IHookOption = { mode: 'assign'}) {
-  const invokedHookCache: {[propName: string]: any} = cachedInstance.get('invokedHookCache') || {}
+const invokeHook = function(hook: string, options: IHookOption = { mode: 'assign' }) {
+  const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
     {
@@ -109,7 +109,7 @@ const invokeHook = function (hook: string, options: IHookOption = { mode: 'assig
     options
   )
 
-  return co(function * () {
+  return co(function*() {
     const cacheKey = `${hook}:${hash(options)}`
     if (options.useCache && invokedHookCache[cacheKey]) {
       return invokedHookCache[cacheKey]
@@ -244,10 +244,10 @@ const invokeHook = function (hook: string, options: IHookOption = { mode: 'assig
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function (command: string, module: string, yargs: yargs.Argv, basePath: string): void {
+const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
-  
+
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
   if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
@@ -256,7 +256,7 @@ const extendSubCommand = function (command: string, module: string, yargs: yargs
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin): void {
+    Object.keys(plugins).map(function(plugin): void {
       if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
         yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
       }
@@ -277,8 +277,8 @@ const extendSubCommand = function (command: string, module: string, yargs: yargs
  * Same name plugins would be overriden orderly.
  * This function also influence final valid commands and configs.
  */
-const getAllPluginsMapping = function (): {[propName: string]: string} {
-  let plugins: {[propName: string]: any} = cachedInstance.get('plugins') || {}
+const getAllPluginsMapping = function(): { [propName: string]: string } {
+  let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
   if (_.isEmpty(plugins)) {
     plugins = {}
 
@@ -287,7 +287,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../plugins')
       })
-      .map(function (plugin): void {
+      .map(function(plugin): void {
         plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
@@ -296,7 +296,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../../../')
       })
-      .map(function (plugin): void {
+      .map(function(plugin): void {
         plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
       })
 
@@ -305,7 +305,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
       .sync('@*/zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../../../')
       })
-      .map(function (plugin): void {
+      .map(function(plugin): void {
         if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
           plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
         }
@@ -317,23 +317,22 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
         .sync('zignis-plugin-*', {
           cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
         })
-        .map(function (plugin): void {
-          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
-          }
-        })
-  
-      // process home npm scope plugins
-      glob
-        .sync('@*/zignis-plugin-*', {
-          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
-        })
-        .map(function (plugin): void {
+        .map(function(plugin): void {
           if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
             plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
           }
         })
 
+      // process home npm scope plugins
+      glob
+        .sync('@*/zignis-plugin-*', {
+          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        })
+        .map(function(plugin): void {
+          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
+            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          }
+        })
     }
 
     // process cwd npm plugins
@@ -341,7 +340,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
       .sync('zignis-plugin-*', {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
           plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
         }
@@ -352,7 +351,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
       .sync('@*/zignis-plugin-*', {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
           plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
         }
@@ -365,7 +364,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
         .sync('zignis-plugin-*', {
           cwd: path.resolve(process.cwd(), config.pluginDir)
         })
-        .map(function (plugin) {
+        .map(function(plugin) {
           if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
             plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
           }
@@ -389,7 +388,7 @@ const getAllPluginsMapping = function (): {[propName: string]: string} {
 /**
  * Get application zignis config only.
  */
-const getApplicationConfig = function (cwd: string | undefined = undefined) {
+const getApplicationConfig = function(cwd: string | undefined = undefined) {
   try {
     const configPath = findUp.sync(['.zignisrc.json'], {
       cwd
@@ -414,8 +413,8 @@ const getApplicationConfig = function (cwd: string | undefined = undefined) {
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function (): {[propName: string]: any} {
-  let pluginConfigs: {[propName: string]: any} | undefined = cachedInstance.get('pluginConfigs')
+const getCombinedConfig = function(): { [propName: string]: any } {
+  let pluginConfigs: { [propName: string]: any } | undefined = cachedInstance.get('pluginConfigs')
 
   if (!pluginConfigs) {
     if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
@@ -446,7 +445,7 @@ const getCombinedConfig = function (): {[propName: string]: any} {
  * Print message with format and color.
  * @param {mix} message Message to log
  */
-const log = function (message: any) {
+const log = function(message: any) {
   if (_.isArray(message) || _.isObject(message)) {
     console.log(colorize(stringify(message)))
   } else {
@@ -460,7 +459,7 @@ const log = function (message: any) {
  * @param {string} label Error log label
  * @param {integer} errorCode Error code
  */
-const error = function (message: any, exit = true, errorCode = 1) {
+const error = function(message: any, exit = true, errorCode = 1) {
   message = _.isString(message) ? { message } : message
   console.log(emoji.get(message.emoji || 'x'), ' ', chalk.red(message.message))
   if (exit) {
@@ -472,7 +471,7 @@ const error = function (message: any, exit = true, errorCode = 1) {
  * Print warn message with yellow color.
  * @param {mix} message Error message to log
  */
-const warn = function (message: any, exit = false, errorCode = 0) {
+const warn = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.yellow(message.message))
   if (exit) {
@@ -484,7 +483,7 @@ const warn = function (message: any, exit = false, errorCode = 0) {
  * Print info message with green color.
  * @param {mix} message Error message to log
  */
-const info = function (message: any, exit = false, errorCode = 0) {
+const info = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.cyan(message.message))
   if (exit) {
@@ -496,7 +495,7 @@ const info = function (message: any, exit = false, errorCode = 0) {
  * Print success message with green color.
  * @param {mix} message Error message to log
  */
-const success = function (message: any, exit = false, errorCode = 0) {
+const success = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message
   console.log(chalk.green(message.message))
   if (exit) {
@@ -508,7 +507,7 @@ const success = function (message: any, exit = false, errorCode = 0) {
  * Compute md5.
  * @param {string} s
  */
-const md5 = function (s: string) {
+const md5 = function(s: string) {
   return crypto
     .createHash('md5')
     .update(s, 'utf8')
@@ -522,7 +521,7 @@ const md5 = function (s: string) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitComma = function (input: string) {
+const splitComma = function(input: string) {
   return splitByChar(input, ',')
 }
 
@@ -533,7 +532,7 @@ const splitComma = function (input: string) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitByChar = function (input: string, char: string) {
+const splitByChar = function(input: string, char: string) {
   const exp = new RegExp(char, 'g')
   return input.replace(exp, ' ').split(/\s+/)
 }
@@ -545,7 +544,7 @@ const splitByChar = function (input: string, char: string) {
  * @param {string} caption Table caption
  * @param {object} borderOptions Border options
  */
-const outputTable = function (columns: string[][], caption: string, borderOptions = {}) {
+const outputTable = function(columns: string[][], caption: string, borderOptions = {}) {
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -569,7 +568,7 @@ const outputTable = function (columns: string[][], caption: string, borderOption
  * @param {*} input yarns option input, could be string or array
  * @returns {array} Package list
  */
-const parsePackageNames = function (input: string | string[]) {
+const parsePackageNames = function(input: string | string[]) {
   if (_.isString(input)) {
     return splitComma(input)
   }
@@ -586,9 +585,19 @@ const parsePackageNames = function (input: string | string[]) {
  * @param {string} pkg package name
  * @param {array} paths search paths
  */
-const loadPackageInfo = function (pkg: string | undefined = undefined, paths = []): any {
+const loadPackageInfo = function(pkg: string | undefined = undefined, paths = []): any {
   const packagePath = findUp.sync('package.json', {
     cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd()
+  })
+  return packagePath ? require(packagePath) : {}
+}
+
+/**
+ * Load core package.json
+ */
+const loadCorePackageInfo = function(): any {
+  const packagePath = findUp.sync('package.json', {
+    cwd: path.resolve('../../', __dirname)
   })
   return packagePath ? require(packagePath) : {}
 }
@@ -598,7 +607,7 @@ const loadPackageInfo = function (pkg: string | undefined = undefined, paths = [
  * @param {string} command Command to exec
  * @param {object} options Options stdio default is [0, 1, 2]
  */
-const exec = function (command: string, options: any = {}): any {
+const exec = function(command: string, options: any = {}): any {
   if (!options.stdio) {
     options.stdio = [0, 1, 2]
   }
@@ -654,7 +663,6 @@ export {
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
-
   // custom functions
   md5,
   delay,
@@ -675,6 +683,7 @@ export {
   getApplicationConfig,
   parsePackageNames,
   loadPackageInfo,
+  loadCorePackageInfo,
   exec,
   sleep,
   getInternalCache,

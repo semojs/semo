@@ -11,8 +11,8 @@ import yParser from 'yargs-parser'
 
 const debug = Utils.debug('zignis-core')
 debug('zignis started')
-const packageConfig = Utils.loadPackageInfo()
-updateNotifier({ pkg: packageConfig, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
+const pkg = Utils.loadCorePackageInfo()
+updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
   defer: false,
   isGlobal: true
 })
@@ -27,6 +27,8 @@ const config = Utils.getCombinedConfig()
 yargs.config(config)
 const plugins = Utils.getAllPluginsMapping()
 debug('zignis get plugins')
+
+const packageConfig = Utils.loadPackageInfo()
 
 // Load local commands
 if (packageConfig.name !== 'zignis') {
