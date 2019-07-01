@@ -1,12 +1,13 @@
-const fs = require('fs')
-const path = require('path')
-const chalk = require('chalk')
-const { Utils } = require('../../../lib')
+import fs from 'fs'
+import path from 'path'
+import chalk from 'chalk'
+import yargs from 'yargs'
+import { Utils } from '../..'
 
 exports.command = 'command <name> [description]'
 exports.desc = 'Generate a command template'
 
-exports.builder = function (yargs) {
+exports.builder = function(yargs: yargs.Argv) {
   yargs.option('extend', {
     default: false,
     describe: 'generate command in extend directory, e.g. extend=zignis'
@@ -23,8 +24,15 @@ exports.builder = function (yargs) {
   })
 }
 
-exports.handler = function (argv) {
-  let commandDir
+exports.handler = function(
+  argv: yargs.Arguments & {
+    extend: string
+    plugin: string
+    name: string
+    commandDir: string
+  }
+) {
+  let commandDir: string
   if (argv.extend) {
     let extendName = argv.extend
     if (extendName !== 'zignis' && extendName.indexOf('zignis-plugin-') !== 0) {

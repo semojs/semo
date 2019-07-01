@@ -1,12 +1,13 @@
-const { Utils } = require('../../lib')
+import yargs from 'yargs'
+import { Utils } from '..'
 
 exports.command = 'hook'
 exports.desc = 'Show hook info'
 
-exports.builder = function (yargs) {}
+exports.builder = function(yargs: yargs.Argv) {}
 
-exports.handler = function (argv) {
-  Utils.co(function * () {
+exports.handler = function(argv: yargs.Arguments) {
+  Utils.co(function*() {
     const hookInfo = yield Utils.invokeHook('hook', {
       mode: 'group'
     })
@@ -18,10 +19,7 @@ exports.handler = function (argv) {
           realHook = hook
         } else {
           let pluginShortName = k.substring('zignis-plugin-'.length)
-          realHook =
-            hook.indexOf(`${pluginShortName}_`) === 0
-              ? hook
-              : `${pluginShortName}_${hook}`
+          realHook = hook.indexOf(`${pluginShortName}_`) === 0 ? hook : `${pluginShortName}_${hook}`
         }
         columns.push([`hook_${realHook}`, k, hookInfo[k][hook]])
       })

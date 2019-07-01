@@ -1,13 +1,14 @@
-const fs = require('fs')
-const path = require('path')
-const shell = require('shelljs')
-const { Utils } = require('../../../lib')
+import fs from 'fs'
+import path from 'path'
+import shell from 'shelljs'
+import yargs from 'yargs'
+import { Utils } from '../..'
 
 exports.command = 'plugin <name>'
 exports.desc = 'Generate a plugin structure'
 // exports.aliases = ''
 
-exports.builder = function (yargs) {
+exports.builder = function(yargs: yargs.Argv) {
   yargs.option('force', {
     default: false,
     describe: 'force creation, remove existed one',
@@ -15,7 +16,12 @@ exports.builder = function (yargs) {
   })
 }
 
-exports.handler = function (argv) {
+exports.handler = function(
+  argv: yargs.Arguments & {
+    pluginDir: string
+    name: string
+  }
+) {
   if (!argv.pluginDir || !fs.existsSync(argv.pluginDir)) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }

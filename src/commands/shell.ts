@@ -1,15 +1,17 @@
-const replHistory = require('repl.history')
-const fs = require('fs')
-const repl = require('repl')
+import replHistory from 'repl.history'
+import fs from 'fs'
+import repl from 'repl'
+import yargs from 'yargs'
 
-const { Utils } = require('../../lib')
+import { Utils } from '..'
 
 exports.command = 'shell'
 exports.desc = 'Shell for Zignis'
 exports.aliases = 'sh'
 
-function corepl (cli) {
-  cli.eval = function coEval (cmd, context, filename, callback) {
+function corepl(cli: repl.REPLServer) {
+  // @ts-ignore
+  cli.eval = function coEval(cmd, context, filename, callback) {
     if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       Utils.info('Bye.')
       process.exit(0)
@@ -17,11 +19,14 @@ function corepl (cli) {
 
     if (cmd.trim() === '?') {
       console.log()
-      Utils.outputTable([
-        ['quit', 'Quit the shell, alias: exit, q.'],
-        ['prefix', 'You can change prefix option at any time.'],
-        ['?', 'Show this help info.']
-      ], 'Internal commands:')
+      Utils.outputTable(
+        [
+          ['quit', 'Quit the shell, alias: exit, q.'],
+          ['prefix', 'You can change prefix option at any time.'],
+          ['?', 'Show this help info.']
+        ],
+        'Internal commands:'
+      )
 
       Utils.info(`Current prefix: ${Utils.chalk.yellow(context.argv.prefix || '[empty]')}`)
       console.log()
@@ -32,11 +37,16 @@ function corepl (cli) {
       let prefix = Utils.splitByChar(cmd, '=')
       prefix.shift()
       context.argv.prefix = prefix.join(' ').trim()
-      Utils.success(`Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`)
+      Utils.success(
+        `Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`
+      )
       return callback()
     }
 
-    if (`${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+shell\s+/) || `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+sh\s+/)) {
+    if (
+      `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+shell\s+/) ||
+      `${context.argv.prefix} ${cmd}`.trim().match(/^zignis\s+sh\s+/)
+    ) {
       Utils.warn('Recursive call shell not allowed!')
       return callback()
     }
@@ -59,10 +69,10 @@ function corepl (cli) {
   return cli
 }
 
-function * openRepl (context) {
-  const r = repl.start({
+function* openRepl(context: any): any {
+  const r: repl.REPLServer = repl.start({
     prompt: context.argv.prompt,
-    completer: (line) => {
+    completer: () => {
       // TODO: implments auto completion in REPL by Shell suggestions.
       // For now, it is just for disabling Node completion.
       return []
@@ -74,13 +84,14 @@ function * openRepl (context) {
   }
   replHistory(r, `${zignisHome}/.zignis_shell_history`)
 
+  // @ts-ignore
   // context即为REPL中的上下文环境
   r.context = Object.assign(r.context, context)
 
   corepl(r)
 }
 
-exports.builder = function (yargs) {
+exports.builder = function(yargs: yargs.Argv) {
   yargs.option('prompt', {
     default: '$ ',
     describe: 'Prompt for input.'
@@ -97,8 +108,8 @@ exports.builder = function (yargs) {
   })
 }
 
-exports.handler = function (argv) {
-  Utils.co(function * () {
+exports.handler = function(argv: yargs.Arguments) {
+  Utils.co(function*() {
     let context = { argv }
 
     return yield openRepl(context)

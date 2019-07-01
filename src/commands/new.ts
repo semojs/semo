@@ -1,21 +1,22 @@
-const fs = require('fs')
-const path = require('path')
+import fs from 'fs'
+import path from 'path'
+import shell from 'shelljs'
+import yargs from 'yargs'
 
-const shell = require('shelljs')
-
-const { Utils } = require('../../lib')
+import { Utils } from '..'
 
 exports.command = 'new <name> [repo] [branch]'
 exports.aliases = 'n'
 exports.desc = 'Create a new project from specific repo'
 
-exports.builder = function (yargs) {
+exports.builder = function(yargs: yargs.Argv) {
   yargs.option('yarn', {
     default: false,
     describe: 'use yarn command'
   })
 
   yargs.option('yes', {
+    default: true,
     alias: 'y',
     describe: 'run npm/yarn init with --yes'
   })
@@ -55,11 +56,18 @@ exports.builder = function (yargs) {
   })
 }
 
-exports.handler = function (argv) {
+exports.handler = function(
+  argv: yargs.Arguments & {
+    name: string
+    select: string
+    add: string
+    addDev: string
+  }
+) {
   argv.repo = argv.repo || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
   argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
 
-  Utils.co(function * () {
+  Utils.co(function*() {
     if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
         shell.rm('-rf', path.resolve(process.cwd(), argv.name))
@@ -99,28 +107,25 @@ exports.handler = function (argv) {
           if (Object.keys(defaultRepos).length === 0) {
             Utils.error('No pre-defined repos available.')
           }
-          const select = defaultRepos[argv.select] ? argv.select : Object.keys(defaultRepos).find(key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1)
-          if (defaultRepos[select]) {
+          const select = defaultRepos[argv.select]
+            ? argv.select
+            : Object.keys(defaultRepos).find(
+                key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1
+              )
+          if (select && defaultRepos[select]) {
             argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
             argv.branch = defaultRepos[select].branch || 'master'
           } else {
-            const answers = yield Utils.inquirer
-              .prompt([
-                {
-                  type: 'list',
-                  name: 'selected',
-                  message: `Please choose a pre-defined repo to continue:`,
-                  choices: Object.keys(defaultRepos).map(key => {
-                    return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
-                  }),
-                  validate: function (answers) {
-                    if (answers.length < 1) {
-                      return 'Please choose at least one.'
-                    }
-                    return true
-                  }
-                }
-              ])
+            const answers = yield Utils.inquirer.prompt([
+              {
+                type: 'list',
+                name: 'selected',
+                message: `Please choose a pre-defined repo to continue:`,
+                choices: Object.keys(defaultRepos).map(key => {
+                  return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
+                })
+              }
+            ])
 
             argv.repo = defaultRepos[answers.selected].repo || Utils.error('Repo not found')
             argv.branch = defaultRepos[answers.selected].branch || 'master'

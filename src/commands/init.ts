@@ -1,15 +1,16 @@
-const inquirer = require('inquirer')
-const chalk = require('chalk')
-const fs = require('fs')
-const path = require('path')
-const co = require('co')
-const { Utils } = require('../../lib')
+import inquirer from 'inquirer'
+import chalk from 'chalk'
+import fs from 'fs'
+import path from 'path'
+import co from 'co'
+import yargs from 'yargs'
+import { Utils } from '..'
 
 exports.command = 'init'
 exports.desc = 'Init basic zignis config file and directories'
 exports.aliases = 'i'
 
-exports.builder = function (yargs) {
+exports.builder = function(yargs: yargs.Argv) {
   yargs.option('plugin', {
     default: false,
     describe: 'plugin mode'
@@ -30,34 +31,39 @@ exports.builder = function (yargs) {
   })
 }
 
-exports.handler = function (argv) {
+exports.handler = function(
+  argv: yargs.Arguments & {
+    add: string
+    addDev: string
+  }
+) {
   let defaultZignisrc = argv.plugin
     ? {
-      commandDir: 'src/commands',
-      extendDir: 'src/extends',
-      hookDir: 'src/hooks'
-    }
+        commandDir: 'src/commands',
+        extendDir: 'src/extends',
+        hookDir: 'src/hooks'
+      }
     : {
-      commandDir: 'bin/zignis/commands',
-      pluginDir: 'bin/zignis/plugins',
-      extendDir: 'bin/zignis/extends',
-      scriptDir: 'bin/zignis/scripts',
-      hookDir: 'bin/zignis/hooks'
-    }
+        commandDir: 'bin/zignis/commands',
+        pluginDir: 'bin/zignis/plugins',
+        extendDir: 'bin/zignis/extends',
+        scriptDir: 'bin/zignis/scripts',
+        hookDir: 'bin/zignis/hooks'
+      }
 
   let currentPath = path.resolve(process.cwd())
 
-  return co(function * () {
+  return co(function*() {
     const override =
       fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
         ? yield inquirer.prompt([
-          {
-            type: 'confirm',
-            name: 'override',
-            message: '.zignisrc.json exists, override?',
-            default: false
-          }
-        ])
+            {
+              type: 'confirm',
+              name: 'override',
+              message: '.zignisrc.json exists, override?',
+              default: false
+            }
+          ])
         : true
 
     if (override === false) {
@@ -70,9 +76,11 @@ exports.handler = function (argv) {
 
     const dirs = Object.keys(defaultZignisrc)
     dirs.forEach(dir => {
-      if (!fs.existsSync(`${currentPath}/${defaultZignisrc[dir]}`)) {
-        Utils.exec(`mkdir -p ${currentPath}/${defaultZignisrc[dir]}`)
-        console.log(chalk.green(`${currentPath}/${defaultZignisrc[dir]} created!`))
+      // @ts-ignore
+      const loc = defaultZignisrc[dir]
+      if (!fs.existsSync(`${currentPath}/${loc}`)) {
+        Utils.exec(`mkdir -p ${currentPath}/${loc}`)
+        console.log(chalk.green(`${currentPath}/${loc} created!`))
       }
     })
 

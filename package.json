@@ -12,7 +12,7 @@
   },
   "license": "MIT",
   "bin": {
-    "zignis": "bin/main.js"
+    "zignis": "lib/main.js"
   },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -70,7 +70,7 @@
     "typescript": "^3.5.2"
   },
   "scripts": {
-    "zignis": "node bin/main.js",
+    "zignis": "node lib/main.js",
     "build": "tsc",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build"

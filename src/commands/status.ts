@@ -1,19 +1,19 @@
-const path = require('path')
-const fs = require('fs')
-const co = require('co')
-const { Utils } = require('../../lib')
+import path from 'path'
+import fs from 'fs'
+import co from 'co'
+import { Utils } from '..'
 
 exports.command = 'status'
 exports.aliases = 'st'
 exports.desc = 'Show environment status info'
 
-exports.builder = function () {}
+exports.builder = function() {}
 
-exports.handler = function () {
-  co(function * () {
+exports.handler = function() {
+  co(function*() {
     // basic information
     const hookStatus = yield Utils.invokeHook('status', { mode: 'group' })
-    const columns = []
+    const columns: string[][] = []
     let kvs = hookStatus.zignis ? hookStatus.zignis : {}
     Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
     Utils.outputTable(columns, 'Core Information')
@@ -29,12 +29,12 @@ exports.handler = function () {
         }
 
         if (hookStatus && hookStatus[plugin]) {
-          Object.keys(hookStatus[plugin]).map(function (key) {
+          Object.keys(hookStatus[plugin]).map(function(key) {
             columns.push([key, hookStatus[plugin][key]])
           })
         }
 
-        if (plugins[plugin].indexOf(process.env.HOME) === 0) {
+        if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
           columns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
         } else {
           columns.push(['location', plugins[plugin]])
@@ -47,9 +47,9 @@ exports.handler = function () {
     // application information
     if (hookStatus['application']) {
       let plugin = 'application'
-      const columns = []
+      const columns: string[][] = []
       if (hookStatus && hookStatus[plugin]) {
-        Object.keys(hookStatus[plugin]).forEach(function (key) {
+        Object.keys(hookStatus[plugin]).forEach(function(key) {
           columns.push([key, hookStatus[plugin][key]])
         })
       }

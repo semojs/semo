@@ -1,7 +1,7 @@
-const path = require('path')
-const os = require('os')
-const envinfo = require('envinfo')
-const { Utils } = require('../../lib')
+import path from 'path'
+import os from 'os'
+import envinfo from 'envinfo'
+import { Utils } from '..'
 
 module.exports = {
   hook_hook: {
@@ -22,7 +22,7 @@ module.exports = {
     }
   },
 
-  * hook_status () {
+  *hook_status() {
     let info = JSON.parse(
       yield envinfo.run(
         {
