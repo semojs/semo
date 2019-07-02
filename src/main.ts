@@ -40,8 +40,8 @@ if (packageConfig.name !== 'zignis') {
 // Load plugin commands
 if (plugins) {
   Object.keys(plugins).map(function(plugin) {
-    if (fs.existsSync(path.resolve(plugins[plugin], 'src/commands'))) {
-      yargs.commandDir(path.resolve(plugins[plugin], 'src/commands'))
+    if (fs.existsSync(path.resolve(plugins[plugin], config.pluginOriginalConfigs[plugin].commandDir))) {
+      yargs.commandDir(path.resolve(plugins[plugin], config.pluginOriginalConfigs[plugin].commandDir))
     }
   })
 }

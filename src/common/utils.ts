@@ -414,9 +414,10 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
  * Get commbined config from whole environment.
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
-  let pluginConfigs: { [propName: string]: any } | undefined = cachedInstance.get('pluginConfigs')
+  let pluginConfigs: { [propName: string]: any } = cachedInstance.get('pluginConfigs') || {}
+  let pluginOriginalConfigs: { [propName: string]: any } = {}
 
-  if (!pluginConfigs) {
+  if (_.isEmpty(pluginConfigs)) {
     if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
       pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
     } else {
@@ -428,6 +429,7 @@ const getCombinedConfig = function(): { [propName: string]: any } {
       if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
         const pluginConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
         pluginConfigs = _.merge(pluginConfigs, pluginConfig)
+        pluginOriginalConfigs[plugin] = pluginConfig
       }
     })
 
@@ -435,6 +437,8 @@ const getCombinedConfig = function(): { [propName: string]: any } {
     let rcConfig = configPath ? require(configPath) : {}
 
     pluginConfigs = _.merge(pluginConfigs, rcConfig)
+    pluginConfigs.pluginOriginalConfigs = pluginOriginalConfigs
+
     cachedInstance.set('pluginConfigs', pluginConfigs)
   }
 
