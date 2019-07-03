@@ -1,4 +1,3 @@
-import co from 'co'
 import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
@@ -6,11 +5,11 @@ import yargs from 'yargs'
 import yParser from 'yargs-parser'
 import { Utils } from '..'
 
-exports.command = 'script [file]'
-exports.aliases = 'scr'
-exports.desc = 'Execute a script'
+export const command = 'script [file]'
+export const aliases = 'scr'
+export const desc = 'Execute a script'
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   const parsedArgv = yParser(process.argv.slice(2))
   let filePath = parsedArgv._[1]
   if (!parsedArgv.help && !parsedArgv.h) {
@@ -27,8 +26,8 @@ exports.builder = function(yargs: yargs.Argv) {
   }
 }
 
-exports.handler = function(argv: yargs.Arguments & { file: string }) {
-  co(function*() {
+export const handler = async function(argv: yargs.Arguments & { file: string }) {
+  try {
     let filePath = argv.file
     if (!fs.existsSync(filePath)) {
       filePath = path.resolve(process.cwd(), argv.file)
@@ -40,6 +39,8 @@ exports.handler = function(argv: yargs.Arguments & { file: string }) {
     if (!_.isFunction(scriptModule.handler)) {
       throw new Error('Script handler not exist!')
     }
-    yield scriptModule.handler(argv)
-  }).catch(e => Utils.error(e.stack))
+    await scriptModule.handler(argv)
+  } catch(e) {
+    Utils.error(e.stack)
+  }
 }

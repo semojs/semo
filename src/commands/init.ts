@@ -2,15 +2,14 @@ import inquirer from 'inquirer'
 import chalk from 'chalk'
 import fs from 'fs'
 import path from 'path'
-import co from 'co'
 import yargs from 'yargs'
 import { Utils } from '..'
 
-exports.command = 'init'
-exports.desc = 'Init basic zignis config file and directories'
-exports.aliases = 'i'
+export const command = 'init'
+export const desc = 'Init basic zignis config file and directories'
+export const aliases = 'i'
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('plugin', {
     default: false,
     alias: 'P',
@@ -35,14 +34,7 @@ exports.builder = function(yargs: yargs.Argv) {
   })
 }
 
-exports.handler = function(
-  argv: yargs.Arguments & {
-    plugin: string
-    force: boolean
-    add: string
-    addDev: string
-  }
-) {
+export const handler = async function(argv: any) {
   let defaultZignisrc = argv.plugin
     ? {
         commandDir: 'src/commands',
@@ -59,10 +51,10 @@ exports.handler = function(
 
   let currentPath = path.resolve(process.cwd())
 
-  return co(function*() {
+  try {
     const { override } =
       fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
-        ? yield inquirer.prompt([
+        ? await inquirer.prompt([
             {
               type: 'confirm',
               name: 'override',
@@ -70,16 +62,13 @@ exports.handler = function(
               default: false
             }
           ])
-        : true
-
+        : { override: true }
     if (override === false) {
       console.log(chalk.yellow('User aborted!'))
       return
     }
-
     fs.writeFileSync(`${currentPath}/.zignisrc.json`, JSON.stringify(defaultZignisrc, null, 2))
     console.log(chalk.green('Default .zignisrc created!'))
-
     const dirs = Object.keys(defaultZignisrc)
     dirs.forEach(dir => {
       // @ts-ignore
@@ -89,7 +78,6 @@ exports.handler = function(
         console.log(chalk.green(`${currentPath}/${loc} created!`))
       }
     })
-
     // add packages
     const addPackage = Utils.parsePackageNames(argv.add)
     const addPackageDev = Utils.parsePackageNames(argv.addDev)
@@ -100,7 +88,6 @@ exports.handler = function(
         Utils.exec(`npm install ${addPackage.join(' ')}`)
       }
     }
-
     if (addPackageDev.length > 0) {
       if (argv.yarn) {
         Utils.exec(`yarn add ${addPackageDev.join(' ')} -D`)
@@ -108,5 +95,7 @@ exports.handler = function(
         Utils.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
       }
     }
-  }).catch(e => Utils.error(e.stack))
+  } catch (e) {
+    return Utils.error(e.stack)
+  }
 }

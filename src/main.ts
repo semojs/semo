@@ -56,35 +56,36 @@ if (
 }
 
 debug('zignis set commands')
+;(async () => {
+  try {
+    if (!parsedArgv.getYargsCompletions) {
+      debug('zignis before command hook')
+      let beforeHooks = await Utils.invokeHook('beforeCommand')
+      Object.keys(beforeHooks).map(function(hook) {
+        beforeHooks[hook](parsedArgv, yargs)
+      })
+    }
 
-co(function*() {
-  if (!parsedArgv.getYargsCompletions) {
-    debug('zignis before command hook')
-    let beforeHooks = yield Utils.invokeHook('beforeCommand')
-    Object.keys(beforeHooks).map(function(hook) {
-      beforeHooks[hook](parsedArgv, yargs)
-    })
-  }
+    // eslint-disable-next-line
+    yargs
+      .help()
+      .completion('completion', 'Generate completion script')
+      .alias('h', 'help')
+      .exitProcess(false)
+      .recommendCommands()
+      .epilog('Find more information at https://zignis.js.org')
+      .wrap(Math.min(120, yargs.terminalWidth())).argv
 
-  // eslint-disable-next-line
-  yargs
-    .help()
-    .completion('completion', 'Generate completion script')
-    .alias('h', 'help')
-    .exitProcess(false)
-    .recommendCommands()
-    .epilog('Find more information at https://zignis.js.org')
-    .wrap(Math.min(120, yargs.terminalWidth())).argv
-
-  if (!parsedArgv.getYargsCompletions) {
-    let afterHooks = yield Utils.invokeHook('afterCommand')
-    Object.keys(afterHooks).map(function(hook) {
-      afterHooks[hook](parsedArgv, yargs)
-    })
-    debug('zignis after command hook')
+    if (!parsedArgv.getYargsCompletions) {
+      let afterHooks = await Utils.invokeHook('afterCommand')
+      Object.keys(afterHooks).map(function(hook) {
+        afterHooks[hook](parsedArgv, yargs)
+      })
+      debug('zignis after command hook')
+    }
+  } catch (e) {
+    if (!e.name || e.name !== 'YError') {
+      Utils.error(e.stack)
+    }
   }
-}).catch(e => {
-  if (!e.name || e.name !== 'YError') {
-    Utils.error(e.stack)
-  }
-})
+})()

@@ -74,7 +74,7 @@ const getCache = function(namespace: string): NodeCache {
 }
 
 interface IHookOption {
-  mode: 'assign' | 'merge' | 'push' | 'replace' | 'group'
+  mode?: 'assign' | 'merge' | 'push' | 'replace' | 'group'
   useCache?: boolean
   include?: boolean | string[]
   exclude?: boolean | string[]
@@ -86,7 +86,7 @@ interface IHookOption {
  * Plugins implement hook in `module.exports`, could be generator function or promise function or non-function
  * For non-function, it will be used as hook data directly, likely to be returned by function
  * @example
- * const hookReturn = yield Utils.invokeHook('hook')
+ * const hookReturn = await Utils.invokeHook('hook')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
  * @param {string} options Options
  * @param {string} options.mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
@@ -95,7 +95,7 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {array} options.opts opts will be sent to hook implementation
  */
-const invokeHook = function(hook: string, options: IHookOption = { mode: 'assign' }) {
+const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -109,7 +109,7 @@ const invokeHook = function(hook: string, options: IHookOption = { mode: 'assign
     options
   )
 
-  return co(function*() {
+  try {
     const cacheKey = `${hook}:${hash(options)}`
     if (options.useCache && invokedHookCache[cacheKey]) {
       return invokedHookCache[cacheKey]
@@ -185,7 +185,7 @@ const invokeHook = function(hook: string, options: IHookOption = { mode: 'assign
           if (loadedPlugin[hook]) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = yield loadedPlugin[hook](options.opts, pluginsReturn) || {}
+              pluginReturn = (await loadedPlugin[hook](options.opts, pluginsReturn)) || {}
             } else {
               pluginReturn = loadedPlugin[hook]
             }
@@ -226,9 +226,9 @@ const invokeHook = function(hook: string, options: IHookOption = { mode: 'assign
     cachedInstance.set('invokedHookCache', invokedHookCache)
 
     return pluginsReturn
-  }).catch(e => {
+  } catch (e) {
     throw new Error(e.stack)
-  })
+  }
 }
 
 /**

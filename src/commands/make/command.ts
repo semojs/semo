@@ -4,10 +4,10 @@ import chalk from 'chalk'
 import yargs from 'yargs'
 import { Utils } from '../..'
 
-exports.command = 'command <name> [description]'
-exports.desc = 'Generate a command template'
+export const command = 'command <name> [description]'
+export const desc = 'Generate a command template'
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('extend', {
     default: false,
     alias: 'E',
@@ -27,14 +27,7 @@ exports.builder = function(yargs: yargs.Argv) {
   })
 }
 
-exports.handler = function(
-  argv: yargs.Arguments & {
-    extend: string
-    plugin: string
-    name: string
-    commandDir: string
-  }
-) {
+export const handler = function(argv: any) {
   let commandDir: string
   if (argv.extend) {
     let extendName = argv.extend

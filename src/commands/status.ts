@@ -1,18 +1,17 @@
 import path from 'path'
 import fs from 'fs'
-import co from 'co'
 import { Utils } from '..'
 
-exports.command = 'status'
-exports.aliases = 'st'
-exports.desc = 'Show environment status info'
+export const command = 'status'
+export const aliases = 'st'
+export const desc = 'Show environment status info'
 
-exports.builder = function() {}
+export const builder = function() {}
 
-exports.handler = function() {
-  co(function*() {
+export const handler = async function() {
+  try {
     // basic information
-    const hookStatus = yield Utils.invokeHook('status', { mode: 'group' })
+    const hookStatus = await Utils.invokeHook('status', { mode: 'group' })
     const columns: string[][] = []
     let kvs = hookStatus.zignis ? hookStatus.zignis : {}
     Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
@@ -57,5 +56,7 @@ exports.handler = function() {
     }
 
     process.exit(0)
-  }).catch(e => Utils.error(e.stack))
+  } catch(e) {
+    Utils.error(e.stack)
+  }
 }

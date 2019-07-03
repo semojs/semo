@@ -5,19 +5,12 @@ import _ from 'lodash'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
 
-exports.command = 'script <name>'
-exports.desc = 'Generate a zignis script file'
+export const command = 'script <name>'
+export const desc = 'Generate a zignis script file'
 
-exports.builder = function(yargs: yargs.Argv) {
-  // yargs.option('option', {default, describe, alias})
-}
+export const builder = function(yargs: yargs.Argv) {}
 
-exports.handler = function(
-  argv: yargs.Arguments & {
-    scriptDir: string
-    name: string
-  }
-) {
+export const handler = function(argv: any) {
   if (!argv.scriptDir || !fs.existsSync(argv.scriptDir)) {
     console.log(chalk.red('"scriptDir" missing in config file or not exist in current directory!'))
     return

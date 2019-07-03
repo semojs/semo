@@ -2,14 +2,13 @@ import fs from 'fs'
 import path from 'path'
 import shell from 'shelljs'
 import yargs from 'yargs'
-
 import { Utils } from '..'
 
-exports.command = 'new <name> [repo] [branch]'
-exports.aliases = 'n'
-exports.desc = 'Create a new project from specific repo'
+export const command = 'new <name> [repo] [branch]'
+export const aliases = 'n'
+export const desc = 'Create a new project from specific repo'
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('yarn', {
     default: false,
     describe: 'use yarn command'
@@ -59,7 +58,7 @@ exports.builder = function(yargs: yargs.Argv) {
   })
 }
 
-exports.handler = function(
+export const handler = async function(
   argv: yargs.Arguments & {
     name: string
     select: string
@@ -70,7 +69,7 @@ exports.handler = function(
   argv.repo = argv.repo || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
   argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
 
-  Utils.co(function*() {
+  try {
     if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
         shell.rm('-rf', path.resolve(process.cwd(), argv.name))
@@ -106,7 +105,7 @@ exports.handler = function(
         Utils.success('New .git directory has been created!')
       } else {
         if (argv.select) {
-          const defaultRepos = yield Utils.invokeHook('new_repo')
+          const defaultRepos = await Utils.invokeHook('new_repo')
           if (Object.keys(defaultRepos).length === 0) {
             Utils.error('No pre-defined repos available.')
           }
@@ -119,7 +118,7 @@ exports.handler = function(
             argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
             argv.branch = defaultRepos[select].branch || 'master'
           } else {
-            const answers = yield Utils.inquirer.prompt([
+            const answers: any = await Utils.inquirer.prompt([
               {
                 type: 'list',
                 name: 'selected',
@@ -186,5 +185,7 @@ exports.handler = function(
       }
       Utils.success('Initial basic zignis structure complete!')
     }
-  }).catch(e => Utils.error(e.stack))
+  } catch(e) {
+    Utils.error(e.stack)
+  }
 }

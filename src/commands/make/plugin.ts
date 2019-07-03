@@ -4,23 +4,17 @@ import shell from 'shelljs'
 import yargs from 'yargs'
 import { Utils } from '../..'
 
-exports.command = 'plugin <name>'
-exports.desc = 'Generate a plugin structure'
-// exports.aliases = ''
+export const command = 'plugin <name>'
+export const desc = 'Generate a plugin structure'
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('force', {
     describe: 'force creation, remove existed one',
     alias: 'f'
   })
 }
 
-exports.handler = function(
-  argv: yargs.Arguments & {
-    pluginDir: string
-    name: string
-  }
-) {
+export const handler = function(argv: any) {
   if (!argv.pluginDir || !fs.existsSync(argv.pluginDir)) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }

@@ -5,7 +5,7 @@ import _ from 'lodash'
 import replHistory from 'repl.history'
 import yargs = require('yargs')
 
-const { Utils } = require('..')
+import { Utils } from '..'
 
 function corepl(cli: repl.REPLServer) {
   var originalEval = cli.eval
@@ -60,11 +60,11 @@ function corepl(cli: repl.REPLServer) {
   return cli
 }
 
-exports.command = 'repl'
-exports.aliases = 'r'
-exports.desc = 'Play with REPL'
+export const command = 'repl'
+export const aliases = 'r'
+export const desc = 'Play with REPL'
 
-function* openRepl(context: any): any {
+async function openRepl(context: any): Promise<any> {
   const r = repl.start('>>> ')
   const zignisHome = process.env.HOME + '/.zignis'
   if (!fs.existsSync(zignisHome)) {
@@ -79,19 +79,19 @@ function* openRepl(context: any): any {
   corepl(r)
 }
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('hook', {
     describe: 'if or not load all plugins repl hook'
   })
 }
 
-exports.handler = function(argv: yargs.Arguments) {
+export const handler = async function(argv: any) {
   argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
-  Utils.co(function*() {
+  try {
     let context = { Utils, argv }
 
     if (argv.hook) {
-      const pluginsReturn = yield Utils.invokeHook(
+      const pluginsReturn = await Utils.invokeHook(
         'repl',
         _.isBoolean(argv.hook)
           ? {}
@@ -102,6 +102,8 @@ exports.handler = function(argv: yargs.Arguments) {
       context = Object.assign(context, pluginsReturn)
     }
 
-    return yield openRepl(context)
-  }).catch((e: Error) => Utils.error(e.stack))
+    return await openRepl(context)
+  } catch(e) {
+    Utils.error(e.stack)
+  }
 }

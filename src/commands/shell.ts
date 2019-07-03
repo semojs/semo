@@ -5,9 +5,9 @@ import yargs from 'yargs'
 
 import { Utils } from '..'
 
-exports.command = 'shell'
-exports.desc = 'Shell for Zignis'
-exports.aliases = 'sh'
+export const command = 'shell'
+export const desc = 'Shell for Zignis'
+export const aliases = 'sh'
 
 function corepl(cli: repl.REPLServer) {
   // @ts-ignore
@@ -75,7 +75,7 @@ function corepl(cli: repl.REPLServer) {
   return cli
 }
 
-function* openRepl(context: any): any {
+async function openRepl(context: any): Promise<any> {
   const r: repl.REPLServer = repl.start({
     prompt: context.argv.prompt,
     completer: () => {
@@ -97,7 +97,7 @@ function* openRepl(context: any): any {
   corepl(r)
 }
 
-exports.builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: yargs.Argv) {
   yargs.option('prompt', {
     default: '$ ',
     describe: 'Prompt for input.'
@@ -114,10 +114,11 @@ exports.builder = function(yargs: yargs.Argv) {
   })
 }
 
-exports.handler = function(argv: yargs.Arguments) {
-  Utils.co(function*() {
+export const handler = async function(argv: yargs.Arguments) {
+  try {
     let context = { argv }
-
-    return yield openRepl(context)
-  }).catch(e => Utils.error(e.stack))
+    return await openRepl(context)
+  } catch(e) {
+    Utils.error(e.stack)
+  }
 }

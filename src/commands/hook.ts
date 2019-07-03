@@ -1,14 +1,14 @@
 import yargs from 'yargs'
 import { Utils } from '..'
 
-exports.command = 'hook'
-exports.desc = 'Show hook info'
+export const command = 'hook'
+export const desc = 'Show hook info'
 
-exports.builder = function(yargs: yargs.Argv) {}
+export const builder = function(yargs: yargs.Argv) {}
 
-exports.handler = function(argv: yargs.Arguments) {
-  Utils.co(function*() {
-    const hookInfo = yield Utils.invokeHook('hook', {
+export const handler = async function(argv: any) {
+  try {
+    const hookInfo = await Utils.invokeHook('hook', {
       mode: 'group'
     })
     const columns = [['Hook', 'Package', 'Description']]
@@ -25,5 +25,7 @@ exports.handler = function(argv: yargs.Arguments) {
       })
     })
     Utils.log(Utils.table(columns))
-  }).catch(e => Utils.error(e.stack))
+  } catch (e) {
+    Utils.error(e.stack)
+  }
 }

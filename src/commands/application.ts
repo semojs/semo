@@ -1,13 +1,12 @@
 import yargs from 'yargs'
 import { Utils } from '..'
 
-exports.command = 'application'
-exports.desc = 'Application command namespace.'
-exports.aliases = 'app'
+export const command = 'application'
+export const desc = 'Application command namespace.'
+export const aliases = 'app'
 
-exports.builder = function(yargs: yargs.Argv) {
-  // yargs.option('option', { default, describe, alias })
+export const builder = function(yargs: yargs.Argv) {
   Utils.extendSubCommand('application', 'zignis', yargs, __dirname)
 }
 
-exports.handler = function(argv: yargs.Arguments) {}
+export const handler = function(argv: yargs.Arguments) {}
