@@ -21,25 +21,25 @@ export const handler = async function() {
     const plugins = Utils.getAllPluginsMapping()
     Object.keys(plugins).forEach(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
-        const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
-        const columns = []
+        const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
+        const pluginColumns: string[][] = []
         if (pkgConfig.version) {
-          columns.push(['version', pkgConfig.version])
+          pluginColumns.push(['version', pkgConfig.version])
         }
 
         if (hookStatus && hookStatus[plugin]) {
           Object.keys(hookStatus[plugin]).map(function(key) {
-            columns.push([key, hookStatus[plugin][key]])
+            pluginColumns.push([key, hookStatus[plugin][key]])
           })
         }
 
         if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
-          columns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
+          pluginColumns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
         } else {
-          columns.push(['location', plugins[plugin]])
+          pluginColumns.push(['location', plugins[plugin]])
         }
 
-        Utils.outputTable(columns, `[${plugin}]`)
+        Utils.outputTable(pluginColumns, `[${plugin}]`)
       }
     })
 

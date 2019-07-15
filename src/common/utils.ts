@@ -278,6 +278,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
  * This function also influence final valid commands and configs.
  */
 const getAllPluginsMapping = function(): { [propName: string]: string } {
+  let argv: any = cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
   if (_.isEmpty(plugins)) {
     plugins = {}
@@ -291,8 +292,9 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
         plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
-    // process core same directory plugins
-    glob
+    if (!argv.disableGlobalPlugin) {
+      // process core same directory plugins
+      glob
       .sync('zignis-plugin-*', {
         cwd: path.resolve(__dirname, '../../../')
       })
@@ -310,8 +312,9 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
           plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
         }
       })
+    }
 
-    if (process.env.HOME) {
+    if (process.env.HOME && !argv.disableHomePlugin) {
       // process home npm plugins
       glob
         .sync('zignis-plugin-*', {
