@@ -3,7 +3,6 @@
 import { Utils } from '.'
 import fs from 'fs'
 import path from 'path'
-import co from 'co'
 import updateNotifier from 'update-notifier'
 // import pkg from '../package.json'
 import yargs from 'yargs'
@@ -30,11 +29,13 @@ debug('zignis get plugins')
 
 const packageConfig = Utils.loadPackageInfo()
 
-// Load local commands
-if (packageConfig.name !== 'zignis') {
-  yargs.commandDir('commands')
-} else if (config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
-  yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
+if (!parsedArgv.disableCoreCommand) {
+  // Load local commands
+  if (packageConfig.name !== 'zignis') {
+    yargs.commandDir('commands')
+  } else if (config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
+    yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
+  }
 }
 
 // Load plugin commands
@@ -63,6 +64,36 @@ debug('zignis set commands')
       let beforeHooks = await Utils.invokeHook('beforeCommand')
       Object.keys(beforeHooks).map(function(hook) {
         beforeHooks[hook](parsedArgv, yargs)
+      })
+    }
+
+    if (!parsedArgv.scriptName) {
+      yargs.option('script-name', {
+        default: false,
+        describe: 'Rename script name.'
+      })
+    } else {
+      yargs.scriptName(parsedArgv.scriptName)
+    }
+
+    if (!parsedArgv.disableCoreCommand) {
+      yargs.option('disable-core-command', {
+        alias: 'disable-core',
+        describe: 'Disable core commands.'
+      })
+    }
+
+    if (!parsedArgv.disableGlobalPlugin) {
+      yargs.option('disable-global-plugin', {
+        alias: 'disable-global-plugins',
+        describe: 'Disable global plugins.'
+      })
+    }
+
+    if (!parsedArgv.disableHomePlugin) {
+      yargs.option('disable-home-plugin', {
+        alias: 'disable-home-plugins',
+        describe: 'Disable home plugins.'
       })
     }
 
