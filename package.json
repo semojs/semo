@@ -73,6 +73,8 @@
     "zignis": "node lib/main.js",
     "build": "tsc",
     "postversion": "git push && git push --tags",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "docs:dev": "vuepress dev doc",
+    "docs:build": "vuepress build doc"
   }
 }
