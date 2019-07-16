@@ -11,13 +11,14 @@ export const desc = 'Generate a zignis script file'
 export const builder = function(yargs: yargs.Argv) {}
 
 export const handler = function(argv: any) {
-  if (!argv.scriptDir || !fs.existsSync(argv.scriptDir)) {
+  let scriptDir = argv.scriptMakeDir || argv.scriptDir
+  if (!scriptDir || !fs.existsSync(scriptDir)) {
     console.log(chalk.red('"scriptDir" missing in config file or not exist in current directory!'))
     return
   }
 
   const filePrefix = dayjs().format('YYYYMMDDHHmmssSSS')
-  const scriptFile = path.resolve(argv.scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.js`)
+  const scriptFile = path.resolve(scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.js`)
   if (fs.existsSync(scriptFile)) {
     console.log(chalk.red('Scritp file exist!'))
     return

@@ -34,15 +34,15 @@ export const handler = function(argv: any) {
     if (extendName !== 'zignis' && extendName.indexOf('zignis-plugin-') !== 0) {
       extendName = `zignis-plugin-${extendName}`
     }
-    commandDir = `${argv.extendDir}/${extendName}/src/commands`
+    commandDir = `${argv.extendMakeDir || argv.extendDir}/${extendName}/src/commands`
   } else if (argv.plugin) {
     let pluginName = argv.plugin
     if (pluginName.indexOf('zignis-plugin-') !== 0) {
       pluginName = `zignis-plugin-${pluginName}`
     }
-    commandDir = `${argv.pluginDir}/${pluginName}/src/commands`
+    commandDir = `${argv.pluginMakeDir || argv.pluginDir}/${pluginName}/src/commands`
   } else {
-    commandDir = argv.commandDir
+    commandDir = argv.commandMakeDir || argv.commandDir
   }
 
   if (!commandDir) {

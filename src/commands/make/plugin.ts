@@ -15,7 +15,8 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = function(argv: any) {
-  if (!argv.pluginDir || !fs.existsSync(argv.pluginDir)) {
+  let pluginDir = argv.pluginMakeDir || argv.pluginDir
+  if (!pluginDir || !fs.existsSync(pluginDir)) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }
 
@@ -24,7 +25,7 @@ export const handler = function(argv: any) {
     Utils.error('Plugin name invalid!')
   }
 
-  const pluginPath = path.resolve(argv.pluginDir, `zignis-plugin-${argv.name}`)
+  const pluginPath = path.resolve(pluginDir, `zignis-plugin-${argv.name}`)
   if (fs.existsSync(pluginPath)) {
     if (argv.force) {
       Utils.warn(`Existed zignis-plugin-${argv.name} is deleted before creating a new one!`)
