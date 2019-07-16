@@ -17,13 +17,14 @@ updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
 })
 debug('zignis update notifier')
 
-const parsedArgv = yParser(process.argv.slice(2))
+let parsedArgv = yParser(process.argv.slice(2))
+const config = Utils.getCombinedConfig()
+yargs.config(config)
+parsedArgv = Utils._.merge(parsedArgv, config)
 const cache = Utils.getInternalCache()
 cache.set('argv', parsedArgv)
 debug('zignis set cache argv')
 
-const config = Utils.getCombinedConfig()
-yargs.config(config)
 const plugins = Utils.getAllPluginsMapping()
 debug('zignis get plugins')
 
@@ -41,8 +42,8 @@ if (!parsedArgv.disableCoreCommand) {
 // Load plugin commands
 if (plugins) {
   Object.keys(plugins).map(function(plugin) {
-    if (fs.existsSync(path.resolve(plugins[plugin], config.pluginOriginalConfigs[plugin].commandDir))) {
-      yargs.commandDir(path.resolve(plugins[plugin], config.pluginOriginalConfigs[plugin].commandDir))
+    if (fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))) {
+      yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     }
   })
 }
