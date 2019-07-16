@@ -247,7 +247,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
-
+  
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
   if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
@@ -257,8 +257,10 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   // Load plugin commands
   if (plugins) {
     Object.keys(plugins).map(function(plugin): void {
-      if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
-        yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
+      if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
+        if (fs.existsSync(path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command))) {
+          yargs.commandDir(path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command))
+        }
       }
     })
   }
@@ -417,35 +419,34 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
  * Get commbined config from whole environment.
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
-  let pluginConfigs: { [propName: string]: any } = cachedInstance.get('pluginConfigs') || {}
-  let pluginOriginalConfigs: { [propName: string]: any } = {}
+  let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
+  let pluginConfigs: { [propName: string]: any } = {}
 
-  if (_.isEmpty(pluginConfigs)) {
+  if (_.isEmpty(combinedConfig)) {
     if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
-      pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
+      combinedConfig = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
     } else {
-      pluginConfigs = {}
+      combinedConfig = {}
     }
 
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
         const pluginConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
-        pluginConfigs = _.merge(pluginConfigs, pluginConfig)
-        pluginOriginalConfigs[plugin] = pluginConfig
+        combinedConfig = _.merge(combinedConfig, pluginConfig)
+        pluginConfigs[plugin] = pluginConfig
       }
     })
 
     const configPath = findUp.sync(['.zignisrc.json'])
     let rcConfig = configPath ? require(configPath) : {}
 
-    pluginConfigs = _.merge(pluginConfigs, rcConfig)
-    pluginConfigs.pluginOriginalConfigs = pluginOriginalConfigs
-
-    cachedInstance.set('pluginConfigs', pluginConfigs)
+    combinedConfig = _.merge(combinedConfig, rcConfig)
+    combinedConfig.pluginConfigs = pluginConfigs
+    cachedInstance.set('combinedConfig', combinedConfig)
   }
 
-  return pluginConfigs || {}
+  return combinedConfig || {}
 }
 
 /**
