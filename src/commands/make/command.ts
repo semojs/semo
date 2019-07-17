@@ -28,17 +28,18 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = function(argv: any) {
+  const scriptName = argv.scriptName || 'zignis'
   let commandDir: string
   if (argv.extend) {
     let extendName = argv.extend
-    if (extendName !== 'zignis' && extendName.indexOf('zignis-plugin-') !== 0) {
-      extendName = `zignis-plugin-${extendName}`
+    if (extendName !== scriptName && extendName.indexOf(`${scriptName}-plugin-`) !== 0) {
+      extendName = `${scriptName}-plugin-${extendName}`
     }
     commandDir = `${argv.extendMakeDir || argv.extendDir}/${extendName}/src/commands`
   } else if (argv.plugin) {
     let pluginName = argv.plugin
-    if (pluginName.indexOf('zignis-plugin-') !== 0) {
-      pluginName = `zignis-plugin-${pluginName}`
+    if (pluginName.indexOf(`${scriptName}-plugin-`) !== 0) {
+      pluginName = `${scriptName}-plugin-${pluginName}`
     }
     commandDir = `${argv.pluginMakeDir || argv.pluginDir}/${pluginName}/src/commands`
   } else {
@@ -65,13 +66,11 @@ export const handler = function(argv: any) {
     handerTpl = `exports.handler = function (argv) {
   Utils.co(function * () {
     console.log('Start to draw your dream code!')
-    Utils.info('Finished successfully!')
   }).catch(e => Utils.error(e.stack))
 }`
   } else {
     handerTpl = `exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
-  Utils.info('Finished successfully!', true)
 }`
   }
 

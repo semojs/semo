@@ -11,7 +11,6 @@ export const aliases = 'i'
 
 export const builder = function(yargs: yargs.Argv) {
   yargs.option('plugin', {
-    default: false,
     alias: 'P',
     describe: 'plugin mode'
   })

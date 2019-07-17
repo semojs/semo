@@ -25,10 +25,11 @@ export const handler = function(argv: any) {
     Utils.error('Plugin name invalid!')
   }
 
-  const pluginPath = path.resolve(pluginDir, `zignis-plugin-${argv.name}`)
+  const scriptName = argv.scriptName || 'zignis'
+  const pluginPath = path.resolve(pluginDir, `${scriptName}-plugin-${argv.name}`)
   if (fs.existsSync(pluginPath)) {
     if (argv.force) {
-      Utils.warn(`Existed zignis-plugin-${argv.name} is deleted before creating a new one!`)
+      Utils.warn(`Existed ${scriptName}-plugin-${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', pluginPath)
     } else {
       Utils.error(`Destination existed, command abort!`)
@@ -37,6 +38,9 @@ export const handler = function(argv: any) {
 
   shell.mkdir('-p', pluginPath)
   shell.cd(pluginPath)
-  shell.exec('zignis init --plugin --exec-mode')
+  if (!shell.which(scriptName)) {
+    Utils.error(`Script ${scriptName} not found!`)
+  }
   shell.exec('npm init --yes')
+  shell.exec(`${scriptName} init --plugin --exec-mode`, (code, stdout, stderr) => {})
 }

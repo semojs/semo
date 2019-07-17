@@ -8,41 +8,51 @@ import updateNotifier from 'update-notifier'
 import yargs from 'yargs'
 import yParser from 'yargs-parser'
 
-const debug = Utils.debug('zignis-core')
-debug('zignis started')
 const pkg = Utils.loadCorePackageInfo()
 updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
   defer: false,
   isGlobal: true
 })
-debug('zignis update notifier')
 
 let parsedArgv = yParser(process.argv.slice(2))
-const config = Utils.getCombinedConfig()
-yargs.config(config)
-parsedArgv = Utils._.merge(parsedArgv, config)
+let appConfig = Utils.getApplicationConfig()
+yargs.config(appConfig)
+parsedArgv = Utils._.merge(appConfig, parsedArgv)
 const cache = Utils.getInternalCache()
 cache.set('argv', parsedArgv)
-debug('zignis set cache argv')
 
 const plugins = Utils.getAllPluginsMapping()
-debug('zignis get plugins')
-
+const config = Utils.getCombinedConfig()
 const packageConfig = Utils.loadPackageInfo()
+
+if (!parsedArgv.scriptName) {
+  yargs.option('script-name', {
+    default: 'zignis',
+    describe: 'Rename script name.',
+    type: 'string'
+  })
+} else {
+  if (!Utils._.isString(parsedArgv.scriptName)) {
+    Utils.error('--script-name must be string, should be used only once.')
+  }
+  yargs.scriptName(parsedArgv.scriptName)
+}
+
+let scriptName = parsedArgv.scriptName || 'zignis'
 
 if (!parsedArgv.disableCoreCommand) {
   // Load local commands
-  if (packageConfig.name !== 'zignis') {
+  if (packageConfig.name !== scriptName) {
     yargs.commandDir('commands')
-  } else if (config.commandDir && fs.existsSync(path.resolve(process.cwd(), config.commandDir))) {
-    yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
+  } else if (appConfig.commandDir && fs.existsSync(path.resolve(process.cwd(), appConfig.commandDir))) {
+    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir))
   }
 }
 
 // Load plugin commands
 if (plugins) {
   Object.keys(plugins).map(function(plugin) {
-    if (fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))) {
+    if (config.pluginConfigs[plugin].commandDir && fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))) {
       yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     }
   })
@@ -50,31 +60,20 @@ if (plugins) {
 
 // Load application commands
 if (
-  packageConfig.name !== 'zignis' &&
-  config.commandDir &&
-  fs.existsSync(path.resolve(process.cwd(), config.commandDir))
+  packageConfig.name !== scriptName &&
+  appConfig.commandDir &&
+  fs.existsSync(path.resolve(process.cwd(), appConfig.commandDir))
 ) {
-  yargs.commandDir(path.resolve(process.cwd(), config.commandDir))
+  yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir))
 }
 
-debug('zignis set commands')
 ;(async () => {
   try {
     if (!parsedArgv.getYargsCompletions) {
-      debug('zignis before command hook')
       let beforeHooks = await Utils.invokeHook('beforeCommand')
       Object.keys(beforeHooks).map(function(hook) {
         beforeHooks[hook](parsedArgv, yargs)
       })
-    }
-
-    if (!parsedArgv.scriptName) {
-      yargs.option('script-name', {
-        default: false,
-        describe: 'Rename script name.'
-      })
-    } else {
-      yargs.scriptName(parsedArgv.scriptName)
     }
 
     if (!parsedArgv.disableCoreCommand) {
@@ -98,6 +97,12 @@ debug('zignis set commands')
       })
     }
 
+    yargs.option('plugin-prefix', {
+      default: 'zignis',
+      type: 'array',
+      describe: 'Set plugin prefix.'
+    })
+
     // eslint-disable-next-line
     yargs
       .help()
@@ -113,7 +118,6 @@ debug('zignis set commands')
       Object.keys(afterHooks).map(function(hook) {
         afterHooks[hook](parsedArgv, yargs)
       })
-      debug('zignis after command hook')
     }
   } catch (e) {
     if (!e.name || e.name !== 'YError') {

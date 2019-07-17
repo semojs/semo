@@ -26,7 +26,6 @@ import yargs from 'yargs'
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt)
 const { hash } = objectHash({ sort: true })
-const debugCore = debug('zignis-core')
 
 let cachedInstance: NodeCache
 /**
@@ -180,7 +179,6 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         }
 
         if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
-          debugCore(`zignis invoke hook: ${hook}, plugin: ${plugin}`)
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
             let pluginReturn
@@ -282,12 +280,26 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
 const getAllPluginsMapping = function(): { [propName: string]: string } {
   let argv: any = cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
+
   if (_.isEmpty(plugins)) {
+    let pluginPrefix = argv.pluginPrefix || 'zignis'
+    let scriptName = argv.scriptName || 'zignis'
+    if (_.isString(pluginPrefix)) {
+      pluginPrefix = [pluginPrefix]
+    }
+
+    if (!_.isArray(pluginPrefix)) {
+      error('invalid --plugin-prefix')
+    }
+
+    let topPluginPattern = '@(' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join('|') + ')'
+    let orgPluginPattern = '@(' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join('|') + ')'
+
     plugins = {}
 
     // process core plugins
     glob
-      .sync('zignis-plugin-*', {
+      .sync(topPluginPattern, {
         cwd: path.resolve(__dirname, '../plugins')
       })
       .map(function(plugin): void {
@@ -297,7 +309,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     if (!argv.disableGlobalPlugin) {
       // process core same directory plugins
       glob
-      .sync('zignis-plugin-*', {
+      .sync(topPluginPattern, {
         cwd: path.resolve(__dirname, '../../../')
       })
       .map(function(plugin): void {
@@ -306,80 +318,74 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 
     // process core same directory npm plugins
     glob
-      .sync('@*/zignis-plugin-*', {
+      .sync(orgPluginPattern, {
         cwd: path.resolve(__dirname, '../../../')
       })
       .map(function(plugin): void {
-        if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
-          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-        }
+        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
       })
     }
 
     if (process.env.HOME && !argv.disableHomePlugin) {
       // process home npm plugins
       glob
-        .sync('zignis-plugin-*', {
-          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        .sync(topPluginPattern, {
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
-          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules', plugin)
           }
         })
 
       // process home npm scope plugins
       glob
-        .sync('@*/zignis-plugin-*', {
-          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        .sync(orgPluginPattern, {
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
-          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules', plugin)
           }
         })
     }
 
     // process cwd npm plugins
     glob
-      .sync('zignis-plugin-*', {
+      .sync(topPluginPattern, {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
-        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-        }
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
     // process cwd npm scope plugins
     glob
-      .sync('@*/zignis-plugin-*', {
+      .sync(orgPluginPattern, {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
-        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-        }
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
     const config = getApplicationConfig()
     if (fs.existsSync(config.pluginDir)) {
       // process local plugins
       glob
-        .sync('zignis-plugin-*', {
+        .sync(topPluginPattern, {
           cwd: path.resolve(process.cwd(), config.pluginDir)
         })
         .map(function(plugin) {
-          if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
-            plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
-          }
+          plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
         })
     }
 
     // process plugin project
     if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
       const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-      if (pkgConfig.name && /^(@[^/]+\/)?zignis-plugin-/.test(pkgConfig.name)) {
+      const matchPluginProject = pluginPrefix.map(prefix => `${prefix}-plugin-`).join('|')
+      const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
+      if (pkgConfig.name && regExp.test(pkgConfig.name)) {
         plugins[pkgConfig.name] = path.resolve(process.cwd())
       }
     }
@@ -395,6 +401,9 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
   try {
+    let argv: any = cachedInstance.get('argv') || {}
+    let scriptName = argv.scriptName || 'zignis'
+
     const configPath = findUp.sync(['.zignisrc.json'], {
       cwd
     })
@@ -402,11 +411,24 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     if (configPath) {
       applicationConfig.applicationDir = path.dirname(configPath)
       if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
-        applicationConfig = Object.assign(
-          {},
-          applicationConfig,
-          require(path.resolve(applicationConfig.applicationDir, 'package.json'))
-        )
+        let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+
+        if (packageInfo.name) {
+          applicationConfig.name = packageInfo.name
+        }
+
+        if (packageInfo.version) {
+          applicationConfig.version = packageInfo.version
+        }
+
+        // args > package > current rc
+        if (packageInfo[scriptName]) {
+          applicationConfig = Object.assign(
+            {},
+            applicationConfig,
+            packageInfo[scriptName]
+          )
+        }
       }
     }
     return applicationConfig

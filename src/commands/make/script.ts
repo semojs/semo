@@ -6,7 +6,7 @@ import yargs from 'yargs'
 import dayjs from 'dayjs'
 
 export const command = 'script <name>'
-export const desc = 'Generate a zignis script file'
+export const desc = 'Generate a script file'
 
 export const builder = function(yargs: yargs.Argv) {}
 
