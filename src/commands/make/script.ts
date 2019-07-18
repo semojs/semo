@@ -8,7 +8,12 @@ import dayjs from 'dayjs'
 export const command = 'script <name>'
 export const desc = 'Generate a script file'
 
-export const builder = function(yargs: yargs.Argv) {}
+export const builder = function(yargs: yargs.Argv) {
+  yargs.option('typescript', {
+    alias: 'ts',
+    describe: 'generate typescript style code'
+  })
+}
 
 export const handler = function(argv: any) {
   let scriptDir = argv.scriptMakeDir || argv.scriptDir
@@ -18,14 +23,24 @@ export const handler = function(argv: any) {
   }
 
   const filePrefix = dayjs().format('YYYYMMDDHHmmssSSS')
-  const scriptFile = path.resolve(scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.js`)
+  const scriptFile = path.resolve(scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`)
   if (fs.existsSync(scriptFile)) {
     console.log(chalk.red('Scritp file exist!'))
     return
   }
+  let code
+  if (argv.typescript) {
+    code = `export const builder = function (yargs: any) {
+  // yargs.option('option', {default, describe, alias})
+}
 
-  const code = `
-exports.builder = function (yargs) {
+export const handler = async function (argv: any) {
+  console.log('Start to draw your dream code!')
+  process.exit(0)
+}
+`
+  } else {
+    code = `exports.builder = function (yargs) {
   // yargs.option('option', {default, describe, alias})
 }
 
@@ -34,6 +49,7 @@ exports.handler = async function (argv) {
   process.exit(0)
 }
 `
+  }
   if (!fs.existsSync(scriptFile)) {
     fs.writeFileSync(scriptFile, code)
     console.log(chalk.green(`${scriptFile} created!`))

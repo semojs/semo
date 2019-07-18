@@ -21,9 +21,13 @@ export const builder = function(yargs: yargs.Argv) {
   })
 
   yargs.option('yield', {
-    default: false,
     alias: 'Y',
     describe: 'use yield style for generator and promoise'
+  })
+
+  yargs.option('typescript', {
+    alias: 'ts',
+    describe: 'generate typescript style code, will ignore yield option'
   })
 }
 
@@ -50,7 +54,7 @@ export const handler = function(argv: any) {
     Utils.error(chalk.red('"commandDir" missing in config file!'))
   }
 
-  const commandFilePath = path.resolve(commandDir, `${argv.name}.js`)
+  const commandFilePath = path.resolve(commandDir, `${argv.name}.${argv.typescript ? 'ts' : 'js'}`)
   const commandFileDir = path.dirname(commandFilePath)
 
   Utils.fs.ensureDirSync(commandFileDir)
@@ -61,21 +65,38 @@ export const handler = function(argv: any) {
 
   const name = argv.name.split('/').pop()
 
-  let handerTpl
-  if (argv.yield) {
-    handerTpl = `exports.handler = function (argv) {
+  let handerTpl, code
+  if (argv.typescript) {
+    code = `import { Utils } from 'zignis'
+
+export const command = 'banke'
+export const desc = 'banke tools'
+// export const aliases = ''
+
+export const builder = function (yargs: any) {
+  // yargs.option('option', { default, describe, alias })
+  // yargs.commandDir('banke')
+}
+
+export const handler = async function (argv: any) {
+  console.log('Start to draw your dream code!')
+}
+    
+`
+  } else {
+    if (argv.yield) {
+      handerTpl = `exports.handler = function (argv) {
   Utils.co(function * () {
     console.log('Start to draw your dream code!')
   }).catch(e => Utils.error(e.stack))
 }`
-  } else {
+    } else {
     handerTpl = `exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
 }`
-  }
-
-  const code = `
-const { Utils } = require('zignis')
+    }
+  
+    code = `const { Utils } = require('zignis')
 
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'
@@ -88,6 +109,8 @@ exports.builder = function (yargs) {
 
 ${handerTpl}
 `
+  }
+  
   if (!fs.existsSync(commandFilePath)) {
     fs.writeFileSync(commandFilePath, code)
     console.log(chalk.green(`${commandFilePath} created!`))
