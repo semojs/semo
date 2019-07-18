@@ -69,13 +69,13 @@ export const handler = function(argv: any) {
   if (argv.typescript) {
     code = `import { Utils } from 'zignis'
 
-export const command = 'banke'
-export const desc = 'banke tools'
+export const command = '${name}'
+export const desc = '${argv.description || name}'
 // export const aliases = ''
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
-  // yargs.commandDir('banke')
+  // yargs.commandDir('${name}')
 }
 
 export const handler = async function (argv: any) {
