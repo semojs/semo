@@ -26,11 +26,18 @@ const config = Utils.getCombinedConfig()
 const packageConfig = Utils.loadPackageInfo()
 
 if (!parsedArgv.scriptName) {
-  yargs.option('script-name', {
-    default: 'zignis',
-    describe: 'Rename script name.',
-    type: 'string'
-  })
+  if (!parsedArgv.hideScriptNameOption) {
+    yargs.option('script-name', {
+      default: 'zignis',
+      describe: 'Rename script name.',
+      type: 'string'
+    })
+    yargs.option('hide-script-name-option', {
+      alias: 'hide-script-name',
+      describe: 'Hide script name option.',
+    })
+  }
+  
 } else {
   if (!Utils._.isString(parsedArgv.scriptName)) {
     Utils.error('--script-name must be string, should be used only once.')
@@ -97,16 +104,39 @@ if (
       })
     }
 
-    yargs.option('plugin-prefix', {
-      default: 'zignis',
-      type: 'array',
-      describe: 'Set plugin prefix.'
-    })
+    if (!parsedArgv.disableCompletionCommand) {
+      yargs.option('disable-completion-command', {
+        alias: 'disable-completion',
+        describe: 'Disable completion command.'
+      })
+
+      if (!parsedArgv.hideCompletionCommand) {
+        yargs.option('hide-completion-command', {
+          alias: 'hide-completion',
+          describe: 'Hide completion command.'
+        })
+        yargs.completion('completion', 'Generate completion script')
+      } else {
+        yargs.completion('completion', false)
+      }
+    }
+
+    if (!parsedArgv.hidePluginPrefixOption) {
+      yargs.option('plugin-prefix', {
+        default: 'zignis',
+        type: 'array',
+        describe: 'Set plugin prefix.'
+      })
+
+      yargs.option('hide-plugin-prefix-option', {
+        alias: 'hide-plugin-prefix',
+        describe: 'Hide plugin prefix option.'
+      })
+    }
 
     // eslint-disable-next-line
     yargs
       .help()
-      .completion('completion', 'Generate completion script')
       .alias('h', 'help')
       .exitProcess(false)
       .recommendCommands()
