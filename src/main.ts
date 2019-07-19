@@ -27,12 +27,12 @@ const packageConfig = Utils.loadPackageInfo()
 
 if (!parsedArgv.scriptName) {
   if (!parsedArgv.hideScriptNameOption) {
-    yargs.option('script-name', {
+    yargs.hide('script-name').option('script-name', {
       default: 'zignis',
       describe: 'Rename script name.',
       type: 'string'
     })
-    yargs.option('hide-script-name-option', {
+    yargs.hide('hide-script-name-option').option('hide-script-name-option', {
       alias: 'hide-script-name',
       describe: 'Hide script name option.',
     })
@@ -43,6 +43,19 @@ if (!parsedArgv.scriptName) {
     Utils.error('--script-name must be string, should be used only once.')
   }
   yargs.scriptName(parsedArgv.scriptName)
+}
+
+if (!parsedArgv.hidePluginPrefixOption && !parsedArgv.hidePluginPrefix) {
+  yargs.hide('plugin-prefix').option('plugin-prefix', {
+    default: 'zignis',
+    type: 'array',
+    describe: 'Set plugin prefix.'
+  })
+
+  yargs.hide('hide-plugin-prefix-option').option('hide-plugin-prefix-option', {
+    alias: 'hide-plugin-prefix',
+    describe: 'Hide plugin prefix option.'
+  })
 }
 
 let scriptName = parsedArgv.scriptName || 'zignis'
@@ -83,35 +96,35 @@ if (
       })
     }
 
-    if (!parsedArgv.disableCoreCommand) {
-      yargs.option('disable-core-command', {
+    if (!parsedArgv.disableCoreCommand && !parsedArgv.disableCore) {
+      yargs.hide('disable-core-command').option('disable-core-command', {
         alias: 'disable-core',
         describe: 'Disable core commands.'
       })
     }
 
-    if (!parsedArgv.disableGlobalPlugin) {
-      yargs.option('disable-global-plugin', {
+    if (!parsedArgv.disableGlobalPlugin && !parsedArgv.disableGlobalPlugins) {
+      yargs.hide('disable-global-plugin').option('disable-global-plugin', {
         alias: 'disable-global-plugins',
         describe: 'Disable global plugins.'
       })
     }
 
-    if (!parsedArgv.disableHomePlugin) {
-      yargs.option('disable-home-plugin', {
+    if (!parsedArgv.disableHomePlugin && !parsedArgv.disableHomePlugins) {
+      yargs.hide('disable-home-plugin').option('disable-home-plugin', {
         alias: 'disable-home-plugins',
         describe: 'Disable home plugins.'
       })
     }
 
-    if (!parsedArgv.disableCompletionCommand) {
-      yargs.option('disable-completion-command', {
+    if (!parsedArgv.disableCompletionCommand && !parsedArgv.disableCompletion) {
+      yargs.hide('disable-completion-command').option('disable-completion-command', {
         alias: 'disable-completion',
         describe: 'Disable completion command.'
       })
 
-      if (!parsedArgv.hideCompletionCommand) {
-        yargs.option('hide-completion-command', {
+      if (!parsedArgv.hideCompletionCommand && !parsedArgv.hideCompletion) {
+        yargs.hide('hide-completion-command').option('hide-completion-command', {
           alias: 'hide-completion',
           describe: 'Hide completion command.'
         })
@@ -122,18 +135,18 @@ if (
       }
     }
 
-    if (!parsedArgv.hidePluginPrefixOption) {
-      yargs.option('plugin-prefix', {
-        default: 'zignis',
-        type: 'array',
-        describe: 'Set plugin prefix.'
+    if (!parsedArgv.hideEpilog) {
+      yargs.hide('hide-epilog').option('hide-epilog', {
+        describe: 'Hide epilog.'
       })
-
-      yargs.option('hide-plugin-prefix-option', {
-        alias: 'hide-plugin-prefix',
-        describe: 'Hide plugin prefix option.'
+      yargs.hide('epilog').option('epilog', {
+        default: false,
+        alias: 'epilog',
+        describe: 'Set epilog.'
       })
     }
+
+    !parsedArgv.hideEpilog && yargs.epilog(parsedArgv.epilog || 'Find more information at https://zignis.js.org')
 
     // eslint-disable-next-line
     yargs
@@ -141,7 +154,6 @@ if (
       .alias('h', 'help')
       .exitProcess(false)
       .recommendCommands()
-      .epilog('Find more information at https://zignis.js.org')
       .wrap(Math.min(120, yargs.terminalWidth())).argv
 
     if (!parsedArgv.getYargsCompletions) {
