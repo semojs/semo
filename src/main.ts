@@ -26,18 +26,11 @@ const config = Utils.getCombinedConfig()
 const packageConfig = Utils.loadPackageInfo()
 
 if (!parsedArgv.scriptName) {
-  if (!parsedArgv.hideScriptNameOption) {
-    yargs.hide('script-name').option('script-name', {
-      default: 'zignis',
-      describe: 'Rename script name.',
-      type: 'string'
-    })
-    yargs.hide('hide-script-name-option').option('hide-script-name-option', {
-      alias: 'hide-script-name',
-      describe: 'Hide script name option.',
-    })
-  }
-  
+  yargs.hide('script-name').option('script-name', {
+    default: 'zignis',
+    describe: 'Rename script name.',
+    type: 'string'
+  })
 } else {
   if (!Utils._.isString(parsedArgv.scriptName)) {
     Utils.error('--script-name must be string, should be used only once.')
@@ -45,18 +38,12 @@ if (!parsedArgv.scriptName) {
   yargs.scriptName(parsedArgv.scriptName)
 }
 
-if (!parsedArgv.hidePluginPrefixOption && !parsedArgv.hidePluginPrefix) {
-  yargs.hide('plugin-prefix').option('plugin-prefix', {
-    default: 'zignis',
-    type: 'array',
-    describe: 'Set plugin prefix.'
-  })
+yargs.hide('plugin-prefix').option('plugin-prefix', {
+  default: 'zignis',
+  type: 'array',
+  describe: 'Set plugin prefix.'
+})
 
-  yargs.hide('hide-plugin-prefix-option').option('hide-plugin-prefix-option', {
-    alias: 'hide-plugin-prefix',
-    describe: 'Hide plugin prefix option.'
-  })
-}
 
 let scriptName = parsedArgv.scriptName || 'zignis'
 
