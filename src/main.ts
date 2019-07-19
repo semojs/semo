@@ -117,6 +117,7 @@ if (
         })
         yargs.completion('completion', 'Generate completion script')
       } else {
+        // @ts-ignore, @types/yargs type def not correct
         yargs.completion('completion', false)
       }
     }
