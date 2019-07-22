@@ -651,7 +651,6 @@ const exec = function(command: string, options: any = {}): any {
  */
 const getNodeEnv = () => {
   const argv: any = cachedInstance.get('argv') || {}
-  console.log(argv)
   const nodeEnvKey = argv.nodeEnvKey || argv.nodeEnv || 'NODE_ENV'
   return process.env[nodeEnvKey] || 'development'
 }
