@@ -133,6 +133,12 @@ if (
       })
     }
 
+    yargs.hide('node-env-key').option('node-env-key', {
+      default: 'NODE_ENV',
+      alias: 'node-env',
+      describe: 'Set node env key'
+    })
+
     !parsedArgv.hideEpilog && yargs.epilog(parsedArgv.epilog || 'Find more information at https://zignis.js.org')
 
     // eslint-disable-next-line
