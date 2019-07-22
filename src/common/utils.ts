@@ -653,7 +653,7 @@ const getNodeEnv = () => {
   const argv: any = cachedInstance.get('argv') || {}
   console.log(argv)
   const nodeEnvKey = argv.nodeEnvKey || argv.nodeEnv || 'NODE_ENV'
-  return process.env[nodeEnvKey] || undefined
+  return process.env[nodeEnvKey] || 'development'
 }
 
 /**
@@ -664,7 +664,7 @@ const isProduction = () => getNodeEnv() === 'production'
 /**
  * Shortcut for checking if or not current env is development
  */
-const isDevelopment = () => getNodeEnv() === 'development' || !getNodeEnv()
+const isDevelopment = () => getNodeEnv() === 'development'
 
 /**
  * Sleep a while of ms
