@@ -50,7 +50,7 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    const patternScriptShell = new RegExp(`^${argv.scriptName}\s+(shell|sh)\s+`)
+    const patternScriptShell = new RegExp(`^${argv.scriptName}\\s+(shell|sh)\\s+`)
     if (
       `${argv.prefix} ${cmd}`.match(patternScriptShell)
     ) {
@@ -58,7 +58,7 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    const patternScript = new RegExp(`^${argv.scriptName}\s+`)
+    const patternScript = new RegExp(`^${argv.scriptName}\\s+`)
     if (`${argv.prefix} ${cmd}`.match(patternScript)) {
       cmd = `${argv.prefix} ${cmd} --exec-mode`
     } else {

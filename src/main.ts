@@ -49,11 +49,7 @@ let scriptName = parsedArgv.scriptName || 'zignis'
 
 if (!parsedArgv.disableCoreCommand) {
   // Load local commands
-  if (packageConfig.name !== scriptName) {
-    yargs.commandDir('commands')
-  } else if (appConfig.commandDir && fs.existsSync(path.resolve(process.cwd(), appConfig.commandDir))) {
-    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir))
-  }
+  yargs.commandDir('commands')
 }
 
 // Load plugin commands

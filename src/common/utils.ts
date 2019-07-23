@@ -124,7 +124,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       },
       getAllPluginsMapping()
     )
-    
+
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
     if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir) {
