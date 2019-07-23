@@ -15,10 +15,10 @@ export const handler = async function(argv: any) {
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {
         let realHook
-        if (k === 'zignis') {
+        if (k === argv.scriptName) {
           realHook = hook
         } else {
-          let pluginShortName = k.substring('zignis-plugin-'.length)
+          let pluginShortName = k.substring(`${argv.scriptName}-plugin-`.length)
           realHook = hook.indexOf(`${pluginShortName}_`) === 0 ? hook : `${pluginShortName}_${hook}`
         }
         columns.push([`hook_${realHook}`, k, hookInfo[k][hook]])

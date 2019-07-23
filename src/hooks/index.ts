@@ -6,19 +6,22 @@ import { Utils } from '..'
 export const hook_hook = {
   beforeCommand: 'Hook triggered before command execution.',
   afterCommand: 'Hook triggered after command execution.',
-  components: 'Hook triggered in zignis script command.',
-  hook: 'Hook triggered in zignis hook command.',
-  repl: 'Hook triggered in zignis repl command.',
-  status: 'Hook triggered in zignis status command.',
-  new_repo: 'Hook triggered in zignis new command.'
+  components: 'Hook triggered when needing to fetch components',
+  hook: 'Hook triggered in hook command.',
+  repl: 'Hook triggered in repl command.',
+  status: 'Hook triggered in status command.',
+  new_repo: 'Hook triggered in new command.'
 }
 
-export const hook_new_repo = {
-  zignis_plugin_starter: {
-    repo: 'git@github.com:zhike-team/zignis-plugin-starter.git',
-    branch: 'master',
-    alias: ['zignis-plugin-starter', 'plugin']
-  }
+export const hook_new_repo = () => {
+  const argv: any = Utils.getInternalCache().get('argv')
+  return argv.scriptName === 'zignis' ? {
+    zignis_plugin_starter: {
+      repo: 'git@github.com:zhike-team/zignis-plugin-starter.git',
+      branch: 'master',
+      alias: ['zignis-plugin-starter', 'plugin']
+    }
+  } : {}
 }
 
 export const hook_status = async () => {

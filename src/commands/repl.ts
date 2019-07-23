@@ -65,12 +65,13 @@ export const aliases = 'r'
 export const desc = 'Play with REPL'
 
 async function openRepl(context: any): Promise<any> {
+  const { argv } = context
   const r = repl.start('>>> ')
-  const zignisHome = process.env.HOME + '/.zignis'
-  if (!fs.existsSync(zignisHome)) {
-    Utils.exec(`mkdir -p ${zignisHome}`)
+  const Home = process.env.HOME + `/.${argv.scriptName}`
+  if (!fs.existsSync(Home)) {
+    Utils.exec(`mkdir -p ${Home}`)
   }
-  replHistory(r, `${zignisHome}/.zignis_history`)
+  replHistory(r, `${Home}/.${argv.scriptName}_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境

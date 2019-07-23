@@ -95,6 +95,8 @@ interface IHookOption {
  * @param {array} options.opts opts will be sent to hook implementation
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv.scriptName || 'zignis'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -118,14 +120,14 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
     const plugins = Object.assign(
       {},
       {
-        zignis: path.resolve(__dirname, '../../')
+        [scriptName]: path.resolve(__dirname, '../../')
       },
       getAllPluginsMapping()
     )
-
+    
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
-    if (appConfig && appConfig.name !== 'zignis' && !plugins[appConfig.name] && appConfig.applicationDir) {
+    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir) {
       plugins['application'] = appConfig.applicationDir
     }
 
@@ -166,10 +168,10 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         }
 
         // hookDir
-        if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
-          const zignisConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
-          if (zignisConfig.hookDir && fs.existsSync(path.resolve(plugins[plugin], zignisConfig.hookDir, 'index.js'))) {
-            pluginEntry = path.join(zignisConfig.hookDir, 'index.js')
+        if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
+          const scriptConfig = require(path.resolve(plugins[plugin], `.${scriptName}rc.json`))
+          if (scriptConfig.hookDir && fs.existsSync(path.resolve(plugins[plugin], scriptConfig.hookDir, 'index.js'))) {
+            pluginEntry = path.join(scriptConfig.hookDir, 'index.js')
           }
         }
 
@@ -400,11 +402,11 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  * Get application zignis config only.
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
-  try {
-    let argv: any = cachedInstance.get('argv') || {}
-    let scriptName = argv.scriptName || 'zignis'
+  let argv: any = cachedInstance.get('argv') || {}
+  let scriptName = argv.scriptName || 'zignis'
 
-    const configPath = findUp.sync(['.zignisrc.json'], {
+  try {
+    const configPath = findUp.sync([`.${scriptName}rc.json`], {
       cwd
     })
     let applicationConfig = configPath ? require(configPath) : {}
@@ -433,7 +435,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     }
     return applicationConfig
   } catch (e) {
-    error(`Application .zignisrc.json can not be parsed!`)
+    error(`Application .${scriptName}rc.json can not be parsed!`)
   }
 }
 
@@ -441,26 +443,28 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
  * Get commbined config from whole environment.
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
+  let argv: any = cachedInstance.get('argv') || {}
+  let scriptName = argv.scriptName || 'zignis'
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
   if (_.isEmpty(combinedConfig)) {
-    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
-      combinedConfig = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
+    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
+      combinedConfig = require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))
     } else {
       combinedConfig = {}
     }
 
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
-      if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
-        const pluginConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
+      if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
+        const pluginConfig = require(path.resolve(plugins[plugin], `.${scriptName}rc.json`))
         combinedConfig = _.merge(combinedConfig, pluginConfig)
         pluginConfigs[plugin] = pluginConfig
       }
     })
 
-    const configPath = findUp.sync(['.zignisrc.json'])
+    const configPath = findUp.sync([`.${scriptName}rc.json`])
     let rcConfig = configPath ? require(configPath) : {}
 
     combinedConfig = _.merge(combinedConfig, rcConfig)

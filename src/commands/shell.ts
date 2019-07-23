@@ -6,17 +6,22 @@ import yargs from 'yargs'
 import { Utils } from '..'
 
 export const command = 'shell'
-export const desc = 'Shell for Zignis'
+export const desc = 'Quick shell'
 export const aliases = 'sh'
 
 function corepl(cli: repl.REPLServer) {
   // @ts-ignore
   cli.eval = function coEval(cmd: string, context, filename, callback) {
+    const { argv } = context
     cmd = cmd.trim()
 
     if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       Utils.info('Bye.')
       process.exit(0)
+    }
+
+    if (!cmd) {
+      return callback()
     }
 
     if (cmd === '?') {
@@ -30,7 +35,7 @@ function corepl(cli: repl.REPLServer) {
         'Internal commands:'
       )
 
-      Utils.info(`Current prefix: ${Utils.chalk.yellow(context.argv.prefix || '[empty]')}`)
+      Utils.info(`Current prefix: ${Utils.chalk.yellow(argv.prefix || '[empty]')}`)
       console.log()
       return callback()
     }
@@ -38,31 +43,32 @@ function corepl(cli: repl.REPLServer) {
     if (cmd.match(/^prefix[\s|=]+/)) {
       let prefix = Utils.splitByChar(cmd, '=')
       prefix.shift()
-      context.argv.prefix = prefix.join(' ').trim()
+      argv.prefix = prefix.join(' ').trim()
       Utils.success(
-        `Prefix has been changed to: ${context.argv.prefix || '[empty], so you can run any shell commands now.'}`
+        `Prefix has been changed to: ${argv.prefix || '[empty], so you can run any shell commands now.'}`
       )
       return callback()
     }
 
+    const patternScriptShell = new RegExp(`^${argv.scriptName}\s+(shell|sh)\s+`)
     if (
-      `${context.argv.prefix} ${cmd}`.match(/^zignis\s+shell\s+/) ||
-      `${context.argv.prefix} ${cmd}`.match(/^zignis\s+sh\s+/)
+      `${argv.prefix} ${cmd}`.match(patternScriptShell)
     ) {
       Utils.warn('Recursive call shell not allowed!')
       return callback()
     }
 
-    if (`${context.argv.prefix} ${cmd}`.match(/^zignis\s+/)) {
-      cmd = `${context.argv.prefix} ${cmd} --exec-mode`
+    const patternScript = new RegExp(`^${argv.scriptName}\s+`)
+    if (`${argv.prefix} ${cmd}`.match(patternScript)) {
+      cmd = `${argv.prefix} ${cmd} --exec-mode`
     } else {
-      cmd = `${context.argv.prefix} ${cmd}`
+      cmd = `${argv.prefix} ${cmd}`
     }
 
     try {
       cmd && Utils.exec(cmd)
     } catch (e) {
-      if (context.argv.debug) {
+      if (argv.debug) {
         Utils.error(e.stack, false)
       } else {
         Utils.error(e.message, false)
@@ -76,19 +82,20 @@ function corepl(cli: repl.REPLServer) {
 }
 
 async function openRepl(context: any): Promise<any> {
+  const { argv } = context
   const r: repl.REPLServer = repl.start({
-    prompt: context.argv.prompt,
+    prompt: argv.prompt,
     completer: () => {
       // TODO: implments auto completion in REPL by Shell suggestions.
       // For now, it is just for disabling Node completion.
       return []
     }
   })
-  const zignisHome = process.env.HOME + '/.zignis'
-  if (!fs.existsSync(zignisHome)) {
-    Utils.exec(`mkdir -p ${zignisHome}`)
+  const Home = process.env.HOME + `/.${argv.scriptName}`
+  if (!fs.existsSync(Home)) {
+    Utils.exec(`mkdir -p ${Home}`)
   }
-  replHistory(r, `${zignisHome}/.zignis_shell_history`)
+  replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
@@ -97,15 +104,17 @@ async function openRepl(context: any): Promise<any> {
   corepl(r)
 }
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs: any) {
+  const argv: any = Utils.getInternalCache().get('argv')
+  const scriptName = argv.scriptName || 'zignis'
   yargs.option('prompt', {
     default: '$ ',
     describe: 'Prompt for input.'
   })
 
   yargs.option('prefix', {
-    default: 'zignis',
-    describe: 'Make input zignis command a little bit faster.'
+    default: scriptName,
+    describe: 'Make input command a little bit faster.'
   })
 
   yargs.option('debug', {

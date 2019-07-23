@@ -54,18 +54,11 @@ export const builder = function(yargs: yargs.Argv) {
 
   yargs.option('init', {
     alias: 'i',
-    describe: 'init new project use Zignis'
+    describe: 'init new project'
   })
 }
 
-export const handler = async function(
-  argv: yargs.Arguments & {
-    name: string
-    select: string
-    add: string
-    addDev: string
-  }
-) {
+export const handler = async function(argv: any) {
   argv.repo = argv.repo || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
   argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
 
@@ -175,15 +168,15 @@ export const handler = async function(
       }
     }
 
-    // init basic zignis structure
+    // init basic structure
     if (argv.init) {
       const initExtra = argv.yarn ? '--yarn' : ''
-      if (argv.name.indexOf('zignis-plugin-') === 0) {
-        Utils.exec(`zignis init --exec-mode --plugin --force ${initExtra}`)
+      if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
+        Utils.exec(`${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`)
       } else {
-        Utils.exec(`zignis init --exec-mode --force  ${initExtra}`)
+        Utils.exec(`${argv.scriptName} init --exec-mode --force  ${initExtra}`)
       }
-      Utils.success('Initial basic zignis structure complete!')
+      Utils.success('Initial basic structure complete!')
     }
   } catch(e) {
     Utils.error(e.stack)

@@ -11,13 +11,13 @@ export const builder = function(yargs: yargs.Argv) {
   yargs.option('extend', {
     default: false,
     alias: 'E',
-    describe: 'generate command in extend directory, e.g. extend=zignis'
+    describe: 'generate command in extend directory'
   })
 
   yargs.option('plugin', {
     default: false,
     alias: 'P',
-    describe: 'generate command in plugin directory, e.g. plugin=xxx'
+    describe: 'generate command in plugin directory'
   })
 
   yargs.option('yield', {
@@ -67,7 +67,7 @@ export const handler = function(argv: any) {
 
   let handerTpl, code
   if (argv.typescript) {
-    code = `import { Utils } from 'zignis'
+    code = `import { Utils } from '${scriptName}'
 
 export const command = '${name}'
 export const desc = '${argv.description || name}'
@@ -95,7 +95,7 @@ export const handler = async function (argv: any) {
 }`
     }
   
-    code = `const { Utils } = require('zignis')
+    code = `const { Utils } = require('${scriptName}')
 
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'

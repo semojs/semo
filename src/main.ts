@@ -59,7 +59,7 @@ if (!parsedArgv.disableCoreCommand) {
 // Load plugin commands
 if (plugins) {
   Object.keys(plugins).map(function(plugin) {
-    if (config.pluginConfigs[plugin].commandDir && fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))) {
+    if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].commandDir && fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))) {
       yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     }
   })

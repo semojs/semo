@@ -8,14 +8,17 @@ export const desc = 'Show environment status info'
 
 export const builder = function() {}
 
-export const handler = async function() {
+export const handler = async function(argv: any) {
+  const scriptName = argv.scriptName || 'zignis'
   try {
     // basic information
     const hookStatus = await Utils.invokeHook('status', { mode: 'group' })
     const columns: string[][] = []
-    let kvs = hookStatus.zignis ? hookStatus.zignis : {}
-    Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
-    Utils.outputTable(columns, 'Core Information')
+    let kvs = hookStatus[scriptName] ? hookStatus[scriptName] : {}
+    if (Object.keys(kvs).length > 0) {
+      Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
+      Utils.outputTable(columns, 'Core Information')
+    }
 
     // plugin information
     const plugins = Utils.getAllPluginsMapping()
