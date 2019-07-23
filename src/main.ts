@@ -14,12 +14,13 @@ updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
   isGlobal: true
 })
 
+const cache = Utils.getInternalCache()
 let parsedArgv = yParser(process.argv.slice(2))
+cache.set('argv', parsedArgv) // set argv first time
 let appConfig = Utils.getApplicationConfig()
 yargs.config(appConfig)
 parsedArgv = Utils._.merge(appConfig, parsedArgv)
-const cache = Utils.getInternalCache()
-cache.set('argv', parsedArgv)
+cache.set('argv', parsedArgv) // set argv second time
 
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
