@@ -125,7 +125,6 @@ if (
       })
       yargs.hide('epilog').option('epilog', {
         default: false,
-        alias: 'epilog',
         describe: 'Set epilog.'
       })
     }
