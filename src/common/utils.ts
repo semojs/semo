@@ -96,7 +96,7 @@ interface IHookOption {
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
   const argv: any = getInternalCache().get('argv')
-  const scriptName = argv.scriptName || 'zignis'
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -285,7 +285,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 
   if (_.isEmpty(plugins)) {
     let pluginPrefix = argv.pluginPrefix || 'zignis'
-    let scriptName = argv.scriptName || 'zignis'
+    let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
     if (_.isString(pluginPrefix)) {
       pluginPrefix = [pluginPrefix]
     }
@@ -445,7 +445,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv.scriptName || 'zignis'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
