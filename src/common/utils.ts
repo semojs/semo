@@ -390,6 +390,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       if (pkgConfig.name && regExp.test(pkgConfig.name)) {
         plugins[pkgConfig.name] = path.resolve(process.cwd())
       }
+
     }
 
     cachedInstance.set('plugins', plugins)
@@ -403,7 +404,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv.scriptName || 'zignis'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
 
   try {
     const configPath = findUp.sync([`.${scriptName}rc.json`], {
