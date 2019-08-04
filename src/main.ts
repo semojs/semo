@@ -51,6 +51,15 @@ if (!parsedArgv.disableCoreCommand) {
   yargs.commandDir('commands')
 }
 
+// Load extra commands by --command-dir option
+if (parsedArgv.commandDir) {
+  if (parsedArgv.commandDir[0] !== '/') {
+    parsedArgv.commandDir = path.resolve(process.cwd(), parsedArgv.commandDir)
+  }
+
+  yargs.commandDir(parsedArgv.commandDir)
+}
+
 // Load plugin commands
 if (plugins) {
   Object.keys(plugins).map(function(plugin) {
