@@ -165,6 +165,12 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           if (pkgConfig.main) {
             pluginEntry = pkgConfig.main
           }
+
+          if (pkgConfig.rc && pkgConfig.rc.hookDir) {
+            if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
+              pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
+            }
+          }
         }
 
         // hookDir
@@ -247,7 +253,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
-  
+
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
   if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
@@ -258,8 +264,14 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   if (plugins) {
     Object.keys(plugins).map(function(plugin): void {
       if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
-        if (fs.existsSync(path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command))) {
-          yargs.commandDir(path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command))
+        if (
+          fs.existsSync(
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+          )
+        ) {
+          yargs.commandDir(
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+          )
         }
       }
     })
@@ -311,21 +323,21 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     if (!argv.disableGlobalPlugin) {
       // process core same directory plugins
       glob
-      .sync(topPluginPattern, {
-        cwd: path.resolve(__dirname, '../../../')
-      })
-      .map(function(plugin): void {
-        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-      })
+        .sync(topPluginPattern, {
+          cwd: path.resolve(__dirname, '../../../')
+        })
+        .map(function(plugin): void {
+          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+        })
 
-    // process core same directory npm plugins
-    glob
-      .sync(orgPluginPattern, {
-        cwd: path.resolve(__dirname, '../../../')
-      })
-      .map(function(plugin): void {
-        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-      })
+      // process core same directory npm plugins
+      glob
+        .sync(orgPluginPattern, {
+          cwd: path.resolve(__dirname, '../../../')
+        })
+        .map(function(plugin): void {
+          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+        })
     }
 
     if (process.env.HOME && !argv.disableHomePlugin) {
@@ -390,7 +402,6 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       if (pkgConfig.name && regExp.test(pkgConfig.name)) {
         plugins[pkgConfig.name] = path.resolve(process.cwd())
       }
-
     }
 
     cachedInstance.set('plugins', plugins)
@@ -411,27 +422,24 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
       cwd
     })
     let applicationConfig = configPath ? require(configPath) : {}
-    if (configPath) {
-      applicationConfig.applicationDir = path.dirname(configPath)
-      if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
-        let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+    applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
+    if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
+      let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
 
-        if (packageInfo.name) {
-          applicationConfig.name = packageInfo.name
-        }
+      if (packageInfo.name) {
+        applicationConfig.name = packageInfo.name
+      }
 
-        if (packageInfo.version) {
-          applicationConfig.version = packageInfo.version
-        }
+      if (packageInfo.version) {
+        applicationConfig.version = packageInfo.version
+      }
 
-        // args > package > current rc
-        if (packageInfo[scriptName]) {
-          applicationConfig = Object.assign(
-            {},
-            applicationConfig,
-            packageInfo[scriptName]
-          )
-        }
+      // args > package > current rc
+      if (packageInfo.rc) {
+        applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
+      }
+      if (packageInfo[scriptName]) {
+        applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
       }
     }
     return applicationConfig
@@ -651,7 +659,7 @@ const exec = function(command: string, options: any = {}): any {
 
 /**
  * Get current node env setting
- * 
+ *
  * You can change the node-env-key in command args or zignis rc file
  */
 const getNodeEnv = () => {

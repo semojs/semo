@@ -74,5 +74,12 @@
     "build": "tsc",
     "postversion": "git push && git push --tags",
     "prepare": "npm run build"
+  },
+  "rc": {
+    "commandDir": "lib/commands",
+    "commandMakeDir": "src/commands",
+    "hookDir": "lib/hooks",
+    "pluginDir": "lib/plugins",
+    "pluginMakeDir": "src/plugins"
   }
 }
