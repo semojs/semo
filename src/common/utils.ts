@@ -23,6 +23,7 @@ import { dd, dump } from 'dumper.js'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
+import yParser from 'yargs-parser'
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt)
 const { hash } = objectHash({ sort: true })
@@ -669,7 +670,7 @@ const loadCorePackageInfo = function(): any {
  * @param {object} options Options stdio default is [0, 1, 2]
  */
 const exec = function(command: string, options: any = {}): any {
-  debugCore({ command, options })
+  debugCore('Utils.exec', { command, options })
   if (!options.stdio) {
     options.stdio = [0, 1, 2]
   }
@@ -746,6 +747,8 @@ export {
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
+  /** [yargs-parser](https://www.npmjs.com/package/yargs-parser) reference */
+  yParser,
   // custom functions
   md5,
   delay,

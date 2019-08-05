@@ -96,6 +96,24 @@ if (
         alias: 'disable-core',
         describe: 'Disable core commands.'
       })
+
+      if (!parsedArgv.disableCompletionCommand && !parsedArgv.disableCompletion) {
+        yargs.hide('disable-completion-command').option('disable-completion-command', {
+          alias: 'disable-completion',
+          describe: 'Disable completion command.'
+        })
+  
+        if (!parsedArgv.hideCompletionCommand && !parsedArgv.hideCompletion) {
+          yargs.hide('hide-completion-command').option('hide-completion-command', {
+            alias: 'hide-completion',
+            describe: 'Hide completion command.'
+          })
+          yargs.completion('completion', 'Generate completion script')
+        } else {
+          // @ts-ignore, @types/yargs type def not correct
+          yargs.completion('completion', false)
+        }
+      }
     }
 
     if (!parsedArgv.disableGlobalPlugin && !parsedArgv.disableGlobalPlugins) {
@@ -112,24 +130,6 @@ if (
       })
     }
 
-    if (!parsedArgv.disableCompletionCommand && !parsedArgv.disableCompletion) {
-      yargs.hide('disable-completion-command').option('disable-completion-command', {
-        alias: 'disable-completion',
-        describe: 'Disable completion command.'
-      })
-
-      if (!parsedArgv.hideCompletionCommand && !parsedArgv.hideCompletion) {
-        yargs.hide('hide-completion-command').option('hide-completion-command', {
-          alias: 'hide-completion',
-          describe: 'Hide completion command.'
-        })
-        yargs.completion('completion', 'Generate completion script')
-      } else {
-        // @ts-ignore, @types/yargs type def not correct
-        yargs.completion('completion', false)
-      }
-    }
-
     if (!parsedArgv.hideEpilog) {
       yargs.hide('hide-epilog').option('hide-epilog', {
         describe: 'Hide epilog.'
@@ -138,12 +138,26 @@ if (
         default: false,
         describe: 'Set epilog.'
       })
+
+      yargs.epilog(((epilog: string | string[]): string => {
+        if (epilog && Utils._.isString(epilog)) {
+          return epilog
+        } else if (Utils._.isArray(epilog)) {
+          let pop = epilog.pop()
+          if (pop) {
+            return pop
+          }
+        }
+
+        return 'Find more information at https://zignis.js.org'
+      })(parsedArgv.setEpilog))
     }
 
-    yargs.hide('set-version').option('set-version', {
-      describe: 'Set version.'
-    })
-    if (parsedArgv.setVersion) {
+    if (!parsedArgv.setVersion) {
+      yargs.hide('set-version').option('set-version', {
+        describe: 'Set version.'
+      })
+    } else {
       yargs.version(parsedArgv.setVersion)
     }
 
@@ -152,8 +166,6 @@ if (
       alias: 'node-env',
       describe: 'Set node env key'
     })
-
-    !parsedArgv.hideEpilog && yargs.epilog(parsedArgv.setEpilog || 'Find more information at https://zignis.js.org')
 
     // eslint-disable-next-line
     yargs
