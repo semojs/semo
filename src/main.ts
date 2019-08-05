@@ -134,10 +134,17 @@ if (
       yargs.hide('hide-epilog').option('hide-epilog', {
         describe: 'Hide epilog.'
       })
-      yargs.hide('epilog').option('epilog', {
+      yargs.hide('set-epilog').option('set-epilog', {
         default: false,
         describe: 'Set epilog.'
       })
+    }
+
+    yargs.hide('set-version').option('set-version', {
+      describe: 'Set version.'
+    })
+    if (parsedArgv.setVersion) {
+      yargs.version(parsedArgv.setVersion)
     }
 
     yargs.hide('node-env-key').option('node-env-key', {
