@@ -153,7 +153,7 @@ if (
       describe: 'Set node env key'
     })
 
-    !parsedArgv.hideEpilog && yargs.epilog(parsedArgv.epilog || 'Find more information at https://zignis.js.org')
+    !parsedArgv.hideEpilog && yargs.epilog(parsedArgv.setEpilog || 'Find more information at https://zignis.js.org')
 
     // eslint-disable-next-line
     yargs
