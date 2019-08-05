@@ -46,6 +46,8 @@ yargs.hide('plugin-prefix').option('plugin-prefix', {
 
 let scriptName = parsedArgv.scriptName || 'zignis'
 
+cache.set('debug', Utils.debug(`${scriptName}-core`))
+
 if (!parsedArgv.disableCoreCommand) {
   // Load local commands
   yargs.commandDir('commands')

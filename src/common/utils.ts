@@ -651,6 +651,8 @@ const loadCorePackageInfo = function(): any {
  * @param {object} options Options stdio default is [0, 1, 2]
  */
 const exec = function(command: string, options: any = {}): any {
+  const debug: any = cachedInstance.get('debug')
+  debug && debug({ command, options })
   if (!options.stdio) {
     options.stdio = [0, 1, 2]
   }
