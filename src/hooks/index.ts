@@ -15,7 +15,8 @@ export const hook_hook = {
 
 export const hook_new_repo = () => {
   const argv: any = Utils.getInternalCache().get('argv')
-  return argv.scriptName === 'zignis' ? {
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  return scriptName === 'zignis' ? {
     zignis_plugin_starter: {
       repo: 'git@github.com:zhike-team/zignis-plugin-starter.git',
       branch: 'master',
