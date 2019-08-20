@@ -57,7 +57,9 @@ if (parsedArgv.commandDir) {
     parsedArgv.commandDir = path.resolve(process.cwd(), parsedArgv.commandDir)
   }
 
-  yargs.commandDir(parsedArgv.commandDir)
+  if (fs.existsSync(path.resolve(parsedArgv.commandDir))) {
+    yargs.commandDir(parsedArgv.commandDir)
+  }
 }
 
 // Load plugin commands
