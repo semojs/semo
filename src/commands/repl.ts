@@ -66,7 +66,10 @@ export const desc = 'Play with REPL'
 
 async function openRepl(context: any): Promise<any> {
   const { argv } = context
-  const r = repl.start('>>> ')
+  const r = repl.start({
+    prompt: argv.prompt,
+  })
+
   const Home = process.env.HOME + `/.${argv.scriptName}`
   if (!fs.existsSync(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
@@ -84,12 +87,17 @@ export const builder = function(yargs: yargs.Argv) {
   yargs.option('hook', {
     describe: 'if or not load all plugins repl hook'
   })
+
+  yargs.option('prompt', {
+    default: '>>> ',
+    describe: 'Prompt for input.'
+  })
 }
 
 export const handler = async function(argv: any) {
   argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
   try {
-    let context = { Utils, argv }
+    let context = { Utils, argv, await: true, yield: true }
 
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(
