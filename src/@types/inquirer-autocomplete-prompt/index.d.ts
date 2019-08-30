@@ -1,5 +1,5 @@
 
 declare module 'inquirer-autocomplete-prompt' {
-  import inquirer from 'inquirer'
-  export default inquirer.prompt
+  import Prompt from 'inquirer/lib/prompts/base'
+  export default Prompt
 }
