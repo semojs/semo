@@ -178,6 +178,9 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       }
 
       try {
+        // 寻找插件声明的钩子文件入口
+        // 默认是Node模块的入口文件
+        // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
         let pluginEntry = 'index.js'
         if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
@@ -185,9 +188,21 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
             pluginEntry = pkgConfig.main
           }
 
-          if (pkgConfig.rc && pkgConfig.rc.hookDir) {
-            if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
-              pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
+          if (pkgConfig.rc) {
+            pkgConfig.rc = formatRcOptions(pkgConfig.rc)
+            if (pkgConfig.rc.hookDir) {
+              if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
+              }
+            }
+          }
+
+          if (pkgConfig[scriptName]) {
+            pkgConfig[scriptName] = formatRcOptions(pkgConfig[scriptName])
+            if (pkgConfig[scriptName].hookDir) {
+              if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig[scriptName].hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig[scriptName].hookDir, 'index.js')
+              }
             }
           }
         }
@@ -455,9 +470,11 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
 
       // args > package > current rc
       if (packageInfo.rc) {
+        packageInfo.rc = formatRcOptions(packageInfo.rc)
         applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
       }
       if (packageInfo[scriptName]) {
+        packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
         applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
       }
     }
@@ -465,6 +482,18 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
   } catch (e) {
     error(`Application .${scriptName}rc.json can not be parsed!`)
   }
+}
+
+const formatRcOptions = (opts) => {
+  if (!_.isObject(opts)) {
+    throw new Error('Not valid rc options!')
+  }
+  Object.keys(opts).filter(key => key.indexOf('-') > -1).forEach(key => {
+    const newKey = key.replace(/--+/g, '-').replace(/^-/g, '').replace(/-([a-z])/g, (m, p1) => p1.toUpperCase())
+    opts[newKey] = opts[key]
+    delete opts[key]
+  })
+  return opts
 }
 
 /**
@@ -478,7 +507,7 @@ const getCombinedConfig = function(): { [propName: string]: any } {
 
   if (_.isEmpty(combinedConfig)) {
     if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
-      combinedConfig = require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))
+      combinedConfig = formatRcOptions(require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`)))
     } else {
       combinedConfig = {}
     }
@@ -486,14 +515,14 @@ const getCombinedConfig = function(): { [propName: string]: any } {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
-        const pluginConfig = require(path.resolve(plugins[plugin], `.${scriptName}rc.json`))
+        const pluginConfig = formatRcOptions(require(path.resolve(plugins[plugin], `.${scriptName}rc.json`)))
         combinedConfig = _.merge(combinedConfig, pluginConfig)
         pluginConfigs[plugin] = pluginConfig
       }
     })
 
     const configPath = findUp.sync([`.${scriptName}rc.json`])
-    let rcConfig = configPath ? require(configPath) : {}
+    let rcConfig = configPath ? formatRcOptions(require(configPath)) : {}
 
     combinedConfig = _.merge(combinedConfig, rcConfig)
     combinedConfig.pluginConfigs = pluginConfigs
