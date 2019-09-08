@@ -1,6 +1,6 @@
 {
-  "config2Style1": "b1",
-  "config2-style2": "b2",
-  "--config2-style3": "b3",
-  "--config2--style4": "b4"
+  "config3Style1": "c1",
+  "config3-style2": "c2",
+  "--config3-style3": "c3",
+  "--config3--style4": "c4"
 }

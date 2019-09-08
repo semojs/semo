@@ -1,5 +1,14 @@
 {
   "rc": {
-    "config1": "a" 
+    "config1Style1": "a1",
+    "config1-style2": "a2",
+    "--config1-style3": "a3",
+    "--config1--style4": "a4"
+  },
+  "zignis": {
+    "config2Style1": "b1",
+    "config2-style2": "b2",
+    "--config2-style3": "b3",
+    "--config2--style4": "b4"
   }
 }
