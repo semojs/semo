@@ -6,7 +6,12 @@ export const command = 'status'
 export const aliases = 'st'
 export const desc = 'Show environment status info'
 
-export const builder = function() {}
+export const builder = function(yargs) {
+  yargs.option('list-plugin', {
+    alias: 'P',
+    describe: 'Show valid plugin list'
+  })
+}
 
 export const handler = async function(argv: any) {
   const scriptName = argv.scriptName || 'zignis'
@@ -20,31 +25,34 @@ export const handler = async function(argv: any) {
       Utils.outputTable(columns, 'Core Information')
     }
 
-    // plugin information
-    const plugins = Utils.getAllPluginsMapping()
-    Object.keys(plugins).forEach(plugin => {
-      if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
-        const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
-        const pluginColumns: string[][] = []
-        if (pkgConfig.version) {
-          pluginColumns.push(['version', pkgConfig.version])
-        }
+    if (argv.listPlugin) {
 
-        if (hookStatus && hookStatus[plugin]) {
-          Object.keys(hookStatus[plugin]).map(function(key) {
-            pluginColumns.push([key, hookStatus[plugin][key]])
-          })
+      // plugin information
+      const plugins = Utils.getAllPluginsMapping()
+      Object.keys(plugins).forEach(plugin => {
+        if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+          const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
+          const pluginColumns: string[][] = []
+          if (pkgConfig.version) {
+            pluginColumns.push(['version', pkgConfig.version])
+          }
+  
+          if (hookStatus && hookStatus[plugin]) {
+            Object.keys(hookStatus[plugin]).map(function(key) {
+              pluginColumns.push([key, hookStatus[plugin][key]])
+            })
+          }
+  
+          if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
+            pluginColumns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
+          } else {
+            pluginColumns.push(['location', plugins[plugin]])
+          }
+  
+          Utils.outputTable(pluginColumns, `[${plugin}]`)
         }
-
-        if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
-          pluginColumns.push(['location', plugins[plugin].replace(process.env.HOME, '~')])
-        } else {
-          pluginColumns.push(['location', plugins[plugin]])
-        }
-
-        Utils.outputTable(pluginColumns, `[${plugin}]`)
-      }
-    })
+      })
+    }
 
     // application information
     if (hookStatus['application']) {

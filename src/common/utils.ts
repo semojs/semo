@@ -455,7 +455,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     const configPath = findUp.sync([`.${scriptName}rc.json`], {
       cwd
     })
-    let applicationConfig = configPath ? require(configPath) : {}
+    let applicationConfig: any = {}
     applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
     if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
       let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
@@ -478,6 +478,13 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
         applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
       }
     }
+
+    if (configPath) {
+      let zignisRcInfo = require(configPath)
+      zignisRcInfo = formatRcOptions(zignisRcInfo)
+      applicationConfig = Object.assign({}, applicationConfig, zignisRcInfo)
+    }
+
     return applicationConfig
   } catch (e) {
     error(`Application .${scriptName}rc.json can not be parsed!`)
@@ -521,10 +528,10 @@ const getCombinedConfig = function(): { [propName: string]: any } {
       }
     })
 
-    const configPath = findUp.sync([`.${scriptName}rc.json`])
-    let rcConfig = configPath ? formatRcOptions(require(configPath)) : {}
-
-    combinedConfig = _.merge(combinedConfig, rcConfig)
+    // const configPath = findUp.sync([`.${scriptName}rc.json`])
+    // let rcConfig = configPath ? formatRcOptions(require(configPath)) : {}
+    const applicatonConfig = getApplicationConfig()
+    combinedConfig = _.merge(combinedConfig, applicatonConfig)
     combinedConfig.pluginConfigs = pluginConfigs
     cachedInstance.set('combinedConfig', combinedConfig)
   }
