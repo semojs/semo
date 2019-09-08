@@ -455,7 +455,15 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     const configPath = findUp.sync([`.${scriptName}rc.json`], {
       cwd
     })
-    let applicationConfig: any = {}
+
+    let applicationConfig
+    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
+      applicationConfig = formatRcOptions(require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`)))
+    } else {
+      applicationConfig = {}
+    }
+
+    
     applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
     if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
       let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
@@ -513,12 +521,6 @@ const getCombinedConfig = function(): { [propName: string]: any } {
   let pluginConfigs: { [propName: string]: any } = {}
 
   if (_.isEmpty(combinedConfig)) {
-    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
-      combinedConfig = formatRcOptions(require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`)))
-    } else {
-      combinedConfig = {}
-    }
-
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
