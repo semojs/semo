@@ -11,3 +11,4 @@ src
 tsconfig.json
 .eslintignore
 /lib/**/*.map
+/lib/examples
