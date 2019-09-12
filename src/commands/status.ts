@@ -8,7 +8,7 @@ export const desc = 'Show environment status info'
 
 export const builder = function(yargs) {
   yargs.option('list-plugin', {
-    alias: 'P',
+    alias: ['plugin', 'P'],
     describe: 'Show valid plugin list'
   })
 }
