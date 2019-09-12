@@ -457,54 +457,58 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
   let argv: any = cachedInstance.get('argv') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  let applicationConfig: { [propName: string]: any } = cachedInstance.get('applicationConfig') || {}
 
-  try {
-    const configPath = findUp.sync([`.${scriptName}rc.json`], {
-      cwd
-    })
-
-    let applicationConfig
-    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
-      applicationConfig = formatRcOptions(require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`)))
-    } else {
-      applicationConfig = {}
+  if (!_.isEmpty(applicationConfig)) {
+    try {
+      const configPath = findUp.sync([`.${scriptName}rc.json`], {
+        cwd
+      })
+  
+      if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`))) {
+        applicationConfig = formatRcOptions(require(path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`)))
+      } else {
+        applicationConfig = {}
+      }
+  
+      
+      applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
+      if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
+        let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+  
+        if (packageInfo.name) {
+          applicationConfig.name = packageInfo.name
+        }
+  
+        if (packageInfo.version) {
+          applicationConfig.version = packageInfo.version
+        }
+  
+        // args > package > current rc
+        if (packageInfo.rc) {
+          packageInfo.rc = formatRcOptions(packageInfo.rc)
+          applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
+        }
+        if (packageInfo[scriptName]) {
+          packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
+          applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
+        }
+      }
+  
+      if (configPath) {
+        let zignisRcInfo = require(configPath)
+        zignisRcInfo = formatRcOptions(zignisRcInfo)
+        applicationConfig = Object.assign({}, applicationConfig, zignisRcInfo)
+      }
+    } catch (e) {
+      debugCore('load rc:', e)
+      error(`Application config load failed!`, false)
     }
 
-    
-    applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
-    if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
-      let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
-
-      if (packageInfo.name) {
-        applicationConfig.name = packageInfo.name
-      }
-
-      if (packageInfo.version) {
-        applicationConfig.version = packageInfo.version
-      }
-
-      // args > package > current rc
-      if (packageInfo.rc) {
-        packageInfo.rc = formatRcOptions(packageInfo.rc)
-        applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
-      }
-      if (packageInfo[scriptName]) {
-        packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
-        applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
-      }
-    }
-
-    if (configPath) {
-      let zignisRcInfo = require(configPath)
-      zignisRcInfo = formatRcOptions(zignisRcInfo)
-      applicationConfig = Object.assign({}, applicationConfig, zignisRcInfo)
-    }
-
-    return applicationConfig
-  } catch (e) {
-    debugCore('load rc:', e)
-    error(`Application config load failed!`, false)
+    cachedInstance.set('applicationConfig', applicationConfig)
   }
+
+  return applicationConfig
 }
 
 const formatRcOptions = (opts) => {
