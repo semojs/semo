@@ -209,7 +209,14 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 
         // hookDir
         if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
-          const scriptConfig = require(path.resolve(plugins[plugin], `.${scriptName}rc.json`))
+          let scriptConfig
+          try {
+            scriptConfig = require(path.resolve(plugins[plugin], `.${scriptName}rc.json`))
+          } catch (e) {
+            scriptConfig = {}
+            debugCore('load rc:', e)
+          }
+          
           if (scriptConfig.hookDir && fs.existsSync(path.resolve(plugins[plugin], scriptConfig.hookDir, 'index.js'))) {
             pluginEntry = path.join(scriptConfig.hookDir, 'index.js')
           }
@@ -495,7 +502,8 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
 
     return applicationConfig
   } catch (e) {
-    error(`Application .${scriptName}rc.json can not be parsed!`)
+    debugCore('load rc:', e)
+    error(`Application config load failed!`, false)
   }
 }
 
@@ -524,7 +532,14 @@ const getCombinedConfig = function(): { [propName: string]: any } {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       if (fs.existsSync(path.resolve(plugins[plugin], `.${scriptName}rc.json`))) {
-        const pluginConfig = formatRcOptions(require(path.resolve(plugins[plugin], `.${scriptName}rc.json`)))
+        let pluginConfig
+        try {
+          pluginConfig = formatRcOptions(require(path.resolve(plugins[plugin], `.${scriptName}rc.json`)))
+        } catch (e) {
+          // debugCore('load rc:', e)
+          pluginConfig = {}
+        }
+        
         combinedConfig = _.merge(combinedConfig, pluginConfig)
         pluginConfigs[plugin] = pluginConfig
       }
