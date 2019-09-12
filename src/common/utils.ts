@@ -146,6 +146,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
+    const combinedConfig = getCombinedConfig()
     if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir) {
       plugins['application'] = appConfig.applicationDir
     }
@@ -166,7 +167,6 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         break
     }
 
-    const combinedConfig = getCombinedConfig()
     for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
       let plugin = Object.keys(plugins)[i]
 
@@ -209,7 +209,23 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         }
 
         // hookDir
-        const hookDir = plugin === scriptName ? combinedConfig.hookDir : combinedConfig.pluginConfigs[plugin].hookDir
+        let hookDir
+
+        switch (plugin) {
+          case scriptName:
+            let corePackageInfo = loadCorePackageInfo()
+            hookDir = corePackageInfo.rc && corePackageInfo.rc.hookDir ? corePackageInfo.rc.hookDir : ''
+          break
+
+          case 'application':
+            hookDir = combinedConfig.hookDir
+          break
+
+          default:
+            hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+          break
+
+        }
         if (hookDir && fs.existsSync(path.resolve(plugins[plugin], hookDir, 'index.js'))) {
           pluginEntry = path.join(hookDir, 'index.js')
         }
