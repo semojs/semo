@@ -498,7 +498,8 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
       applicationConfig = {}
     }
 
-    applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
+    applicationConfig.coreDir = path.resolve(__dirname, '../../')
+    applicationConfig.applicationDir = cwd ? cwd : configPath ? path.dirname(configPath) : process.cwd()
     if (fileExistsSyncCache(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
       let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
 
