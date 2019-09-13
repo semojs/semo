@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import repl from 'repl'
-import fs from 'fs'
 import _ from 'lodash'
 import replHistory from 'repl.history'
 import yargs = require('yargs')
@@ -71,7 +70,7 @@ async function openRepl(context: any): Promise<any> {
   })
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
-  if (!fs.existsSync(Home)) {
+  if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
   replHistory(r, `${Home}/.${argv.scriptName}_history`)

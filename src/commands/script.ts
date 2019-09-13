@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import _ from 'lodash'
 import yargs from 'yargs'
@@ -13,7 +12,7 @@ export const builder = function(yargs: yargs.Argv) {
   const parsedArgv = yParser(process.argv.slice(2))
   let filePath = parsedArgv._[1]
   if (!parsedArgv.help && !parsedArgv.h) {
-    if (!fs.existsSync(filePath)) {
+    if (!Utils.fileExistsSyncCache(filePath)) {
       filePath = path.resolve(process.cwd(), filePath)
     } else {
       filePath = path.resolve(filePath)
@@ -29,7 +28,7 @@ export const builder = function(yargs: yargs.Argv) {
 export const handler = async function(argv: yargs.Arguments & { file: string }) {
   try {
     let filePath = argv.file
-    if (!fs.existsSync(filePath)) {
+    if (!Utils.fileExistsSyncCache(filePath)) {
       filePath = path.resolve(process.cwd(), argv.file)
     } else {
       filePath = path.resolve(argv.file)

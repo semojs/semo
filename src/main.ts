@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 
 import { Utils } from '.'
-import fs from 'fs'
 import path from 'path'
 import updateNotifier from 'update-notifier'
 // import pkg from '../package.json'
@@ -57,7 +56,7 @@ if (parsedArgv.commandDir) {
     parsedArgv.commandDir = path.resolve(process.cwd(), parsedArgv.commandDir)
   }
 
-  if (fs.existsSync(path.resolve(parsedArgv.commandDir))) {
+  if (Utils.fileExistsSyncCache(path.resolve(parsedArgv.commandDir))) {
     yargs.commandDir(parsedArgv.commandDir)
   }
 }
@@ -68,7 +67,7 @@ if (plugins) {
     if (
       config.pluginConfigs[plugin] &&
       config.pluginConfigs[plugin].commandDir &&
-      fs.existsSync(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
+      Utils.fileExistsSyncCache(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     ) {
       yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     }
@@ -79,7 +78,7 @@ if (plugins) {
 if (
   packageConfig.name !== scriptName &&
   appConfig.commandDir &&
-  fs.existsSync(path.resolve(process.cwd(), appConfig.commandDir))
+  Utils.fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
 ) {
   yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir))
 }

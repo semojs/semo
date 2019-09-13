@@ -1,5 +1,4 @@
 import replHistory from 'repl.history'
-import fs from 'fs'
 import repl from 'repl'
 import yargs from 'yargs'
 
@@ -92,7 +91,7 @@ async function openRepl(context: any): Promise<any> {
     }
   })
   const Home = process.env.HOME + `/.${argv.scriptName}`
-  if (!fs.existsSync(Home)) {
+  if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
   replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)

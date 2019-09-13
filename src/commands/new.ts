@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import shell from 'shelljs'
 import yargs from 'yargs'
@@ -63,7 +62,7 @@ export const handler = async function(argv: any) {
   argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
 
   try {
-    if (fs.existsSync(path.resolve(process.cwd(), argv.name))) {
+    if (Utils.fileExistsSyncCache(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
         shell.rm('-rf', path.resolve(process.cwd(), argv.name))
         Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)

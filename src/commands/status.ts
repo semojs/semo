@@ -1,5 +1,4 @@
 import path from 'path'
-import fs from 'fs'
 import { Utils } from '..'
 
 export const command = 'status'
@@ -30,7 +29,7 @@ export const handler = async function(argv: any) {
       // plugin information
       const plugins = Utils.getAllPluginsMapping()
       Object.keys(plugins).forEach(plugin => {
-        if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+        if (Utils.fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
           const pluginColumns: string[][] = []
           if (pkgConfig.version) {

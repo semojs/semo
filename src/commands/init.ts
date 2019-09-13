@@ -52,7 +52,7 @@ export const handler = async function(argv: any) {
 
   try {
     const { override } =
-      fs.existsSync(`${currentPath}/.${argv.scriptName}rc.json`) && !argv.force
+      Utils.fileExistsSyncCache(`${currentPath}/.${argv.scriptName}rc.json`) && !argv.force
         ? await inquirer.prompt([
             {
               type: 'confirm',
@@ -72,7 +72,7 @@ export const handler = async function(argv: any) {
     dirs.forEach(dir => {
       // @ts-ignore
       const loc = defaultRc[dir]
-      if (!fs.existsSync(`${currentPath}/${loc}`)) {
+      if (!Utils.fileExistsSyncCache(`${currentPath}/${loc}`)) {
         Utils.exec(`mkdir -p ${currentPath}/${loc}`)
         console.log(chalk.green(`${currentPath}/${loc} created!`))
       }

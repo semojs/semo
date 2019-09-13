@@ -4,6 +4,7 @@ import chalk from 'chalk'
 import _ from 'lodash'
 import yargs from 'yargs'
 import dayjs from 'dayjs'
+import { Utils } from '../..'
 
 export const command = 'script <name>'
 export const desc = 'Generate a script file'
@@ -17,14 +18,14 @@ export const builder = function(yargs: yargs.Argv) {
 
 export const handler = function(argv: any) {
   let scriptDir = argv.scriptMakeDir || argv.scriptDir
-  if (!scriptDir || !fs.existsSync(scriptDir)) {
+  if (!scriptDir || !Utils.fileExistsSyncCache(scriptDir)) {
     console.log(chalk.red('"scriptDir" missing in config file or not exist in current directory!'))
     return
   }
 
   const filePrefix = dayjs().format('YYYYMMDDHHmmssSSS')
   const scriptFile = path.resolve(scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`)
-  if (fs.existsSync(scriptFile)) {
+  if (Utils.fileExistsSyncCache(scriptFile)) {
     console.log(chalk.red('Scritp file exist!'))
     return
   }
@@ -50,7 +51,7 @@ exports.handler = async function (argv) {
 }
 `
   }
-  if (!fs.existsSync(scriptFile)) {
+  if (!Utils.fileExistsSyncCache(scriptFile)) {
     fs.writeFileSync(scriptFile, code)
     console.log(chalk.green(`${scriptFile} created!`))
   }

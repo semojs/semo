@@ -59,7 +59,7 @@ export const handler = function(argv: any) {
 
   Utils.fs.ensureDirSync(commandFileDir)
 
-  if (fs.existsSync(commandFilePath)) {
+  if (Utils.fileExistsSyncCache(commandFilePath)) {
     Utils.error(chalk.red('Command file exist!'))
   }
 
@@ -110,7 +110,7 @@ ${handerTpl}
 `
   }
   
-  if (!fs.existsSync(commandFilePath)) {
+  if (!Utils.fileExistsSyncCache(commandFilePath)) {
     fs.writeFileSync(commandFilePath, code)
     console.log(chalk.green(`${commandFilePath} created!`))
   }

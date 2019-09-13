@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import shell from 'shelljs'
 import yargs from 'yargs'
@@ -16,7 +15,7 @@ export const builder = function(yargs: yargs.Argv) {
 
 export const handler = function(argv: any) {
   let pluginDir = argv.pluginMakeDir || argv.pluginDir
-  if (!pluginDir || !fs.existsSync(pluginDir)) {
+  if (!pluginDir || !Utils.fileExistsSyncCache(pluginDir)) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }
 
@@ -27,7 +26,7 @@ export const handler = function(argv: any) {
 
   const scriptName = argv.scriptName || 'zignis'
   const pluginPath = path.resolve(pluginDir, `${scriptName}-plugin-${argv.name}`)
-  if (fs.existsSync(pluginPath)) {
+  if (Utils.fileExistsSyncCache(pluginPath)) {
     if (argv.force) {
       Utils.warn(`Existed ${scriptName}-plugin-${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', pluginPath)

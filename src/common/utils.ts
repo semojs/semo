@@ -91,6 +91,20 @@ const debugCore = function(...args) {
   return debugCache
 }
 
+const fileExistsSyncCache = function(filePath) {
+  const fileCheckHistory: any = cachedInstance.get('fileCheckHistory') || {}
+  if (fileCheckHistory[filePath]) {
+    fileCheckHistory[filePath].count++
+    return fileCheckHistory[filePath].existed
+  }
+
+  const existed = fs.existsSync(filePath)
+  fileCheckHistory[filePath] = { count: 1, existed }
+  cachedInstance.set('fileCheckHistory', fileCheckHistory)
+
+  return fileCheckHistory[filePath].existed
+}
+
 interface IHookOption {
   mode?: 'assign' | 'merge' | 'push' | 'replace' | 'group'
   useCache?: boolean
@@ -183,7 +197,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         // 默认是Node模块的入口文件
         // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
         let pluginEntry = 'index.js'
-        if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
           if (pkgConfig.main) {
             pluginEntry = pkgConfig.main
@@ -192,7 +206,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           if (pkgConfig.rc) {
             pkgConfig.rc = formatRcOptions(pkgConfig.rc)
             if (pkgConfig.rc.hookDir) {
-              if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
                 pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
               }
             }
@@ -201,7 +215,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           if (pkgConfig[scriptName]) {
             pkgConfig[scriptName] = formatRcOptions(pkgConfig[scriptName])
             if (pkgConfig[scriptName].hookDir) {
-              if (fs.existsSync(path.resolve(plugins[plugin], pkgConfig[scriptName].hookDir, 'index.js'))) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig[scriptName].hookDir, 'index.js'))) {
                 pluginEntry = path.join(pkgConfig[scriptName].hookDir, 'index.js')
               }
             }
@@ -226,7 +240,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           break
 
         }
-        if (hookDir && fs.existsSync(path.resolve(plugins[plugin], hookDir, 'index.js'))) {
+        if (hookDir && fileExistsSyncCache(path.resolve(plugins[plugin], hookDir, 'index.js'))) {
           pluginEntry = path.join(hookDir, 'index.js')
         }
 
@@ -235,7 +249,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           continue
         }
 
-        if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
             let pluginReturn
@@ -305,7 +319,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
 
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
-  if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
+  if (currentCommand && fileExistsSyncCache(path.resolve(basePath, currentCommand))) {
     yargs.commandDir(path.resolve(basePath, currentCommand))
   }
 
@@ -314,7 +328,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
     Object.keys(plugins).map(function(plugin): void {
       if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
         if (
-          fs.existsSync(
+          fileExistsSyncCache(
             path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
           )
         ) {
@@ -329,7 +343,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   // Load application commands
   if (
     config.extendDir &&
-    fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
+    fileExistsSyncCache(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   ) {
     yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   }
@@ -432,7 +446,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       })
 
     const config = getApplicationConfig()
-    if (fs.existsSync(config.pluginDir)) {
+    if (fileExistsSyncCache(config.pluginDir)) {
       // process local plugins
       glob
         .sync(topPluginPattern, {
@@ -444,7 +458,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     }
 
     // process plugin project
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+    if (fileExistsSyncCache(path.resolve(process.cwd(), 'package.json'))) {
       const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
       const matchPluginProject = pluginPrefix.map(prefix => `${prefix}-plugin-`).join('|')
       const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
@@ -473,7 +487,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     })
 
     const homeZignisRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
-    if (homeZignisRcPath && fs.existsSync(homeZignisRcPath)) {
+    if (homeZignisRcPath && fileExistsSyncCache(homeZignisRcPath)) {
       try {
         applicationConfig = formatRcOptions(require(homeZignisRcPath))
       } catch (e) {
@@ -485,7 +499,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
     }
 
     applicationConfig.applicationDir = configPath ? path.dirname(configPath) : cwd ? cwd : process.cwd()
-    if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
+    if (fileExistsSyncCache(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
       let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
 
       if (packageInfo.name) {
@@ -543,7 +557,7 @@ const getCombinedConfig = function(): { [propName: string]: any } {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
       const pluginZignisRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
-      if (fs.existsSync(pluginZignisRcPath)) {
+      if (fileExistsSyncCache(pluginZignisRcPath)) {
         let pluginConfig
         try {
           pluginConfig = formatRcOptions(require(pluginZignisRcPath))
@@ -842,5 +856,6 @@ export {
   getCache,
   getNodeEnv,
   isProduction,
-  isDevelopment
+  isDevelopment,
+  fileExistsSyncCache
 }
