@@ -67,13 +67,15 @@
     "eslint-plugin-node": "^9.2.0",
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
+    "rimraf": "^3.0.0",
     "typescript": "^3.6.2"
   },
   "scripts": {
     "zignis": "node lib/main.js",
     "build": "tsc",
+    "clean": "rimraf lib",
     "postversion": "git push && git push --tags",
-    "prepare": "npm run build"
+    "prepare": "npm run clean && npm run build"
   },
   "rc": {
     "commandDir": "lib/commands",
