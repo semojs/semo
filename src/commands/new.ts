@@ -58,8 +58,8 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = async function(argv: any) {
-  argv.repo = argv.repo || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.repo') || ''
-  argv.branch = argv.branch || Utils._.get(Utils.getCombinedConfig(), 'commandDefault.new.branch') || 'master'
+  argv.repo = argv.repo || ''
+  argv.branch = argv.branch || 'master'
 
   try {
     if (Utils.fileExistsSyncCache(path.resolve(process.cwd(), argv.name))) {

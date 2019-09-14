@@ -94,7 +94,7 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = async function(argv: any) {
-  argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
+  argv.hook = argv.hook || false
   try {
     let context = { Utils, argv, await: true, yield: true }
 

@@ -316,11 +316,17 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
+  const opts = {
+    // Give each command an ability to disable temporarily
+    visit: (command) => {
+      return command.disabled === true ? false : command
+    }
+  }
 
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
   if (currentCommand && fileExistsSyncCache(path.resolve(basePath, currentCommand))) {
-    yargs.commandDir(path.resolve(basePath, currentCommand))
+    yargs.commandDir(path.resolve(basePath, currentCommand), opts)
   }
 
   // Load plugin commands
@@ -334,7 +340,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
         ) {
           yargs.commandDir(
             path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
-          )
+          , opts)
         }
       }
     })
@@ -345,7 +351,7 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
     config.extendDir &&
     fileExistsSyncCache(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   ) {
-    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command), opts)
   }
 }
 

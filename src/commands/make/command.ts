@@ -69,6 +69,7 @@ export const handler = function(argv: any) {
   if (argv.typescript) {
     code = `import { Utils } from '${scriptName}'
 
+export const disabled = false // Set to true to disable this command temporarily
 export const command = '${name}'
 export const desc = '${argv.description || name}'
 // export const aliases = ''
@@ -97,6 +98,7 @@ export const handler = async function (argv: any) {
   
     code = `const { Utils } = require('${scriptName}')
 
+exportx.disabled = false // Set to true to disable this command temporarily
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'
 // exports.aliases = ''

@@ -20,6 +20,7 @@ let appConfig = Utils.getApplicationConfig()
 yargs.config(appConfig)
 parsedArgv = Utils._.merge(appConfig, parsedArgv)
 cache.set('argv', parsedArgv) // set argv second time
+cache.set('yargs', yargs)
 
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
@@ -44,10 +45,15 @@ yargs.hide('plugin-prefix').option('plugin-prefix', {
 })
 
 let scriptName = parsedArgv.scriptName || 'zignis'
-
+const opts = {
+  // Give each command an ability to disable temporarily
+  visit: (command) => {
+    return command.disabled === true ? false : command
+  }
+}
 if (!parsedArgv.disableCoreCommand) {
   // Load local commands
-  yargs.commandDir('commands')
+  yargs.commandDir('commands', opts)
 }
 
 // Load extra commands by --command-dir option
@@ -57,7 +63,7 @@ if (parsedArgv.commandDir) {
   }
 
   if (Utils.fileExistsSyncCache(path.resolve(parsedArgv.commandDir))) {
-    yargs.commandDir(parsedArgv.commandDir)
+    yargs.commandDir(parsedArgv.commandDir, opts)
   }
 }
 
@@ -69,7 +75,7 @@ if (plugins) {
       config.pluginConfigs[plugin].commandDir &&
       Utils.fileExistsSyncCache(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
     ) {
-      yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
+      yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir), opts)
     }
   })
 }
@@ -80,11 +86,31 @@ if (
   appConfig.commandDir &&
   Utils.fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
 ) {
-  yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir))
+  yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), opts)
 }
 
 ;(async () => {
   try {
+    // @ts-ignore
+    // Register global middlewares
+    yargs.middleware((argv, yargs) => {
+      let commandPath = yargs.getContext().fullCommands.slice()
+      let commandDefault
+
+      if (argv.commandDefault && commandPath.length >= 1) {
+        while (commandPath.length >= 1) {
+          commandDefault = Utils._.get(argv.commandDefault, commandPath)
+          if (!Utils._.isObject(commandDefault) || Utils._.isArray(commandDefault)) {
+            commandPath.pop()
+            continue
+          }
+          break
+        }
+      }
+
+      return commandDefault ? Utils._.merge(argv, commandDefault) : argv
+    })
+
     if (!parsedArgv.getYargsCompletions) {
       let beforeHooks = await Utils.invokeHook('beforeCommand')
       Object.keys(beforeHooks).map(function(hook) {
