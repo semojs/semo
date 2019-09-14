@@ -536,6 +536,11 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
   return applicationConfig
 }
 
+/**
+ * Format options keys
+ * 
+ * Make compatible of param cases and camel cases
+ */
 const formatRcOptions = (opts) => {
   if (!_.isObject(opts)) {
     throw new Error('Not valid rc options!')
@@ -862,5 +867,6 @@ export {
   isProduction,
   isDevelopment,
   fileExistsSyncCache,
-  debugCore
+  debugCore,
+  formatRcOptions
 }

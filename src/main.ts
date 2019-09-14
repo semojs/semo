@@ -108,7 +108,7 @@ if (
         }
       }
 
-      argv = commandDefault ? Utils._.merge(argv, commandDefault, parsedArgv) : argv
+      argv = commandDefault ? Utils._.merge(argv, Utils.formatRcOptions(commandDefault), parsedArgv) : argv
       cache.set('argv', argv) // set argv third time
 
       return argv
