@@ -94,7 +94,7 @@ if (
     // @ts-ignore
     // Register global middlewares
     yargs.middleware((argv, yargs) => {
-      let commandPath = yargs.getContext().fullCommands.slice()
+      let commandPath = yargs.getContext().fullCommands.slice().map(cmd => cmd.split(' ')[0])
       let commandDefault
 
       if (argv.commandDefault && commandPath.length >= 1) {
