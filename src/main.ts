@@ -108,7 +108,10 @@ if (
         }
       }
 
-      return commandDefault ? Utils._.merge(argv, commandDefault) : argv
+      argv = commandDefault ? Utils._.merge(argv, commandDefault, parsedArgv) : argv
+      cache.set('argv', argv) // set argv third time
+
+      return argv
     })
 
     if (!parsedArgv.getYargsCompletions) {

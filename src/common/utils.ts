@@ -861,5 +861,6 @@ export {
   getNodeEnv,
   isProduction,
   isDevelopment,
-  fileExistsSyncCache
+  fileExistsSyncCache,
+  debugCore
 }
