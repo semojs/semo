@@ -1,4 +1,3 @@
-import { middlewares } from './commands/make/command'
 #!/usr/bin/env node
 
 import { Utils } from '.'
