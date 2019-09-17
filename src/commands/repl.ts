@@ -31,16 +31,14 @@ function corepl(cli: repl.REPLServer) {
       process.exit(0)
     }
 
-    if (cmd.match(/^yield\s+/)) {
-      cmd = 'Utils.co(function *() { let _ = ' + cmd + '; return _;})'
-    } else if (cmd.match(/\W*yield\s+/)) {
-      cmd = 'Utils.co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})'
-    }
-
-    if (cmd.match(/^await\s+/)) {
-      cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
+    if (cmd.match(/^await\s+/) || cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/)) {
+      if (cmd.match(/=/)) {
+        cmd = '(async function() { (' + cmd + ') })()'
+      } else {
+        cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
+      }
     } else if (cmd.match(/\W*await\s+/)) {
-      cmd = '(async function() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})()'
+      cmd = '(async function() { (' + cmd.replace(/^\s*(var|let|const)\s+/, '') + ') })()'
     }
 
     function done(val: any) {
