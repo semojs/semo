@@ -1,5 +1,9 @@
 # 基础
 
+```
+This doc would be rebuilt, so do not maintain this doc anymore.
+```
+
 Zignis 不是一个英文单词，其由两部分，`Z` + `ignis`，Z 是智课的智的首字母，ignis 是火种的拉丁文单词。所以，意思就很明显了，就是想做一个基础的项目，作为公司的火种，让星星之火可以燎原。
 
 ## 快速开始

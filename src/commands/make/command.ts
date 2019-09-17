@@ -20,14 +20,9 @@ export const builder = function(yargs: yargs.Argv) {
     describe: 'generate command in plugin directory'
   })
 
-  yargs.option('yield', {
-    alias: 'Y',
-    describe: 'use yield style for generator and promoise'
-  })
-
   yargs.option('typescript', {
     alias: 'ts',
-    describe: 'generate typescript style code, will ignore yield option'
+    describe: 'generate typescript style code'
   })
 }
 
@@ -67,12 +62,11 @@ export const handler = function(argv: any) {
 
   let handerTpl, code
   if (argv.typescript) {
-    code = `import { Utils } from '${scriptName}'
-
-export const disabled = false // Set to true to disable this command temporarily
+    code = `export const disabled = false // Set to true to disable this command temporarily
 export const command = '${name}'
 export const desc = '${argv.description || name}'
 // export const aliases = ''
+// export const middlewares = (argv) => {}
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
@@ -84,24 +78,15 @@ export const handler = async function (argv: any) {
 }
 `
   } else {
-    if (argv.yield) {
-      handerTpl = `exports.handler = function (argv) {
-  Utils.co(function * () {
-    console.log('Start to draw your dream code!')
-  }).catch(e => Utils.error(e.stack))
-}`
-    } else {
     handerTpl = `exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
 }`
-    }
   
-    code = `const { Utils } = require('${scriptName}')
-
-exportx.disabled = false // Set to true to disable this command temporarily
+    code = `exports.disabled = false // Set to true to disable this command temporarily
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'
 // exports.aliases = ''
+// exports.middlewares = (argv) => {}
 
 exports.builder = function (yargs) {
   // yargs.option('option', { default, describe, alias })
@@ -116,6 +101,4 @@ ${handerTpl}
     fs.writeFileSync(commandFilePath, code)
     console.log(chalk.green(`${commandFilePath} created!`))
   }
-
-  // TODO: check zignis installed or not, if not ask if add, check yarn.lock, if exist use yarn or use npm
 }

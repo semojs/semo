@@ -16,7 +16,7 @@ function corepl(cli: repl.REPLServer) {
       Utils.outputTable(
         [
           ['quit', 'Quit the REPL, alias: exit, q.'],
-          ['yield/await', 'Run generator or promise function.'],
+          ['await', 'Run generator or promise function.'],
           ['?', 'Show this help info.']
         ],
         'Internal commands:'
