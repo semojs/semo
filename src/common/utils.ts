@@ -319,6 +319,10 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   const opts = {
     // Give each command an ability to disable temporarily
     visit: (command) => {
+      command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
+      if (command.middleware) {
+        command.middlewares.concat(command.middleware)
+      }
       return command.disabled === true ? false : command
     }
   }

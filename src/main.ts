@@ -1,3 +1,4 @@
+import { middlewares } from './commands/make/command'
 #!/usr/bin/env node
 
 import { Utils } from '.'
@@ -49,6 +50,10 @@ let scriptName = parsedArgv.scriptName || 'zignis'
 const opts = {
   // Give each command an ability to disable temporarily
   visit: (command) => {
+    command.middlewares = command.middlewares ? Utils._.castArray(command.middlewares) : []
+    if (command.middleware) {
+      command.middlewares.concat(command.middleware)
+    }
     return command.disabled === true ? false : command
   }
 }

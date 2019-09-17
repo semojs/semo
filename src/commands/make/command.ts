@@ -66,7 +66,7 @@ export const handler = function(argv: any) {
 export const command = '${name}'
 export const desc = '${argv.description || name}'
 // export const aliases = ''
-// export const middlewares = (argv) => {}
+// export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
@@ -86,7 +86,7 @@ export const handler = async function (argv: any) {
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'
 // exports.aliases = ''
-// exports.middlewares = (argv) => {}
+// exports.middleware = (argv) => {}
 
 exports.builder = function (yargs) {
   // yargs.option('option', { default, describe, alias })
