@@ -15,6 +15,7 @@ updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
 
 const cache = Utils.getInternalCache()
 let parsedArgv = yParser(process.argv.slice(2))
+let parsedArgvOrigin = parsedArgv
 cache.set('argv', parsedArgv) // set argv first time
 let appConfig = Utils.getApplicationConfig()
 yargs.config(appConfig)
@@ -94,7 +95,7 @@ if (
     // @ts-ignore
     // Register global middlewares
     yargs.middleware((argv, yargs) => {
-      let commandPath = yargs.getContext().fullCommands.slice().map(cmd => cmd.split(' ')[0])
+      const commandPath = yargs.getContext().fullCommands.slice().map(cmd => cmd.split(' ')[0])
       let commandDefault
 
       if (argv.commandDefault && commandPath.length >= 1) {
@@ -108,7 +109,20 @@ if (
         }
       }
 
-      argv = commandDefault ? Utils._.merge(argv, Utils.formatRcOptions(commandDefault), parsedArgv) : argv
+      // Insert home rc command default options between default options and cli options
+      // So the priority is: command default options < application rc options < home rc options < cli options
+      const overrideArgv = {}
+      const aliases = yargs.parsed.aliases
+      Object.keys(parsedArgvOrigin).filter(key => key !== '_').forEach(key => {
+        if (aliases[key] && Array.isArray(aliases[key])) {
+          overrideArgv[key] = parsedArgvOrigin[key]
+          aliases[key].forEach(alias => {
+            overrideArgv[alias] = parsedArgvOrigin[key]
+          })
+        }
+      })
+
+      argv = commandDefault ? Utils._.merge(argv, Utils.formatRcOptions(commandDefault), overrideArgv) : argv
       cache.set('argv', argv) // set argv third time
 
       return argv
