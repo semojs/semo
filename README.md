@@ -41,6 +41,10 @@ Option：
 
 Please refer to the documentation to learn how to use Zignis, because you need to do the integration by yourself to make Zignis work for your project.
 
+# Requirements
+
+- Node > v8.0
+
 # Documentation
 
 - [Chinese(中文)](https://zignis.js.org/)
