@@ -18,7 +18,7 @@ export const hook_new_repo = () => {
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
   return scriptName === 'zignis' ? {
     zignis_plugin_starter: {
-      repo: 'git@github.com:zhike-team/zignis-plugin-starter.git',
+      repo: 'https://github.com/zhike-team/zignis-plugin-starter.git',
       branch: 'master',
       alias: ['zignis-plugin-starter', 'plugin']
     }
