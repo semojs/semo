@@ -1,5 +1,7 @@
 #!/usr/bin/env node
 
+require('ts-node/register')
+
 import { Utils } from '.'
 import path from 'path'
 import updateNotifier from 'update-notifier'
@@ -47,6 +49,8 @@ yargs.hide('plugin-prefix').option('plugin-prefix', {
 
 let scriptName = parsedArgv.scriptName || 'zignis'
 const opts = {
+  extensions: ['js', '(?<!d\.)ts'],
+  
   // Give each command an ability to disable temporarily
   visit: (command) => {
     command.middlewares = command.middlewares ? Utils._.castArray(command.middlewares) : []
