@@ -1,7 +1,5 @@
 #!/usr/bin/env node
 
-require('ts-node/register')
-
 import { Utils } from '.'
 import path from 'path'
 import updateNotifier from 'update-notifier'
@@ -24,6 +22,10 @@ yargs.config(appConfig)
 parsedArgv = Utils._.merge(appConfig, parsedArgv)
 cache.set('argv', parsedArgv) // set argv second time
 cache.set('yargs', yargs)
+
+if (parsedArgv.typescript) {
+  require('ts-node/register')
+} 
 
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
@@ -63,17 +65,6 @@ const opts = {
 if (!parsedArgv.disableCoreCommand) {
   // Load local commands
   yargs.commandDir('commands', opts)
-}
-
-// Load extra commands by --command-dir option
-if (parsedArgv.commandDir) {
-  if (parsedArgv.commandDir[0] !== '/') {
-    parsedArgv.commandDir = path.resolve(process.cwd(), parsedArgv.commandDir)
-  }
-
-  if (Utils.fileExistsSyncCache(path.resolve(parsedArgv.commandDir))) {
-    yargs.commandDir(parsedArgv.commandDir, opts)
-  }
 }
 
 // Load plugin commands
