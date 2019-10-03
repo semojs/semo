@@ -31,16 +31,23 @@ export const builder = function(yargs: yargs.Argv) {
     alias: 'D',
     describe: 'add npm package to package.json devDependencies'
   })
+
+  yargs.option('typescript', {
+    alias: 'ts',
+    describe: 'generate typescript style code'
+  })
 }
 
 export const handler = async function(argv: any) {
-  let defaultRc = argv.plugin
+  let defaultRc: any = argv.plugin
     ? {
+        typescript: argv.typescript ? true : null,
         commandDir: 'src/commands',
         extendDir: 'src/extends',
         hookDir: 'src/hooks'
       }
     : {
+        typescript: argv.typescript ? true : null,
         commandDir: `bin/${argv.scriptName}/commands`,
         pluginDir: `bin/${argv.scriptName}/plugins`,
         extendDir: `bin/${argv.scriptName}/extends`,
