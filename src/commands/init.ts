@@ -40,20 +40,20 @@ export const builder = function(yargs: yargs.Argv) {
 
 export const handler = async function(argv: any) {
   let defaultRc: any = argv.plugin
-    ? {
+    ? Utils._.pickBy({
         typescript: argv.typescript ? true : null,
         commandDir: 'src/commands',
         extendDir: 'src/extends',
         hookDir: 'src/hooks'
-      }
-    : {
+      })
+    : Utils._.pickBy({
         typescript: argv.typescript ? true : null,
         commandDir: `bin/${argv.scriptName}/commands`,
         pluginDir: `bin/${argv.scriptName}/plugins`,
         extendDir: `bin/${argv.scriptName}/extends`,
         scriptDir: `bin/${argv.scriptName}/scripts`,
         hookDir: `bin/${argv.scriptName}/hooks`
-      }
+      })
 
   let currentPath = path.resolve(process.cwd())
 
@@ -75,7 +75,7 @@ export const handler = async function(argv: any) {
     }
     fs.writeFileSync(`${currentPath}/.${argv.scriptName}rc.json`, JSON.stringify(defaultRc, null, 2))
     console.log(chalk.green(`Default .${argv.scriptName}rc created!`))
-    const dirs = Object.keys(defaultRc)
+    const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)
     dirs.forEach(dir => {
       // @ts-ignore
       const loc = defaultRc[dir]
