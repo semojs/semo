@@ -24,7 +24,9 @@ cache.set('argv', parsedArgv) // set argv second time
 cache.set('yargs', yargs)
 
 if (parsedArgv.typescript) {
-  require('ts-node/register')
+  // ts-node/register use ignore node_modules mode, that make zignis fail to load ts command from plugins
+  const { register: tsNodeRegister} = require('ts-node')
+  tsNodeRegister({ skipIgnore: true })
 } 
 
 const plugins = Utils.getAllPluginsMapping()
