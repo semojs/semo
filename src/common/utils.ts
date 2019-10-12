@@ -317,8 +317,6 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
   const opts = {
-    extensions: ['js', '(?<!d\.)ts'],
-    
     // Give each command an ability to disable temporarily
     visit: (command) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []

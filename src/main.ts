@@ -23,11 +23,6 @@ parsedArgv = Utils._.merge(appConfig, parsedArgv)
 cache.set('argv', parsedArgv) // set argv second time
 cache.set('yargs', yargs)
 
-if (parsedArgv.typescript) {
-  // This way will not support zignis plugins in node_modules, but safe
-  require('ts-node/register')
-} 
-
 const plugins = Utils.getAllPluginsMapping()
 const config = Utils.getCombinedConfig()
 const packageConfig = Utils.loadPackageInfo()
@@ -52,8 +47,6 @@ yargs.hide('plugin-prefix').option('plugin-prefix', {
 
 let scriptName = parsedArgv.scriptName || 'zignis'
 const opts = {
-  extensions: ['js', '(?<!d\.)ts'],
-  
   // Give each command an ability to disable temporarily
   visit: (command) => {
     command.middlewares = command.middlewares ? Utils._.castArray(command.middlewares) : []
