@@ -72,6 +72,7 @@
   },
   "scripts": {
     "zignis": "node lib/main.js",
+    "watch": "tsc -w",
     "build": "tsc",
     "clean": "rimraf lib",
     "postversion": "git push && git push --tags",
