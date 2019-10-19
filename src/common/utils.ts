@@ -456,16 +456,20 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       })
 
     const config = getApplicationConfig()
-    if (fileExistsSyncCache(config.pluginDir)) {
-      // process local plugins
-      glob
-        .sync(topPluginPattern, {
-          cwd: path.resolve(process.cwd(), config.pluginDir)
-        })
-        .map(function(plugin) {
-          plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
-        })
-    }
+    const pluginDirs = _.castArray(config.pluginDir)
+    pluginDirs.forEach(pluginDir => {
+      if (fileExistsSyncCache(pluginDir)) {
+        // process local plugins
+        glob
+          .sync(topPluginPattern, {
+            cwd: path.resolve(process.cwd(), pluginDir)
+          })
+          .map(function(plugin) {
+            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          })
+      }
+    })
+   
 
     // process plugin project
     if (fileExistsSyncCache(path.resolve(process.cwd(), 'package.json'))) {
