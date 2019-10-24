@@ -1,4 +1,3 @@
-import fs from 'fs'
 import path from 'path'
 import shell from 'shelljs'
 import yargs from 'yargs'
@@ -15,7 +14,8 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = function(argv: any) {
-  if (!argv.pluginDir || !fs.existsSync(argv.pluginDir)) {
+  let pluginDir = argv.pluginMakeDir || argv.pluginDir
+  if (!pluginDir || !Utils.fileExistsSyncCache(pluginDir)) {
     Utils.error('"pluginDir" missing in config file or not exist in current directory!')
   }
 
@@ -24,10 +24,11 @@ export const handler = function(argv: any) {
     Utils.error('Plugin name invalid!')
   }
 
-  const pluginPath = path.resolve(argv.pluginDir, `zignis-plugin-${argv.name}`)
-  if (fs.existsSync(pluginPath)) {
+  const scriptName = argv.scriptName || 'zignis'
+  const pluginPath = path.resolve(pluginDir, `${scriptName}-plugin-${argv.name}`)
+  if (Utils.fileExistsSyncCache(pluginPath)) {
     if (argv.force) {
-      Utils.warn(`Existed zignis-plugin-${argv.name} is deleted before creating a new one!`)
+      Utils.warn(`Existed ${scriptName}-plugin-${argv.name} is deleted before creating a new one!`)
       shell.rm('-rf', pluginPath)
     } else {
       Utils.error(`Destination existed, command abort!`)
@@ -36,6 +37,9 @@ export const handler = function(argv: any) {
 
   shell.mkdir('-p', pluginPath)
   shell.cd(pluginPath)
-  shell.exec('zignis init --plugin --exec-mode')
+  if (!shell.which(scriptName)) {
+    Utils.error(`Script ${scriptName} not found!`)
+  }
   shell.exec('npm init --yes')
+  shell.exec(`${scriptName} init --plugin --exec-mode`, (code, stdout, stderr) => {})
 }

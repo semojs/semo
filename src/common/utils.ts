@@ -23,10 +23,10 @@ import { dd, dump } from 'dumper.js'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
+import yParser from 'yargs-parser'
 
 inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt)
 const { hash } = objectHash({ sort: true })
-const debugCore = debug('zignis-core')
 
 let cachedInstance: NodeCache
 /**
@@ -73,6 +73,38 @@ const getCache = function(namespace: string): NodeCache {
   return cachedNamespaceInstances[namespace]
 }
 
+/**
+ * debug core
+ */
+const debugCore = function(...args) {
+  let debugCache: any = getInternalCache().get('debug')
+
+  if (!debugCache) {
+    const argv: any = getInternalCache().get('argv')
+    const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+    debugCache = debug(`${scriptName}-core`)
+    debugCache(...args)
+
+    getInternalCache().set('debug', debugCache)
+  }
+
+  return debugCache
+}
+
+const fileExistsSyncCache = function(filePath) {
+  const fileCheckHistory: any = cachedInstance.get('fileCheckHistory') || {}
+  if (fileCheckHistory[filePath]) {
+    fileCheckHistory[filePath].count++
+    return fileCheckHistory[filePath].existed
+  }
+
+  const existed = fs.existsSync(filePath)
+  fileCheckHistory[filePath] = { count: 1, existed }
+  cachedInstance.set('fileCheckHistory', fileCheckHistory)
+
+  return fileCheckHistory[filePath].existed
+}
+
 interface IHookOption {
   mode?: 'assign' | 'merge' | 'push' | 'replace' | 'group'
   useCache?: boolean
@@ -96,6 +128,8 @@ interface IHookOption {
  * @param {array} options.opts opts will be sent to hook implementation
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -119,14 +153,15 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
     const plugins = Object.assign(
       {},
       {
-        zignis: path.resolve(__dirname, '../../')
+        [scriptName]: path.resolve(__dirname, '../../')
       },
       getAllPluginsMapping()
     )
 
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
-    if (appConfig && appConfig.name !== 'zignis' && !plugins[appConfig.name] && appConfig.applicationDir) {
+    const combinedConfig = getCombinedConfig()
+    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir) {
       plugins['application'] = appConfig.applicationDir
     }
 
@@ -158,20 +193,55 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       }
 
       try {
+        // 寻找插件声明的钩子文件入口
+        // 默认是Node模块的入口文件
+        // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
         let pluginEntry = 'index.js'
-        if (fs.existsSync(path.resolve(plugins[plugin], 'package.json'))) {
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
           if (pkgConfig.main) {
             pluginEntry = pkgConfig.main
           }
+
+          if (pkgConfig.rc) {
+            pkgConfig.rc = formatRcOptions(pkgConfig.rc)
+            if (pkgConfig.rc.hookDir) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
+              }
+            }
+          }
+
+          if (pkgConfig[scriptName]) {
+            pkgConfig[scriptName] = formatRcOptions(pkgConfig[scriptName])
+            if (pkgConfig[scriptName].hookDir) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig[scriptName].hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig[scriptName].hookDir, 'index.js')
+              }
+            }
+          }
         }
 
         // hookDir
-        if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
-          const zignisConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
-          if (zignisConfig.hookDir && fs.existsSync(path.resolve(plugins[plugin], zignisConfig.hookDir, 'index.js'))) {
-            pluginEntry = path.join(zignisConfig.hookDir, 'index.js')
-          }
+        let hookDir
+
+        switch (plugin) {
+          case scriptName:
+            let corePackageInfo = loadCorePackageInfo()
+            hookDir = corePackageInfo.rc && corePackageInfo.rc.hookDir ? corePackageInfo.rc.hookDir : ''
+          break
+
+          case 'application':
+            hookDir = combinedConfig.hookDir
+          break
+
+          default:
+            hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+          break
+
+        }
+        if (hookDir && fileExistsSyncCache(path.resolve(plugins[plugin], hookDir, 'index.js'))) {
+          pluginEntry = path.join(hookDir, 'index.js')
         }
 
         // For application, do not accept default index.js
@@ -179,8 +249,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           continue
         }
 
-        if (fs.existsSync(path.resolve(plugins[plugin], pluginEntry))) {
-          debugCore(`zignis invoke hook: ${hook}, plugin: ${plugin}`)
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (loadedPlugin[hook]) {
             let pluginReturn
@@ -247,18 +316,36 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
+  const opts = {
+    // Give each command an ability to disable temporarily
+    visit: (command) => {
+      command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
+      if (command.middleware) {
+        command.middlewares = command.middlewares.concat(command.middleware)
+      }
+      return command.disabled === true ? false : command
+    }
+  }
 
   // load default commands
   const currentCommand: string | undefined = command.split('/').pop()
-  if (currentCommand && fs.existsSync(path.resolve(basePath, currentCommand))) {
-    yargs.commandDir(path.resolve(basePath, currentCommand))
+  if (currentCommand && fileExistsSyncCache(path.resolve(basePath, currentCommand))) {
+    yargs.commandDir(path.resolve(basePath, currentCommand), opts)
   }
 
   // Load plugin commands
   if (plugins) {
     Object.keys(plugins).map(function(plugin): void {
-      if (fs.existsSync(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))) {
-        yargs.commandDir(path.resolve(plugins[plugin], `src/extends/${module}/src/commands`, command))
+      if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
+        if (
+          fileExistsSyncCache(
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+          )
+        ) {
+          yargs.commandDir(
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+          , opts)
+        }
       }
     })
   }
@@ -266,9 +353,9 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
   // Load application commands
   if (
     config.extendDir &&
-    fs.existsSync(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
+    fileExistsSyncCache(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
   ) {
-    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command), opts)
   }
 }
 
@@ -280,12 +367,26 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
 const getAllPluginsMapping = function(): { [propName: string]: string } {
   let argv: any = cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
+
   if (_.isEmpty(plugins)) {
+    let pluginPrefix = argv.pluginPrefix || 'zignis'
+    let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+    if (_.isString(pluginPrefix)) {
+      pluginPrefix = [pluginPrefix]
+    }
+
+    if (!_.isArray(pluginPrefix)) {
+      error('invalid --plugin-prefix')
+    }
+
+    let topPluginPattern = '@(' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join('|') + ')'
+    let orgPluginPattern = '@(' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join('|') + ')'
+
     plugins = {}
 
     // process core plugins
     glob
-      .sync('zignis-plugin-*', {
+      .sync(topPluginPattern, {
         cwd: path.resolve(__dirname, '../plugins')
       })
       .map(function(plugin): void {
@@ -295,89 +396,87 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     if (!argv.disableGlobalPlugin) {
       // process core same directory plugins
       glob
-      .sync('zignis-plugin-*', {
-        cwd: path.resolve(__dirname, '../../../')
-      })
-      .map(function(plugin): void {
-        plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-      })
-
-    // process core same directory npm plugins
-    glob
-      .sync('@*/zignis-plugin-*', {
-        cwd: path.resolve(__dirname, '../../../')
-      })
-      .map(function(plugin): void {
-        if (fs.existsSync(path.resolve(__dirname, '../../../', plugin))) {
+        .sync(topPluginPattern, {
+          cwd: path.resolve(__dirname, '../../../')
+        })
+        .map(function(plugin): void {
           plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
-        }
-      })
+        })
+
+      // process core same directory npm plugins
+      glob
+        .sync(orgPluginPattern, {
+          cwd: path.resolve(__dirname, '../../../')
+        })
+        .map(function(plugin): void {
+          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+        })
     }
 
     if (process.env.HOME && !argv.disableHomePlugin) {
       // process home npm plugins
       glob
-        .sync('zignis-plugin-*', {
-          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        .sync(topPluginPattern, {
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
-          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules', plugin)
           }
         })
 
       // process home npm scope plugins
       glob
-        .sync('@*/zignis-plugin-*', {
-          cwd: path.resolve(process.env.HOME, '.zignis', 'node_modules')
+        .sync(orgPluginPattern, {
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
-          if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin))) {
-            plugins[plugin] = path.resolve(process.env.HOME, '.zignis', 'node_modules', plugin)
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules', plugin)
           }
         })
     }
 
     // process cwd npm plugins
     glob
-      .sync('zignis-plugin-*', {
+      .sync(topPluginPattern, {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
-        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-        }
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
     // process cwd npm scope plugins
     glob
-      .sync('@*/zignis-plugin-*', {
+      .sync(orgPluginPattern, {
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
-        if (fs.existsSync(path.resolve(process.cwd(), 'node_modules', plugin))) {
-          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-        }
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
     const config = getApplicationConfig()
-    if (fs.existsSync(config.pluginDir)) {
-      // process local plugins
-      glob
-        .sync('zignis-plugin-*', {
-          cwd: path.resolve(process.cwd(), config.pluginDir)
-        })
-        .map(function(plugin) {
-          if (fs.existsSync(path.resolve(process.cwd(), config.pluginDir, plugin))) {
-            plugins[plugin] = path.resolve(process.cwd(), config.pluginDir, plugin)
-          }
-        })
-    }
+    const pluginDirs = _.castArray(config.pluginDir)
+    pluginDirs.forEach(pluginDir => {
+      if (fileExistsSyncCache(pluginDir)) {
+        // process local plugins
+        glob
+          .sync(topPluginPattern, {
+            cwd: path.resolve(process.cwd(), pluginDir)
+          })
+          .map(function(plugin) {
+            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          })
+      }
+    })
+   
 
     // process plugin project
-    if (fs.existsSync(path.resolve(process.cwd(), 'package.json'))) {
+    if (fileExistsSyncCache(path.resolve(process.cwd(), 'package.json'))) {
       const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-      if (pkgConfig.name && /^(@[^/]+\/)?zignis-plugin-/.test(pkgConfig.name)) {
+      const matchPluginProject = pluginPrefix.map(prefix => `${prefix}-plugin-`).join('|')
+      const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
+      if (pkgConfig.name && regExp.test(pkgConfig.name)) {
         plugins[pkgConfig.name] = path.resolve(process.cwd())
       }
     }
@@ -392,60 +491,113 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  * Get application zignis config only.
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
-  try {
-    const configPath = findUp.sync(['.zignisrc.json'], {
-      cwd
-    })
-    let applicationConfig = configPath ? require(configPath) : {}
-    if (configPath) {
-      applicationConfig.applicationDir = path.dirname(configPath)
-      if (fs.existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
-        applicationConfig = Object.assign(
-          {},
-          applicationConfig,
-          require(path.resolve(applicationConfig.applicationDir, 'package.json'))
-        )
-      }
+  let argv: any = cachedInstance.get('argv') || {}
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  let applicationConfig
+
+  const configPath = findUp.sync([`.${scriptName}rc.json`], {
+    cwd
+  })
+
+  const homeZignisRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
+  if (homeZignisRcPath && fileExistsSyncCache(homeZignisRcPath)) {
+    try {
+      applicationConfig = formatRcOptions(require(homeZignisRcPath))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Global ${homeZignisRcPath} config load failed!`)
     }
-    return applicationConfig
-  } catch (e) {
-    error(`Application .zignisrc.json can not be parsed!`)
+  } else {
+    applicationConfig = {}
   }
+
+  applicationConfig.coreDir = path.resolve(__dirname, '../../')
+  applicationConfig.applicationDir = cwd ? cwd : configPath ? path.dirname(configPath) : process.cwd()
+  if (fileExistsSyncCache(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
+    let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+
+    if (packageInfo.name) {
+      applicationConfig.name = packageInfo.name
+    }
+
+    if (packageInfo.version) {
+      applicationConfig.version = packageInfo.version
+    }
+
+    // args > package > current rc
+    if (packageInfo.rc) {
+      packageInfo.rc = formatRcOptions(packageInfo.rc)
+      applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
+    }
+    if (packageInfo[scriptName]) {
+      packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
+      applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
+    }
+  }
+
+  if (configPath) {
+    let zignisRcInfo = require(configPath)
+    zignisRcInfo = formatRcOptions(zignisRcInfo)
+    applicationConfig = Object.assign({}, applicationConfig, zignisRcInfo)
+  }
+
+  return applicationConfig
+}
+
+/**
+ * Format options keys
+ * 
+ * Make compatible of param cases and camel cases
+ */
+const formatRcOptions = (opts) => {
+  if (!_.isObject(opts)) {
+    throw new Error('Not valid rc options!')
+  }
+  Object.keys(opts).filter(key => key.indexOf('-') > -1).forEach(key => {
+    const newKey = key.replace(/--+/g, '-').replace(/^-/g, '').replace(/-([a-z])/g, (m, p1) => p1.toUpperCase())
+    opts[newKey] = opts[key]
+    delete opts[key]
+  })
+  return opts
 }
 
 /**
  * Get commbined config from whole environment.
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
-  let pluginConfigs: { [propName: string]: any } = cachedInstance.get('pluginConfigs') || {}
-  let pluginOriginalConfigs: { [propName: string]: any } = {}
+  let argv: any = cachedInstance.get('argv') || {}
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
+  let pluginConfigs: { [propName: string]: any } = {}
 
-  if (_.isEmpty(pluginConfigs)) {
-    if (process.env.HOME && fs.existsSync(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))) {
-      pluginConfigs = require(path.resolve(process.env.HOME, '.zignis', '.zignisrc.json'))
-    } else {
-      pluginConfigs = {}
-    }
-
+  if (_.isEmpty(combinedConfig)) {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
-      if (fs.existsSync(path.resolve(plugins[plugin], '.zignisrc.json'))) {
-        const pluginConfig = require(path.resolve(plugins[plugin], '.zignisrc.json'))
-        pluginConfigs = _.merge(pluginConfigs, pluginConfig)
-        pluginOriginalConfigs[plugin] = pluginConfig
+      const pluginZignisRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
+      if (fileExistsSyncCache(pluginZignisRcPath)) {
+        let pluginConfig
+        try {
+          pluginConfig = formatRcOptions(require(pluginZignisRcPath))
+        } catch (e) {
+          debugCore('load rc:', e)
+          warn(`Plugin ${plugin} .zignisrc.json config load failed!`)
+          pluginConfig = {}
+        }
+        
+        combinedConfig = _.merge(combinedConfig, pluginConfig)
+        pluginConfigs[plugin] = pluginConfig
       }
     })
 
-    const configPath = findUp.sync(['.zignisrc.json'])
-    let rcConfig = configPath ? require(configPath) : {}
-
-    pluginConfigs = _.merge(pluginConfigs, rcConfig)
-    pluginConfigs.pluginOriginalConfigs = pluginOriginalConfigs
-
-    cachedInstance.set('pluginConfigs', pluginConfigs)
+    // const configPath = findUp.sync([`.${scriptName}rc.json`])
+    // let rcConfig = configPath ? formatRcOptions(require(configPath)) : {}
+    const applicatonConfig = getApplicationConfig()
+    combinedConfig = _.merge(combinedConfig, applicatonConfig)
+    combinedConfig.pluginConfigs = pluginConfigs
+    cachedInstance.set('combinedConfig', combinedConfig)
   }
 
-  return pluginConfigs || {}
+  return combinedConfig || {}
 }
 
 /**
@@ -615,11 +767,33 @@ const loadCorePackageInfo = function(): any {
  * @param {object} options Options stdio default is [0, 1, 2]
  */
 const exec = function(command: string, options: any = {}): any {
+  debugCore('Utils.exec', { command, options })
   if (!options.stdio) {
     options.stdio = [0, 1, 2]
   }
   return execSync(command, options)
 }
+
+/**
+ * Get current node env setting
+ *
+ * You can change the node-env-key in command args or zignis rc file
+ */
+const getNodeEnv = () => {
+  const argv: any = cachedInstance.get('argv') || {}
+  const nodeEnvKey = argv.nodeEnvKey || argv.nodeEnv || 'NODE_ENV'
+  return process.env[nodeEnvKey] || 'development'
+}
+
+/**
+ * Shortcut for checking if or not current env is production
+ */
+const isProduction = () => getNodeEnv() === 'production'
+
+/**
+ * Shortcut for checking if or not current env is development
+ */
+const isDevelopment = () => getNodeEnv() === 'development'
 
 /**
  * Sleep a while of ms
@@ -670,6 +844,8 @@ export {
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
+  /** [yargs-parser](https://www.npmjs.com/package/yargs-parser) reference */
+  yParser,
   // custom functions
   md5,
   delay,
@@ -694,5 +870,11 @@ export {
   exec,
   sleep,
   getInternalCache,
-  getCache
+  getCache,
+  getNodeEnv,
+  isProduction,
+  isDevelopment,
+  fileExistsSyncCache,
+  debugCore,
+  formatRcOptions
 }

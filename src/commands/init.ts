@@ -6,12 +6,11 @@ import yargs from 'yargs'
 import { Utils } from '..'
 
 export const command = 'init'
-export const desc = 'Init basic zignis config file and directories'
+export const desc = 'Init basic config file and directories'
 export const aliases = 'i'
 
 export const builder = function(yargs: yargs.Argv) {
   yargs.option('plugin', {
-    default: false,
     alias: 'P',
     describe: 'plugin mode'
   })
@@ -32,33 +31,40 @@ export const builder = function(yargs: yargs.Argv) {
     alias: 'D',
     describe: 'add npm package to package.json devDependencies'
   })
+
+  yargs.option('typescript', {
+    alias: 'ts',
+    describe: 'generate typescript style code'
+  })
 }
 
 export const handler = async function(argv: any) {
-  let defaultZignisrc = argv.plugin
-    ? {
+  let defaultRc: any = argv.plugin
+    ? Utils._.pickBy({
+        typescript: argv.typescript ? true : null,
         commandDir: 'src/commands',
         extendDir: 'src/extends',
         hookDir: 'src/hooks'
-      }
-    : {
-        commandDir: 'bin/zignis/commands',
-        pluginDir: 'bin/zignis/plugins',
-        extendDir: 'bin/zignis/extends',
-        scriptDir: 'bin/zignis/scripts',
-        hookDir: 'bin/zignis/hooks'
-      }
+      })
+    : Utils._.pickBy({
+        typescript: argv.typescript ? true : null,
+        commandDir: `bin/${argv.scriptName}/commands`,
+        pluginDir: `bin/${argv.scriptName}/plugins`,
+        extendDir: `bin/${argv.scriptName}/extends`,
+        scriptDir: `bin/${argv.scriptName}/scripts`,
+        hookDir: `bin/${argv.scriptName}/hooks`
+      })
 
   let currentPath = path.resolve(process.cwd())
 
   try {
     const { override } =
-      fs.existsSync(`${currentPath}/.zignisrc.json`) && !argv.force
+      Utils.fileExistsSyncCache(`${currentPath}/.${argv.scriptName}rc.json`) && !argv.force
         ? await inquirer.prompt([
             {
               type: 'confirm',
               name: 'override',
-              message: '.zignisrc.json exists, override?',
+              message: `.${argv.scriptName}rc.json exists, override?`,
               default: false
             }
           ])
@@ -67,13 +73,13 @@ export const handler = async function(argv: any) {
       console.log(chalk.yellow('User aborted!'))
       return
     }
-    fs.writeFileSync(`${currentPath}/.zignisrc.json`, JSON.stringify(defaultZignisrc, null, 2))
-    console.log(chalk.green('Default .zignisrc created!'))
-    const dirs = Object.keys(defaultZignisrc)
+    fs.writeFileSync(`${currentPath}/.${argv.scriptName}rc.json`, JSON.stringify(defaultRc, null, 2))
+    console.log(chalk.green(`Default .${argv.scriptName}rc created!`))
+    const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)
     dirs.forEach(dir => {
       // @ts-ignore
-      const loc = defaultZignisrc[dir]
-      if (!fs.existsSync(`${currentPath}/${loc}`)) {
+      const loc = defaultRc[dir]
+      if (!Utils.fileExistsSyncCache(`${currentPath}/${loc}`)) {
         Utils.exec(`mkdir -p ${currentPath}/${loc}`)
         console.log(chalk.green(`${currentPath}/${loc} created!`))
       }

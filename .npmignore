@@ -10,3 +10,5 @@ yarn.lock
 src
 tsconfig.json
 .eslintignore
+/lib/**/*.map
+/lib/examples

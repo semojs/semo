@@ -7,7 +7,7 @@ Zignis is a command-line tool framework, based on [Yargs](https://www.npmjs.com/
 - Less concepts(command, plugin, hook, config), but more powerful.
 - All of plugins, commands, configs can be overridden in conventional order.
 - Easily register a command to Zignis, so you can combine your team toolbox or workflow to Zignis
-- A plugable REPL, it's not just like native node REPL, you can hook anything into REPL, which is also support yield and await.
+- A plugable REPL, it's not just like native node REPL, you can hook anything into REPL, which is also support await.
 - Ability to extend command's subcommands in other plugins.
 - Provide a simple code generator mechanism.
 - Support organization plugins.
@@ -40,6 +40,10 @@ Option：
 ```
 
 Please refer to the documentation to learn how to use Zignis, because you need to do the integration by yourself to make Zignis work for your project.
+
+# Requirements
+
+- Node > v8.0
 
 # Documentation
 

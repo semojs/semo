@@ -1,6 +1,5 @@
 import chalk from 'chalk'
 import repl from 'repl'
-import fs from 'fs'
 import _ from 'lodash'
 import replHistory from 'repl.history'
 import yargs = require('yargs')
@@ -17,7 +16,7 @@ function corepl(cli: repl.REPLServer) {
       Utils.outputTable(
         [
           ['quit', 'Quit the REPL, alias: exit, q.'],
-          ['yield/await', 'Run generator or promise function.'],
+          ['await', 'Run generator or promise function.'],
           ['?', 'Show this help info.']
         ],
         'Internal commands:'
@@ -32,16 +31,14 @@ function corepl(cli: repl.REPLServer) {
       process.exit(0)
     }
 
-    if (cmd.match(/^yield\s+/)) {
-      cmd = 'Utils.co(function *() { let _ = ' + cmd + '; return _;})'
-    } else if (cmd.match(/\W*yield\s+/)) {
-      cmd = 'Utils.co(function *() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})'
-    }
-
-    if (cmd.match(/^await\s+/)) {
-      cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
+    if (cmd.match(/^await\s+/) || cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/)) {
+      if (cmd.match(/=/)) {
+        cmd = '(async function() { (' + cmd + ') })()'
+      } else {
+        cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
+      }
     } else if (cmd.match(/\W*await\s+/)) {
-      cmd = '(async function() {' + cmd.replace(/^\s*(var|let|const)\s+/, '') + '})()'
+      cmd = '(async function() { (' + cmd.replace(/^\s*(var|let|const)\s+/, '') + ') })()'
     }
 
     function done(val: any) {
@@ -65,12 +62,16 @@ export const aliases = 'r'
 export const desc = 'Play with REPL'
 
 async function openRepl(context: any): Promise<any> {
-  const r = repl.start('>>> ')
-  const zignisHome = process.env.HOME + '/.zignis'
-  if (!fs.existsSync(zignisHome)) {
-    Utils.exec(`mkdir -p ${zignisHome}`)
+  const { argv } = context
+  const r = repl.start({
+    prompt: argv.prompt,
+  })
+
+  const Home = process.env.HOME + `/.${argv.scriptName}`
+  if (!Utils.fileExistsSyncCache(Home)) {
+    Utils.exec(`mkdir -p ${Home}`)
   }
-  replHistory(r, `${zignisHome}/.zignis_history`)
+  replHistory(r, `${Home}/.${argv.scriptName}_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
@@ -83,12 +84,17 @@ export const builder = function(yargs: yargs.Argv) {
   yargs.option('hook', {
     describe: 'if or not load all plugins repl hook'
   })
+
+  yargs.option('prompt', {
+    default: '>>> ',
+    describe: 'Prompt for input.'
+  })
 }
 
 export const handler = async function(argv: any) {
-  argv.hook = argv.hook || _.get(Utils.getCombinedConfig(), 'commandDefault.repl.hook') || false
+  argv.hook = argv.hook || false
   try {
-    let context = { Utils, argv }
+    let context = { Utils, argv, await: true }
 
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(
