@@ -65,4 +65,5 @@ docs/public
 docs/API.md
 package-lock.json
 /lib
-public
+/public
+doc/.vuepress/public/typedoc
