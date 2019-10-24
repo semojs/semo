@@ -1,7 +1,7 @@
 language: node_js
 node_js:
   - '8'
-script: npm run jsdoc
+script: npm run docs:build
 deploy:
   provider: pages
   local-dir: docs

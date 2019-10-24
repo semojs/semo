@@ -68,7 +68,9 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "rimraf": "^3.0.0",
-    "typescript": "^3.6.3"
+    "typedoc": "^0.15.0",
+    "typescript": "^3.6.3",
+    "vuepress": "^1.2.0"
   },
   "scripts": {
     "zignis": "node lib/main.js",
@@ -76,12 +78,10 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "postversion": "git push && git push --tags",
-<<<<<<< HEAD
     "prepare": "npm run build",
-    "docs:dev": "vuepress dev doc",
-    "docs:build": "vuepress build doc"
-=======
-    "prepare": "npm run clean && npm run build"
+    "docs:typedoc": "mkdir -p doc/.vuepress/public/typedoc && typedoc src/common",
+    "docs:dev": "npm run docs:typedoc && vuepress dev doc",
+    "docs:build": "npm run docs:typedoc && vuepress build doc"
   },
   "rc": {
     "commandDir": "lib/commands",
@@ -92,6 +92,5 @@
   },
   "engines": {
     "node": ">=8.10.0"
->>>>>>> master
   }
 }

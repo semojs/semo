@@ -1,0 +1,9 @@
+{
+  "out": "doc/.vuepress/public/typedoc",
+  "mode": "file",
+  "theme": "default",
+  "exclude": [
+  ],
+  "readme": "none",
+  "excludeExternals": true
+}

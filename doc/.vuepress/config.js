@@ -2,7 +2,7 @@ const host = process.env.NODE_ENV === 'development' ? 'localhost:8080' : 'zignis
 
 module.exports = {
   title: 'Zignis',
-  description: '沉淀最佳实践，减少重复投入，跨项目统一命令行实现方式。',
+  description: '沉淀最佳实践，减少重复投入，统一实现方式。',
   base: '/',
   dest: 'public',
   themeConfig: {
@@ -14,9 +14,20 @@ module.exports = {
     displayAllHeaders: false,
     nav: [
       { text: '首页', link: '/'},
-      // { text: '指南', link: '/guide/'},
+      { text: '指南', link: '/guide/'},
+      { text: '参考', link: `http://${host}/typedoc/`}
     ],
     sidebarDepth: 1,
+    sidebar: [
+      {
+        title: '指南',
+        collapsable: false,
+        children: [
+          '/guide/',
+          '/guide/quickstart/',
+        ]
+      }
+    ]
   }
 
 }
