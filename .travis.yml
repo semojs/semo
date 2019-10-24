@@ -4,7 +4,7 @@ node_js:
 script: npm run docs:build
 deploy:
   provider: pages
-  local-dir: docs
+  local-dir: public
   skip-cleanup: true
   github-token: $GITHUB_TOKEN # Set in the settings page of your repository, as a secure variable
   keep-history: true
