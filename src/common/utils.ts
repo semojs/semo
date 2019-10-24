@@ -232,11 +232,15 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           break
 
           case 'application':
-            hookDir = combinedConfig.hookDir
+            if (combinedConfig.hookDir) {
+              hookDir = combinedConfig.hookDir
+            }
           break
 
           default:
-            hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+            if (combinedConfig.pluginConfigs[plugin]) {
+              hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+            }
           break
 
         }

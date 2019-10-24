@@ -20,11 +20,12 @@ module.exports = {
     sidebarDepth: 1,
     sidebar: [
       {
-        title: '指南',
+        title: '基础',
         collapsable: false,
         children: [
           '/guide/',
           '/guide/quickstart/',
+          '/guide/core-commands/',
         ]
       }
     ]
