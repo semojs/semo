@@ -15,6 +15,7 @@ module.exports = {
     nav: [
       { text: '首页', link: '/'},
       { text: '指南', link: '/guide/'},
+      { text: '用法', link: '/usage/'},
       { text: '参考', link: `http://${host}/typedoc/`}
     ],
     sidebarDepth: 1,
@@ -26,6 +27,25 @@ module.exports = {
           '/guide/',
           '/guide/quickstart/',
           '/guide/core-commands/',
+        ]
+      },
+      {
+        title: '用法',
+        collapsable: false,
+        children: [
+          '/usage/',
+          '/usage/plugin/',
+          '/usage/integration/',
+          '/usage/solution/',
+          '/usage/distribution/',
+        ]
+      },
+      {
+        title: '社区',
+        collapsable: false,
+        children: [
+          '/community/contrib/',
+          '/community/qa/',
         ]
       }
     ]
