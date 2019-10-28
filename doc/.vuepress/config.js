@@ -27,6 +27,8 @@ module.exports = {
           '/guide/',
           '/guide/quickstart/',
           '/guide/core-commands/',
+          '/guide/config/',
+          '/guide/plugin/',
         ]
       },
       {

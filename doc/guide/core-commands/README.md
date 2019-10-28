@@ -285,7 +285,7 @@ REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言
 这里需要实现内置的 `hook_repl` 钩子，并且在业务项目的声明的钩子目录配置： `hookDir`，下面代码仅供参考。
 
 ```js
-# src/hooks/index.ts
+// src/hooks/index.ts
 export const hook_repl = () => {
   return {
     add: async (a, b) => {
