@@ -34,8 +34,8 @@ zignis-plugin-convert-a-to-b
 
 目前我已知的插件一部分是开源的，一部分是公司内部仓库的，现在把开源的插件列出来，供大家参考。
 
-- [zignis-plugin-ssh](https://github.com/zhike-team/zignis-plugin-ssh): 一个管理 SSH 账户的插件，支持添加，列表，删除，搜索，登录等操作
-- [zignis-plugin-serve](https://github.com/zhike-team/zignis-plugin-serve): 一个 Web 服务插件，支持静态资源也支持动态接口，基于 `Koa`
+- [zignis-plugin-ssh](https://github.com/vipzhicheng/zignis-plugin-ssh): 一个管理 SSH 账户的插件，支持添加，列表，删除，搜索，登录等操作
+- [zignis-plugin-serve](https://github.com/vipzhicheng/zignis-plugin-serve): 一个 Web 服务插件，支持静态资源也支持动态接口，基于 `Koa`
 - [zignis-plugin-zhike](https://github.com/zhike-team/zignis-plugin-zhike): 整合了公司的基础设施，其中鉴权是走的是配置管理服务，这个插件只负责自动连接和暴露方法
 - [zignis-plugin-zhike-dingtalk](https://github.com/zhike-team/zignis-plugin-zhike-dingtalk): 整合了钉钉的 Webhook，可以快速给钉钉群发消息
 - [zignis-plugin-read](https://github.com/vipzhicheng/zignis-plugin-read): 借助各种开源项目实现的把一个网页主体转成各种各样常用的格式
