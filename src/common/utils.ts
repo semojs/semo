@@ -383,8 +383,12 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       error('invalid --plugin-prefix')
     }
 
-    let topPluginPattern = '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
-    let orgPluginPattern = '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
+    let topPluginPattern = pluginPrefix.length > 1 
+      ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
+      : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
+    let orgPluginPattern = pluginPrefix.length > 1 
+      ? '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
+      : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
 
     plugins = {}
 
