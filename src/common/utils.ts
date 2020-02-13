@@ -383,14 +383,15 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       error('invalid --plugin-prefix')
     }
 
-    let topPluginPattern = '@(' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join('|') + ')'
-    let orgPluginPattern = '@(' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join('|') + ')'
+    let topPluginPattern = '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
+    let orgPluginPattern = '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
 
     plugins = {}
 
     // process core plugins
     glob
       .sync(topPluginPattern, {
+        noext:true,
         cwd: path.resolve(__dirname, '../plugins')
       })
       .map(function(plugin): void {
@@ -401,6 +402,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       // process core same directory plugins
       glob
         .sync(topPluginPattern, {
+          noext:true,
           cwd: path.resolve(__dirname, '../../../')
         })
         .map(function(plugin): void {
@@ -410,6 +412,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       // process core same directory npm plugins
       glob
         .sync(orgPluginPattern, {
+          noext:true,
           cwd: path.resolve(__dirname, '../../../')
         })
         .map(function(plugin): void {
@@ -421,6 +424,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       // process home npm plugins
       glob
         .sync(topPluginPattern, {
+          noext:true,
           cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
@@ -432,6 +436,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       // process home npm scope plugins
       glob
         .sync(orgPluginPattern, {
+          noext:true,
           cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
         })
         .map(function(plugin): void {
@@ -444,6 +449,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     // process cwd npm plugins
     glob
       .sync(topPluginPattern, {
+        noext:true,
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
@@ -453,6 +459,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
     // process cwd npm scope plugins
     glob
       .sync(orgPluginPattern, {
+        noext:true,
         cwd: path.resolve(process.cwd(), 'node_modules')
       })
       .map(function(plugin) {
@@ -466,6 +473,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
         // process local plugins
         glob
           .sync(topPluginPattern, {
+            noext:true,
             cwd: path.resolve(process.cwd(), pluginDir)
           })
           .map(function(plugin) {
