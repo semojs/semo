@@ -14,12 +14,12 @@ footer: 企业级Node项目命令行体系建设工具
 
 ```bash
 # 对于本地环境，一般推荐全局安装
-npm i -g zignis
-zignis help
+npm i -g semo
+semo help
 # 首次在项目中整合
 cd YOUR_PROJECT
-npm install zignis
-zignis init
-zignis make command test
-zignis make command application/test --extend=zignis
+npm install semo
+semo init
+semo make command test
+semo make command application/test --extend=semo
 ```

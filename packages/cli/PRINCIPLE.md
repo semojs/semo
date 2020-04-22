@@ -1,21 +1,21 @@
-# Zignis principle
+# Semo principles
 
-## Command line tool is useful
+## Efficiency
 
-- Make development faster
-- Make daily operation efficient
+- Make development faster and easier
+- Make daily operation more efficient
 
-## 3 layers command line tool structure
+## Consistency
 
 - Core commands
 - Npm commands
 - Application commands
 
-If we run our business in MicroService, there are a lot of services for one application. Consistant command line tool may help us more.
+They are all same style. If we run business in micro-service, there are a lot of services for one application. Consistant command line tools may help us more.
 
-## Extensible
+## Flexibility
 
 - We can share
-- We can override other's plugin temporary or permanent
+- We can override other plugins temporary or permanent
 - We can hook in
 - We can config

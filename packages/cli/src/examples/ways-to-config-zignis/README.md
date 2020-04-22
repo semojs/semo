@@ -1,7 +1,7 @@
 Use terminal to cd in this directory, then:
 
 ```
-zignis repl
+semo repl
 >>> argv
 ```
 
@@ -28,5 +28,5 @@ You can see:
 
 That means you can use this way to control code behaviours when you write your own custom commands.
 
-If you see different from above results, maybe you have global configs at `~/.zignis/.zignisrc.json`.
+If you see different from above results, maybe you have global configs at `~/.semo/.semorc.json`.
 

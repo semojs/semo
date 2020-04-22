@@ -2,12 +2,12 @@
 
 ## 快速开始
 
-`Zignis` 插件就是一个标准的 `Node` 模块，只不过要符合一些目录和文件结构的约定，而这些约定往往很难记忆，所以我们为插件开发者或者工具的使用者提供了各种辅助的工具，例如代码自动生成。这里描述的是推荐的插件开发流程，但同时，在熟悉开发流程之后，也完全可以从一个空目录开始手动构建一个插件。
+`Semo` 插件就是一个标准的 `Node` 模块，只不过要符合一些目录和文件结构的约定，而这些约定往往很难记忆，所以我们为插件开发者或者工具的使用者提供了各种辅助的工具，例如代码自动生成。这里描述的是推荐的插件开发流程，但同时，在熟悉开发流程之后，也完全可以从一个空目录开始手动构建一个插件。
 
 ### 第一步：根据模板，创建插件目录
 
 ```
-zignis new zignis-plugin-xyz --select=plugin
+semo new semo-plugin-xyz --select=plugin
 ```
 
 这里使用了内置的插件模板，按照之前配置管理说的，我们完全可以覆盖 `repo` 和 `branch` 选项，或者覆盖 `--select` 选项来省去每次都传默认参数。
@@ -15,8 +15,8 @@ zignis new zignis-plugin-xyz --select=plugin
 ### 第二步：进入插件目录，执行默认命令，证明一切正常
 
 ```
-cd zignis-plugin-xyz
-zignis hi
+cd semo-plugin-xyz
+semo hi
 ```
 
 这是插件模板内置的一个命令，初始化完成后，进入目录即可执行，完成首次你与插件命令的一次对话，如果你看到它回答你 `Hey you!` 就证明已经准备好，接下来就可以写真正改变世界的脚本了。
@@ -26,7 +26,7 @@ zignis hi
 需要注意的是，这个插件模板是基于 `Typescript`，因此你需要有一些 `Typescript` 基础，然后我们开发时建议开着 `yarn watch` 命令窗口，来实时编译，一边开发一边测试。
 
 ```
-zignis make command xyz
+semo make command xyz
 ```
 
 一般插件名和插件封装的命令会有一定的关联，这里我们添加一个 `xyz` 命令，当然你也可以在之前的 `hi` 命令上修改。真正掌握了插件开发之后，默认的 `hi` 命令就应该删掉了。
@@ -38,7 +38,7 @@ zignis make command xyz
 通过这个命令查询当前环境支持哪些钩子：
 
 ```
-zignis hook
+semo hook
 ```
 
 ### 例子1：实现 `hook_new_repo`
@@ -54,7 +54,7 @@ export const hook_new_repo = {
 }
 ```
 
-通过这个钩子，让我们在 `zignis new [PROJECT] --select` 命令执行时可以选择自定义的项目模板，只需要记住别名，不需要记住地址；另一个好处是不需要管每个工程师个人电脑上是如何设置全局 `--repo` 选项的，只需要安装了指定的插件，那大家就都可以用相同的项目别名初始化项目了。
+通过这个钩子，让我们在 `semo new [PROJECT] --select` 命令执行时可以选择自定义的项目模板，只需要记住别名，不需要记住地址；另一个好处是不需要管每个工程师个人电脑上是如何设置全局 `--repo` 选项的，只需要安装了指定的插件，那大家就都可以用相同的项目别名初始化项目了。
 
 ### 例子2：实现 `hook_repl`
 
@@ -76,7 +76,7 @@ export const hook_repl = () => {
 然后在 REPL 环境，就可以使用了:
 
 ```
-zignis repl
+semo repl
 >>> add
 [Function: add]
 >>> await add(1, 2)
@@ -105,7 +105,7 @@ zignis repl
 exports.func = () => {}
 ```
 
-这种方式没有任何问题，但是一般定义这种方式的模块也不需要遵守 `Zignis` 的规范，只要遵守 `node` 和 `npm` 的规范即可。这里 `Zignis` 定义了另外一种暴露方法的方式。基于钩子机制。
+这种方式没有任何问题，但是一般定义这种方式的模块也不需要遵守 `Semo` 的规范，只要遵守 `node` 和 `npm` 的规范即可。这里 `Semo` 定义了另外一种暴露方法的方式。基于钩子机制。
 
 ```js
 // src/hooks/index.ts
@@ -119,7 +119,7 @@ export const hook_components = async () {
 使用
 
 ```js
-import { Utils } from 'zignis'
+import { Utils } from 'semo'
 const { a } = await Utils.invokeHook('components')
 console.log(a)
 // -> 'b'
@@ -130,7 +130,7 @@ console.log(a)
 
 ## 发布插件
 
-通过命令，钩子或者类库的扩展，我们就写好了一个 `Zignis` 插件，如果想跟他人共享你的插件，需要做一些准备工作。
+通过命令，钩子或者类库的扩展，我们就写好了一个 `Semo` 插件，如果想跟他人共享你的插件，需要做一些准备工作。
 
 ### 1. 上传代码到一个 `git` 仓库
 

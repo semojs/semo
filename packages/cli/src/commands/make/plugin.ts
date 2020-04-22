@@ -24,7 +24,7 @@ export const handler = function(argv: any) {
     Utils.error('Plugin name invalid!')
   }
 
-  const scriptName = argv.scriptName || 'zignis'
+  const scriptName = argv.scriptName || 'semo'
   const pluginPath = path.resolve(pluginDir, `${scriptName}-plugin-${argv.name}`)
   if (Utils.fileExistsSyncCache(pluginPath)) {
     if (argv.force) {

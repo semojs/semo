@@ -8,29 +8,26 @@ import _ from 'lodash'
 import colorize from 'json-colorizer'
 import stringify from 'json-stringify-pretty-compact'
 import chalk from 'chalk'
-import randomatic from 'randomatic'
 import day from 'dayjs'
-import co from 'co'
 import shell from 'shelljs'
 import debug from 'debug'
 import inquirer from 'inquirer'
-import inquirerAutocompletePrompt from 'inquirer-autocomplete-prompt'
 import fuzzy from 'fuzzy'
 import { execSync } from 'child_process'
 import objectHash from 'node-object-hash'
-import emoji from 'node-emoji'
 import { dd, dump } from 'dumper.js'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
 import yParser from 'yargs-parser'
+import updateNotifier from 'update-notifier'
 
-inquirer.registerPrompt('autocomplete', inquirerAutocompletePrompt)
 const { hash } = objectHash({ sort: true })
 
 let cachedInstance: NodeCache
+
 /**
- * Get Zignis internal cache instance
+ * Get Semo internal cache instance
  * @returns {NodeCache}
  */
 const getInternalCache = function(): NodeCache {
@@ -48,7 +45,7 @@ interface CachedNamespaceInstance {
 }
 
 /**
- * Get Zignis cache instance by namespace
+ * Get Semo cache instance by namespace
  * @param {string} namespace
  * @returns {NodeCache}
  */
@@ -81,7 +78,7 @@ const debugCore = function(...args) {
 
   if (!debugCache) {
     const argv: any = getInternalCache().get('argv')
-    const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+    const scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
     debugCache = debug(`${scriptName}-core`)
     debugCache(...args)
 
@@ -119,7 +116,7 @@ interface IHookOption {
  * For non-function, it will be used as hook data directly, likely to be returned by function
  * @example
  * const hookReturn = await Utils.invokeHook('hook')
- * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `zhike:hook`
+ * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `prefix:hook`
  * @param {string} options Options
  * @param {string} options.mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
  * @param {bool} options.useCache If or not use cached hook result
@@ -129,7 +126,7 @@ interface IHookOption {
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
   const argv: any = getInternalCache().get('argv')
-  const scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  const scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -149,7 +146,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       return invokedHookCache[cacheKey]
     }
 
-    // Make Zignis core supporting hook invocation
+    // Make Semo core supporting hook invocation
     const plugins = Object.assign(
       {},
       {
@@ -310,7 +307,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
  * @example
  * exports.builder = function (yargs) {
  *   // The first param could be a/b/c if you want to extend subcommand's subcommand
- *   Utils.extendSubCommand('make', 'zignis', yargs, __dirname)
+ *   Utils.extendSubCommand('make', 'semo', yargs, __dirname)
  * }
  * @param {String} command Current command name.
  * @param {String} module Current plugin name.
@@ -373,8 +370,8 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
 
   if (_.isEmpty(plugins)) {
-    let pluginPrefix = argv.pluginPrefix || 'zignis'
-    let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+    let pluginPrefix = argv.pluginPrefix || 'semo'
+    let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
     if (_.isString(pluginPrefix)) {
       pluginPrefix = [pluginPrefix]
     }
@@ -504,24 +501,24 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 }
 
 /**
- * Get application zignis config only.
+ * Get application semo config only.
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
   let applicationConfig
 
   const configPath = findUp.sync([`.${scriptName}rc.json`], {
     cwd
   })
 
-  const homeZignisRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
-  if (homeZignisRcPath && fileExistsSyncCache(homeZignisRcPath)) {
+  const homeSemoRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
+  if (homeSemoRcPath && fileExistsSyncCache(homeSemoRcPath)) {
     try {
-      applicationConfig = formatRcOptions(require(homeZignisRcPath))
+      applicationConfig = formatRcOptions(require(homeSemoRcPath))
     } catch (e) {
       debugCore('load rc:', e)
-      warn(`Global ${homeZignisRcPath} config load failed!`)
+      warn(`Global ${homeSemoRcPath} config load failed!`)
     }
   } else {
     applicationConfig = {}
@@ -552,9 +549,9 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
   }
 
   if (configPath) {
-    let zignisRcInfo = require(configPath)
-    zignisRcInfo = formatRcOptions(zignisRcInfo)
-    applicationConfig = Object.assign({}, applicationConfig, zignisRcInfo)
+    let semoRcInfo = require(configPath)
+    semoRcInfo = formatRcOptions(semoRcInfo)
+    applicationConfig = Object.assign({}, applicationConfig, semoRcInfo)
   }
 
   return applicationConfig
@@ -582,21 +579,21 @@ const formatRcOptions = (opts) => {
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'zignis'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
   if (_.isEmpty(combinedConfig)) {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
-      const pluginZignisRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
-      if (fileExistsSyncCache(pluginZignisRcPath)) {
+      const pluginSemoRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
+      if (fileExistsSyncCache(pluginSemoRcPath)) {
         let pluginConfig
         try {
-          pluginConfig = formatRcOptions(require(pluginZignisRcPath))
+          pluginConfig = formatRcOptions(require(pluginSemoRcPath))
         } catch (e) {
           debugCore('load rc:', e)
-          warn(`Plugin ${plugin} .zignisrc.json config load failed!`)
+          warn(`Plugin ${plugin} .semorc.json config load failed!`)
           pluginConfig = {}
         }
         
@@ -636,7 +633,7 @@ const log = function(message: any) {
  */
 const error = function(message: any, exit = true, errorCode = 1) {
   message = _.isString(message) ? { message } : message
-  console.log(emoji.get(message.emoji || 'x'), ' ', chalk.red(message.message))
+  console.log(chalk.red(message.message))
   if (exit) {
     process.exit(errorCode)
   }
@@ -714,7 +711,7 @@ const splitByChar = function(input: string, char: string) {
 
 /**
  * Print a simple table.
- * A table style for `zignis status`, if you don't like this style, can use Utils.table
+ * A table style for `semo status`, if you don't like this style, can use Utils.table
  * @param {array} columns Table columns
  * @param {string} caption Table caption
  * @param {object} borderOptions Border options
@@ -793,7 +790,7 @@ const exec = function(command: string, options: any = {}): any {
 /**
  * Get current node env setting
  *
- * You can change the node-env-key in command args or zignis rc file
+ * You can change the node-env-key in command args or semo rc file
  */
 const getNodeEnv = () => {
   const argv: any = cachedInstance.get('argv') || {}
@@ -819,7 +816,279 @@ const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms))
 const delay = sleep
 
 /**
- * Zignis utils functions and references to common modules.
+ * Keep repl history
+ * 
+ * repl.history 0.1.4 not compatile with node v12, so find other solution.
+ */
+const replHistory = function (repl, file) {
+
+  try {
+      fs.statSync(file);
+      repl.history = fs.readFileSync(file, 'utf-8').split('\n').reverse();
+      repl.history.shift();
+      repl.historyIndex = -1; // will be incremented before pop
+  } catch (e) { }
+
+  let fd = fs.openSync(file, 'a');
+  let wstream = fs.createWriteStream(file, {
+      fd: fd
+  });
+  wstream.on('error', function (err) {
+      throw err;
+  });
+
+  repl.addListener('line', function (code) {
+      if (code && code !== '.history') {
+          wstream.write(code + '\n');
+      } else {
+          repl.historyIndex++;
+          repl.history.pop();
+      }
+  });
+
+  process.on('exit', function () {
+      fs.closeSync(fd);
+  });
+
+  repl.commands['history'] = {
+      help: 'Show the history',
+      action: function () {
+          var out: any = [];
+          repl.history.forEach(function (v) {
+              out.push(v);
+          });
+          repl.outputStream.write(out.reverse().join('\n') + '\n');
+          repl.displayPrompt();
+      }
+  };
+}
+
+/**
+ * Launch dispatcher
+ */
+const launchDispatcher = () => {
+
+  const pkg = loadCorePackageInfo()
+  updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
+    defer: false,
+    isGlobal: true
+  })
+
+  const cache = getInternalCache()
+  let parsedArgv = yParser(process.argv.slice(2))
+  let parsedArgvOrigin = parsedArgv
+  cache.set('argv', parsedArgv) // set argv first time
+  let appConfig = getApplicationConfig()
+  yargs.config(appConfig)
+  parsedArgv = _.merge(appConfig, parsedArgv)
+  cache.set('argv', parsedArgv) // set argv second time
+  cache.set('yargs', yargs)
+
+  const plugins = getAllPluginsMapping()
+  const config = getCombinedConfig()
+  const packageConfig = loadPackageInfo()
+
+  if (!parsedArgv.scriptName) {
+    yargs.hide('script-name').option('script-name', {
+      default: '@semo/cli',
+      describe: 'Rename script name.',
+      type: 'string'
+    })
+  } else {
+    if (!_.isString(parsedArgv.scriptName)) {
+      error('--script-name must be string, should be used only once.')
+    }
+    yargs.scriptName(parsedArgv.scriptName)
+  }
+
+  yargs.hide('plugin-prefix').option('plugin-prefix', {
+    default: '@semo/cli',
+    describe: 'Set plugin prefix.'
+  })
+
+  let scriptName = parsedArgv.scriptName || '@semo/cli'
+  const opts = {
+    // Give each command an ability to disable temporarily
+    visit: (command) => {
+      command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
+      if (command.middleware) {
+        command.middlewares = command.middlewares.concat(command.middleware)
+      }
+      return command.disabled === true ? false : command
+    }
+  }
+  if (!parsedArgv.disableCoreCommand) {
+    // Load local commands
+    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), opts)
+  }
+
+  // Load plugin commands
+  if (plugins) {
+    Object.keys(plugins).map(function(plugin) {
+      if (
+        config.pluginConfigs[plugin] &&
+        config.pluginConfigs[plugin].commandDir &&
+        fileExistsSyncCache(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
+      ) {
+        yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir), opts)
+      }
+    })
+  }
+
+  // Load application commands
+  if (
+    packageConfig.name !== scriptName &&
+    appConfig.commandDir &&
+    fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
+  ) {
+    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), opts)
+  }
+
+  ;(async () => {
+    try {
+      // @ts-ignore
+      // Register global middlewares
+      yargs.middleware((argv, yargs) => {
+        const commandPath = yargs.getContext().fullCommands.slice().map(cmd => cmd.split(' ')[0])
+        let commandDefault
+
+        if (argv.commandDefault && commandPath.length >= 1) {
+          while (commandPath.length >= 1) {
+            commandDefault = _.get(argv.commandDefault, commandPath)
+            if (!_.isObject(commandDefault) || _.isArray(commandDefault)) {
+              commandPath.pop()
+              continue
+            }
+            break
+          }
+        }
+
+        // Insert home rc command default options between default options and cli options
+        // So the priority is: command default options < application rc options < home rc options < cli options
+        const overrideArgv = {}
+        const aliases = yargs.parsed.aliases
+        Object.keys(parsedArgvOrigin).filter(key => key !== '_').forEach(key => {
+          if (aliases[key] && Array.isArray(aliases[key])) {
+            overrideArgv[key] = parsedArgvOrigin[key]
+            aliases[key].forEach(alias => {
+              overrideArgv[alias] = parsedArgvOrigin[key]
+            })
+          }
+        })
+
+        argv = commandDefault ? _.merge(argv, formatRcOptions(commandDefault), overrideArgv) : argv
+        cache.set('argv', argv) // set argv third time
+
+        return argv
+      })
+
+      if (!parsedArgv.getYargsCompletions) {
+        let beforeHooks = await invokeHook('beforeCommand')
+        Object.keys(beforeHooks).map(function(hook) {
+          beforeHooks[hook](parsedArgv, yargs)
+        })
+      }
+
+      if (!parsedArgv.disableCoreCommand && !parsedArgv.disableCore) {
+        yargs.hide('disable-core-command').option('disable-core-command', {
+          alias: 'disable-core',
+          describe: 'Disable core commands.'
+        })
+
+        if (!parsedArgv.disableCompletionCommand && !parsedArgv.disableCompletion) {
+          yargs.hide('disable-completion-command').option('disable-completion-command', {
+            alias: 'disable-completion',
+            describe: 'Disable completion command.'
+          })
+    
+          if (!parsedArgv.hideCompletionCommand && !parsedArgv.hideCompletion) {
+            yargs.hide('hide-completion-command').option('hide-completion-command', {
+              alias: 'hide-completion',
+              describe: 'Hide completion command.'
+            })
+            yargs.completion('completion', 'Generate completion script')
+          } else {
+            // @ts-ignore, @types/yargs type def not correct
+            yargs.completion('completion', false)
+          }
+        }
+      }
+
+      if (!parsedArgv.disableGlobalPlugin && !parsedArgv.disableGlobalPlugins) {
+        yargs.hide('disable-global-plugin').option('disable-global-plugin', {
+          alias: 'disable-global-plugins',
+          describe: 'Disable global plugins.'
+        })
+      }
+
+      if (!parsedArgv.disableHomePlugin && !parsedArgv.disableHomePlugins) {
+        yargs.hide('disable-home-plugin').option('disable-home-plugin', {
+          alias: 'disable-home-plugins',
+          describe: 'Disable home plugins.'
+        })
+      }
+
+      if (!parsedArgv.hideEpilog) {
+        yargs.hide('hide-epilog').option('hide-epilog', {
+          describe: 'Hide epilog.'
+        })
+        yargs.hide('set-epilog').option('set-epilog', {
+          default: false,
+          describe: 'Set epilog.'
+        })
+
+        yargs.epilog(((epilog: string | string[]): string => {
+          if (epilog && _.isString(epilog)) {
+            return epilog
+          } else if (_.isArray(epilog)) {
+            let pop = epilog.pop()
+            if (pop) {
+              return pop
+            }
+          }
+
+          return 'Find more information at https://semo.js.org'
+        })(parsedArgv.setEpilog))
+      }
+
+      if (!parsedArgv.setVersion) {
+        yargs.hide('set-version').option('set-version', {
+          describe: 'Set version.'
+        })
+      } else {
+        yargs.version(parsedArgv.setVersion)
+      }
+
+      yargs.hide('node-env-key').option('node-env-key', {
+        default: 'NODE_ENV',
+        alias: 'node-env',
+        describe: 'Set node env key'
+      })
+
+      // eslint-disable-next-line
+      yargs
+        .help()
+        .alias('h', 'help')
+        .exitProcess(false)
+        .recommendCommands()
+        .wrap(Math.min(120, yargs.terminalWidth())).argv
+
+      if (!parsedArgv.getYargsCompletions) {
+        let afterHooks = await invokeHook('afterCommand')
+        Object.keys(afterHooks).map(function(hook) {
+          afterHooks[hook](parsedArgv, yargs)
+        })
+      }
+    } catch (e) {
+      if (!e.name || e.name !== 'YError') {
+        error(e.stack)
+      }
+    }
+  })()
+}
+
+/**
+ * Semo utils functions and references to common modules.
  * @module Utils
  */
 export {
@@ -832,16 +1101,8 @@ export {
   table,
   /** [day.js](https://www.npmjs.com/package/dayjs) reference, check [api](https://github.com/iamkun/dayjs/blob/HEAD/docs/en/API-reference.md) documentation. */
   day,
-  /** [json-colorizer](https://www.npmjs.com/package/json-colorizer) reference */
-  colorize,
-  /** [json-stringify-pretty-compact](https://www.npmjs.com/package/json-stringify-pretty-compact) reference. */
-  stringify,
-  /** [glob](https://www.npmjs.com/package/glob) reference. */
-  glob,
-  /** [find-up](https://www.npmjs.com/package/find-up) reference. */
-  findUp,
-  /** [co](https://www.npmjs.com/package/co) reference. */
-  co,
+  /** [fs-extra](https://www.npmjs.com/package/fs-extra) reference */
+  fs,
   /** [shelljs](https://www.npmjs.com/package/shelljs) reference. */
   shell,
   /** [debug](https://www.npmjs.com/package/debug) reference. */
@@ -850,12 +1111,6 @@ export {
   fuzzy,
   /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
   inquirer,
-  /** [fs-extra](https://www.npmjs.com/package/fs-extra) reference */
-  fs,
-  /** [randomatic](https://www.npmjs.com/package/randomatic) reference */
-  randomatic,
-  /** [node-emoji](https://www.npmjs.com/package/node-emoji) reference */
-  emoji,
   /** [get-stdin](https://www.npmjs.com/package/get-stdin) reference */
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
@@ -892,5 +1147,7 @@ export {
   isDevelopment,
   fileExistsSyncCache,
   debugCore,
-  formatRcOptions
+  formatRcOptions,
+  replHistory,
+  launchDispatcher
 }

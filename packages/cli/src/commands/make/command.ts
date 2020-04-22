@@ -27,7 +27,7 @@ export const builder = function(yargs: yargs.Argv) {
 }
 
 export const handler = function(argv: any) {
-  const scriptName = argv.scriptName || 'zignis'
+  const scriptName = argv.scriptName || 'semo'
   let commandDir: string
   if (argv.extend) {
     let extendName = argv.extend

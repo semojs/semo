@@ -13,7 +13,7 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  const scriptName = argv.scriptName || 'zignis'
+  const scriptName = argv.scriptName || 'semo'
   try {
     // basic information
     const hookStatus = await Utils.invokeHook('status', { mode: 'group' })

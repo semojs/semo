@@ -1,4 +1,3 @@
-import replHistory from 'repl.history'
 import repl from 'repl'
 import yargs from 'yargs'
 
@@ -94,7 +93,7 @@ async function openRepl(context: any): Promise<any> {
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
-  replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
+  Utils.replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
@@ -105,7 +104,7 @@ async function openRepl(context: any): Promise<any> {
 
 export const builder = function(yargs: any) {
   const argv: any = Utils.getInternalCache().get('argv')
-  const scriptName = argv.scriptName || 'zignis'
+  const scriptName = argv.scriptName || 'semo'
   yargs.option('prompt', {
     default: '$ ',
     describe: 'Prompt for input.'

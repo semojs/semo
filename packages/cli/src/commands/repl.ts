@@ -1,7 +1,6 @@
 import chalk from 'chalk'
 import repl from 'repl'
 import _ from 'lodash'
-import replHistory from 'repl.history'
 import yargs = require('yargs')
 
 import { Utils } from '..'
@@ -71,7 +70,7 @@ async function openRepl(context: any): Promise<any> {
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
-  replHistory(r, `${Home}/.${argv.scriptName}_history`)
+  Utils.replHistory(r, `${Home}/.${argv.scriptName}_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
