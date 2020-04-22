@@ -1,0 +1,16 @@
+docs
+.docma.json
+.editorconfig
+.eslintrc.js
+.travis.yml
+PRINCIPLE.md
+yarn-error.log
+yarn.lock
+.vscode/settings.json
+src
+tsconfig.json
+.eslintignore
+/lib/**/*.map
+/lib/examples
+/public
+/doc
