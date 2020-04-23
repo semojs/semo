@@ -27,7 +27,7 @@ yarn add @semo/cli
 semo init [--typescript]
 ```
 
-这里看项目是否是基于 typescript 搭建的，如果是就带上 `--typescript` 参数。初始化过程会在项目根目录新建一个配置文件 `.semorc.json`，并且新增了一个 `bin/semo` 目录，理论上不会和现有的项目有冲突。
+这里看项目是否是基于 Typescript 搭建的，如果是就带上 `--typescript` 参数。初始化过程会在项目根目录新建一个配置文件 `.semorc.json`，并且新增了一个 `bin/semo` 目录，理论上不会和现有的项目有冲突。
 
 ### 3. 添加一些命令或脚本
 
