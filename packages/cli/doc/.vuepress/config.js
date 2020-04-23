@@ -4,7 +4,7 @@ module.exports = {
   title: 'Semo',
   description: '帮你规范项目自定义命令行工具',
   base: '/',
-  dest: 'public',
+  dest: '../../public',
   themeConfig: {
     repo: 'https://github.com/vipzhicheng/semo',
     repoLabel: 'Github',
