@@ -1,7 +1,23 @@
 {
-  "name": "root",
+  "name": "semo",
   "private": true,
   "devDependencies": {
+    "husky": "^4.2.5",
     "lerna": "^3.20.2"
+  },
+  "scripts": {
+    "test": "exit 0",
+    "lerna": "lerna",
+    "prepublish": "lerna run prepublish",
+    "lerna:publish": "lerna publish from-git --yes --npm-client yarn"
+  },
+  "husky": {
+    "hooks": {
+      "pre-commit": "yarn test"
+    }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:vipzhicheng/semo.git"
   }
 }
