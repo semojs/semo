@@ -9,6 +9,7 @@ yarn.lock
 .vscode/settings.json
 src
 tsconfig.json
+typedoc.json
 .eslintignore
 /lib/**/*.map
 /lib/examples
