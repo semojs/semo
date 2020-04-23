@@ -18,7 +18,7 @@
 这里以 `yarn` 为例：
 
 ```
-yarn add semo
+yarn add @semo/cli
 ```
 
 ### 2. 在项目根目录进行初始化
