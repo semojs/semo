@@ -526,6 +526,31 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
 
   applicationConfig.coreDir = path.resolve(__dirname, '../../')
   applicationConfig.applicationDir = cwd ? cwd : configPath ? path.dirname(configPath) : process.cwd()
+
+  // Load core rc
+  if (fileExistsSyncCache(path.resolve(applicationConfig.coreDir, 'package.json'))) {
+    let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+
+    if (packageInfo.name) {
+      applicationConfig.name = packageInfo.name
+    }
+
+    if (packageInfo.version) {
+      applicationConfig.version = packageInfo.version
+    }
+
+    // args > package > current rc
+    if (packageInfo.rc) {
+      packageInfo.rc = formatRcOptions(packageInfo.rc)
+      applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
+    }
+    if (packageInfo[scriptName]) {
+      packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
+      applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
+    }
+  }
+
+  // Load application rc, if same dir with core, it's a dup process, rare case.
   if (fileExistsSyncCache(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
     let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
 
@@ -919,7 +944,7 @@ const launchDispatcher = () => {
   }
   if (!parsedArgv.disableCoreCommand) {
     // Load local commands
-    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), opts)
+    yargs.commandDir(path.resolve(appConfig.coreDir, appConfig.commandDir), opts)
   }
 
   // Load plugin commands
