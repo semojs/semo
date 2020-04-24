@@ -70,7 +70,7 @@ async function openRepl(context: any): Promise<any> {
   const pkgPureName = Utils._.trimStart(argv.scriptName, '@').split('/')[0]
 
   const Home = process.env.HOME + `/.${pkgPureName}`
-  Utils.fs.ensureDir(Home)
+  Utils.fs.ensureDirSync(Home)
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }

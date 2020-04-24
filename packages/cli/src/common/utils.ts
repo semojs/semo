@@ -927,7 +927,7 @@ const launchDispatcher = () => {
   }
 
   yargs.hide('plugin-prefix').option('plugin-prefix', {
-    default: '@semo/cli',
+    default: 'semo',
     describe: 'Set plugin prefix.'
   })
 
