@@ -529,7 +529,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined) {
 
   // Load core rc
   if (fileExistsSyncCache(path.resolve(applicationConfig.coreDir, 'package.json'))) {
-    let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
+    let packageInfo = require(path.resolve(applicationConfig.coreDir, 'package.json'))
 
     if (packageInfo.name) {
       applicationConfig.name = packageInfo.name
