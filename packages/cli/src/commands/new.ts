@@ -36,7 +36,7 @@ export const builder = function(yargs: yargs.Argv) {
 
   yargs.option('select', {
     alias: 's',
-    describe: 'select from default repos'
+    describe: 'select from registered repos'
   })
 
   yargs.option('add', {
@@ -75,7 +75,35 @@ export const handler = async function(argv: any) {
       // Nothing happened.
       shell.cd(argv.name)
     } else {
-      if (argv.empty || !argv.repo) {
+      if (argv.select) {
+        const defaultRepos = await Utils.invokeHook('new_repo')
+        if (Object.keys(defaultRepos).length === 0) {
+          Utils.error('No pre-defined repos available.')
+        }
+        const select = defaultRepos[argv.select]
+          ? argv.select
+          : Object.keys(defaultRepos).find(
+              key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1
+            )
+        if (select && defaultRepos[select]) {
+          argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
+          argv.branch = defaultRepos[select].branch || 'master'
+        } else {
+          const answers: any = await Utils.inquirer.prompt([
+            {
+              type: 'list',
+              name: 'selected',
+              message: `Please choose a pre-defined repo to continue:`,
+              choices: Object.keys(defaultRepos).map(key => {
+                return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
+              })
+            }
+          ])
+
+          argv.repo = defaultRepos[answers.selected].repo || Utils.error('Repo not found')
+          argv.branch = defaultRepos[answers.selected].branch || 'master'
+        }
+      } else if (argv.empty || !argv.repo) {
         shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
         shell.cd(argv.name)
         if (argv.yarn) {
@@ -95,56 +123,26 @@ export const handler = async function(argv: any) {
         Utils.exec(`echo "node_modules" > .gitignore`)
         Utils.exec('git init')
         Utils.success('New .git directory has been created!')
-      } else {
-        if (argv.select) {
-          const defaultRepos = await Utils.invokeHook('new_repo')
-          if (Object.keys(defaultRepos).length === 0) {
-            Utils.error('No pre-defined repos available.')
-          }
-          const select = defaultRepos[argv.select]
-            ? argv.select
-            : Object.keys(defaultRepos).find(
-                key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1
-              )
-          if (select && defaultRepos[select]) {
-            argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
-            argv.branch = defaultRepos[select].branch || 'master'
-          } else {
-            const answers: any = await Utils.inquirer.prompt([
-              {
-                type: 'list',
-                name: 'selected',
-                message: `Please choose a pre-defined repo to continue:`,
-                choices: Object.keys(defaultRepos).map(key => {
-                  return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
-                })
-              }
-            ])
+      }
 
-            argv.repo = defaultRepos[answers.selected].repo || Utils.error('Repo not found')
-            argv.branch = defaultRepos[answers.selected].branch || 'master'
-          }
+      Utils.info(`Downloading from ${argv.repo}`)
+      try {
+        Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
+
+        Utils.success('Succeeded!')
+        shell.cd(argv.name)
+        shell.rm('-rf', path.resolve(process.cwd(), `.git`))
+        Utils.success('.git directory removed!')
+        if (argv.yarn) {
+          Utils.exec('yarn')
+        } else {
+          Utils.exec('npm install')
         }
 
-        Utils.info(`Downloading from ${argv.repo}`)
-        try {
-          Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
-
-          Utils.success('Succeeded!')
-          shell.cd(argv.name)
-          shell.rm('-rf', path.resolve(process.cwd(), `.git`))
-          Utils.success('.git directory removed!')
-          if (argv.yarn) {
-            Utils.exec('yarn')
-          } else {
-            Utils.exec('npm install')
-          }
-
-          Utils.exec('git init')
-          Utils.success('New .git directory has been created!')
-        } catch (e) {
-          Utils.error(e.message)
-        }
+        Utils.exec('git init')
+        Utils.success('New .git directory has been created!')
+      } catch (e) {
+        Utils.error(e.message)
       }
     }
 
