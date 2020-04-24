@@ -6,7 +6,7 @@ module.exports = {
   base: '/',
   dest: '../../public',
   themeConfig: {
-    repo: 'https://github.com/vipzhicheng/semo',
+    repo: 'https://github.com/semojs/semo',
     repoLabel: 'Github',
     editLinks: true,
     editLinkText: 'Help improve this page',
