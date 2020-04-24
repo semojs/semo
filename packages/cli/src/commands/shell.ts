@@ -89,11 +89,16 @@ async function openRepl(context: any): Promise<any> {
       return []
     }
   })
-  const Home = process.env.HOME + `/.${argv.scriptName}`
+
+  // Trim leading @ and get org name if exist
+  const pkgPureName = Utils._.trimStart(argv.scriptName, '@').split('/')[0]
+  
+  const Home = process.env.HOME + `/.${pkgPureName}`
+  Utils.fs.ensureDir(Home)
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
-  Utils.replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
+  Utils.replHistory(r, `${Home}/.${pkgPureName}_shell_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
@@ -105,13 +110,17 @@ async function openRepl(context: any): Promise<any> {
 export const builder = function(yargs: any) {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv.scriptName || 'semo'
+
+  // Trim leading @ and get org name if exist
+  const pkgPureName = Utils._.trimStart(scriptName, '@').split('/')[0]
+  
   yargs.option('prompt', {
     default: '$ ',
     describe: 'Prompt for input.'
   })
 
   yargs.option('prefix', {
-    default: scriptName,
+    default: pkgPureName,
     describe: 'Make input command a little bit faster.'
   })
 
