@@ -95,7 +95,7 @@ export const handler = async function(argv: any) {
               name: 'selected',
               message: `Please choose a pre-defined repo to continue:`,
               choices: Object.keys(defaultRepos).map(key => {
-                return { name: `${key} [${defaultRepos[key].alias.join(', ')}]`, value: key }
+                return { name: `${defaultRepos[key].alias.join(', ')}`, value: key }
               })
             }
           ])
