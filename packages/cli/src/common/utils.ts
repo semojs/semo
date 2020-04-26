@@ -78,7 +78,7 @@ const debugCore = function(...args) {
 
   if (!debugCache) {
     const argv: any = getInternalCache().get('argv')
-    const scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
+    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     debugCache = debug(`${scriptName}-core`)
     debugCache(...args)
 
@@ -126,7 +126,7 @@ interface IHookOption {
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
   const argv: any = getInternalCache().get('argv')
-  const scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = `hook_${hook}`
   options = Object.assign(
@@ -371,7 +371,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 
   if (_.isEmpty(plugins)) {
     let pluginPrefix = argv.pluginPrefix || 'semo'
-    let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
+    let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     if (_.isString(pluginPrefix)) {
       pluginPrefix = [pluginPrefix]
     }
@@ -505,7 +505,7 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  */
 const getApplicationConfig = function(cwd: string | undefined = undefined) {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   let applicationConfig
 
   const configPath = findUp.sync([`.${scriptName}rc.json`], {
@@ -604,7 +604,7 @@ const formatRcOptions = (opts) => {
  */
 const getCombinedConfig = function(): { [propName: string]: any } {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : '@semo/cli'
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
@@ -931,7 +931,7 @@ const launchDispatcher = () => {
     describe: 'Set plugin prefix.'
   })
 
-  let scriptName = parsedArgv.scriptName || '@semo/cli'
+  let scriptName = parsedArgv.scriptName || 'semo'
   const opts = {
     // Give each command an ability to disable temporarily
     visit: (command) => {

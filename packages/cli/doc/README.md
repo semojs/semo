@@ -14,7 +14,7 @@ footer: 企业级Node项目命令行体系建设工具
 
 ```bash
 # 对于本地环境，一般推荐全局安装
-npm i -g @semo/cli
+npm install -g @semo/cli
 semo help
 # 首次在项目中整合
 cd YOUR_PROJECT
