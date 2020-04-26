@@ -915,7 +915,7 @@ const launchDispatcher = () => {
 
   if (!parsedArgv.scriptName) {
     yargs.hide('script-name').option('script-name', {
-      default: '@semo/cli',
+      default: 'semo',
       describe: 'Rename script name.',
       type: 'string'
     })

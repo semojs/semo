@@ -5,7 +5,7 @@
 `Semo` 命令行工具同时也是一个辅助工程师日常开发，运维和调试的命令行工具，建议你在本地环境全局安装，具体的使用说明可以参考[这里](https://semo.js.org)。
 
 ```
-$ npm i -g semo
+$ npm i -g @semo/cli
 $ semo help
 
 semo [命令]
@@ -112,7 +112,7 @@ npm version patch && npm publish
 如果打开 package.json，你会发现在插件模板里，`semo` 放在了 `peerDependencies`，也就是所有的插件如果要生效，需要和 `semo` 一起安装。
 
 ```
-npm i -g semo semo-plugin-xxx
+npm i -g @semo/cli semo-plugin-xxx
 ```
 
 如果别人的插件仅仅是定义了一些你需要的命令，则你可以把命令安装在全局，如果别人的插件在业务项目中要用，则要放到项目依赖当中。

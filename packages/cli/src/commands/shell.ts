@@ -90,15 +90,12 @@ async function openRepl(context: any): Promise<any> {
     }
   })
 
-  // Trim leading @ and get org name if exist
-  const pkgPureName = Utils._.trimStart(argv.scriptName, '@').split('/')[0]
-  
-  const Home = process.env.HOME + `/.${pkgPureName}`
+  const Home = process.env.HOME + `/.${argv.scriptName}`
   Utils.fs.ensureDirSync(Home)
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
-  Utils.replHistory(r, `${Home}/.${pkgPureName}_shell_history`)
+  Utils.replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
