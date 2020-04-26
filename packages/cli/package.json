@@ -80,6 +80,8 @@
     "docs:build": "npm run docs:typedoc && vuepress build doc"
   },
   "rc": {
+    "coreCommandDir": "lib/commands",
+    "coreHookDir": "lib/hooks",
     "commandDir": "lib/commands",
     "commandMakeDir": "src/commands",
     "hookDir": "lib/hooks",

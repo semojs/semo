@@ -507,13 +507,13 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
  * @param opts
  *   opts.scriptName: set scriptName
  */
-const getApplicationConfig = function(cwd: string | undefined = undefined, opts: any) {
+const getApplicationConfig = function(opts: any = {}) {
   let argv: any = cachedInstance.get('argv') || {}
   let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
   let applicationConfig
 
   const configPath = findUp.sync([`.${scriptName}rc.json`], {
-    cwd
+    cwd: opts.cwd
   })
 
   const homeSemoRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
@@ -529,7 +529,7 @@ const getApplicationConfig = function(cwd: string | undefined = undefined, opts:
   }
 
   applicationConfig.coreDir = path.resolve(__dirname, '../../')
-  applicationConfig.applicationDir = cwd ? cwd : configPath ? path.dirname(configPath) : process.cwd()
+  applicationConfig.applicationDir = opts.cwd ? opts.cwd : configPath ? path.dirname(configPath) : process.cwd()
 
   // Load core rc
   if (fileExistsSyncCache(path.resolve(applicationConfig.coreDir, 'package.json'))) {
@@ -606,9 +606,9 @@ const formatRcOptions = (opts) => {
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function(): { [propName: string]: any } {
+const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
@@ -895,7 +895,7 @@ const replHistory = function (repl, file) {
 /**
  * Launch dispatcher
  */
-const launchDispatcher = () => {
+const launchDispatcher = (opts: any = {}) => {
 
   const pkg = loadCorePackageInfo()
   updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
@@ -907,14 +907,18 @@ const launchDispatcher = () => {
   let parsedArgv = yParser(process.argv.slice(2))
   let parsedArgvOrigin = parsedArgv
   cache.set('argv', parsedArgv) // set argv first time
-  let appConfig = getApplicationConfig()
+  let appConfig = getApplicationConfig({
+    scriptName: opts.scriptName
+  })
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
   cache.set('argv', parsedArgv) // set argv second time
   cache.set('yargs', yargs)
 
   const plugins = getAllPluginsMapping()
-  const config = getCombinedConfig()
+  const config = getCombinedConfig({
+    scriptName: opts.scriptName
+  })
   const packageConfig = loadPackageInfo()
 
   if (!parsedArgv.scriptName) {
@@ -936,7 +940,7 @@ const launchDispatcher = () => {
   })
 
   let scriptName = parsedArgv.scriptName || 'semo'
-  const opts = {
+  const yargsOpts = {
     // Give each command an ability to disable temporarily
     visit: (command) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
@@ -948,7 +952,7 @@ const launchDispatcher = () => {
   }
   if (!parsedArgv.disableCoreCommand) {
     // Load local commands
-    yargs.commandDir(path.resolve(appConfig.coreDir, appConfig.commandDir), opts)
+    yargs.commandDir(path.resolve(appConfig.coreDir, appConfig.coreCommandDir), yargsOpts)
   }
 
   // Load plugin commands

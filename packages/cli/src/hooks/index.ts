@@ -37,7 +37,9 @@ export const hook_status = async () => {
   )
 
   let kvs = {}
-  const appConfig = Utils.getApplicationConfig(path.resolve(__dirname, '../../'))
+  const appConfig = Utils.getApplicationConfig({
+    cwd: path.resolve(__dirname, '../../')
+  })
   kvs = Object.assign(
     kvs,
     Utils._.pickBy(
