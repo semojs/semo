@@ -502,10 +502,14 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
 
 /**
  * Get application semo config only.
+ * 
+ * @param cwd
+ * @param opts
+ *   opts.scriptName: set scriptName
  */
-const getApplicationConfig = function(cwd: string | undefined = undefined) {
+const getApplicationConfig = function(cwd: string | undefined = undefined, opts: any) {
   let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
   let applicationConfig
 
   const configPath = findUp.sync([`.${scriptName}rc.json`], {
