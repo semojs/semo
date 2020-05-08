@@ -94,7 +94,7 @@ export const builder = function(yargs: yargs.Argv) {
 export const handler = async function(argv: any) {
   argv.hook = argv.hook || false
   try {
-    let context = { Utils, argv, await: true }
+    let context = { Semo: Utils, argv, await: true }
 
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(

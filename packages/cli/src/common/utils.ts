@@ -1121,6 +1121,43 @@ const launchDispatcher = (opts: any = {}) => {
 }
 
 /**
+ * Import a package on runtime
+ * 
+ * Mostly used in REPL mode, if module not found in current context, 
+ * it will be downloaded to ~/.semo/node_modules for global share.
+ * 
+ * @param name Package name
+ */
+const importPackage = (name, force = false) => {
+  let pkg, pkgPath
+
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  const Home = process.env.HOME + `/.${scriptName}`
+  const homeNodeModulesPath = path.resolve(Home, 'node_modules')
+
+  fs.ensureDirSync(Home)
+  fs.ensureDirSync(homeNodeModulesPath)
+
+  if (force) {
+    exec(`npm install ${name} --prefix ${Home}`)
+  }
+
+  try {
+    pkgPath = require.resolve(name, { paths: [homeNodeModulesPath] })
+    pkg = require(pkgPath)
+  } catch (err) {
+    if (err.code == 'MODULE_NOT_FOUND') {
+      exec(`npm install ${name} --prefix ${Home}`)
+      pkgPath = require.resolve(name, { paths: [homeNodeModulesPath] })
+      pkg = require(pkgPath)
+    }
+  }
+
+  return pkg
+}
+
+/**
  * Semo utils functions and references to common modules.
  * @module Utils
  */
@@ -1182,5 +1219,6 @@ export {
   debugCore,
   formatRcOptions,
   replHistory,
-  launchDispatcher
+  launchDispatcher,
+  importPackage
 }
