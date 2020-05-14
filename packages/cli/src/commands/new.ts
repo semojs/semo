@@ -125,24 +125,26 @@ export const handler = async function(argv: any) {
         Utils.success('New .git directory has been created!')
       }
 
-      Utils.info(`Downloading from ${argv.repo}`)
-      try {
-        Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
-
-        Utils.success('Succeeded!')
-        shell.cd(argv.name)
-        shell.rm('-rf', path.resolve(process.cwd(), `.git`))
-        Utils.success('.git directory removed!')
-        if (argv.yarn) {
-          Utils.exec('yarn')
-        } else {
-          Utils.exec('npm install')
+      if (argv.repo && argv.name) {
+        Utils.info(`Downloading from ${argv.repo}`)
+        try {
+          Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
+  
+          Utils.success('Succeeded!')
+          shell.cd(argv.name)
+          shell.rm('-rf', path.resolve(process.cwd(), `.git`))
+          Utils.success('.git directory removed!')
+          if (argv.yarn) {
+            Utils.exec('yarn')
+          } else {
+            Utils.exec('npm install')
+          }
+  
+          Utils.exec('git init')
+          Utils.success('New .git directory has been created!')
+        } catch (e) {
+          Utils.error(e.message)
         }
-
-        Utils.exec('git init')
-        Utils.success('New .git directory has been created!')
-      } catch (e) {
-        Utils.error(e.message)
       }
     }
 
