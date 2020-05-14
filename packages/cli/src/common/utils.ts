@@ -566,6 +566,11 @@ const getApplicationConfig = function(opts: any = {}) {
   //   }
   // }
 
+  // Inject some core config, hard coded
+  applicationConfig = Object.assign({}, applicationConfig, {
+    coreCommandDir: 'lib/commands'
+  })
+
   // Load application rc, if same dir with core, it's a dup process, rare case.
   if (fileExistsSyncCache(path.resolve(applicationConfig.applicationDir, 'package.json'))) {
     let packageInfo = require(path.resolve(applicationConfig.applicationDir, 'package.json'))
