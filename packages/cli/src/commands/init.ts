@@ -36,9 +36,18 @@ export const builder = function(yargs: yargs.Argv) {
     alias: 'ts',
     describe: 'generate typescript style code'
   })
+
+  yargs.option('rc-format', {
+    default: 'yml',
+    describe: 'rc format, default is yml, also support json'
+  })
 }
 
 export const handler = async function(argv: any) {
+  if (!['yml', 'json'].includes(argv.rcFormat)) {
+    Utils.error('Invalid --rc-format option, only support yml and json.')
+    return
+  }
   let defaultRc: any = argv.plugin
     ? Utils._.pickBy({
         typescript: argv.typescript ? true : null,
@@ -58,8 +67,9 @@ export const handler = async function(argv: any) {
   let currentPath = path.resolve(process.cwd())
 
   try {
+    const configPath = `${currentPath}/.${argv.scriptName}rc.${argv.rcFormat ? argv.rcFormat : 'yml'}`
     const { override } =
-      Utils.fileExistsSyncCache(`${currentPath}/.${argv.scriptName}rc.json`) && !argv.force
+      Utils.fileExistsSyncCache(configPath) && !argv.force
         ? await inquirer.prompt([
             {
               type: 'confirm',
@@ -73,7 +83,12 @@ export const handler = async function(argv: any) {
       console.log(chalk.yellow('User aborted!'))
       return
     }
-    fs.writeFileSync(`${currentPath}/.${argv.scriptName}rc.json`, JSON.stringify(defaultRc, null, 2))
+    if (argv.rcFormat === 'yml') {
+      fs.writeFileSync(configPath, Utils.yaml.stringify(defaultRc, {}))
+    } else if (argv.rcFormat === 'json') {
+      fs.writeFileSync(configPath, JSON.stringify(defaultRc, null, 2))
+    }
+    
     console.log(chalk.green(`Default .${argv.scriptName}rc created!`))
     const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)
     dirs.forEach(dir => {
