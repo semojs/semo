@@ -648,7 +648,7 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
       const pluginSemoJsonRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
       const pluginSemoYamlRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.yml`)
       let pluginConfig
-      if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
+      if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
         try {
           const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
           pluginConfig = formatRcOptions(yaml.parse(rcFile))
