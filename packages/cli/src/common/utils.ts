@@ -589,9 +589,21 @@ const getApplicationConfig = function(opts: any = {}) {
   }
 
   if (configPath) {
-    let semoRcInfo = require(configPath)
-    semoRcInfo = formatRcOptions(semoRcInfo)
-    applicationConfig = Object.assign({}, applicationConfig, semoRcInfo)
+    let semoRcInfo = {}
+
+    try {
+      if (configPath.endsWith('.yml')) {
+        const rcFile = fs.readFileSync(configPath, 'utf8')
+        semoRcInfo = formatRcOptions(yaml.parse(rcFile))
+      } else {
+        semoRcInfo = require(configPath)
+        semoRcInfo = formatRcOptions(semoRcInfo)
+      }
+      applicationConfig = Object.assign({}, applicationConfig, semoRcInfo)
+    } catch(e) {
+      debugCore('load rc:', e)
+      warn(`application rc config load failed!`)
+    }
   }
 
   return applicationConfig
@@ -629,8 +641,8 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
       // .semorc.yml > .semorc.json
       const pluginSemoJsonRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
       const pluginSemoYamlRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.yml`)
+      let pluginConfig
       if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
-        let pluginConfig
         try {
           const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
           pluginConfig = formatRcOptions(yaml.parse(rcFile))
@@ -639,11 +651,7 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
           warn(`Plugin ${plugin} .semorc.yml config load failed!`)
           pluginConfig = {}
         }
-        
-        combinedConfig = _.merge(combinedConfig, pluginConfig)
-        pluginConfigs[plugin] = pluginConfig
       } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
-        let pluginConfig
         try {
           pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
         } catch (e) {
@@ -651,10 +659,12 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
           warn(`Plugin ${plugin} .semorc.json config load failed!`)
           pluginConfig = {}
         }
-        
-        combinedConfig = _.merge(combinedConfig, pluginConfig)
-        pluginConfigs[plugin] = pluginConfig
       }
+
+      let pluginConfigPick = _.pick(pluginConfig, ['commandDir', 'extendDir', 'hookDir', plugin])
+      combinedConfig = _.merge(combinedConfig, pluginConfigPick)
+      pluginConfigs[plugin] = pluginConfig
+
     })
 
     // const configPath = findUp.sync([`.${scriptName}rc.json`])
