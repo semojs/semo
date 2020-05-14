@@ -627,7 +627,7 @@ const formatRcOptions = (opts) => {
   Object.keys(opts).filter(key => key.indexOf('-') > -1).forEach(key => {
     const newKey = key.replace(/--+/g, '-').replace(/^-/g, '').replace(/-([a-z])/g, (m, p1) => p1.toUpperCase())
     opts[newKey] = opts[key]
-    delete opts[key]
+    // delete opts[key] // sometimes we need original style
   })
   return opts
 }
