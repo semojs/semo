@@ -5,6 +5,7 @@ import glob from 'glob'
 import { table, getBorderCharacters } from 'table'
 import findUp from 'find-up'
 import _ from 'lodash'
+import yaml from 'yaml'
 import colorize from 'json-colorizer'
 import stringify from 'json-stringify-pretty-compact'
 import chalk from 'chalk'
@@ -512,17 +513,27 @@ const getApplicationConfig = function(opts: any = {}) {
   let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
   let applicationConfig
 
-  const configPath = findUp.sync([`.${scriptName}rc.json`], {
+  const configPath = findUp.sync([`.${scriptName}rc.yml`, `.${scriptName}rc.json`], {
     cwd: opts.cwd
   })
 
-  const homeSemoRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
-  if (homeSemoRcPath && fileExistsSyncCache(homeSemoRcPath)) {
+  // .semorc.yml > .semorc.json
+  const homeSemoJsonRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
+  const homeSemoYamlRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.yml`) : ''
+  if (homeSemoYamlRcPath && fileExistsSyncCache(homeSemoYamlRcPath)) {
     try {
-      applicationConfig = formatRcOptions(require(homeSemoRcPath))
+      const rcFile = fs.readFileSync(homeSemoYamlRcPath, 'utf8')
+      applicationConfig = formatRcOptions(yaml.parse(rcFile))
     } catch (e) {
       debugCore('load rc:', e)
-      warn(`Global ${homeSemoRcPath} config load failed!`)
+      warn(`Global ${homeSemoYamlRcPath} config load failed!`)
+    }
+  } else if (homeSemoJsonRcPath && fileExistsSyncCache(homeSemoJsonRcPath)) {
+    try {
+      applicationConfig = formatRcOptions(require(homeSemoJsonRcPath))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Global ${homeSemoJsonRcPath} config load failed!`)
     }
   } else {
     applicationConfig = {}
@@ -615,11 +626,26 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
   if (_.isEmpty(combinedConfig)) {
     const plugins = getAllPluginsMapping()
     Object.keys(plugins).map(plugin => {
-      const pluginSemoRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
-      if (fileExistsSyncCache(pluginSemoRcPath)) {
+      // .semorc.yml > .semorc.json
+      const pluginSemoJsonRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
+      const pluginSemoYamlRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.yml`)
+      if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
         let pluginConfig
         try {
-          pluginConfig = formatRcOptions(require(pluginSemoRcPath))
+          const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
+          pluginConfig = formatRcOptions(yaml.parse(rcFile))
+        } catch (e) {
+          debugCore('load rc:', e)
+          warn(`Plugin ${plugin} .semorc.yml config load failed!`)
+          pluginConfig = {}
+        }
+        
+        combinedConfig = _.merge(combinedConfig, pluginConfig)
+        pluginConfigs[plugin] = pluginConfig
+      } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
+        let pluginConfig
+        try {
+          pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
         } catch (e) {
           debugCore('load rc:', e)
           warn(`Plugin ${plugin} .semorc.json config load failed!`)
@@ -1187,6 +1213,9 @@ export {
   NodeCache,
   /** [yargs-parser](https://www.npmjs.com/package/yargs-parser) reference */
   yParser,
+  /** [yargs-parser](https://www.npmjs.com/package/yaml) reference */
+  yaml,
+
   // custom functions
   md5,
   delay,
