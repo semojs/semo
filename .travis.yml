@@ -8,6 +8,8 @@ cache:
 before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s
   - export PATH="$HOME/.yarn/bin:$PATH"
+install:
+  - lerna bootstrap
 before_script:
   # - lerna exec -- yarn
   - yarn run lerna run prepublish
