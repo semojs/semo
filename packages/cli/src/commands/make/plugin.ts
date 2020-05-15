@@ -1,12 +1,10 @@
 import path from 'path'
-import shell from 'shelljs'
-import yargs from 'yargs'
-import { Utils } from '../..'
+import { Utils } from '@semo/core'
 
 export const command = 'plugin <name>'
 export const desc = 'Generate a plugin structure'
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('force', {
     describe: 'force creation, remove existed one',
     alias: 'f'
@@ -29,17 +27,17 @@ export const handler = function(argv: any) {
   if (Utils.fileExistsSyncCache(pluginPath)) {
     if (argv.force) {
       Utils.warn(`Existed ${scriptName}-plugin-${argv.name} is deleted before creating a new one!`)
-      shell.rm('-rf', pluginPath)
+      Utils.shell.rm('-rf', pluginPath)
     } else {
       Utils.error(`Destination existed, command abort!`)
     }
   }
 
-  shell.mkdir('-p', pluginPath)
-  shell.cd(pluginPath)
-  if (!shell.which(scriptName)) {
+  Utils.shell.mkdir('-p', pluginPath)
+  Utils.shell.cd(pluginPath)
+  if (!Utils.shell.which(scriptName)) {
     Utils.error(`Script ${scriptName} not found!`)
   }
-  shell.exec('npm init --yes')
-  shell.exec(`${scriptName} init --plugin --exec-mode`, (code, stdout, stderr) => {})
+  Utils.shell.exec('npm init --yes')
+  Utils.shell.exec(`${scriptName} init --plugin --exec-mode`, (code, stdout, stderr) => {})
 }

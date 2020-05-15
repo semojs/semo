@@ -1,0 +1,2 @@
+hook: true
+hookDir: lib/hooks

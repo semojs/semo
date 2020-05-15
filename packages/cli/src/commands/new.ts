@@ -1,13 +1,11 @@
 import path from 'path'
-import shell from 'shelljs'
-import yargs from 'yargs'
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const command = 'new <name> [repo] [branch]'
 export const aliases = 'n'
 export const desc = 'Create a new project from specific repo'
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('yarn', {
     default: false,
     describe: 'use yarn command'
@@ -64,7 +62,7 @@ export const handler = async function(argv: any) {
   try {
     if (Utils.fileExistsSyncCache(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
-        shell.rm('-rf', path.resolve(process.cwd(), argv.name))
+        Utils.shell.rm('-rf', path.resolve(process.cwd(), argv.name))
         Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
       } else if (!argv.merge) {
         Utils.error(`Destination existed, command abort!`)
@@ -73,7 +71,7 @@ export const handler = async function(argv: any) {
 
     if (argv.merge) {
       // Nothing happened.
-      shell.cd(argv.name)
+      Utils.shell.cd(argv.name)
     } else {
       if (argv.select) {
         const defaultRepos = await Utils.invokeHook('new_repo')
@@ -104,8 +102,8 @@ export const handler = async function(argv: any) {
           argv.branch = defaultRepos[answers.selected].branch || 'master'
         }
       } else if (argv.empty || !argv.repo) {
-        shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
-        shell.cd(argv.name)
+        Utils.shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
+        Utils.shell.cd(argv.name)
         if (argv.yarn) {
           if (argv.yes) {
             Utils.exec('yarn init -y')
@@ -131,8 +129,8 @@ export const handler = async function(argv: any) {
           Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
   
           Utils.success('Succeeded!')
-          shell.cd(argv.name)
-          shell.rm('-rf', path.resolve(process.cwd(), `.git`))
+          Utils.shell.cd(argv.name)
+          Utils.shell.rm('-rf', path.resolve(process.cwd(), `.git`))
           Utils.success('.git directory removed!')
           if (argv.yarn) {
             Utils.exec('yarn')

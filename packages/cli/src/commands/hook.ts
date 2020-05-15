@@ -1,10 +1,9 @@
-import yargs from 'yargs'
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const command = 'hook'
 export const desc = 'Show hook info'
 
-export const builder = function(yargs: yargs.Argv) {}
+export const builder = function(yargs) {}
 
 export const handler = async function(argv: any) {
   try {

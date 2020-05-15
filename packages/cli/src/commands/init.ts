@@ -1,15 +1,12 @@
-import inquirer from 'inquirer'
-import chalk from 'chalk'
 import fs from 'fs'
 import path from 'path'
-import yargs from 'yargs'
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const command = 'init'
 export const desc = 'Init basic config file and directories'
 export const aliases = 'i'
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('plugin', {
     alias: 'P',
     describe: 'plugin mode'
@@ -70,7 +67,7 @@ export const handler = async function(argv: any) {
     const configPath = `${currentPath}/.${argv.scriptName}rc.${argv.rcFormat ? argv.rcFormat : 'yml'}`
     const { override } =
       Utils.fileExistsSyncCache(configPath) && !argv.force
-        ? await inquirer.prompt([
+        ? await Utils.inquirer.prompt([
             {
               type: 'confirm',
               name: 'override',
@@ -80,7 +77,7 @@ export const handler = async function(argv: any) {
           ])
         : { override: true }
     if (override === false) {
-      console.log(chalk.yellow('User aborted!'))
+      console.log(Utils.chalk.yellow('User aborted!'))
       return
     }
     if (argv.rcFormat === 'yml') {
@@ -89,14 +86,14 @@ export const handler = async function(argv: any) {
       fs.writeFileSync(configPath, JSON.stringify(defaultRc, null, 2))
     }
     
-    console.log(chalk.green(`Default .${argv.scriptName}rc created!`))
+    console.log(Utils.chalk.green(`Default .${argv.scriptName}rc created!`))
     const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)
     dirs.forEach(dir => {
       // @ts-ignore
       const loc = defaultRc[dir]
       if (!Utils.fileExistsSyncCache(`${currentPath}/${loc}`)) {
         Utils.exec(`mkdir -p ${currentPath}/${loc}`)
-        console.log(chalk.green(`${currentPath}/${loc} created!`))
+        console.log(Utils.chalk.green(`${currentPath}/${loc} created!`))
       }
     })
     // add packages

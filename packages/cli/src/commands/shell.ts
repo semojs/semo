@@ -1,7 +1,6 @@
 import repl from 'repl'
-import yargs from 'yargs'
 
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const command = 'shell'
 export const desc = 'Quick shell'
@@ -127,7 +126,7 @@ export const builder = function(yargs: any) {
   })
 }
 
-export const handler = async function(argv: yargs.Arguments) {
+export const handler = async function(argv) {
   try {
     let context = { argv }
     return await openRepl(context)

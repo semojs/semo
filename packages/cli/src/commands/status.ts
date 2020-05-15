@@ -1,5 +1,5 @@
 import path from 'path'
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const command = 'status'
 export const aliases = 'st'

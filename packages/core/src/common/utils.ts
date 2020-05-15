@@ -22,6 +22,7 @@ import NodeCache from 'node-cache'
 import yargs from 'yargs'
 import yParser from 'yargs-parser'
 import updateNotifier from 'update-notifier'
+import envinfo from 'envinfo'
 
 const { hash } = objectHash({ sort: true })
 
@@ -992,9 +993,9 @@ const launchDispatcher = (opts: any = {}) => {
       return command.disabled === true ? false : command
     }
   }
-  if (!parsedArgv.disableCoreCommand) {
+  if (!parsedArgv.disableCoreCommand && opts.coreDir) {
     // Load local commands
-    yargs.commandDir(path.resolve(appConfig.coreDir, appConfig.coreCommandDir), yargsOpts)
+    yargs.commandDir(path.resolve(opts.coreDir, appConfig.coreCommandDir), yargsOpts)
   }
 
   // Load plugin commands
@@ -1209,6 +1210,8 @@ export {
   _,
   /** [chalk](https://www.npmjs.com/package/chalk) reference */
   chalk,
+  /** [chalk](https://www.npmjs.com/package/envinfo) reference */
+  envinfo,
   /** [table](https://www.npmjs.com/package/table) reference */
   table,
   /** [day.js](https://www.npmjs.com/package/dayjs) reference, check [api](https://github.com/iamkun/dayjs/blob/HEAD/docs/en/API-reference.md) documentation. */

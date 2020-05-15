@@ -1,7 +1,6 @@
 import path from 'path'
 import os from 'os'
-import envinfo from 'envinfo'
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 export const hook_hook = {
   beforeCommand: 'Hook triggered before command execution.',
@@ -27,7 +26,7 @@ export const hook_new_repo = () => {
 
 export const hook_status = async () => {
   let info = JSON.parse(
-    await envinfo.run(
+    await Utils.envinfo.run(
       {
         System: ['OS', 'Shell'],
         Binaries: ['Node', 'Yarn', 'npm']

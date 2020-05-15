@@ -1,15 +1,11 @@
 import fs from 'fs'
 import path from 'path'
-import chalk from 'chalk'
-import _ from 'lodash'
-import yargs from 'yargs'
-import dayjs from 'dayjs'
-import { Utils } from '../..'
+import { Utils } from '@semo/core'
 
 export const command = 'script <name>'
 export const desc = 'Generate a script file'
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('typescript', {
     alias: 'ts',
     describe: 'generate typescript style code'
@@ -19,14 +15,14 @@ export const builder = function(yargs: yargs.Argv) {
 export const handler = function(argv: any) {
   let scriptDir = argv.scriptMakeDir || argv.scriptDir
   if (!scriptDir || !Utils.fileExistsSyncCache(scriptDir)) {
-    console.log(chalk.red('"scriptDir" missing in config file or not exist in current directory!'))
+    console.log(Utils.chalk.red('"scriptDir" missing in config file or not exist in current directory!'))
     return
   }
 
-  const filePrefix = dayjs().format('YYYYMMDDHHmmssSSS')
-  const scriptFile = path.resolve(scriptDir, `${filePrefix}_${_.kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`)
+  const filePrefix = Utils.day().format('YYYYMMDDHHmmssSSS')
+  const scriptFile = path.resolve(scriptDir, `${filePrefix}_${Utils._.kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`)
   if (Utils.fileExistsSyncCache(scriptFile)) {
-    console.log(chalk.red('Scritp file exist!'))
+    console.log(Utils.chalk.red('Scritp file exist!'))
     return
   }
   let code
@@ -53,6 +49,6 @@ exports.handler = async function (argv) {
   }
   if (!Utils.fileExistsSyncCache(scriptFile)) {
     fs.writeFileSync(scriptFile, code)
-    console.log(chalk.green(`${scriptFile} created!`))
+    console.log(Utils.chalk.green(`${scriptFile} created!`))
   }
 }

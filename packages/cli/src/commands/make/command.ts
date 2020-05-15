@@ -1,13 +1,11 @@
 import fs from 'fs'
 import path from 'path'
-import chalk from 'chalk'
-import yargs from 'yargs'
-import { Utils } from '../..'
+import { Utils } from '@semo/core'
 
 export const command = 'command <name> [description]'
 export const desc = 'Generate a command template'
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('extend', {
     default: false,
     alias: 'E',
@@ -46,7 +44,7 @@ export const handler = function(argv: any) {
   }
 
   if (!commandDir) {
-    Utils.error(chalk.red('"commandDir" missing in config file!'))
+    Utils.error(Utils.chalk.red('"commandDir" missing in config file!'))
   }
 
   const commandFilePath = path.resolve(commandDir, `${argv.name}.${argv.typescript ? 'ts' : 'js'}`)
@@ -55,7 +53,7 @@ export const handler = function(argv: any) {
   Utils.fs.ensureDirSync(commandFileDir)
 
   if (Utils.fileExistsSyncCache(commandFilePath)) {
-    Utils.error(chalk.red('Command file exist!'))
+    Utils.error(Utils.chalk.red('Command file exist!'))
   }
 
   const name = argv.name.split('/').pop()
@@ -99,6 +97,6 @@ ${handerTpl}
   
   if (!Utils.fileExistsSyncCache(commandFilePath)) {
     fs.writeFileSync(commandFilePath, code)
-    console.log(chalk.green(`${commandFilePath} created!`))
+    console.log(Utils.chalk.green(`${commandFilePath} created!`))
   }
 }

@@ -1,9 +1,5 @@
-import chalk from 'chalk'
 import repl from 'repl'
-import _ from 'lodash'
-import yargs = require('yargs')
-
-import { Utils } from '..'
+import { Utils } from '@semo/core'
 
 function corepl(cli: repl.REPLServer) {
   var originalEval = cli.eval
@@ -26,7 +22,7 @@ function corepl(cli: repl.REPLServer) {
     }
 
     if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
-      console.log(chalk.yellow('Bye!'))
+      console.log(Utils.chalk.yellow('Bye!'))
       process.exit(0)
     }
 
@@ -80,7 +76,7 @@ async function openRepl(context: any): Promise<any> {
   corepl(r)
 }
 
-export const builder = function(yargs: yargs.Argv) {
+export const builder = function(yargs) {
   yargs.option('hook', {
     describe: 'if or not load all plugins repl hook'
   })
@@ -99,7 +95,7 @@ export const handler = async function(argv: any) {
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(
         'repl',
-        _.isBoolean(argv.hook)
+        Utils._.isBoolean(argv.hook)
           ? {}
           : {
               include: Utils.splitComma(argv.hook)

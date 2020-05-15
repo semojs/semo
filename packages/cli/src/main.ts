@@ -1,5 +1,8 @@
 #!/usr/bin/env node
 
-import { Utils } from '.'
+import { Utils } from '@semo/core'
+import path from 'path'
 
-Utils.launchDispatcher()
+Utils.launchDispatcher({
+  coreDir: path.resolve(__dirname, '../')
+})
