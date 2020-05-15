@@ -9,7 +9,8 @@
     "test": "exit 0",
     "lerna": "lerna",
     "prepublish": "lerna run prepublish",
-    "lerna:publish": "lerna publish from-git --yes"
+    "lerna:publish": "lerna publish from-git --yes",
+    "postversion": "git push && git push --tags"
   },
   "husky": {
     "hooks": {
