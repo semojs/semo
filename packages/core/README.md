@@ -1,3 +1,3 @@
 # @semo/core
 
-This is the core of Semo, privide core methods.
+This is the core of Semo, provide core methods for other command line tools.

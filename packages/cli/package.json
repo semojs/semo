@@ -39,7 +39,6 @@
     "watch": "tsc -w",
     "build": "tsc",
     "clean": "rimraf lib",
-    "postversion": "git push && git push --tags",
     "prepare": "npm run build",
     "docs:typedoc": "mkdir -p doc/.vuepress/public/typedoc && typedoc src/common",
     "docs:dev": "npm run docs:typedoc && vuepress dev doc",
