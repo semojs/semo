@@ -9,7 +9,7 @@ before_install:
   - curl -o- -L https://yarnpkg.com/install.sh | bash -s
   - export PATH="$HOME/.yarn/bin:$PATH"
 before_script:
-  - lerna exec -- yarn
+  # - lerna exec -- yarn
   - yarn run lerna run prepublish
 script:
   - yarn test
