@@ -6,9 +6,9 @@ export const aliases = 'st'
 export const desc = 'Show environment status info'
 
 export const builder = function(yargs) {
-  yargs.option('list-plugin', {
-    alias: ['plugin', 'P'],
-    describe: 'Show valid plugin list'
+  yargs.option('all', {
+    alias: ['A'],
+    describe: 'Show all information'
   })
 }
 
@@ -24,7 +24,7 @@ export const handler = async function(argv: any) {
       Utils.outputTable(columns, 'Core Information')
     }
 
-    if (argv.listPlugin) {
+    if (argv.all) {
 
       // plugin information
       const plugins = Utils.getAllPluginsMapping()
