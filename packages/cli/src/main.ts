@@ -4,5 +4,6 @@ import { Utils } from '@semo/core'
 import path from 'path'
 
 Utils.launchDispatcher({
-  coreDir: path.resolve(__dirname, '../')
+  coreDir: path.resolve(__dirname, '../'),
+  orgMode: true
 })

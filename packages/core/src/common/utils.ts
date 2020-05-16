@@ -407,20 +407,20 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       glob
         .sync(topPluginPattern, {
           noext:true,
-          cwd: path.resolve(__dirname, '../../../../')
+          cwd: path.resolve(argv.coreDir, argv.orgMode ? '../../' : '../')
         })
         .map(function(plugin): void {
-          plugins[plugin] = path.resolve(__dirname, '../../../../', plugin)
+          plugins[plugin] = path.resolve(argv.coreDir, argv.orgMode ? '../../' : '../', plugin)
         })
 
       // process core same directory npm plugins
       glob
         .sync(orgPluginPattern, {
           noext:true,
-          cwd: path.resolve(__dirname, '../../../../')
+          cwd: path.resolve(argv.coreDir, argv.orgMode ? '../../' : '../')
         })
         .map(function(plugin): void {
-          plugins[plugin] = path.resolve(__dirname, '../../../../', plugin)
+          plugins[plugin] = path.resolve(argv.coreDir, argv.orgMode ? '../../' : '../', plugin)
         })
     }
 
@@ -927,7 +927,8 @@ const launchDispatcher = (opts: any = {}) => {
   cache.set('argv', parsedArgv) // set argv first time
   let appConfig = getApplicationConfig({
     scriptName: opts.scriptName,
-    coreDir: opts.coreDir
+    coreDir: opts.coreDir,
+    orgMode: opts.orgMode
   })
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
