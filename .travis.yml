@@ -10,6 +10,7 @@ before_install:
   - export PATH="$HOME/.yarn/bin:$PATH"
 install:
   - lerna bootstrap --npm-client yarn
+  - git reset --hard HEAD
 before_script:
   # - lerna exec -- yarn
   - yarn run lerna run prepublish
