@@ -44,7 +44,7 @@ semo [命令]
 
 ```
 
-Please refer to the documentation to learn how to use Semo, because you need to do the integration by yourself to make Semo work for your project.
+Please refer to the documentation to learn how to use Semo, because you need to do the integration by yourself to make Semo work with your project.
 
 # Requirements
 
