@@ -407,20 +407,20 @@ const getAllPluginsMapping = function(): { [propName: string]: string } {
       glob
         .sync(topPluginPattern, {
           noext:true,
-          cwd: path.resolve(__dirname, '../../../')
+          cwd: path.resolve(__dirname, '../../../../')
         })
         .map(function(plugin): void {
-          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+          plugins[plugin] = path.resolve(__dirname, '../../../../', plugin)
         })
 
       // process core same directory npm plugins
       glob
         .sync(orgPluginPattern, {
           noext:true,
-          cwd: path.resolve(__dirname, '../../../')
+          cwd: path.resolve(__dirname, '../../../../')
         })
         .map(function(plugin): void {
-          plugins[plugin] = path.resolve(__dirname, '../../../', plugin)
+          plugins[plugin] = path.resolve(__dirname, '../../../../', plugin)
         })
     }
 
