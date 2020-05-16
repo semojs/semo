@@ -148,19 +148,20 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       return invokedHookCache[cacheKey]
     }
 
-    // Make Semo core supporting hook invocation
-    const plugins = Object.assign(
-      {},
-      {
-        [scriptName]: path.resolve(__dirname, '../../')
-      },
-      getAllPluginsMapping()
-    )
-
     // Make Application supporting hook invocation
     const appConfig = getApplicationConfig()
     const combinedConfig = getCombinedConfig()
-    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir) {
+
+    // Make Semo core supporting hook invocation
+    const plugins = argv.coreDir ? Object.assign(
+      {},
+      {
+        [scriptName]: path.resolve(argv.coreDir)
+      },
+      getAllPluginsMapping()
+    ) : getAllPluginsMapping()
+
+    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir && appConfig.applicationDir !== argv.coreDir) {
       plugins['application'] = appConfig.applicationDir
     }
 
@@ -540,35 +541,10 @@ const getApplicationConfig = function(opts: any = {}) {
     applicationConfig = {}
   }
 
-  applicationConfig.coreDir = path.resolve(__dirname, '../../')
   applicationConfig.applicationDir = opts.cwd ? opts.cwd : configPath ? path.dirname(configPath) : process.cwd()
 
-  // Not sure why core rc must be loaded, so disable a while to test
-  // // Load core rc
-  // if (fileExistsSyncCache(path.resolve(applicationConfig.coreDir, 'package.json'))) {
-  //   let packageInfo = require(path.resolve(applicationConfig.coreDir, 'package.json'))
-
-  //   if (packageInfo.name) {
-  //     applicationConfig.name = packageInfo.name
-  //   }
-
-  //   if (packageInfo.version) {
-  //     applicationConfig.version = packageInfo.version
-  //   }
-
-  //   // args > package > current rc
-  //   if (packageInfo.rc) {
-  //     packageInfo.rc = formatRcOptions(packageInfo.rc)
-  //     applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
-  //   }
-  //   if (packageInfo[scriptName]) {
-  //     packageInfo[scriptName] = formatRcOptions(packageInfo[scriptName])
-  //     applicationConfig = Object.assign({}, applicationConfig, packageInfo[scriptName])
-  //   }
-  // }
-
   // Inject some core config, hard coded
-  applicationConfig = Object.assign({}, applicationConfig, {
+  applicationConfig = Object.assign({}, applicationConfig, opts, {
     coreCommandDir: 'lib/commands'
   })
 
@@ -939,7 +915,6 @@ const replHistory = function (repl, file) {
  * Launch dispatcher
  */
 const launchDispatcher = (opts: any = {}) => {
-
   const pkg = loadCorePackageInfo()
   updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
     defer: false,
@@ -951,7 +926,8 @@ const launchDispatcher = (opts: any = {}) => {
   let parsedArgvOrigin = parsedArgv
   cache.set('argv', parsedArgv) // set argv first time
   let appConfig = getApplicationConfig({
-    scriptName: opts.scriptName
+    scriptName: opts.scriptName,
+    coreDir: opts.coreDir
   })
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
