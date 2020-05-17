@@ -926,7 +926,7 @@ const launchDispatcher = (opts: any = {}) => {
   let parsedArgvOrigin = parsedArgv
   cache.set('argv', parsedArgv) // set argv first time
   let appConfig = getApplicationConfig({
-    scriptName: opts.scriptName,
+    scriptName: opts.scriptName || 'semo',
     coreDir: opts.coreDir,
     orgMode: opts.orgMode
   })
