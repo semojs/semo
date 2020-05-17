@@ -16,10 +16,15 @@ export const hook_new_repo = () => {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   return scriptName === 'semo' ? {
-    semo_plugin_starter_typescript: {
-      repo: 'https://github.com/semojs/semo-plugin-starter-typescript.git',
+    semo_starter_plugin_typescript: {
+      repo: 'https://github.com/semojs/semo-starter-plugin-typescript.git',
       branch: 'master',
       alias: ['semo-plugin-starter-typescript', 'plugin-typescript']
+    },
+    semo_starter_application_simple_typescript: {
+      repo: 'https://github.com/semojs/semo-starter-application-simple-typescript.git',
+      branch: 'master',
+      alias: ['semo-starter-application-simple-typescript', 'application-simple']
     }
   } : {}
 }
