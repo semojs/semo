@@ -49,9 +49,13 @@ export const builder = function(yargs) {
     describe: 'add npm package to package.json devDependencies'
   })
 
-  yargs.option('init', {
-    alias: 'i',
+  yargs.option('init-semo', {
     describe: 'init new project'
+  })
+
+  yargs.option('init-git', {
+    default: true,
+    describe: 'init a git repo'
   })
 }
 
@@ -119,8 +123,11 @@ export const handler = async function(argv: any) {
         }
 
         Utils.exec(`echo "node_modules" > .gitignore`)
-        Utils.exec('git init')
-        Utils.success('New .git directory has been created!')
+
+        if (argv.initGit) {
+          Utils.exec('git init')
+          Utils.success('New .git directory has been created!')
+        }
       }
 
       if (argv.repo && argv.name) {
@@ -138,8 +145,10 @@ export const handler = async function(argv: any) {
             Utils.exec('npm install')
           }
   
-          Utils.exec('git init')
-          Utils.success('New .git directory has been created!')
+          if (argv.initGit) {
+            Utils.exec('git init')
+            Utils.success('New .git directory has been created!')
+          }
         } catch (e) {
           Utils.error(e.message)
         }
@@ -166,7 +175,7 @@ export const handler = async function(argv: any) {
     }
 
     // init basic structure
-    if (argv.init) {
+    if (argv.initSemo) {
       const initExtra = argv.yarn ? '--yarn' : ''
       if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
         Utils.exec(`${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`)
