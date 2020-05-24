@@ -964,6 +964,11 @@ const launchDispatcher = (opts: any = {}) => {
     // Give each command an ability to disable temporarily
     visit: (command) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
+
+      command.middlewares.unshift(async (argv) => {
+        argv.$input = await getStdin()
+      })
+
       if (command.middleware) {
         command.middlewares = command.middlewares.concat(command.middleware)
       }
