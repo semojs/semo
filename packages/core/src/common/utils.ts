@@ -988,7 +988,7 @@ const launchDispatcher = (opts: any = {}) => {
         config.pluginConfigs[plugin].commandDir &&
         fileExistsSyncCache(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir))
       ) {
-        yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir), opts)
+        yargs.commandDir(path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir), yargsOpts)
       }
     })
   }
@@ -999,7 +999,7 @@ const launchDispatcher = (opts: any = {}) => {
     appConfig.commandDir &&
     fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
   ) {
-    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), opts)
+    yargs.commandDir(path.resolve(process.cwd(), appConfig.commandDir), yargsOpts)
   }
 
   ;(async () => {
