@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.0">
     
     <meta name="description" content="帮你规范项目自定义命令行工具">
-    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.c3aff465.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/12.e2fbeee0.js" as="script"><link rel="prefetch" href="/assets/js/10.710546ca.js"><link rel="prefetch" href="/assets/js/11.839822a0.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.0540c3c3.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.6beb8b66.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.feb228c3.js">
+    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.25f6400d.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/12.d5bb8ffb.js" as="script"><link rel="prefetch" href="/assets/js/10.7c11d1ec.js"><link rel="prefetch" href="/assets/js/11.62d32727.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.0540c3c3.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.6beb8b66.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.feb228c3.js">
     <link rel="stylesheet" href="/assets/css/0.styles.ee42f28f.css">
   </head>
   <body>
@@ -37,22 +37,23 @@ $ semo help
 semo [命令]
 
 命令：
-  semo application                 Application command namespace.                                       [aliases: app]
-  semo hook                        Show hook info
-  semo init                        Init basic config file and directories                                 [aliases: i]
-  semo make &lt;component&gt;            Generate component sample code                               [aliases: generate, g]
-  semo new &lt;name&gt; [repo] [branch]  Create a new project from specific repo                                [aliases: n]
-  semo repl                        Play with REPL                                                         [aliases: r]
-  semo script [file]               Execute a script                                                     [aliases: scr]
-  semo shell                       Quick shell                                                           [aliases: sh]
-  semo status                      Show environment status info                                          [aliases: st]
-  semo completion                  Generate completion script
+  semo application                    Application command namespace                                      [aliases: app]
+  semo create &lt;name&gt; [repo] [branch]  Create a new project from specific repo                               [aliases: n]
+  semo generate &lt;component&gt;           Generate component sample code                                        [aliases: g]
+  semo hook                           Show hook info
+  semo init                           Init basic config file and directories                                [aliases: i]
+  semo plugin                         Plugin management tool                                                [aliases: p]
+  semo repl                           Play with REPL                                                        [aliases: r]
+  semo run &lt;plugin&gt; [command]         Run any plugin command directly
+  semo script [file]                  Execute a script                                                    [aliases: scr]
+  semo shell                          Quick shell                                                          [aliases: sh]
+  semo status                         Show environment status info                                         [aliases: st]
+  semo completion                     Generate completion script
 
-选项：
+Options:
   --version   显示版本号                                                                                          [布尔]
   -h, --help  显示帮助信息                                                                                        [布尔]
 
-Find more information at https://semo.js.org
 </code></pre></div><p>可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 <code>Semo</code> 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 <code>Semo</code> 的作用和价值。</p> <h2 id="项目集成"><a href="#项目集成" class="header-anchor">#</a> 项目集成</h2> <p><code>Semo</code> 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 <code>Semo</code>，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。</p> <div class="language- extra-class"><pre class="language-text"><code>cd YOUR_PROJECT
 npm install semo
 semo init
@@ -91,6 +92,6 @@ yarn add semo-plugin-xxx // 或
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.c3aff465.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/12.e2fbeee0.js" defer></script>
+    <script src="/assets/js/app.25f6400d.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/12.d5bb8ffb.js" defer></script>
   </body>
 </html>
