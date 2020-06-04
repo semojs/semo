@@ -952,9 +952,10 @@ const launchDispatcher = (opts: any = {}) => {
   let parsedArgvOrigin = parsedArgv
   cache.set('argv', parsedArgv) // set argv first time
   let appConfig = getApplicationConfig({
+    packageName: opts.packageName,
     scriptName: opts.scriptName || 'semo',
     coreDir: opts.coreDir,
-    orgMode: opts.orgMode,
+    orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
   })
   
   yargs.config(appConfig)
@@ -1023,6 +1024,7 @@ const launchDispatcher = (opts: any = {}) => {
   // Load application commands
   if (
     packageConfig.name !== scriptName &&
+    packageConfig.name !== opts.packageName &&
     appConfig.commandDir &&
     fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
   ) {
