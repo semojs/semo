@@ -27,7 +27,7 @@ $ semo help
 semo [命令]
 
 命令：
-  semo application                    Application command namespace.                                      [aliases: app]
+  semo application                    Application command namespace                                      [aliases: app]
   semo create <name> [repo] [branch]  Create a new project from specific repo                               [aliases: n]
   semo generate <component>           Generate component sample code                                        [aliases: g]
   semo hook                           Show hook info

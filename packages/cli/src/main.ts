@@ -4,6 +4,7 @@ import { Utils } from '@semo/core'
 import path from 'path'
 
 Utils.launchDispatcher({
+  packageName: '@semo/core',
   coreDir: path.resolve(__dirname, '../'),
-  orgMode: true // Means my package publish under npm orgnization scop
+  orgMode: true // Means my package publish under npm orgnization scope
 })

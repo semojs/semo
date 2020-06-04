@@ -3,7 +3,7 @@ import path from 'path'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'list'
-export const desc = 'list'
+export const desc = 'List all plugins'
 export const aliases = ['l', 'ls']
 // export const middleware = (argv) => {}
 
@@ -13,6 +13,14 @@ export const builder = function (yargs: any) {
 
 export const handler = async function (argv: any) {
   const plugins = Utils.getAllPluginsMapping()
+
+  if (Object.keys(plugins).length === 0) {
+    Utils.warn('No plugins found.')
+    Utils.info(`Use ${Utils.chalk.bold.green('plugin install')} sub command to install plugins.`)
+    // Utils.info(`Use ${Utils.chalk.bold.green('plugin list --remote')} to see available plugins.`)
+
+    return
+  }
 
   const headers = ['Plugin', 'Version', 'Location', 'Status'].map(item => Utils.chalk.green(item))
   const rows = [headers]

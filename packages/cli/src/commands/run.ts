@@ -8,7 +8,7 @@ export const desc = 'Run any plugin command directly'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  yargs.option('force', { default: false, describe: 'force update plugin cache' })
+  yargs.option('upgrade', { describe: 'force upgrade plugin cache' })
   yargs.option('scope', { default: '', describe: 'Set plugin npm scope' })
   // yargs.commandDir('run')
 }
@@ -26,7 +26,7 @@ export const handler = async function (argv: any) {
   let plugin
 
   try {
-    plugin = Utils.importPackage(argv.plugin, 'run-plugin-cache')
+    plugin = Utils.importPackage(argv.plugin, 'run-plugin-cache', true, argv.upgrade)
   } catch (e) {
     Utils.error('Plugin not found')
   }

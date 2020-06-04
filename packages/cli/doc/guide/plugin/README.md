@@ -7,7 +7,7 @@
 ### 第一步：根据模板，创建插件目录
 
 ```
-semo new semo-plugin-xyz --select=plugin
+semo create semo-plugin-xyz --select=plugin
 ```
 
 这里使用了内置的插件模板，按照之前配置管理说的，我们完全可以覆盖 `repo` 和 `branch` 选项，或者覆盖 `--select` 选项来省去每次都传默认参数。
@@ -26,7 +26,7 @@ semo hi
 需要注意的是，这个插件模板是基于 `Typescript`，因此你需要有一些 `Typescript` 基础，然后我们开发时建议开着 `yarn watch` 命令窗口，来实时编译，一边开发一边测试。
 
 ```
-semo make command xyz
+semo generate command xyz
 ```
 
 一般插件名和插件封装的命令会有一定的关联，这里我们添加一个 `xyz` 命令，当然你也可以在之前的 `hi` 命令上修改。真正掌握了插件开发之后，默认的 `hi` 命令就应该删掉了。
@@ -41,11 +41,11 @@ semo make command xyz
 semo hook
 ```
 
-### 例子1：实现 `hook_new_repo`
+### 例子1：实现 `hook_create_project_template`
 
 ```js
 // src/hooks/index.ts
-export const hook_new_repo = {
+export const hook_create_project_template = {
   demo_repo: {
     repo: 'demo_repo.git',
     branch: 'master',
@@ -54,7 +54,7 @@ export const hook_new_repo = {
 }
 ```
 
-通过这个钩子，让我们在 `semo new [PROJECT] --select` 命令执行时可以选择自定义的项目模板，只需要记住别名，不需要记住地址；另一个好处是不需要管每个工程师个人电脑上是如何设置全局 `--repo` 选项的，只需要安装了指定的插件，那大家就都可以用相同的项目别名初始化项目了。
+通过这个钩子，让我们在 `semo create [PROJECT] --select` 命令执行时可以选择自定义的项目模板，只需要记住别名，不需要记住地址；另一个好处是不需要管每个工程师个人电脑上是如何设置全局 `--repo` 选项的，只需要安装了指定的插件，那大家就都可以用相同的项目别名初始化项目了。
 
 ### 例子2：实现 `hook_repl`
 
@@ -172,3 +172,27 @@ npm publish
 ### 7. 积极维护
 
 任何 npm 包都有可能逐渐过时，或者有安全风险，需要我们积极维护，让插件发挥本来应该发挥的作用。
+
+## 插件的层级
+
+Semo 的插件系统会扫描多个位置，以增加灵活性，每个层级对应不同的目的和限制。
+
+* 通过 `npm install -g semo-plugin-xxx` 安装到全局环境，所以安装的插件命令是全局可用的，这是 `npm` 默认的全局安装包的方式。
+* 通过 `semo plugin install semo-plugin-xxx` 安装到家目录的 `.semo` 目录，安装的插件命令也是全局可用的，某些情况下当前用户没有权限用 npm 的方式安装到全局，可以用这种方式。
+* 通过 `npm install semo-plugin-xxx` 安装到当前项目目录，这种方式的插件命令只有在当前项目才会生效。
+
+为什么有的插件会需要安装到全局呢？因为插件不仅仅可以实现我们项目的业务需求，也可以实现我们的开发工具链，甚至可以实现一些非业务的小功能，只要有想象力，任何终端功能都可以来一波，可以是完全手写，也可以是对其他优秀项目进行封装和整合，这里的优秀项目不局限于语言和语言的扩展包仓库。
+
+## 直接运行远程插件
+
+这里只是一个错觉，其实还是要下载到本地，只不过下载目录是区分开的，这样就不会干扰你的实现，你可以任意测试你感兴趣的插件。
+
+```
+semo run semo-plugin-serve
+```
+
+这个插件的功能是提供简单的 HTTP 服务，首次运行是会下载，以后就会复用之前下载的插件，通过 --force 来进行强制更新。
+
+:::tip
+后续会开发清理插件缓存的功能
+:::

@@ -14,6 +14,6 @@ export const builder = function(yargs) {
 export const handler = function(argv) {
   if (argv._.length === 1) {
     Utils.info(`The ${Utils.chalk.bold.green('generate')} command is for generating code by code template.`)
-    Utils.info(`Use ${Utils.chalk.green('semo generate help')} to see how many generators provided.`)
+    Utils.info(`Use ${Utils.chalk.green('generate help')} to see supported generators.`)
   }
 }

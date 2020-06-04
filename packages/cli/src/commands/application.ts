@@ -1,7 +1,7 @@
 import { Utils } from '@semo/core'
 
 export const command = 'application'
-export const desc = 'Application command namespace.'
+export const desc = 'Application command namespace'
 export const aliases = 'app'
 
 export const builder = function(yargs) {
