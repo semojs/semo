@@ -20,9 +20,13 @@ import { dd, dump } from 'dumper.js'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
-import yParser from 'yargs-parser'
+import yargsInternal from 'yargs/yargs'
+
 import updateNotifier from 'update-notifier'
 import envinfo from 'envinfo'
+
+// @ts-ignore
+const yParser = yargsInternal.Parser
 
 const { hash } = objectHash({ sort: true })
 
@@ -950,9 +954,9 @@ const launchDispatcher = (opts: any = {}) => {
   let appConfig = getApplicationConfig({
     scriptName: opts.scriptName || 'semo',
     coreDir: opts.coreDir,
-    orgMode: opts.orgMode
+    orgMode: opts.orgMode,
   })
-
+  
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
   cache.set('argv', parsedArgv) // set argv second time
@@ -1323,7 +1327,7 @@ export {
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
-  /** [yargs-parser](https://www.npmjs.com/package/yargs-parser) reference */
+  /** [yargs-parser](https://www.npmjs.com/package/yargs) reference */
   yParser,
   /** [yargs-parser](https://www.npmjs.com/package/yaml) reference */
   yaml,

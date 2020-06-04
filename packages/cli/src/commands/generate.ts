@@ -5,9 +5,9 @@ export const desc = 'Generate component sample code'
 export const aliases = ['g']
 
 export const builder = function(yargs) {
-  const argv: any = yargs.argv || {}
+  const argv: any = Utils.getInternalCache().get('argv') || {}
   const scriptName = argv.scriptName || 'semo'
-  
+
   Utils.extendSubCommand('generate', scriptName, yargs, __dirname)
 }
 

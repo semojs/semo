@@ -5,5 +5,5 @@ import path from 'path'
 
 Utils.launchDispatcher({
   coreDir: path.resolve(__dirname, '../'),
-  orgMode: true
+  orgMode: true // Means my package publish under npm orgnization scop
 })

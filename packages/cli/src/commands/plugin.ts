@@ -7,10 +7,11 @@ export const aliases = 'p'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  const argv: any = yargs.argv || {}
+  const argv: any = Utils.getInternalCache().get('argv') || {}
   const scriptName = argv.scriptName || 'semo'
 
   Utils.extendSubCommand('plugin', scriptName, yargs, __dirname)
+  return yargs
 }
 
 export const handler = async function (argv: any) {
