@@ -27,24 +27,31 @@ $ semo help
 semo [命令]
 
 命令：
-  semo application                 Application command namespace.                                       [aliases: app]
-  semo hook                        Show hook info
-  semo init                        Init basic config file and directories                                 [aliases: i]
-  semo make <component>            Generate component sample code                               [aliases: generate, g]
-  semo new <name> [repo] [branch]  Create a new project from specific repo                                [aliases: n]
-  semo repl                        Play with REPL                                                         [aliases: r]
-  semo script [file]               Execute a script                                                     [aliases: scr]
-  semo shell                       Quick shell                                                           [aliases: sh]
-  semo status                      Show environment status info                                          [aliases: st]
-  semo completion                  Generate completion script
+  semo application                    Application command namespace.                                      [aliases: app]
+  semo create <name> [repo] [branch]  Create a new project from specific repo                               [aliases: n]
+  semo generate <component>           Generate component sample code                                        [aliases: g]
+  semo hook                           Show hook info
+  semo init                           Init basic config file and directories                                [aliases: i]
+  semo plugin                         Plugin management tool                                                [aliases: p]
+  semo repl                           Play with REPL                                                        [aliases: r]
+  semo run <plugin> [command]         Run any plugin command directly
+  semo script [file]                  Execute a script                                                    [aliases: scr]
+  semo shell                          Quick shell                                                          [aliases: sh]
+  semo status                         Show environment status info                                         [aliases: st]
+  semo completion                     Generate completion script
 
-选项：
+Options:
   --version   显示版本号                                                                                          [布尔]
   -h, --help  显示帮助信息                                                                                        [布尔]
 
 ```
 
 Please refer to the documentation to learn how to use Semo, because you need to do the integration by yourself to make Semo work with your project.
+
+# Documentation
+
+- https://semo.js.org
+- English version TBD.
 
 # Requirements
 

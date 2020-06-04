@@ -104,7 +104,8 @@ async function openRepl(context: any): Promise<any> {
 }
 
 export const builder = function(yargs: any) {
-  const argv: any = Utils.getInternalCache().get('argv')
+  const argv = yargs.argv
+  // const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv.scriptName || 'semo'
 
   // Trim leading @ and get org name if exist

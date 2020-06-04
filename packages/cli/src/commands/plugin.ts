@@ -2,8 +2,8 @@ import { Utils } from "@semo/core"
 
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'plugin'
-export const desc = 'plugin'
-// export const aliases = ''
+export const desc = 'Plugin management tool'
+export const aliases = 'p'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {

@@ -4,7 +4,7 @@ import path from 'path'
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'list'
 export const desc = 'list'
-// export const aliases = ''
+export const aliases = ['l', 'ls']
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
@@ -14,7 +14,7 @@ export const builder = function (yargs: any) {
 export const handler = async function (argv: any) {
   const plugins = Utils.getAllPluginsMapping()
 
-  const headers = ['Plugin', 'Version', 'Status'].map(item => Utils.chalk.green(item))
+  const headers = ['Plugin', 'Version', 'Location', 'Status'].map(item => Utils.chalk.green(item))
   const rows = [headers]
   Object.keys(plugins).forEach(plugin => {
     let pluginVersion
@@ -22,7 +22,15 @@ export const handler = async function (argv: any) {
       const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
       pluginVersion = pkgConfig.version || 'Unknown'
     }
-    rows.push([plugin, pluginVersion, 'Enabled'])
+
+    let pluginLocation
+    if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
+      pluginLocation = plugins[plugin].replace(process.env.HOME, '~')
+    } else {
+      pluginLocation = plugins[plugin]
+    }
+
+    rows.push([plugin, pluginVersion, pluginLocation, 'Enabled'])
   })
 
   Utils.outputTable(rows)

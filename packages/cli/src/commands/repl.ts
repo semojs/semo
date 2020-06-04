@@ -90,7 +90,9 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   argv.hook = argv.hook || false
   try {
-    let context = { Semo: Utils, argv, await: true }
+    let context = { Utils, Semo: Utils, argv, await: true, package: (name) => {
+      return Utils.importPackage(name, 'repl-package-cache', true, false)
+    } }
 
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(
