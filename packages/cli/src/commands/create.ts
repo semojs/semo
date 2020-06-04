@@ -60,11 +60,6 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
-  if (argv.yarn) {
-    Utils.info('yarn.lock found, use yarn for package management.')
-  }
-
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'
 
@@ -113,6 +108,10 @@ export const handler = async function(argv: any) {
       } else if (argv.empty || !argv.repo) {
         Utils.shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
         Utils.shell.cd(argv.name)
+        argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
+        if (argv.yarn) {
+          Utils.info('yarn.lock found, use yarn for package management.')
+        }
         if (argv.yarn) {
           if (argv.yes) {
             Utils.exec('yarn init -y')
@@ -142,6 +141,10 @@ export const handler = async function(argv: any) {
   
           Utils.success('Succeeded!')
           Utils.shell.cd(argv.name)
+          argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
+          if (argv.yarn) {
+            Utils.info('yarn.lock found, use yarn for package management.')
+          }
           Utils.shell.rm('-rf', path.resolve(process.cwd(), `.git`))
           Utils.success('.git directory removed!')
           if (argv.yarn) {
