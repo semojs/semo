@@ -318,6 +318,11 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
  * @param {String} basePath Often set to `__dirname`.
  */
 const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
+  let argv: any = cachedInstance.get('argv') || {}
+  if (yargs && _.isEmpty(argv)) {
+    getInternalCache().set('argv', yargs.argv)
+  }
+
   const plugins = getAllPluginsMapping()
   const config = getCombinedConfig()
   const opts = {
@@ -327,7 +332,9 @@ const extendSubCommand = function(command: string, module: string, yargs: yargs.
 
       command.middlewares.unshift(async (argv) => {
         argv.$input = await getStdin()
+        getInternalCache().set('argv', argv)
       })
+
 
       if (command.middleware) {
         command.middlewares = command.middlewares.concat(command.middleware)
@@ -935,6 +942,7 @@ const launchDispatcher = (opts: any = {}) => {
     coreDir: opts.coreDir,
     orgMode: opts.orgMode
   })
+
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
   cache.set('argv', parsedArgv) // set argv second time
@@ -972,8 +980,8 @@ const launchDispatcher = (opts: any = {}) => {
 
       command.middlewares.unshift(async (argv) => {
         argv.$input = await getStdin()
+        getInternalCache().set('argv', argv)
       })
-
       if (command.middleware) {
         command.middlewares = command.middlewares.concat(command.middleware)
       }

@@ -1,2 +1,3 @@
 hook: true
+typescript: true
 hookDir: lib/hooks
