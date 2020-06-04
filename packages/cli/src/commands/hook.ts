@@ -10,7 +10,7 @@ export const handler = async function(argv: any) {
     const hookInfo = await Utils.invokeHook('hook', {
       mode: 'group'
     })
-    const columns = [['Hook', 'Package', 'Description']]
+    const columns = [['Hook', 'Package', 'Description'].map(item => Utils.chalk.green(item))]
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {
         let realHook
@@ -23,7 +23,7 @@ export const handler = async function(argv: any) {
         columns.push([`hook_${realHook}`, k, hookInfo[k][hook]])
       })
     })
-    Utils.log(Utils.table(columns))
+    Utils.outputTable(columns)
   } catch (e) {
     Utils.error(e.stack)
   }

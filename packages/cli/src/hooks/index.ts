@@ -9,10 +9,10 @@ export const hook_hook = {
   hook: 'Hook triggered in hook command.',
   repl: 'Hook triggered in repl command.',
   status: 'Hook triggered in status command.',
-  new_repo: 'Hook triggered in new command.'
+  create_project_template: 'Hook triggered in create command.'
 }
 
-export const hook_new_repo = () => {
+export const hook_create_project_template = () => {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   return scriptName === 'semo' ? {

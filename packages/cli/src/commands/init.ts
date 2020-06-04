@@ -41,6 +41,11 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
+  argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
+  if (argv.yarn) {
+    Utils.info('yarn.lock found, use yarn for package management.')
+  }
+
   if (!['yml', 'json'].includes(argv.rcFormat)) {
     Utils.error('Invalid --rc-format option, only support yml and json.')
     return
