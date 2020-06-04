@@ -817,10 +817,20 @@ const parsePackageNames = function(input: string | string[]) {
  * @param {string} pkg package name
  * @param {array} paths search paths
  */
-const loadPackageInfo = function(pkg: string | undefined = undefined, paths = []): any {
+const getPackagePath = function(pkg: string | undefined = undefined, paths: any = []): any {
   const packagePath = findUp.sync('package.json', {
     cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd()
   })
+  return packagePath
+}
+
+/**
+ * Load any package's package.json
+ * @param {string} pkg package name
+ * @param {array} paths search paths
+ */
+const loadPackageInfo = function(pkg: string | undefined = undefined, paths: any = []): any {
+  const packagePath = getPackagePath(pkg, paths)
   return packagePath ? require(packagePath) : {}
 }
 
@@ -1158,36 +1168,124 @@ const launchDispatcher = (opts: any = {}) => {
   })()
 }
 
+const loadPluginRc = (name, location = '', home = true) => {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
+  downloadDir = location ? downloadDir + `/${location}` : downloadDir
+  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+  fs.ensureDirSync(downloadDir)
+  fs.ensureDirSync(downloadDirNodeModulesPath)
+
+  const packagePath = getPackagePath(name, [downloadDirNodeModulesPath])
+  const packageDir = path.dirname(packagePath)
+
+  const pluginSemoJsonRcPath = path.resolve(packageDir, `.${scriptName}rc.json`)
+  const pluginSemoYamlRcPath = path.resolve(packageDir, `.${scriptName}rc.yml`)
+  let pluginConfig
+  if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
+    try {
+      const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
+      pluginConfig = formatRcOptions(yaml.parse(rcFile))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Plugin ${name} .semorc.yml config load failed!`)
+      pluginConfig = {}
+    }
+  } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
+    try {
+      pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Plugin ${name} .semorc.json config load failed!`)
+      pluginConfig = {}
+    }
+  }
+
+  pluginConfig.dirname = packageDir
+
+  return pluginConfig
+}
+
+const resolvePackage = (name, location = '', home = true) => {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
+  downloadDir = location ? downloadDir + `/${location}` : downloadDir
+  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+  fs.ensureDirSync(downloadDir)
+  fs.ensureDirSync(downloadDirNodeModulesPath)
+
+  const pkgPath = require.resolve(name, { paths: [downloadDirNodeModulesPath] })
+  return pkgPath
+}
+
+const installPackage = (name, location = '', home = true) => {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
+  downloadDir = location ? downloadDir + `/${location}` : downloadDir
+  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+  fs.ensureDirSync(downloadDir)
+  fs.ensureDirSync(downloadDirNodeModulesPath)
+
+  exec(`npm install ${name} --prefix ${downloadDir}`)
+}
+
+const uninstallPackage = (name, location = '', home = true) => {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
+  downloadDir = location ? downloadDir + `/${location}` : downloadDir
+  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+  fs.ensureDirSync(downloadDir)
+  fs.ensureDirSync(downloadDirNodeModulesPath)
+
+  exec(`npm uninstall ${name} --prefix ${downloadDir}`)
+}
+
 /**
  * Import a package on runtime
  * 
- * Mostly used in REPL mode, if module not found in current context, 
- * it will be downloaded to ~/.semo/node_modules for global share.
+ * If not exist, will install first,
  * 
  * @param name Package name
+ * @param force Force install again
+ * @param location node_module directory by location
+ * @param home if true save modules to .semo, if false, save to cwd 
  */
-const importPackage = (name, force = false) => {
+const importPackage = (name, location = '', home = true, force = false) => {
   let pkg, pkgPath
 
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-  const Home = process.env.HOME + `/.${scriptName}`
-  const homeNodeModulesPath = path.resolve(Home, 'node_modules')
 
-  fs.ensureDirSync(Home)
-  fs.ensureDirSync(homeNodeModulesPath)
+  let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
+  downloadDir = location ? downloadDir + `/${location}` : downloadDir
+  const downloadDirNodeModulesPath = path.resolve(downloadDir, 'node_modules')
+
+  fs.ensureDirSync(downloadDir)
+  fs.ensureDirSync(downloadDirNodeModulesPath)
 
   if (force) {
-    exec(`npm install ${name} --prefix ${Home}`)
+    exec(`npm install ${name} --prefix ${downloadDir}`)
   }
 
   try {
-    pkgPath = require.resolve(name, { paths: [homeNodeModulesPath] })
+    pkgPath = require.resolve(name, { paths: [downloadDirNodeModulesPath] })    
     pkg = require(pkgPath)
   } catch (err) {
     if (err.code == 'MODULE_NOT_FOUND') {
-      exec(`npm install ${name} --prefix ${Home}`)
-      pkgPath = require.resolve(name, { paths: [homeNodeModulesPath] })
+      exec(`npm install ${name} --prefix ${downloadDir}`)
+      pkgPath = require.resolve(name, { paths: [downloadDirNodeModulesPath] })
       pkg = require(pkgPath)
     }
   }
@@ -1250,6 +1348,7 @@ export {
   getApplicationConfig,
   parsePackageNames,
   loadPackageInfo,
+  loadPluginRc,
   loadCorePackageInfo,
   exec,
   sleep,
@@ -1263,5 +1362,8 @@ export {
   formatRcOptions,
   replHistory,
   launchDispatcher,
-  importPackage
+  importPackage,
+  installPackage,
+  uninstallPackage,
+  resolvePackage
 }
