@@ -2,14 +2,14 @@ const host = process.env.NODE_ENV === 'development' ? 'localhost:8080' : 'semo.j
 
 module.exports = {
   title: 'Semo',
-  description: '帮你规范项目自定义命令行工具',
+  description: '一个Node项目命令行开发规范',
   base: '/',
   dest: '../../public',
   themeConfig: {
     repo: 'https://github.com/semojs/semo/packages/cli',
     repoLabel: 'Github',
     editLinks: true,
-    editLinkText: 'Help improve this page',
+    editLinkText: '帮助改进此页文档',
     docsDir: 'doc',
     displayAllHeaders: false,
     nav: [

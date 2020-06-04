@@ -16,7 +16,7 @@
 // ~/.semo/.semorc.json
 {
     "commandDefault": {
-        "new": {
+        "create": {
             "repo": "REPO_URL",
             "branch": "master"
         },
@@ -24,16 +24,16 @@
 }
 ```
 
-这里的意思是，`semo new` 命令基于模板项目初始化项目时本来应该是这么写的：
+这里的意思是，`semo create` 命令基于模板项目初始化项目时本来应该是这么写的：
 
 ```
-semo new PROJECT_NAME PROJECT_REPO_URL master -f
+semo create PROJECT_NAME PROJECT_REPO_URL master -f
 ```
 
 但是，因为有了默认配置，我们就可以省略两个参数，而变成：
 
 ```
-semo new PROJECT_NAME -f
+semo create PROJECT_NAME -f
 ```
 
 :::tip
@@ -119,7 +119,7 @@ const foo = Utils._.get(argv, 'semo-plugin-xxx.foo', argv.foo)
 }
 ```
 
-再比如：`semo init` 命令有个选项 `--typescript`，如果加了这个选项初始化目录结构，项目配置里也会有对应的覆盖配置，这样在执行 `semo make` 命令时，我们很多代码生成命令都是同时支持 `js` 和 `ts` 两个版本的，通过这个选项会让所有的代码自动生成时都是 `typescript` 风格。
+再比如：`semo init` 命令有个选项 `--typescript`，如果加了这个选项初始化目录结构，项目配置里也会有对应的覆盖配置，这样在执行 `semo generate` 命令时，我们很多代码生成命令都是同时支持 `js` 和 `ts` 两个版本的，通过这个选项会让所有的代码自动生成时都是 `typescript` 风格。
 
 ```json
 {

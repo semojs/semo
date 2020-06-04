@@ -58,14 +58,14 @@ semo init
 
 
 ```
-semo make command test
+semo generate command test
 semo test # 执行刚刚添加的命令
 ```
 
 **定义一个二级子命令**
 
 ```
-semo make command application/test --extend=semo
+semo generate command application/test --extend=semo
 semo application test
 ```
 
@@ -87,7 +87,7 @@ RUN echo 'alias app="npx semo app"' >> /home/node/.bashrc
 
 ```
 cd ~/.semo/node_modules # 这个目录下定义的插件会全局加载
-semo new semo-plugin-xxx --select=plugin # 选择插件模板
+semo create semo-plugin-xxx --select=plugin # 选择插件模板
 cd semo-plugin-xxx
 semo hi # # 默认里面有一个示例命令
 code . # 用 Vscode 开始开发

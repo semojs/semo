@@ -32,8 +32,8 @@ semo init [--typescript]
 ### 3. 添加一些命令或脚本
 
 ```
-semo make command xxx
-semo make script yyy
+semo generate command xxx
+semo generate script yyy
 ```
 
 ### 4. 定义项目自己的插件
@@ -41,7 +41,7 @@ semo make script yyy
 类似于渐进式开发的理念，一个插件如果只是自己的项目中使用，可以将插件作为项目代码的一部分，等优化成熟了，也很容易转成 npm 包的形式与其他项目分享。
 
 ```
-semo make plugin zzz
+semo generate plugin zzz
 ```
 
 ### 5. 将业务代码注入到 REPL 环境
