@@ -6,8 +6,8 @@
     <title>核心命令 | Semo</title>
     <meta name="generator" content="VuePress 1.5.0">
     
-    <meta name="description" content="帮你规范项目自定义命令行工具">
-    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.3641521f.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/10.7c11d1ec.js" as="script"><link rel="prefetch" href="/assets/js/11.62d32727.js"><link rel="prefetch" href="/assets/js/12.d5bb8ffb.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.0540c3c3.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.6beb8b66.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.feb228c3.js">
+    <meta name="description" content="一个Node项目命令行开发规范">
+    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.c0d7ec91.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/10.7c11d1ec.js" as="script"><link rel="prefetch" href="/assets/js/11.62d32727.js"><link rel="prefetch" href="/assets/js/12.8b0276e1.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.530dbca2.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.3c2f4e30.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.b76d1384.js">
     <link rel="stylesheet" href="/assets/css/0.styles.ee42f28f.css">
   </head>
   <body>
@@ -188,7 +188,7 @@ Plugin management tool
   hostname :  [MY_HOST]
   home     :  [MY_HOME]
   shell    :  [MY_SHELL]
-</code></pre></div><p>这里实现了一个 hook， <code>hook_status</code>，实现了这个 hook 的插件，可以在这里展示插件的相关信息，如果是业务项目实现了这个钩子，也可以在这里显示项目信息。</p> <h2 id="semo-completion"><a href="#semo-completion" class="header-anchor">#</a> <code>semo completion</code></h2> <p>这个命令的作用是输出一段 <code>Shell</code> 脚本，放到 <code>.bashrc</code> 或者 <code>.zshrc</code> 里，就能够获得子命令的自动补全效果。</p> <div class="custom-block warning"><p class="custom-block-title">WARNING</p> <p>由于 <code>Semo</code> 的性能有些差，所以这个自动补全虽然能用，但是体验极差，不建议使用。</p></div></div> <footer class="page-edit"><div class="edit-link"><a href="https://github.com/semojs/semo/packages/cli/edit/master/doc/guide/core-commands/README.md" target="_blank" rel="noopener noreferrer">Help improve this page</a> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></div> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+</code></pre></div><p>这里实现了一个 hook， <code>hook_status</code>，实现了这个 hook 的插件，可以在这里展示插件的相关信息，如果是业务项目实现了这个钩子，也可以在这里显示项目信息。</p> <h2 id="semo-completion"><a href="#semo-completion" class="header-anchor">#</a> <code>semo completion</code></h2> <p>这个命令的作用是输出一段 <code>Shell</code> 脚本，放到 <code>.bashrc</code> 或者 <code>.zshrc</code> 里，就能够获得子命令的自动补全效果。</p> <div class="custom-block warning"><p class="custom-block-title">WARNING</p> <p>由于 <code>Semo</code> 的性能有些差，所以这个自动补全虽然能用，但是体验极差，不建议使用。</p></div></div> <footer class="page-edit"><div class="edit-link"><a href="https://github.com/semojs/semo/packages/cli/edit/master/doc/guide/core-commands/README.md" target="_blank" rel="noopener noreferrer">帮助改进此页文档</a> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></div> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
       ←
       <a href="/guide/quickstart/" class="prev">
         快速上手
@@ -197,6 +197,6 @@ Plugin management tool
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.3641521f.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/10.7c11d1ec.js" defer></script>
+    <script src="/assets/js/app.c0d7ec91.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/10.7c11d1ec.js" defer></script>
   </body>
 </html>

@@ -6,8 +6,8 @@
     <title>快速上手 | Semo</title>
     <meta name="generator" content="VuePress 1.5.0">
     
-    <meta name="description" content="帮你规范项目自定义命令行工具">
-    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.3641521f.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/12.d5bb8ffb.js" as="script"><link rel="prefetch" href="/assets/js/10.7c11d1ec.js"><link rel="prefetch" href="/assets/js/11.62d32727.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.0540c3c3.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.6beb8b66.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.feb228c3.js">
+    <meta name="description" content="一个Node项目命令行开发规范">
+    <link rel="preload" href="/assets/css/0.styles.ee42f28f.css" as="style"><link rel="preload" href="/assets/js/app.c0d7ec91.js" as="script"><link rel="preload" href="/assets/js/2.c5d927dc.js" as="script"><link rel="preload" href="/assets/js/12.8b0276e1.js" as="script"><link rel="prefetch" href="/assets/js/10.7c11d1ec.js"><link rel="prefetch" href="/assets/js/11.62d32727.js"><link rel="prefetch" href="/assets/js/13.54667cf3.js"><link rel="prefetch" href="/assets/js/14.46df9bca.js"><link rel="prefetch" href="/assets/js/15.530dbca2.js"><link rel="prefetch" href="/assets/js/16.cc517018.js"><link rel="prefetch" href="/assets/js/17.c7be9147.js"><link rel="prefetch" href="/assets/js/3.ed5ab998.js"><link rel="prefetch" href="/assets/js/4.621b6b95.js"><link rel="prefetch" href="/assets/js/5.3c2f4e30.js"><link rel="prefetch" href="/assets/js/6.dcb05593.js"><link rel="prefetch" href="/assets/js/7.857d61bb.js"><link rel="prefetch" href="/assets/js/8.389c3998.js"><link rel="prefetch" href="/assets/js/9.b76d1384.js">
     <link rel="stylesheet" href="/assets/css/0.styles.ee42f28f.css">
   </head>
   <body>
@@ -57,15 +57,15 @@ Options:
 </code></pre></div><p>可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 <code>Semo</code> 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 <code>Semo</code> 的作用和价值。</p> <h2 id="项目集成"><a href="#项目集成" class="header-anchor">#</a> 项目集成</h2> <p><code>Semo</code> 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 <code>Semo</code>，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。</p> <div class="language- extra-class"><pre class="language-text"><code>cd YOUR_PROJECT
 npm install semo
 semo init
-</code></pre></div><p>业务项目集成 Semo 必须要将 <code>Semo</code> 添加为项目依赖，但是具体放到 <code>devDependencies</code> 还是 <code>dependencies</code>，需要根据实际情况而定，在业务项目使用 <code>Semo</code> 的时候有几种使用模式：</p> <ul><li>业务项目服务核心逻辑依赖 <code>Semo</code>，这种侵入式的，必须添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>Semo</code>，但是有使用 Semo 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>Semo</code>，也没有使用 <code>Semo</code> 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 <code>REPL</code> 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 <code>devDependencies</code>。</li></ul> <h3 id="添加一个项目命令"><a href="#添加一个项目命令" class="header-anchor">#</a> 添加一个项目命令</h3> <p>这里要考虑的是未来项目命令行工具的规划，如果很多，最好划分一下层次，另外，第一层子命令是一些核心命令，如果我们的命令都放到第一层，会容易混淆和误用。</p> <p><strong>定义一个一级子命令</strong></p> <div class="language- extra-class"><pre class="language-text"><code>semo make command test
+</code></pre></div><p>业务项目集成 Semo 必须要将 <code>Semo</code> 添加为项目依赖，但是具体放到 <code>devDependencies</code> 还是 <code>dependencies</code>，需要根据实际情况而定，在业务项目使用 <code>Semo</code> 的时候有几种使用模式：</p> <ul><li>业务项目服务核心逻辑依赖 <code>Semo</code>，这种侵入式的，必须添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>Semo</code>，但是有使用 Semo 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>Semo</code>，也没有使用 <code>Semo</code> 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 <code>REPL</code> 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 <code>devDependencies</code>。</li></ul> <h3 id="添加一个项目命令"><a href="#添加一个项目命令" class="header-anchor">#</a> 添加一个项目命令</h3> <p>这里要考虑的是未来项目命令行工具的规划，如果很多，最好划分一下层次，另外，第一层子命令是一些核心命令，如果我们的命令都放到第一层，会容易混淆和误用。</p> <p><strong>定义一个一级子命令</strong></p> <div class="language- extra-class"><pre class="language-text"><code>semo generate command test
 semo test # 执行刚刚添加的命令
-</code></pre></div><p><strong>定义一个二级子命令</strong></p> <div class="language- extra-class"><pre class="language-text"><code>semo make command application/test --extend=semo
+</code></pre></div><p><strong>定义一个二级子命令</strong></p> <div class="language- extra-class"><pre class="language-text"><code>semo generate command application/test --extend=semo
 semo application test
 </code></pre></div><p>为了让项目命令和核心以及插件定义的命令隔离，这里推荐的是将项目命令用上面第二种方式添加，同时如果是复杂的项目，还可以继续分层次。当然这样造成了一个问题就是命令的层次增加导致的记忆负担，以及要多输入很多前面的命令才能找到要执行的命令。所以一般，我们在项目里还需要为运行环境的 <code>bashrc</code> 增加几个 <code>alias</code>:</p> <p><strong>假设线上环境是用 Docker 容器部署的</strong></p> <div class="language- extra-class"><pre class="language-text"><code>// Dockerfile
 RUN echo 'alias semo=&quot;npx semo&quot;' &gt;&gt; /home/node/.bashrc
 RUN echo 'alias app=&quot;npx semo app&quot;' &gt;&gt; /home/node/.bashrc
 </code></pre></div><p>这面的命令演示了缩减命令长度的方法，在实际使用过程中，如果命令分层特别深，这里可以多定义一些 <code>alias</code>。</p> <h2 id="开发插件"><a href="#开发插件" class="header-anchor">#</a> 开发插件</h2> <p>如果不是在项目中使用 <code>Semo</code>，仅仅是要快速实现一些脚本命令，帮助自己提高工作效率，这时你可以使用 <code>Semo</code> 快速开始。</p> <div class="language- extra-class"><pre class="language-text"><code>cd ~/.semo/node_modules # 这个目录下定义的插件会全局加载
-semo new semo-plugin-xxx --select=plugin # 选择插件模板
+semo create semo-plugin-xxx --select=plugin # 选择插件模板
 cd semo-plugin-xxx
 semo hi # # 默认里面有一个示例命令
 code . # 用 Vscode 开始开发
@@ -83,7 +83,7 @@ yarn add semo-plugin-xxx // 或
 </code></pre></div><p>利用 <code>Semo</code> 提供的钩子机制，也可以使用另一种风格来使用插件提供的业务逻辑支持。</p> <div class="language-js extra-class"><pre class="language-js"><code><span class="token keyword">import</span> <span class="token punctuation">{</span> Utils <span class="token punctuation">}</span> <span class="token keyword">from</span> <span class="token string">'semo'</span>
 
 <span class="token keyword">const</span> <span class="token punctuation">{</span> xxx <span class="token punctuation">}</span> <span class="token operator">=</span> <span class="token keyword">await</span> Utils<span class="token punctuation">.</span><span class="token function">invokeHook</span><span class="token punctuation">(</span><span class="token string">'components'</span><span class="token punctuation">)</span>
-</code></pre></div><p>可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。</p></div> <footer class="page-edit"><div class="edit-link"><a href="https://github.com/semojs/semo/packages/cli/edit/master/doc/guide/quickstart/README.md" target="_blank" rel="noopener noreferrer">Help improve this page</a> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></div> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
+</code></pre></div><p>可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。</p></div> <footer class="page-edit"><div class="edit-link"><a href="https://github.com/semojs/semo/packages/cli/edit/master/doc/guide/quickstart/README.md" target="_blank" rel="noopener noreferrer">帮助改进此页文档</a> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></div> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
       ←
       <a href="/guide/" class="prev router-link-active">
         介绍
@@ -92,6 +92,6 @@ yarn add semo-plugin-xxx // 或
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.3641521f.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/12.d5bb8ffb.js" defer></script>
+    <script src="/assets/js/app.c0d7ec91.js" defer></script><script src="/assets/js/2.c5d927dc.js" defer></script><script src="/assets/js/12.8b0276e1.js" defer></script>
   </body>
 </html>
