@@ -16,7 +16,7 @@ function cutstr(str, len) {
   let str_len = 0;
   let str_cut = new String();
   str_len = str.length;
-  for (var i = 0; i < str_len; i++) {
+  for (let i = 0; i < str_len; i++) {
     let a = str.charAt(i);
     str_length++;
     if (escape(a).length > 4) {
