@@ -11,6 +11,30 @@ export const builder = function (yargs: any) {
   yargs.option('remote', { describe: 'List remote plugins' })
 }
 
+function cutstr(str, len) {
+  let str_length = 0;
+  let str_len = 0;
+  let str_cut = new String();
+  str_len = str.length;
+  for (var i = 0; i < str_len; i++) {
+    let a = str.charAt(i);
+    str_length++;
+    if (escape(a).length > 4) {
+      //中文字符的长度经编码之后大于4  
+      str_length++;
+    }
+    str_cut = str_cut.concat(a);
+    if (str_length >= len) {
+      str_cut = str_cut.concat("...");
+      return str_cut;
+    }
+  }
+  //如果给定字符串小于指定长度，则返回源字符串；  
+  if (str_length < len) {
+    return str;
+  }
+}
+
 export const handler = async function (argv: any) {
   const plugins = Utils.getAllPluginsMapping(argv)
   if (Object.keys(plugins).length === 0) {
@@ -30,21 +54,21 @@ export const handler = async function (argv: any) {
         const pkgConfig: any = require(path.resolve(plugins[plugin], 'package.json'))
         pluginVersion = pkgConfig.version || 'Unknown'
       }
-  
+
       let pluginLocation
       if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
         pluginLocation = plugins[plugin].replace(process.env.HOME, '~')
       } else {
         pluginLocation = plugins[plugin]
       }
-  
+
       rows.push([plugin, pluginVersion, pluginLocation, 'Installed'])
     })
     Utils.outputTable(rows)
   } else {
     Utils.info('Remote plugins list may be unavailable temporarily...')
     console.log()
-    
+
     const headers = ['Plugin', 'Version', 'Description', 'Status'].map(item => Utils.chalk.green(item))
     const rows = [headers]
 
@@ -53,12 +77,10 @@ export const handler = async function (argv: any) {
     results.length > 0 && results.sort((a, b) => a.name.localeCompare(b.name))
     for (let item of results) {
       rows.push([
-        item.name, 
-        item.version, 
-        item.description.length > 30 
-          ? item.description.substring(0, 30) + '...' 
-          : item.description, 
-        plugins[item.name] ? 'Installed' : 'Not installed' ]
+        item.name,
+        item.version,
+        cutstr(item.description, 50),
+        plugins[item.name] ? 'Installed' : 'Not installed']
       )
     }
     Utils.outputTable(rows)
