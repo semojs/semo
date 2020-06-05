@@ -2,7 +2,7 @@ import path from 'path'
 import { Utils } from '@semo/core'
 
 export const command = 'create <name> [repo] [branch]'
-export const aliases = 'n'
+export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'
 
 export const builder = function(yargs) {

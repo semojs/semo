@@ -3,6 +3,7 @@ import { Utils } from '@semo/core'
 
 export const command = 'plugin <name>'
 export const desc = 'Generate a plugin structure'
+export const aliases = ['plug']
 
 export const builder = function(yargs) {
   yargs.option('force', {

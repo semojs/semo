@@ -4,6 +4,7 @@ import { Utils } from '@semo/core'
 
 export const command = 'command <name> [description]'
 export const desc = 'Generate a command template'
+export const aliases = ['com']
 
 export const builder = function(yargs) {
   yargs.option('extend', {
@@ -29,7 +30,7 @@ export const handler = function(argv: any) {
   let commandDir: string
   if (argv.extend) {
     let extendName = argv.extend
-    if (extendName !== scriptName && extendName.indexOf(`${scriptName}-plugin-`) !== 0) {
+    if (extendName !== scriptName && extendName.indexOf(`${scriptName}-plugin-`) === -1) {
       extendName = `${scriptName}-plugin-${extendName}`
     }
     commandDir = `${argv.extendMakeDir || argv.extendDir}/${extendName}/src/commands`

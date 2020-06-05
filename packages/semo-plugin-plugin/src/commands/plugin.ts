@@ -7,16 +7,12 @@ export const aliases = 'p'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  const argv: any = Utils.getInternalCache().get('argv') || {}
-  const scriptName = argv.scriptName || 'semo'
-
-  Utils.extendSubCommand('plugin', scriptName, yargs, __dirname)
-  return yargs
+  Utils.extendSubCommand('plugin', 'semo-plugin-plugin', yargs, __dirname)
 }
 
 export const handler = async function (argv: any) {
   if (argv._.length === 1) {
     Utils.info(`The ${Utils.chalk.bold.green('plugin')} command is for managing semo plugins.`)
-    Utils.info(`Use ${Utils.chalk.green('semo plugin help')} to see it's sub commands`)
+    Utils.info(`Use ${Utils.chalk.green('plugin help')} to see it's sub commands`)
   }
 }

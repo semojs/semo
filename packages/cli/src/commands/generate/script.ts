@@ -4,6 +4,7 @@ import { Utils } from '@semo/core'
 
 export const command = 'script <name>'
 export const desc = 'Generate a script file'
+export const aliases = ['scr']
 
 export const builder = function(yargs) {
   yargs.option('typescript', {

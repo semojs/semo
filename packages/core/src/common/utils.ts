@@ -321,10 +321,10 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function(command: string, module: string, yargs: yargs.Argv, basePath: string): void {
+const extendSubCommand = function(command: string, module: string, yargs: any, basePath: string): void {
   let argv: any = cachedInstance.get('argv') || {}
-  if (yargs && _.isEmpty(argv)) {
-    getInternalCache().set('argv', yargs.argv)
+  if (_.isEmpty(argv)) {
+    getInternalCache().set('argv', yargs.getOptions().configObjects[0])
   }
 
   const plugins = getAllPluginsMapping()
