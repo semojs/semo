@@ -1172,6 +1172,9 @@ const launchDispatcher = (opts: any = {}) => {
         .alias('h', 'help')
         .exitProcess(false)
         .recommendCommands()
+        .parserConfiguration({
+          'sort-commands': true
+        })
         .wrap(Math.min(120, yargs.terminalWidth())).argv
 
       if (!parsedArgv.getYargsCompletions) {
