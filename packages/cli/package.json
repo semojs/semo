@@ -46,13 +46,6 @@
     "docs:dev": "npm run docs:typedoc && vuepress dev doc",
     "docs:build": "npm run docs:typedoc && vuepress build doc"
   },
-  "rc": {
-    "commandDir": "lib/commands",
-    "commandMakeDir": "src/commands",
-    "hookDir": "lib/hooks",
-    "pluginDir": "lib/plugins",
-    "pluginMakeDir": "src/plugins"
-  },
   "engines": {
     "node": ">=8.10.0"
   }
