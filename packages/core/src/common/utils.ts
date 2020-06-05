@@ -324,6 +324,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 const extendSubCommand = function(command: string, module: string, yargs: any, basePath: string): void {
   let argv: any = cachedInstance.get('argv') || {}
   if (_.isEmpty(argv)) {
+    argv = yargs.getOptions().configObjects[0]
     getInternalCache().set('argv', yargs.getOptions().configObjects[0])
   }
 
