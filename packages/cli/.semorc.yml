@@ -6,3 +6,4 @@ extendDir: lib/extends
 extendMakeDir: src/extends
 hookDir: lib/hooks
 hookMakeDir: src/hooks
+pluginDir: ../

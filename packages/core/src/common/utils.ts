@@ -499,6 +499,16 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
           .map(function(plugin) {
             plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
           })
+
+        // process local npm scope plugins
+        glob
+          .sync(orgPluginPattern, {
+            noext:true,
+            cwd: path.resolve(process.cwd(), pluginDir)
+          })
+          .map(function(plugin) {
+            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          })
       }
     })
    
