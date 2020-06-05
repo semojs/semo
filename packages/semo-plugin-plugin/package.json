@@ -1,6 +1,16 @@
 {
   "name": "semo-plugin-plugin",
   "version": "0.3.1",
+  "description": "A semo plugin to provide plugin management.",
+  "keywords": [
+    "cli",
+    "command",
+    "semo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/semojs/semo"
+  },
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
