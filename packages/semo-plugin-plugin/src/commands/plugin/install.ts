@@ -1,7 +1,7 @@
 import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
-export const command = 'install <pluginName>'
+export const command = 'install <plugin>'
 export const desc = 'Install plugin'
 export const aliases = 'i'
 // export const middleware = (argv) => {}
