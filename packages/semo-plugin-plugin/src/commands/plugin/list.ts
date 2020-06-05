@@ -12,8 +12,7 @@ export const builder = function (yargs: any) {
 }
 
 export const handler = async function (argv: any) {
-  const plugins = Utils.getAllPluginsMapping()
-
+  const plugins = Utils.getAllPluginsMapping(argv)
   if (Object.keys(plugins).length === 0) {
     Utils.warn('No plugins found.')
     Utils.info(`Use ${Utils.chalk.bold.green('plugin install')} sub command to install plugins.`)

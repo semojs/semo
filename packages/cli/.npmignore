@@ -12,5 +12,6 @@ typedoc.json
 .eslintignore
 /lib/**/*.map
 /lib/examples
+/lib.localBin.js
 /public
 /doc

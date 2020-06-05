@@ -4,6 +4,11 @@
 
 > alias: `app`
 
+:::tip
+这条命令已经转移到 `semo-plugin-application` 插件
+:::
+
+
 默认这个命令没有任何功能，存在的意思是跟业务项目建立一个约定，建议业务项目添加的命令都写成这个命令的子命令。而业务项目之所以能为这个命令添加子命令是利用了 `Semo` 的命令扩展机制。
 
 ```bash
@@ -257,6 +262,10 @@ semo generate command generate/test --extend=semo
 
 > alias: p
 
+:::tip
+这条命令已经转移到 `semo-plugin-plugin` 插件
+:::
+
 这个命令用于安装在家目录的全局插件，也可以用于优化当前项目的 semo 执行效率。
 
 ```
@@ -367,6 +376,10 @@ semo run serve --upgrade
 
 > alias: `scr`
 
+:::tip
+这条命令已经转移到 `semo-plugin-script` 插件
+:::
+
 很多时候我们都需要跑一些脚本，这些脚本是在项目服务之外的，需要我们主动触发，可能是做数据迁移，可能是数据导出，可能是数据批量修改，也可能是执行业务逻辑，比如发邮件，发短信，发通知等等。在遇到这样的需求的时候，我们都需要写脚本，但是我们会遇到几个问题：
 
 - 放哪里
@@ -408,6 +421,10 @@ export const handler = async function (argv: any) {
 ## `semo shell`
 
 > alias: `sh`
+
+:::tip
+这条命令已经转移到 `semo-plugin-shell` 插件
+:::
 
 这个命令是个很简单的命令，目的是不用每次敲命令都输入前面的 `semo`，例如：
 

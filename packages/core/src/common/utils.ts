@@ -153,8 +153,8 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
     }
 
     // Make Application supporting hook invocation
-    const appConfig = getApplicationConfig()
-    const combinedConfig = getCombinedConfig()
+    const appConfig = getApplicationConfig(argv)
+    const combinedConfig = getCombinedConfig(argv)
 
     // Make Semo core supporting hook invocation
     const plugins = argv.coreDir ? Object.assign(
@@ -162,8 +162,8 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       {
         [scriptName]: path.resolve(argv.coreDir)
       },
-      getAllPluginsMapping()
-    ) : getAllPluginsMapping()
+      getAllPluginsMapping(argv)
+    ) : getAllPluginsMapping(argv)
 
     if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir && appConfig.applicationDir !== argv.coreDir) {
       plugins['application'] = appConfig.applicationDir
@@ -231,8 +231,8 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 
         switch (plugin) {
           case scriptName:
-            let corePackageInfo = loadCorePackageInfo()
-            hookDir = corePackageInfo.rc && corePackageInfo.rc.hookDir ? corePackageInfo.rc.hookDir : ''
+            let coreRcInfo = parseRcFile(plugin, plugins[plugin])
+            hookDir = coreRcInfo && coreRcInfo.hookDir ? coreRcInfo.hookDir : ''
           break
 
           case 'application':
@@ -327,8 +327,8 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
     getInternalCache().set('argv', yargs.getOptions().configObjects[0])
   }
 
-  const plugins = getAllPluginsMapping()
-  const config = getCombinedConfig()
+  const plugins = getAllPluginsMapping(argv)
+  const config = getCombinedConfig(argv)
   const opts = {
     // Give each command an ability to disable temporarily
     visit: (command) => {
@@ -384,8 +384,8 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
  * Same name plugins would be overriden orderly.
  * This function also influence final valid commands and configs.
  */
-const getAllPluginsMapping = function(): { [propName: string]: string } {
-  let argv: any = cachedInstance.get('argv') || {}
+const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: string } {
+  argv = argv || cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
 
   if (_.isEmpty(plugins)) {
@@ -625,40 +625,47 @@ const formatRcOptions = (opts) => {
   return opts
 }
 
+const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
+  argv = argv || cachedInstance.get('argv') || {}
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  // .semorc.yml > .semorc.json
+  const pluginSemoJsonRcPath = path.resolve(pluginPath, `.${scriptName}rc.json`)
+  const pluginSemoYamlRcPath = path.resolve(pluginPath, `.${scriptName}rc.yml`)
+  let pluginConfig
+  if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
+    try {
+      const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
+      pluginConfig = formatRcOptions(yaml.parse(rcFile))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Plugin ${plugin} .semorc.yml config load failed!`)
+      pluginConfig = {}
+    }
+  } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
+    try {
+      pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Plugin ${plugin} .semorc.json config load failed!`)
+      pluginConfig = {}
+    }
+  }
+
+  return pluginConfig
+}
+
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } {
-  let argv: any = cachedInstance.get('argv') || {}
-  let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
+const getCombinedConfig = function(argv: any = {}): { [propName: string]: any } {
   let combinedConfig: { [propName: string]: any } = cachedInstance.get('combinedConfig') || {}
   let pluginConfigs: { [propName: string]: any } = {}
 
   if (_.isEmpty(combinedConfig)) {
-    const plugins = getAllPluginsMapping()
+    const plugins = getAllPluginsMapping(argv)
     Object.keys(plugins).map(plugin => {
-      // .semorc.yml > .semorc.json
-      const pluginSemoJsonRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.json`)
-      const pluginSemoYamlRcPath = path.resolve(plugins[plugin], `.${scriptName}rc.yml`)
-      let pluginConfig
-      if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
-        try {
-          const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
-          pluginConfig = formatRcOptions(yaml.parse(rcFile))
-        } catch (e) {
-          debugCore('load rc:', e)
-          warn(`Plugin ${plugin} .semorc.yml config load failed!`)
-          pluginConfig = {}
-        }
-      } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
-        try {
-          pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
-        } catch (e) {
-          debugCore('load rc:', e)
-          warn(`Plugin ${plugin} .semorc.json config load failed!`)
-          pluginConfig = {}
-        }
-      }
+      let pluginConfig = parseRcFile(plugin, plugins[plugin], argv)
 
       let pluginConfigPick = _.pick(pluginConfig, ['commandDir', 'extendDir', 'hookDir', plugin])
       combinedConfig = _.merge(combinedConfig, pluginConfigPick)
@@ -666,8 +673,6 @@ const getCombinedConfig = function(opts: any = {}): { [propName: string]: any } 
 
     })
 
-    // const configPath = findUp.sync([`.${scriptName}rc.json`])
-    // let rcConfig = configPath ? formatRcOptions(require(configPath)) : {}
     const applicatonConfig = getApplicationConfig()
     combinedConfig = _.merge(combinedConfig, applicatonConfig)
     combinedConfig.pluginConfigs = pluginConfigs
@@ -963,10 +968,8 @@ const launchDispatcher = (opts: any = {}) => {
   cache.set('argv', parsedArgv) // set argv second time
   cache.set('yargs', yargs)
 
-  const plugins = getAllPluginsMapping()
-  const config = getCombinedConfig({
-    scriptName: opts.scriptName
-  })
+  const plugins = getAllPluginsMapping(parsedArgv)
+  const config = getCombinedConfig(parsedArgv)
   const packageConfig = loadPackageInfo()
 
   if (!parsedArgv.scriptName) {
@@ -1188,28 +1191,7 @@ const loadPluginRc = (name, location = '', home = true) => {
   const packagePath = getPackagePath(name, [downloadDirNodeModulesPath])
   const packageDir = path.dirname(packagePath)
 
-  const pluginSemoJsonRcPath = path.resolve(packageDir, `.${scriptName}rc.json`)
-  const pluginSemoYamlRcPath = path.resolve(packageDir, `.${scriptName}rc.yml`)
-  let pluginConfig
-  if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
-    try {
-      const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
-      pluginConfig = formatRcOptions(yaml.parse(rcFile))
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Plugin ${name} .semorc.yml config load failed!`)
-      pluginConfig = {}
-    }
-  } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
-    try {
-      pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Plugin ${name} .semorc.json config load failed!`)
-      pluginConfig = {}
-    }
-  }
-
+  let pluginConfig = parseRcFile(name, packageDir, argv)
   pluginConfig.dirname = packageDir
 
   return pluginConfig
