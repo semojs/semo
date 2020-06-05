@@ -1,5 +1,5 @@
 {
-  "name": "semo-plugin-applicationt",
+  "name": "semo-plugin-application",
   "version": "0.3.7",
   "description": "A semo plugin to provide project commands convension.",
   "keywords": [
