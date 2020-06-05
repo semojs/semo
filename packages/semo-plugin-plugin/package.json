@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-plugin",
-  "version": "0.3.7",
+  "version": "0.3.9",
   "description": "A semo plugin to provide plugin management.",
   "keywords": [
     "cli",
@@ -34,7 +34,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^0.3.7"
+    "@semo/core": "^0.3.9"
   },
   "publishConfig": {
     "access": "public"
