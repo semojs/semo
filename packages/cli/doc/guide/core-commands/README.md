@@ -330,7 +330,7 @@ export const hook_repl = () => {
 在具体的实践中，我们把数据库，缓存，OSS，Consul, ElasticSearch 等等多种公司的基础设施注入了进来，写成插件，使得我们更容易的直接访问基础设施。
 :::
 
-## `semo run <plugin> [command]`
+## `semo run <PLUGIN> [COMMAND]`
 
 这个命令可以像 yarn create 一样，实现直接执行远程插件包里的命令的效果
 
@@ -363,14 +363,16 @@ semo run serve --public-dir=.
 如果你在 npm 的 semo 插件包也是在 scope 下的，在用 run 时需要指定 scope
 
 ```
-semo run xxx --scope yyy
+semo run xxx --SCOPE yyy
 ```
 
 `run` 命令运行的插件肯定是缓存到本地了，只不过不在全局插件目录 `.semo/node_modules`, 而是在 `.semo/run_plugin_cache/node_modules` 目录，默认如果存在就会用缓存里的插件，如果想更新需要用参数 --upgrade
 
 ```
-semo run serve --upgrade
+semo run serve --UPGRADE
 ```
+
+你可能已经发现这个命令的所有参数和选项都是大写的，这是为了减少与其他插件的冲突，我们最好约定所有的插件的参数和选项都用小写。
 
 ## `semo script [file]`
 
