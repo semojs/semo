@@ -127,6 +127,7 @@ export const builder = function(yargs: any) {
 export const handler = async function(argv) {
   const scriptName = argv.scriptName || 'semo'
   argv.prefix = argv.prefix || scriptName
+  argv.prompt = argv.prompt || '$ '
 
   try {
     let context = { argv }

@@ -1408,8 +1408,12 @@ const importPackage = (name, location = '', home = true, force = false) => {
   fs.ensureDirSync(downloadDir)
   fs.ensureDirSync(downloadDirNodeModulesPath)
 
+  if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
+    exec(`cd ${downloadDir} && npm init -y`)
+  }
+
   if (force) {
-    exec(`npm install ${name} --prefix ${downloadDir}`)
+    exec(`npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
   }
 
   try {
