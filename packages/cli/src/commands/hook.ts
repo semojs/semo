@@ -2,7 +2,7 @@ import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'hook'
-export const desc = 'Hook '
+export const desc = 'Hook management'
 // export const aliases = ''
 // export const middleware = (argv) => {}
 

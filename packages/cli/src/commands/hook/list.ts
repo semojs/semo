@@ -2,6 +2,7 @@ import { Utils } from '@semo/core'
 
 export const command = 'list'
 export const desc = 'Show hook list'
+export const aliases = ['ls']
 
 export const builder = function(yargs) {}
 
