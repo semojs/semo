@@ -80,8 +80,9 @@ function corepl(cli: repl.REPLServer) {
 
 async function openRepl(context: any): Promise<any> {
   const { argv } = context
+  const prefix = argv.prefix || ''
   const r: repl.REPLServer = repl.start({
-    prompt: argv.prompt,
+    prompt: `${prefix}:${argv.prompt}`,
     completer: () => {
       // TODO: implments auto completion in REPL by Shell suggestions.
       // For now, it is just for disabling Node completion.
@@ -104,20 +105,16 @@ async function openRepl(context: any): Promise<any> {
 }
 
 export const builder = function(yargs: any) {
-  const argv = yargs.argv
-  // const argv: any = Utils.getInternalCache().get('argv')
+  const argv: any = yargs.getOptions().configObjects[0]
   const scriptName = argv.scriptName || 'semo'
 
-  // Trim leading @ and get org name if exist
-  const pkgPureName = Utils._.trimStart(scriptName, '@').split('/')[0]
-  
   yargs.option('prompt', {
-    default: '$ ',
+    default: `$ `,
     describe: 'Prompt for input.'
   })
 
   yargs.option('prefix', {
-    default: pkgPureName,
+    default: scriptName,
     describe: 'Make input command a little bit faster.'
   })
 
@@ -128,6 +125,9 @@ export const builder = function(yargs: any) {
 }
 
 export const handler = async function(argv) {
+  const scriptName = argv.scriptName || 'semo'
+  argv.prefix = argv.prefix || scriptName
+
   try {
     let context = { argv }
     return await openRepl(context)
