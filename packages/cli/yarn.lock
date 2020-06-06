@@ -853,10 +853,10 @@
   resolved "https://registry.yarnpkg.com/@nodelib/fs.stat/-/fs.stat-1.1.3.tgz#2b5a3ab3f918cca48a8c754c08168e3f03eba61b"
   integrity sha512-shAmDyaQC4H92APFoIaVDHCx5bStIocgvbwQyxPRrbUY20V1EYTbSDchWbuwlMG3V17cprZhA6+78JfB+3DTPw==
 
-"@semo/core@^0.3.3":
-  version "0.3.3"
-  resolved "https://registry.yarnpkg.com/@semo/core/-/core-0.3.3.tgz#b3f06b94e80b4ad2ffb6ef6d26e288a54714d855"
-  integrity sha512-lwXsYHu6MYJ71j9Lmu5spLja7+0cIwKgj9X6wphRkq2RtRppBmRgy3vVMTOfgnKm6NNVu9bns0UmhoM0/ljVFg==
+"@semo/core@^0.5.0":
+  version "0.5.0"
+  resolved "https://registry.yarnpkg.com/@semo/core/-/core-0.5.0.tgz#9be79c8068b30d300bde838ea81f8c02a956e367"
+  integrity sha512-v6wxUtSkoCJF3uvPsfQHaO5j7oKpGw70/BzR5AVqyB+obBh+xHk68aeYHR0PpEFSg8iMMbeRlSFJCAqW447jsA==
   dependencies:
     chalk "^4.0.0"
     dayjs "^1.8.28"
@@ -5736,7 +5736,7 @@ minimist@0.0.8:
 
 minimist@^1.2.0:
   version "1.2.0"
-  resolved "http://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
+  resolved "https://registry.npmjs.org/minimist/-/minimist-1.2.0.tgz#a35008b20f41383eec1fb914f4cd5df79a264284"
 
 minimist@^1.2.5:
   version "1.2.5"
@@ -9022,9 +9022,9 @@ websocket-driver@>=0.5.1:
     websocket-extensions ">=0.1.1"
 
 websocket-extensions@>=0.1.1:
-  version "0.1.3"
-  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.3.tgz#5d2ff22977003ec687a4b87073dfbbac146ccf29"
-  integrity sha512-nqHUnMXmBzT0w570r2JpJxfiSD1IzoI+HGVdd3aZ0yNi3ngvQ4jv1dtHt5VGxfI2yj5yqImPhOK4vmIh2xMbGg==
+  version "0.1.4"
+  resolved "https://registry.yarnpkg.com/websocket-extensions/-/websocket-extensions-0.1.4.tgz#7f8473bc839dfd87608adb95d7eb075211578a42"
+  integrity sha512-OqedPIGOfsDlo31UNwYbCFMSaO9m9G/0faIHj5/dZFDMFqPTcx6UwqyOy3COEaEOg/9VsGIpdqn62W5KhoKSpg==
 
 when@~3.6.x:
   version "3.6.4"
