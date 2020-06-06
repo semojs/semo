@@ -134,7 +134,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
-  hook = `hook_${hook}`
+  hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
   options = Object.assign(
     {
       mode: 'assign',
@@ -262,7 +262,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           if (loadedPlugin[hook]) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = (await loadedPlugin[hook](options.opts, pluginsReturn)) || {}
+              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options.opts)) || {}
             } else {
               pluginReturn = loadedPlugin[hook]
             }
@@ -299,10 +299,141 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       }
     }
 
+    // hook_alter
+    pluginsReturn = invokeHookAlter(hook, pluginsReturn, options)
+
     invokedHookCache[cacheKey] = pluginsReturn
     cachedInstance.set('invokedHookCache', invokedHookCache)
 
     return pluginsReturn
+  } catch (e) {
+    throw new Error(e.stack)
+  }
+}
+
+/**
+ * Run hook_alter in all valid plugins and return altered results 
+ * @param {object} hook Hook name
+ * @param {object} data need alter data
+ * @param {object} options Same as invokeHook 
+ */
+const invokeHookAlter = async function(hook: string, data, options: IHookOption = {}) {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
+
+  try {
+    // Make Application supporting hook invocation
+    const appConfig = getApplicationConfig(argv)
+    const combinedConfig = getCombinedConfig(argv)
+
+    // Make Semo core supporting hook invocation
+    const plugins = argv.coreDir ? Object.assign(
+      {},
+      {
+        [scriptName]: path.resolve(argv.coreDir)
+      },
+      getAllPluginsMapping(argv)
+    ) : getAllPluginsMapping(argv)
+
+    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir && appConfig.applicationDir !== argv.coreDir) {
+      plugins['application'] = appConfig.applicationDir
+    }
+
+    // hook_alter
+    for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
+      let plugin = Object.keys(plugins)[i]
+
+      if (_.isArray(options.include) && options.include.length > 0 && options.include.indexOf(plugin) === -1) {
+        continue
+      }
+
+      if (_.isArray(options.exclude) && options.exclude.length > 0 && options.exclude.indexOf(plugin) > -1) {
+        continue
+      }
+
+      try {
+        // 寻找插件声明的钩子文件入口
+        // 默认是Node模块的入口文件
+        // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
+        let pluginEntry = 'index.js'
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
+          const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
+          if (pkgConfig.main) {
+            pluginEntry = pkgConfig.main
+          }
+
+          if (pkgConfig.rc) {
+            pkgConfig.rc = formatRcOptions(pkgConfig.rc)
+            if (pkgConfig.rc.hookDir) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig.rc.hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig.rc.hookDir, 'index.js')
+              }
+            }
+          }
+
+          if (pkgConfig[scriptName]) {
+            pkgConfig[scriptName] = formatRcOptions(pkgConfig[scriptName])
+            if (pkgConfig[scriptName].hookDir) {
+              if (fileExistsSyncCache(path.resolve(plugins[plugin], pkgConfig[scriptName].hookDir, 'index.js'))) {
+                pluginEntry = path.join(pkgConfig[scriptName].hookDir, 'index.js')
+              }
+            }
+          }
+        }
+
+        // hookDir
+        let hookDir
+
+        switch (plugin) {
+          case scriptName:
+            let coreRcInfo = parseRcFile(plugin, plugins[plugin])
+            hookDir = coreRcInfo && coreRcInfo.hookDir ? coreRcInfo.hookDir : ''
+          break
+
+          case 'application':
+            if (combinedConfig.hookDir) {
+              hookDir = combinedConfig.hookDir
+            }
+          break
+
+          default:
+            if (combinedConfig.pluginConfigs[plugin]) {
+              hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+            }
+          break
+
+        }
+        if (hookDir && fileExistsSyncCache(path.resolve(plugins[plugin], hookDir, 'index.js'))) {
+          pluginEntry = path.join(hookDir, 'index.js')
+        }
+
+        // For application, do not accept default index.js
+        if (plugin === 'application' && pluginEntry === 'index.js') {
+          continue
+        }
+
+        if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
+          const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
+          const hook_alter = `${hook}_alter`
+          if (loadedPlugin[hook_alter]) {
+            if (_.isFunction(loadedPlugin[hook_alter])) {
+              data = await loadedPlugin[hook_alter](data, options.opts)
+            } else {
+              data = loadedPlugin[hook_alter]
+            }
+          }
+        }
+      } catch (e) {
+        if (!e.code || e.code !== 'MODULE_NOT_FOUND') {
+          throw new Error(e.stack)
+        } else {
+          error(e.message, false)
+        }
+      }
+    }
+
+    return data
   } catch (e) {
     throw new Error(e.stack)
   }

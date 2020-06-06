@@ -1,30 +1,22 @@
 import { Utils } from '@semo/core'
 
+export const disabled = false // Set to true to disable this command temporarily
 export const command = 'hook'
-export const desc = 'Show hook info'
+export const desc = 'Hook '
+// export const aliases = ''
+// export const middleware = (argv) => {}
 
-export const builder = function(yargs) {}
+export const builder = function (yargs: any) {
+  // yargs.option('option', { default, describe, alias })
+  const argv: any = Utils.getInternalCache().get('argv') || {}
+  const scriptName = argv.scriptName || 'semo'
 
-export const handler = async function(argv: any) {
-  try {
-    const hookInfo = await Utils.invokeHook('hook', {
-      mode: 'group'
-    })
-    const columns = [['Hook', 'Package', 'Description'].map(item => Utils.chalk.green(item))]
-    Object.keys(hookInfo).map(k => {
-      Object.keys(hookInfo[k]).map(hook => {
-        let realHook
-        if (k === argv.scriptName) {
-          realHook = hook
-        } else {
-          let pluginShortName = k.substring(`${argv.scriptName}-plugin-`.length)
-          realHook = hook.indexOf(`${pluginShortName}_`) === 0 ? hook : `${pluginShortName}_${hook}`
-        }
-        columns.push([`hook_${realHook}`, k, hookInfo[k][hook]])
-      })
-    })
-    Utils.outputTable(columns)
-  } catch (e) {
-    Utils.error(e.stack)
+  Utils.extendSubCommand('hook', scriptName, yargs, __dirname)
+}
+
+export const handler = async function (argv: any) {
+  if (argv._.length === 1) {
+    Utils.info(`The ${Utils.chalk.bold.green('hook')} command is for checking hooks.`)
+    Utils.info(`Use ${Utils.chalk.green('hook help')} to see supported operations.`)
   }
 }

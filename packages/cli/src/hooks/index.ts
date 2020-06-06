@@ -3,8 +3,8 @@ import os from 'os'
 import { Utils } from '@semo/core'
 
 export const hook_hook = {
-  beforeCommand: 'Hook triggered before command execution.',
-  afterCommand: 'Hook triggered after command execution.',
+  before_command: 'Hook triggered before command execution.',
+  after_command: 'Hook triggered after command execution.',
   components: 'Hook triggered when needing to fetch components',
   hook: 'Hook triggered in hook command.',
   repl: 'Hook triggered in repl command.',
