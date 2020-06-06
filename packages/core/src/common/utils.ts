@@ -1475,6 +1475,7 @@ export {
   error,
   outputTable,
   invokeHook,
+  invokeHookAlter,
   extendSubCommand,
   getAllPluginsMapping,
   getCombinedConfig,
