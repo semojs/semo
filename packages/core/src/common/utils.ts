@@ -577,11 +577,11 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
       glob
         .sync(topPluginPattern, {
           noext:true,
-          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules')
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'home-plugin-cache', 'node_modules')
         })
         .map(function(plugin): void {
           if (process.env.HOME) {
-            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules', plugin)
+            plugins[plugin] = path.resolve(process.env.HOME, `.${scriptName}`, 'home-plugin-cache', 'node_modules', plugin)
           }
         })
 
@@ -1358,31 +1358,39 @@ const resolvePackage = (name, location = '', home = true) => {
 }
 
 const installPackage = (name, location = '', home = true) => {
+  const nameArray = _.castArray(name)
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
   let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
   downloadDir = location ? downloadDir + `/${location}` : downloadDir
-  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
 
   fs.ensureDirSync(downloadDir)
-  fs.ensureDirSync(downloadDirNodeModulesPath)
 
-  exec(`npm install ${name} --prefix ${downloadDir}`)
+  if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
+    exec(`cd ${downloadDir} && npm init -y`)
+  }
+  
+
+  exec(`npm install ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
 }
 
 const uninstallPackage = (name, location = '', home = true) => {
+  const nameArray = _.castArray(name)
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
   let downloadDir = home ? process.env.HOME + `/.${scriptName}` : process.cwd()
   downloadDir = location ? downloadDir + `/${location}` : downloadDir
-  const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
 
   fs.ensureDirSync(downloadDir)
-  fs.ensureDirSync(downloadDirNodeModulesPath)
 
-  exec(`npm uninstall ${name} --prefix ${downloadDir}`)
+  if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
+    exec(`cd ${downloadDir} && npm init -y`)
+  }
+  
+
+  exec(`npm uninstall ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
 }
 
 /**
@@ -1417,12 +1425,12 @@ const importPackage = (name, location = '', home = true, force = false) => {
   }
 
   try {
-    pkgPath = require.resolve(name, { paths: [downloadDirNodeModulesPath] })    
+    pkgPath = require.resolve(name, { paths: [downloadDir] })    
     pkg = require(pkgPath)
   } catch (err) {
     if (err.code == 'MODULE_NOT_FOUND') {
       exec(`npm install ${name} --prefix ${downloadDir}`)
-      pkgPath = require.resolve(name, { paths: [downloadDirNodeModulesPath] })
+      pkgPath = require.resolve(name, { paths: [downloadDir] })
       pkg = require(pkgPath)
     }
   }

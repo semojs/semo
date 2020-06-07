@@ -1,8 +1,8 @@
 import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
-export const command = 'uninstall <plugin>'
-export const desc = 'Uninstall plugin'
+export const command = 'uninstall <plugin...>'
+export const desc = 'Uninstall plugins'
 export const aliases = 'un'
 // export const middleware = (argv) => {}
 
@@ -15,17 +15,19 @@ export const builder = function (yargs: any) {
 export const handler = async function (argv: any) {
   const scriptName= argv.scriptName || 'semo'
 
-  if (argv.plugin.indexOf(`${scriptName}-plugin-`) === -1) {
-    argv.plugin = `${scriptName}-plugin-${argv.plugin}`
-  }
+  argv.plugin = Utils._.castArray(argv.plugin)
+  argv.plugin = argv.plugin.map(plugin => {
+    if (plugin.indexOf(`${scriptName}-plugin-`) === -1) {
+      plugin = `${scriptName}-plugin-${plugin}`
+    }
+  
+    if (argv.scope) {
+      plugin = `@${argv.scope}/${plugin}`
+    }
 
-  if (argv.scope) {
-    argv.plugin = `@${argv.scope}/${argv.plugin}`
-  }
+    return plugin
+  })
 
-  if (argv.local) {
-    Utils.uninstallPackage(argv.plugin, '', false)
-  } else {
-    Utils.uninstallPackage(argv.plugin, '', true)
-  }
+  Utils.uninstallPackage(argv.plugin, 'home-plugin-cache', true)
 }
+
