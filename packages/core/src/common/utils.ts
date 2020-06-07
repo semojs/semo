@@ -1322,6 +1322,13 @@ const launchDispatcher = (opts: any = {}) => {
   })()
 }
 
+/**
+ * Load plugin rc config
+ * 
+ * @param name Plugin name
+ * @param location plugin installed directory name under ~/.semo
+ * @param home if load from HOME directory
+ */
 const loadPluginRc = (name, location = '', home = true) => {
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
