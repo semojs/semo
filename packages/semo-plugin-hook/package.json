@@ -1,11 +1,10 @@
 {
   "name": "semo-plugin-hook",
-  "version": "0.0.0",
+  "version": "0.6.0",
   "description": "A semo plugin to provide hook management.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
-  "peerDependencies": {},
   "devDependencies": {
     "@types/node": "^14.0.11",
     "@typescript-eslint/eslint-plugin": "^3.1.0",

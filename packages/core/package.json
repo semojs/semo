@@ -1,6 +1,6 @@
 {
   "name": "@semo/core",
-  "version": "0.5.6",
+  "version": "0.6.0",
   "description": "The core of Semo",
   "keywords": [
     "cli",
