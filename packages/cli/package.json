@@ -32,7 +32,6 @@
     "eslint-plugin-promise": "^4.2.1",
     "eslint-plugin-standard": "^4.0.1",
     "rimraf": "^3.0.2",
-    "typedoc": "^0.17.7",
     "typescript": "^3.9.5",
     "vuepress": "^1.5.0"
   },
@@ -42,9 +41,8 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepare": "npm run build",
-    "docs:typedoc": "mkdir -p doc/.vuepress/public/typedoc && typedoc src/common",
-    "docs:dev": "npm run docs:typedoc && vuepress dev doc",
-    "docs:build": "npm run docs:typedoc && vuepress build doc"
+    "docs:dev": "vuepress dev doc",
+    "docs:build": "vuepress build doc"
   },
   "engines": {
     "node": ">=8.10.0"

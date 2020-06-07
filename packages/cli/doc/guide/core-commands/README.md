@@ -12,7 +12,8 @@
 默认这个命令没有任何功能，存在的意思是跟业务项目建立一个约定，建议业务项目添加的命令都写成这个命令的子命令。而业务项目之所以能为这个命令添加子命令是利用了 `Semo` 的命令扩展机制。
 
 ```bash
-semo generate command application/test --extend=semo
+npm install semo-plugin-application
+semo generate command application/test --extend=application
 ```
 
 这样就可以为项目添加一个 test 命令，而这个命令在执行的时候需要使用 `semo application test` 的方式来调用。

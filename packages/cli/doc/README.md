@@ -22,5 +22,8 @@ cd YOUR_PROJECT
 npm install @semo/cli
 semo init
 semo generate command test
-semo generate command application/test --extend=semo
+
+# 使用 application 命令行规范
+npm install semo-plugin-application
+semo generate command application/test --extend=application
 ```

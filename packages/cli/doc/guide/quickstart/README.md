@@ -65,7 +65,8 @@ semo test # 执行刚刚添加的命令
 **定义一个二级子命令**
 
 ```
-semo generate command application/test --extend=semo
+npm install semo-plugin-application
+semo generate command application/test --extend=application
 semo application test
 ```
 

@@ -11,10 +11,10 @@ Suppose you have already init the project using `Semo`, you can use this command
 
 ```
 yarn add semo-plugin-application
-semo create command application/test --extend=application
-semo create command application/build --extend=application
-semo create command application/deploy --extend=application
-semo create command application/other --extend=application
+semo generate command application/test --extend=application
+semo generate command application/build --extend=application
+semo generate command application/deploy --extend=application
+semo generate command application/other --extend=application
 ```
 
 There are builtin commands, `test`, `build`, `deploy`, if you don't like there commands, you can set `disabled=true` in your extended commands to hide these commands.
@@ -31,7 +31,7 @@ semo application|app other
 you can even add more levels of commands in your project.
 
 ```
-semo create command application/level1/level2/command --extend=application
+semo generate command application/level1/level2/command --extend=application
 ```
 
 ## License
