@@ -6,11 +6,11 @@ module.exports = {
   base: '/',
   dest: '../../public',
   themeConfig: {
-    repo: 'https://github.com/semojs/semo/packages/cli',
+    repo: 'semojs/semo',
     repoLabel: 'Github',
     editLinks: true,
     editLinkText: '帮助改进此页文档',
-    docsDir: 'doc',
+    docsDir: 'packages/cli/doc',
     displayAllHeaders: false,
     nav: [
       { text: '首页', link: '/'},
