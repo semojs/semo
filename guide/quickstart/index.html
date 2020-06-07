@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.0">
     
     <meta name="description" content="一个Node项目命令行开发规范">
-    <link rel="preload" href="/assets/css/0.styles.9bcdb81a.css" as="style"><link rel="preload" href="/assets/js/app.891374b1.js" as="script"><link rel="preload" href="/assets/js/2.27785afd.js" as="script"><link rel="preload" href="/assets/js/12.288a6dcd.js" as="script"><link rel="prefetch" href="/assets/js/10.f1d8d6ce.js"><link rel="prefetch" href="/assets/js/11.c1a59164.js"><link rel="prefetch" href="/assets/js/13.13ed3765.js"><link rel="prefetch" href="/assets/js/14.0871fcc3.js"><link rel="prefetch" href="/assets/js/15.25ef09da.js"><link rel="prefetch" href="/assets/js/16.2b7b0b1d.js"><link rel="prefetch" href="/assets/js/17.e11b1ccc.js"><link rel="prefetch" href="/assets/js/3.3ddec59a.js"><link rel="prefetch" href="/assets/js/4.2b7fc900.js"><link rel="prefetch" href="/assets/js/5.889db759.js"><link rel="prefetch" href="/assets/js/6.e863ce1f.js"><link rel="prefetch" href="/assets/js/7.d5135d8b.js"><link rel="prefetch" href="/assets/js/8.8110660e.js"><link rel="prefetch" href="/assets/js/9.d556d3e7.js">
+    <link rel="preload" href="/assets/css/0.styles.9bcdb81a.css" as="style"><link rel="preload" href="/assets/js/app.14ed52fa.js" as="script"><link rel="preload" href="/assets/js/2.27785afd.js" as="script"><link rel="preload" href="/assets/js/12.a07cfc1b.js" as="script"><link rel="prefetch" href="/assets/js/10.3f7bec6b.js"><link rel="prefetch" href="/assets/js/11.0dba904f.js"><link rel="prefetch" href="/assets/js/13.13ed3765.js"><link rel="prefetch" href="/assets/js/14.0871fcc3.js"><link rel="prefetch" href="/assets/js/15.25ef09da.js"><link rel="prefetch" href="/assets/js/16.8b0553d2.js"><link rel="prefetch" href="/assets/js/17.e11b1ccc.js"><link rel="prefetch" href="/assets/js/3.3ddec59a.js"><link rel="prefetch" href="/assets/js/4.2b7fc900.js"><link rel="prefetch" href="/assets/js/5.889db759.js"><link rel="prefetch" href="/assets/js/6.e863ce1f.js"><link rel="prefetch" href="/assets/js/7.d5135d8b.js"><link rel="prefetch" href="/assets/js/8.8110660e.js"><link rel="prefetch" href="/assets/js/9.d556d3e7.js">
     <link rel="stylesheet" href="/assets/css/0.styles.9bcdb81a.css">
   </head>
   <body>
@@ -37,23 +37,19 @@ $ semo help
 semo [命令]
 
 命令：
-  semo application                    Application command namespace                                      [aliases: app]
-  semo create &lt;name&gt; [repo] [branch]  Create a new project from specific repo                               [aliases: n]
-  semo generate &lt;component&gt;           Generate component sample code                                        [aliases: g]
-  semo hook                           Show hook info
-  semo init                           Init basic config file and directories                                [aliases: i]
-  semo plugin                         Plugin management tool                                                [aliases: p]
-  semo repl                           Play with REPL                                                        [aliases: r]
-  semo run &lt;plugin&gt; [command]         Run any plugin command directly
-  semo script [file]                  Execute a script                                                    [aliases: scr]
-  semo shell                          Quick shell                                                          [aliases: sh]
-  semo status                         Show environment status info                                         [aliases: st]
   semo completion                     Generate completion script
+  semo create &lt;name&gt; [repo] [branch]  Create a new project from specific repo                               [aliases: c]
+  semo generate &lt;component&gt;           Generate component sample code                                        [aliases: g]
+  semo init                           Init basic config file and directories                                [aliases: i]
+  semo repl                           Play with REPL                                                        [aliases: r]
+  semo run &lt;PLUGIN&gt; [COMMAND...]      Run any plugin command directly
+  semo status                         Show environment status info                                         [aliases: st]
 
 Options:
   --version   显示版本号                                                                                          [布尔]
   -h, --help  显示帮助信息                                                                                        [布尔]
 
+Find more information at https://semo.js.org
 </code></pre></div><p>可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 <code>Semo</code> 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 <code>Semo</code> 的作用和价值。</p> <h2 id="项目集成"><a href="#项目集成" class="header-anchor">#</a> 项目集成</h2> <p><code>Semo</code> 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 <code>Semo</code>，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。</p> <div class="language- extra-class"><pre class="language-text"><code>cd YOUR_PROJECT
 semo init
 </code></pre></div><p>如果仅仅使用 Semo 的插件调度方式，那么不需要安装 <code>@semo/core</code>， 如果想要使用 <code>@semo/core</code> 里的方法，则业务项目要将 <code>@semo/core</code> 添加为项目依赖，但是具体放到 <code>devDependencies</code> 还是 <code>dependencies</code>，需要根据实际情况而定，在业务项目使用 <code>@semo/core</code> 的时候有几种使用模式：</p> <ul><li>业务项目服务核心逻辑依赖 <code>@semo/core</code>，这种侵入式的，必须添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>@semo/core</code>，但是有使用 @semo/core 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 <code>dependencies</code>。</li> <li>业务项目服务核心逻辑不依赖 <code>@semo/core</code>，也没有使用 <code>@semo/core</code> 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 <code>REPL</code> 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 <code>devDependencies</code>。</li> <li>如果容器环境本身没有安装 <code>Semo</code>， 也可以在项目依赖中添加 <code>@semo/cli</code>， 然后通过 <code>npx semo</code> 来调度。</li></ul> <h3 id="添加一个项目命令"><a href="#添加一个项目命令" class="header-anchor">#</a> 添加一个项目命令</h3> <p>这里要考虑的是未来项目命令行工具的规划，如果很多，最好划分一下层次，另外，第一层子命令是一些核心命令，如果我们的命令都放到第一层，会容易混淆和误用。</p> <p><strong>定义一个一级子命令</strong></p> <div class="language- extra-class"><pre class="language-text"><code>semo generate command test
@@ -65,7 +61,7 @@ semo application test
 RUN echo 'alias semo=&quot;npx semo&quot;' &gt;&gt; /home/node/.bashrc
 RUN echo 'alias app=&quot;npx semo app&quot;' &gt;&gt; /home/node/.bashrc
 </code></pre></div><p>这面的命令演示了缩减命令长度的方法，在实际使用过程中，如果命令分层特别深，这里可以多定义一些 <code>alias</code>。</p> <h2 id="开发插件"><a href="#开发插件" class="header-anchor">#</a> 开发插件</h2> <p>如果不是在项目中使用 <code>Semo</code>，仅仅是要快速实现一些脚本命令，帮助自己提高工作效率，这时你可以使用 <code>Semo</code> 快速开始。</p> <div class="language- extra-class"><pre class="language-text"><code>cd ~/.semo/node_modules # 这个目录下定义的插件会全局加载
-semo create semo-plugin-xxx --select=plugin # 选择插件模板
+semo create semo-plugin-xxx --template=plugin # 选择插件模板
 cd semo-plugin-xxx
 semo hi # # 默认里面有一个示例命令
 code . # 用 Vscode 开始开发
@@ -92,6 +88,6 @@ yarn add semo-plugin-xxx // 或
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.891374b1.js" defer></script><script src="/assets/js/2.27785afd.js" defer></script><script src="/assets/js/12.288a6dcd.js" defer></script>
+    <script src="/assets/js/app.14ed52fa.js" defer></script><script src="/assets/js/2.27785afd.js" defer></script><script src="/assets/js/12.a07cfc1b.js" defer></script>
   </body>
 </html>
