@@ -10,7 +10,7 @@ export const handler = async function(argv: any) {
   try {
     const hookInfo = await Utils.invokeHook('hook', {
       mode: 'group'
-    })
+    }, argv)
     const columns = [['Hook', 'Package', 'Description'].map(item => Utils.chalk.green(item))]
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {

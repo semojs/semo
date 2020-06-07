@@ -130,8 +130,9 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {array} options.opts opts will be sent to hook implementation
  */
-const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }) {
-  const argv: any = getInternalCache().get('argv')
+const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }, argv: any = null) {
+  argv = argv || getInternalCache().get('argv') || {}
+  console.log(argv)
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
