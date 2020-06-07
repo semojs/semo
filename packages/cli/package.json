@@ -1,6 +1,6 @@
 {
   "name": "@semo/cli",
-  "version": "0.5.4",
+  "version": "0.5.5",
   "description": "A command line tools dispatcher ",
   "keywords": [
     "cli",
@@ -19,7 +19,7 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@semo/core": "^0.5.4"
+    "@semo/core": "^0.5.5"
   },
   "devDependencies": {
     "@types/node": "^14.0.11",
