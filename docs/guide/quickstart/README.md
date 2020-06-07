@@ -38,15 +38,15 @@ Options:
 
 ```
 cd YOUR_PROJECT
-npm install semo
 semo init
 ```
 
-业务项目集成 Semo 必须要将 `Semo` 添加为项目依赖，但是具体放到 `devDependencies` 还是 `dependencies`，需要根据实际情况而定，在业务项目使用 `Semo` 的时候有几种使用模式：
+如果仅仅使用 Semo 的插件调度方式，那么不需要安装 `@semo/core`， 如果想要使用 `@semo/core` 里的方法，则业务项目要将 `@semo/core` 添加为项目依赖，但是具体放到 `devDependencies` 还是 `dependencies`，需要根据实际情况而定，在业务项目使用 `@semo/core` 的时候有几种使用模式：
 
-- 业务项目服务核心逻辑依赖 `Semo`，这种侵入式的，必须添加到 `dependencies`。
-- 业务项目服务核心逻辑不依赖 `Semo`，但是有使用 Semo 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 `dependencies`。
-- 业务项目服务核心逻辑不依赖 `Semo`，也没有使用 `Semo` 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 `REPL` 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 `devDependencies`。
+- 业务项目服务核心逻辑依赖 `@semo/core`，这种侵入式的，必须添加到 `dependencies`。
+- 业务项目服务核心逻辑不依赖 `@semo/core`，但是有使用 @semo/core 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 `dependencies`。
+- 业务项目服务核心逻辑不依赖 `@semo/core`，也没有使用 `@semo/core` 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 `REPL` 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 `devDependencies`。
+- 如果容器环境本身没有安装 `Semo`， 也可以在项目依赖中添加 `@semo/cli`， 然后通过 `npx semo` 来调度。
 
 ### 添加一个项目命令
 
