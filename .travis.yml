@@ -16,7 +16,7 @@ before_script:
   - yarn run lerna run prepublish
 script:
   - yarn test
-  - lerna run docs:build --scope @semo/cli --npm-client yarn
+  - yarn run docs:build
   - lerna run docs:typedoc --scope @semo/core --npm-client yarn
 before_deploy:
   - echo "//registry.npmjs.org/:_authToken=\${NPM_TOKEN}" >> $HOME/.npmrc 2> /dev/null

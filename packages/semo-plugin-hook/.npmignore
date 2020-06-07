@@ -1,0 +1,8 @@
+docs
+.vscode
+.travis.yml
+/src
+.editorconfig
+.eslintignore
+.eslintrc.js
+tsconfig.json

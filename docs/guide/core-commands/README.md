@@ -22,6 +22,10 @@ semo generate command application/test --extend=application
 
 ## `semo hook`
 
+:::tip
+这条命令已经转移到 `semo-plugin-hook` 插件
+:::
+
 这个命令的输出显示了当前环境下可用的所有的钩子，所有实现这些钩子的逻辑都可以被执行。在输出当中能够看到钩子的名称，描述，以及钩子在哪个模块声明的：
 
 ```

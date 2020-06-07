@@ -4,13 +4,13 @@ module.exports = {
   title: 'Semo',
   description: '一个Node项目命令行开发规范',
   base: '/',
-  dest: '../../public',
+  dest: 'public',
   themeConfig: {
     repo: 'semojs/semo',
     repoLabel: 'Github',
     editLinks: true,
     editLinkText: '帮助改进此页文档',
-    docsDir: 'packages/cli/doc',
+    docsDir: 'docs',
     displayAllHeaders: false,
     nav: [
       { text: '首页', link: '/'},
