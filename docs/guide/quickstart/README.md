@@ -11,23 +11,19 @@ $ semo help
 semo [命令]
 
 命令：
-  semo application                    Application command namespace                                      [aliases: app]
-  semo create <name> [repo] [branch]  Create a new project from specific repo                               [aliases: n]
-  semo generate <component>           Generate component sample code                                        [aliases: g]
-  semo hook                           Show hook info
-  semo init                           Init basic config file and directories                                [aliases: i]
-  semo plugin                         Plugin management tool                                                [aliases: p]
-  semo repl                           Play with REPL                                                        [aliases: r]
-  semo run <plugin> [command]         Run any plugin command directly
-  semo script [file]                  Execute a script                                                    [aliases: scr]
-  semo shell                          Quick shell                                                          [aliases: sh]
-  semo status                         Show environment status info                                         [aliases: st]
   semo completion                     Generate completion script
+  semo create <name> [repo] [branch]  Create a new project from specific repo                               [aliases: c]
+  semo generate <component>           Generate component sample code                                        [aliases: g]
+  semo init                           Init basic config file and directories                                [aliases: i]
+  semo repl                           Play with REPL                                                        [aliases: r]
+  semo run <PLUGIN> [COMMAND...]      Run any plugin command directly
+  semo status                         Show environment status info                                         [aliases: st]
 
 Options:
   --version   显示版本号                                                                                          [布尔]
   -h, --help  显示帮助信息                                                                                        [布尔]
 
+Find more information at https://semo.js.org
 ```
 
 可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 `Semo` 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 `Semo` 的作用和价值。
@@ -88,7 +84,7 @@ RUN echo 'alias app="npx semo app"' >> /home/node/.bashrc
 
 ```
 cd ~/.semo/node_modules # 这个目录下定义的插件会全局加载
-semo create semo-plugin-xxx --select=plugin # 选择插件模板
+semo create semo-plugin-xxx --template=plugin # 选择插件模板
 cd semo-plugin-xxx
 semo hi # # 默认里面有一个示例命令
 code . # 用 Vscode 开始开发

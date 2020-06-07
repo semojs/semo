@@ -9,6 +9,10 @@ npm i -g @semo/cli
 semo help
 ```
 
+# Documentation
+
+Please refer to http://semo.js.org
+
 # License
 
 MIT

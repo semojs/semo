@@ -8,54 +8,55 @@ export const desc = 'Create a new project from specific repo'
 export const builder = function(yargs) {
   yargs.option('yarn', {
     default: false,
-    describe: 'use yarn command'
+    describe: 'Use yarn command'
   })
 
   yargs.option('yes', {
     default: true,
     alias: 'y',
-    describe: 'run npm/yarn init with --yes'
+    describe: 'Run npm/yarn init with --yes'
   })
 
   yargs.option('force', {
-    alias: 'f',
-    describe: 'force download, existed folder will be deleted!'
+    alias: 'F',
+    describe: 'Force download, existed folder will be deleted!'
   })
 
   yargs.option('merge', {
-    alias: 'm',
-    describe: 'merge config with exist project folder!'
+    alias: 'M',
+    describe: 'Merge config with exist project folder!'
   })
 
   yargs.option('empty', {
-    alias: 'e',
-    describe: 'force empty project, ignore repo'
+    alias: 'E',
+    describe: 'Force empty project, ignore repo'
   })
 
-  yargs.option('select', {
-    alias: 's',
-    describe: 'select from registered repos'
+  yargs.option('template', {
+    alias: 'T',
+    describe: 'Select from registered template repos'
   })
 
   yargs.option('add', {
     default: false,
     alias: 'A',
-    describe: 'add npm package to package.json dependencies'
+    describe: 'Add npm package to package.json dependencies'
   })
 
   yargs.option('add-dev', {
     default: false,
     alias: 'D',
-    describe: 'add npm package to package.json devDependencies'
+    describe: 'Add npm package to package.json devDependencies'
   })
 
   yargs.option('init-semo', {
-    describe: 'init new project'
+    alias: 'i',
+    describe: 'Init new project'
   })
 
   yargs.option('init-git', {
     default: true,
-    describe: 'init a git repo'
+    describe: 'Init a git repo'
   })
 }
 
@@ -77,19 +78,19 @@ export const handler = async function(argv: any) {
       // Nothing happened.
       Utils.shell.cd(argv.name)
     } else {
-      if (argv.select) {
+      if (argv.template) {
         const defaultRepos = await Utils.invokeHook('create_project_template')
         if (Object.keys(defaultRepos).length === 0) {
           Utils.error('No pre-defined repos available.')
         }
-        const select = defaultRepos[argv.select]
-          ? argv.select
+        const template = defaultRepos[argv.template]
+          ? argv.template
           : Object.keys(defaultRepos).find(
-              key => defaultRepos[key].alias && defaultRepos[key].alias.indexOf(argv.select) > -1
+              key => defaultRepos[key].alias && defaultRepos[key].alias.join('|').indexOf(argv.template) > -1
             )
-        if (select && defaultRepos[select]) {
-          argv.repo = defaultRepos[select].repo || Utils.error('Repo not found')
-          argv.branch = defaultRepos[select].branch || 'master'
+        if (template && defaultRepos[template]) {
+          argv.repo = defaultRepos[template].repo || Utils.error('Repo not found')
+          argv.branch = defaultRepos[template].branch || 'master'
         } else {
           const answers: any = await Utils.inquirer.prompt([
             {

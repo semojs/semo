@@ -78,7 +78,7 @@ async function openRepl(context: any): Promise<any> {
 
 export const builder = function(yargs) {
   yargs.option('hook', {
-    describe: 'if or not load all plugins repl hook'
+    describe: 'If or not load all plugins repl hook'
   })
 
   yargs.option('prompt', {

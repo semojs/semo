@@ -88,7 +88,7 @@ Hook                         :  Package :  Description
 另外，如果我们真的要创建一个插件，通过初始化的方式进行还是太慢了，这里推荐使用插件项目模板进行，具体的命令如下：
 
 ```
-semo create semo-plugin-xxx --select=plugin
+semo create semo-plugin-xxx --template=plugin
 ```
 
 很明显这里还可以使用其他项目模板，关于 `create` 命令，参见下放关于 `create` 命令的介绍。
@@ -110,13 +110,13 @@ Create a create project from specific repo
   --version      显示版本号                                                                                       [布尔]
   --yarn         use yarn command                                                                        [默认值: false]
   --yes, -y      run npm/yarn init with --yes                                                             [默认值: true]
-  --force, -f    force download, existed folder will be deleted!
-  --merge, -m    merge config with exist project folder!
-  --empty, -e    force empty project, ignore repo
-  --select, -s   select from default repos
+  --force, -F    force download, existed folder will be deleted!
+  --merge, -M    merge config with exist project folder!
+  --empty, -E    force empty project, ignore repo
+  --template, -T   select from default repos
   --add, -A      add npm package to package.json dependencies                                            [默认值: false]
   --add-dev, -D  add npm package to package.json devDependencies                                         [默认值: false]
-  --init, -i     init new project
+  --init-semo, -i     init new project
   -h, --help     显示帮助信息                                                                                     [布尔]
 ```
 
@@ -180,7 +180,7 @@ semo create semo-plugin-[PLUGIN_NAME] -yfie
 如果我们创建项目执行下面的命令:
 
 ```
-semo create PROJECT_NAME --select
+semo create PROJECT_NAME --template
 ```
 
 则会看到下面的输出:
@@ -208,8 +208,8 @@ export const hook_create_project_template = {
 如果在初始化的时候已经知道要使用的模板和标识，可以直接指定：
 
 ```
-semo create PROJECT_NAME --select=demo
-semo create PROJECT_NAME --select=demo_repo
+semo create PROJECT_NAME --template=demo
+semo create PROJECT_NAME --template=demo_repo
 ```
 
 :::tip

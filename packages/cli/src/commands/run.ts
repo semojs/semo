@@ -8,7 +8,7 @@ export const desc = 'Run any plugin command directly'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  yargs.option('UPGRADE', { describe: 'force upgrade plugin cache' })
+  yargs.option('UPGRADE', { describe: 'Force upgrade plugin cache', alias: 'UP' })
   yargs.option('SCOPE', { default: '', describe: 'Set plugin npm scope' })
   // yargs.commandDir('run')
 }

@@ -9,34 +9,34 @@ export const aliases = 'i'
 export const builder = function(yargs) {
   yargs.option('plugin', {
     alias: 'P',
-    describe: 'plugin mode'
+    describe: 'Plugin mode'
   })
 
   yargs.option('force', {
     alias: 'f',
-    describe: 'force init!'
+    describe: 'Force init!'
   })
 
   yargs.option('add', {
     default: false,
     alias: 'A',
-    describe: 'add npm package to package.json dependencies'
+    describe: 'Add npm package to package.json dependencies'
   })
 
   yargs.option('add-dev', {
     default: false,
     alias: 'D',
-    describe: 'add npm package to package.json devDependencies'
+    describe: 'Add npm package to package.json devDependencies'
   })
 
   yargs.option('typescript', {
     alias: 'ts',
-    describe: 'generate typescript style code'
+    describe: 'Generate typescript style code'
   })
 
   yargs.option('rc-format', {
     default: 'yml',
-    describe: 'rc format, default is yml, also support json'
+    describe: 'Rc format, default is yml, also support json'
   })
 }
 
