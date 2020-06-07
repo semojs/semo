@@ -132,7 +132,6 @@ interface IHookOption {
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }, argv: any = null) {
   argv = argv || getInternalCache().get('argv') || {}
-  console.log(argv)
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
   hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
@@ -301,7 +300,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
     }
 
     // hook_alter
-    pluginsReturn = invokeHookAlter(hook, pluginsReturn, options)
+    pluginsReturn = invokeHookAlter(hook, pluginsReturn, options, argv)
 
     invokedHookCache[cacheKey] = pluginsReturn
     cachedInstance.set('invokedHookCache', invokedHookCache)
@@ -318,8 +317,8 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
  * @param {object} data need alter data
  * @param {object} options Same as invokeHook 
  */
-const invokeHookAlter = async function(hook: string, data, options: IHookOption = {}) {
-  const argv: any = getInternalCache().get('argv')
+const invokeHookAlter = async function(hook: string, data, options: IHookOption = {}, argv: any = null) {
+  argv = argv || getInternalCache().get('argv') || {}
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
 
