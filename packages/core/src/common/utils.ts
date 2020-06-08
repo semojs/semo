@@ -550,7 +550,8 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
         plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
-    if (!argv.disableGlobalPlugin) {
+    // argv.coreDir not always exists, it not plugins list will not include npm global plugins
+    if (!argv.disableGlobalPlugin && argv.coreDir) {
       // process core same directory plugins
       glob
         .sync(topPluginPattern, {
