@@ -109,7 +109,7 @@ exports.func = () => {}
 
 ```js
 // src/hooks/index.ts
-export const hook_components = async () {
+export const hook_component = async () {
   return {
     a: 'b'
   }
@@ -120,7 +120,7 @@ export const hook_components = async () {
 
 ```js
 import { Utils } from 'semo'
-const { a } = await Utils.invokeHook('components')
+const { a } = await Utils.invokeHook('component')
 console.log(a)
 // -> 'b'
 ```

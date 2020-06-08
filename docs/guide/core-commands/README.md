@@ -32,7 +32,7 @@ semo generate command application/test --extend=application
 Hook                         :  Package :  Description                                     
   hook_beforeCommand           :  semo    :  Hook triggered before command execution.        
   hook_afterCommand            :  semo    :  Hook triggered after command execution.         
-  hook_components              :  semo    :  Hook triggered when needing to fetch components 
+  hook_component               :  semo    :  Hook triggered when needing to fetch component 
   hook_hook                    :  semo    :  Hook triggered in hook command.                 
   hook_repl                    :  semo    :  Hook triggered in repl command.                 
   hook_status                  :  semo    :  Hook triggered in status command.               
