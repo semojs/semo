@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.0">
     
     <meta name="description" content="一个Node项目命令行开发规范">
-    <link rel="preload" href="/assets/css/0.styles.9bcdb81a.css" as="style"><link rel="preload" href="/assets/js/app.b1e07584.js" as="script"><link rel="preload" href="/assets/js/2.27785afd.js" as="script"><link rel="preload" href="/assets/js/10.3f7bec6b.js" as="script"><link rel="prefetch" href="/assets/js/11.0dba904f.js"><link rel="prefetch" href="/assets/js/12.a07cfc1b.js"><link rel="prefetch" href="/assets/js/13.13ed3765.js"><link rel="prefetch" href="/assets/js/14.0871fcc3.js"><link rel="prefetch" href="/assets/js/15.25ef09da.js"><link rel="prefetch" href="/assets/js/16.8b0553d2.js"><link rel="prefetch" href="/assets/js/17.e11b1ccc.js"><link rel="prefetch" href="/assets/js/3.3ddec59a.js"><link rel="prefetch" href="/assets/js/4.2b7fc900.js"><link rel="prefetch" href="/assets/js/5.889db759.js"><link rel="prefetch" href="/assets/js/6.e863ce1f.js"><link rel="prefetch" href="/assets/js/7.d5135d8b.js"><link rel="prefetch" href="/assets/js/8.8110660e.js"><link rel="prefetch" href="/assets/js/9.d556d3e7.js">
+    <link rel="preload" href="/assets/css/0.styles.9bcdb81a.css" as="style"><link rel="preload" href="/assets/js/app.e267e20c.js" as="script"><link rel="preload" href="/assets/js/2.27785afd.js" as="script"><link rel="preload" href="/assets/js/10.5513cf14.js" as="script"><link rel="prefetch" href="/assets/js/11.678b93f9.js"><link rel="prefetch" href="/assets/js/12.2d016466.js"><link rel="prefetch" href="/assets/js/13.13ed3765.js"><link rel="prefetch" href="/assets/js/14.0871fcc3.js"><link rel="prefetch" href="/assets/js/15.25ef09da.js"><link rel="prefetch" href="/assets/js/16.8b0553d2.js"><link rel="prefetch" href="/assets/js/17.e11b1ccc.js"><link rel="prefetch" href="/assets/js/3.3ddec59a.js"><link rel="prefetch" href="/assets/js/4.2b7fc900.js"><link rel="prefetch" href="/assets/js/5.889db759.js"><link rel="prefetch" href="/assets/js/6.e863ce1f.js"><link rel="prefetch" href="/assets/js/7.d5135d8b.js"><link rel="prefetch" href="/assets/js/8.8110660e.js"><link rel="prefetch" href="/assets/js/9.d556d3e7.js">
     <link rel="stylesheet" href="/assets/css/0.styles.9bcdb81a.css">
   </head>
   <body>
@@ -36,7 +36,7 @@ semo generate <span class="token builtin class-name">command</span> application/
 </code></pre></div><p>这样就可以为项目添加一个 test 命令，而这个命令在执行的时候需要使用 <code>semo application test</code> 的方式来调用。</p> <p>通过 <code>semo application help</code> 可以看到当前业务项目定义的所有顶级子命令，因为如果项目实现的命令过多，层次也多的话，一般我们很难记住所有命令和参数，所以帮助命令是我们经常要执行的。</p> <h2 id="semo-hook"><a href="#semo-hook" class="header-anchor">#</a> <code>semo hook</code></h2> <div class="custom-block tip"><p class="custom-block-title">TIP</p> <p>这条命令已经转移到 <code>semo-plugin-hook</code> 插件</p></div> <p>这个命令的输出显示了当前环境下可用的所有的钩子，所有实现这些钩子的逻辑都可以被执行。在输出当中能够看到钩子的名称，描述，以及钩子在哪个模块声明的：</p> <div class="language- extra-class"><pre class="language-text"><code>Hook                         :  Package :  Description                                     
   hook_beforeCommand           :  semo    :  Hook triggered before command execution.        
   hook_afterCommand            :  semo    :  Hook triggered after command execution.         
-  hook_components              :  semo    :  Hook triggered when needing to fetch components 
+  hook_component               :  semo    :  Hook triggered when needing to fetch component 
   hook_hook                    :  semo    :  Hook triggered in hook command.                 
   hook_repl                    :  semo    :  Hook triggered in repl command.                 
   hook_status                  :  semo    :  Hook triggered in status command.               
@@ -198,6 +198,6 @@ Plugin management tool
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.b1e07584.js" defer></script><script src="/assets/js/2.27785afd.js" defer></script><script src="/assets/js/10.3f7bec6b.js" defer></script>
+    <script src="/assets/js/app.e267e20c.js" defer></script><script src="/assets/js/2.27785afd.js" defer></script><script src="/assets/js/10.5513cf14.js" defer></script>
   </body>
 </html>
