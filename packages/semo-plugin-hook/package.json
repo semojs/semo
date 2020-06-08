@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-hook",
-  "version": "0.6.5",
+  "version": "0.6.7",
   "description": "A semo plugin to provide hook management.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
@@ -25,7 +25,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^0.6.4"
+    "@semo/core": "^0.6.7"
   },
   "publishConfig": {
     "access": "public"
