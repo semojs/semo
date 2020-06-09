@@ -90,7 +90,7 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   argv.hook = argv.hook || false
   try {
-    let context = { Utils, Semo: Utils, argv, await: true, package: (name, force = false) => {
+    let context = { argv, await: true, package: (name, force = false) => {
       return Utils.importPackage(name, 'repl-package-cache', true, force)
     } }
 
@@ -103,7 +103,7 @@ export const handler = async function(argv: any) {
               include: Utils.splitComma(argv.hook)
             }
       )
-      context = Object.assign(context, pluginsReturn)
+      context = Object.assign(context, { Semo: Object.assign({ Utils }, pluginsReturn)})
     }
 
     return await openRepl(context)
