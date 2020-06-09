@@ -467,6 +467,8 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
+         // Insert a blank line to terminal
+         console.log()
         argv.$input = await getStdin()
         getInternalCache().set('argv', argv)
       })
@@ -1137,9 +1139,12 @@ const launchDispatcher = (opts: any = {}) => {
   const yargsOpts = {
     // Give each command an ability to disable temporarily
     visit: (command) => {
+      // console.log()
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
+        // Insert a blank line to terminal
+        console.log()
         argv.$input = await getStdin()
         getInternalCache().set('argv', argv)
       })
