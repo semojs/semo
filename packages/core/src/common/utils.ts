@@ -1468,6 +1468,8 @@ export {
   debug,
   /** [fuzzy](https://www.npmjs.com/package/fuzzy) reference. */
   fuzzy,
+  /** [fuzzy](https://www.npmjs.com/package/glob) reference. */
+  glob,
   /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
   inquirer,
   /** [get-stdin](https://www.npmjs.com/package/get-stdin) reference */
