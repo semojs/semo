@@ -199,13 +199,10 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       try {
         // 寻找插件声明的钩子文件入口
         // 默认是Node模块的入口文件
-        // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
+        // package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
         let pluginEntry = 'index.js'
         if (fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
-          if (pkgConfig.main) {
-            pluginEntry = pkgConfig.main
-          }
 
           if (pkgConfig.rc) {
             pkgConfig.rc = formatRcOptions(pkgConfig.rc)
@@ -355,13 +352,10 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
       try {
         // 寻找插件声明的钩子文件入口
         // 默认是Node模块的入口文件
-        // package.main < package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
+        // package.rc.hookDir < package[scriptName].hookDir < rcfile.hookDir
         let pluginEntry = 'index.js'
         if (fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))) {
           const pkgConfig = require(path.resolve(plugins[plugin], 'package.json'))
-          if (pkgConfig.main) {
-            pluginEntry = pkgConfig.main
-          }
 
           if (pkgConfig.rc) {
             pkgConfig.rc = formatRcOptions(pkgConfig.rc)
