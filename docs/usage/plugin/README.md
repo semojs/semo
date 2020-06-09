@@ -34,14 +34,16 @@ semo-plugin-convert-a-to-b
 
 如果对自己的插件作品很满意，想分享给其他人使用，就可以把插件发布到 `npm` 上，然后告诉别人来用。当然，由于 `Semo` 只是充当一个命令调度的作用，其实很大概率上你不必非要基于 `Semo` 来写这种 `npm` 包，除非你是 `Semo` 的粉丝 ^_^。
 
-那么目前都有哪些社区插件了呢，目前的社区还没怎么建起来，插件还比较少，包括但不限于以下插件：
+那么目前都有哪些社区插件了呢，目前的社区还没怎么建起来，插件还比较少，包括但不限于以下插件：（这里的核心指的是放到核心仓库和 `@semo/core` 一起维护的插件）
 
 * **semo-plugin-application**，【核心】定义了一个 Node 项目中可以使用的，给项目添加子命令的规范。
 * **semo-plugin-script**，【核心】定义了一个 Node 项目中可以使用的脚本规范。
 * **semo-plugin-plugin**，【核心】提供了 Semo 全局插件管理命令行工具。
 * **semo-plugin-shell**，【核心】提供了一个简单的命令行环境，可以少敲几个字母。
 * **semo-plugin-hook**，【核心】可以查看钩子相关的信息。
-* **semo-plugin-ssh**, 【扩展】提供了简单的 SSH 账户管理功能。
-* **semo-plugin-read**，【扩展】提供了将 URL 转换成 Markdown，进而转换成各种格式的工具。
+* **semo-plugin-ssh**, 【扩展】提供了简单的 `SSH` 账户管理功能。
+* **semo-plugin-read**，【扩展】提供了将 URL 转换成 `Markdown`，进而转换成各种格式的工具。
   * **semo-plugin-read-extend-format-wechat** 这是 read 插件的一个扩展，提供了微信公众号文章在线编辑器的功能，需要和 read 一起使用。
-* **semo-plugin-serve**，【扩展】提供了一个简单的 HTTP 服务器的功能，类似于 `serve`。
+* **semo-plugin-serve**，【扩展】提供了一个简单的 `HTTP` 服务器的功能，类似于 `serve`。
+* **semo-plugin-sequelize**, 【扩展】提供了对  `Sequelize` 的集成以提供数据库的访问能力
+* **semo-plugin-redis**，【扩展】提供了对 `Redis` 的集成已提供缓存的访问能力
