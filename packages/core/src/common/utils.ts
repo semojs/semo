@@ -1214,7 +1214,7 @@ const launchDispatcher = (opts: any = {}) => {
       })
 
       if (!parsedArgv.getYargsCompletions) {
-        let beforeHooks = await invokeHook('beforeCommand')
+        let beforeHooks = await invokeHook('before_command')
         Object.keys(beforeHooks).map(function(hook) {
           beforeHooks[hook](parsedArgv, yargs)
         })
@@ -1308,7 +1308,7 @@ const launchDispatcher = (opts: any = {}) => {
         .wrap(Math.min(120, yargs.terminalWidth())).argv
 
       if (!parsedArgv.getYargsCompletions) {
-        let afterHooks = await invokeHook('afterCommand')
+        let afterHooks = await invokeHook('after_command')
         Object.keys(afterHooks).map(function(hook) {
           afterHooks[hook](parsedArgv, yargs)
         })
