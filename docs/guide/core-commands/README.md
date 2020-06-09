@@ -318,14 +318,18 @@ export const hook_repl = () => {
 
 然后在 REPL 环境，就可以使用了:
 
+:::tip
+`hook_repl` 返回的信息都注入到了 REPL 里的 Semo 对象。
+:::
+
 ```
 >>> add
 [Function: add]
->>> await add(1, 2)
+>>> await Semo.add(1, 2)
 3
 >>> multiple
 [Function: multiple]
->>> await multiple(3, 4)
+>>> await Semo.multiple(3, 4)
 12
 ```
 
