@@ -16,7 +16,6 @@ import inquirer from 'inquirer'
 import fuzzy from 'fuzzy'
 import { execSync } from 'child_process'
 import objectHash from 'node-object-hash'
-import { dd, dump } from 'dumper.js'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
@@ -1489,8 +1488,6 @@ export {
   warn,
   info,
   success,
-  dd,
-  dump,
   error,
   outputTable,
   invokeHook,

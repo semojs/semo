@@ -3,7 +3,7 @@
   "private": true,
   "devDependencies": {
     "husky": "^4.2.5",
-    "lerna": "^3.20.2",
+    "lerna": "^3.22.1",
     "vuepress": "^1.5.0"
   },
   "scripts": {
@@ -12,7 +12,11 @@
     "prepublish": "lerna run prepublish",
     "lerna:publish": "lerna publish from-git --yes",
     "docs:dev": "vuepress dev docs",
-    "docs:build": "vuepress build docs"
+    "docs:build": "vuepress build docs",
+    "upgrade:preview": "lerna exec -- ncu && ncu",
+    "upgrade": "lerna exec -- ncu -u --timeout 300 && lerna exec -- yarn && ncu -u --timeout 300 && yarn",
+    "deploy:minor": "lerna version minor -y",
+    "deploy": "lerna version patch -y"
   },
   "husky": {
     "hooks": {
