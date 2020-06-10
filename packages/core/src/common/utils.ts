@@ -164,7 +164,11 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
       getAllPluginsMapping(argv)
     ) : getAllPluginsMapping(argv)
 
-    if (appConfig && appConfig.name !== scriptName && !plugins[appConfig.name] && appConfig.applicationDir && appConfig.applicationDir !== argv.coreDir) {
+    if (appConfig && 
+        appConfig.name !== scriptName && 
+        appConfig.name !== argv.packageName && 
+        !plugins[appConfig.name] && 
+        appConfig.applicationDir && appConfig.applicationDir !== argv.coreDir) {
       plugins['application'] = appConfig.applicationDir
     }
 
