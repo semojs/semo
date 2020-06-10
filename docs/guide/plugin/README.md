@@ -125,7 +125,7 @@ export const hook_component = async () {
 
 ```js
 import { Utils } from 'semo'
-const { a } = await Utils.invokeHook('component')
+const { a } = await Utils.invokeHook('components')
 console.log(a)
 // -> 'b'
 ```

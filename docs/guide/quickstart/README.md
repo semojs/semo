@@ -132,7 +132,7 @@ import lib from 'semo-plugin-xxx'
 ```js
 import { Utils } from 'semo'
 
-const { xxx } = await Utils.invokeHook('component')
+const { xxx } = await Utils.invokeHook('components')
 ```
 
 可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。
