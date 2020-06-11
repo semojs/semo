@@ -9,7 +9,7 @@ export const aliases = ['ls', 'l']
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  // yargs.option('option', { default, describe, alias })
+  yargs.option('watch', { describe: 'Watch config change, maybe only work on Mac' })
   // yargs.commandDir('list')
 }
 
@@ -27,18 +27,15 @@ export const handler = async function (argv: any) {
     return
   }
 
-  // const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
-  // const config = Utils.yaml.parseDocument(rcFile)
-
-//   config.contents.items.forEach(item => {
-//     console.log(item.key, item.value)
-//   })
-// console.log(config.toString())
-//   console.log('Start to draw your dream code!')
-
-
-  spawn(`cat ${configPath} | less -r`, { 
-    stdio: 'inherit',
-    shell: true
-  })
+  if (argv.watch && Utils.shell.which('watch')) {
+    spawn(`watch cat ${configPath}`, { 
+      stdio: 'inherit',
+      shell: true
+    })
+  } else {
+    spawn(`cat ${configPath} | less -r`, { 
+      stdio: 'inherit',
+      shell: true
+    })
+  }
 }

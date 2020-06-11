@@ -140,3 +140,15 @@ typescript: true
 foo-bar
 fooBar
 :::
+
+## 通过命令行修改配置
+
+我们当然可以通过编辑配置文件的方式修改配置，但是 Semo 也提供了编辑配置的命令行工具，在命令行工具的帮助下，就可以用脚本的方式定制某些配置了。
+
+```
+semo config set a.b.c d 'some comment' -g
+semo config get a.b.c
+semo config del a.b.c
+semo config list
+semo config list --watch
+```

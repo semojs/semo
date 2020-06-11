@@ -51,12 +51,24 @@ export const handler = async function (argv: any) {
     return
   }
 
-  if (argv.global && configPath && !Utils.fs.existsSync(configPath)) {
-    Utils.fs.ensureDirSync(configPath)
+  if (argv.global && configPath && !Utils.fs.existsSync(path.dirname(configPath))) {
+    Utils.fs.ensureDirSync(path.dirname(configPath))
   }
 
-  const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
-  const config = Utils.yaml.parseDocument(rcFile)
+  let config
+  if (Utils.fs.existsSync(configPath)) {
+    const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
+    config = Utils.yaml.parseDocument(rcFile)
+  } else {
+    config = Utils.yaml.parseDocument('')
+
+    config.commentBefore = `THIS IS CLI TOOL SEMO(@semo/cli)'s RC FILE.
+YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
+RUN semo config help TO SEE THE RELATED COMMANDS.
+`
+    config.contents = Utils.yaml.createNode({})
+  }
+
   const tmpConfigObject = Utils._.set({}, argv.configKey, argv.configValue)
 
   // Recursively find and change
@@ -69,10 +81,9 @@ export const handler = async function (argv: any) {
 
 const walk = (map: any, configKey, config, comment) => {
   const currentKey = Object.keys(configKey)[0]
-  if (map.items) {
 
-
-    let found = false
+  let found = false
+  if (map && map.items && map.items.length > 0) {
     for (let pair of map.items) {
       if (pair.key.value === currentKey) {
         found = true
@@ -84,13 +95,35 @@ const walk = (map: any, configKey, config, comment) => {
         }
       }
     }
+  }
 
-    if (!found) {
-      const pair = config.schema.createPair(currentKey, configKey[currentKey])
-      pair.comment = comment
+  if (!found) {
+    const pair = config.schema.createPair(currentKey, configKey[currentKey])
+    walkComment(pair.value, configKey[currentKey], comment)
+
+    if (map && Utils._.isArray(map.items)) {
       map.items.push(pair)
+    } else {
+      config.contents = pair
     }
   }
 
   return
+}
+
+const walkComment = (map, configKey, comment) => {
+  if (Utils._.isString(configKey)) {
+    map.comment = comment
+  } else {
+    const nextKey = Object.keys(configKey)[0]
+
+    if (map && map.items && map.items.length > 0) {
+      for (let pair of map.items) {
+        if (pair.key.value === nextKey) {
+          walkComment(pair.value, configKey[pair.key.value], comment)
+        }
+      }
+  
+    }
+  }
 }

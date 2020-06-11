@@ -686,7 +686,7 @@ const getApplicationConfig = function(opts: any = {}) {
       debugCore('load rc:', e)
       warn(`Global ${homeSemoYamlRcPath} config load failed!`)
     }
-  } {
+  } else {
     applicationConfig = {}
   }
 

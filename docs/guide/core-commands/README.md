@@ -20,6 +20,29 @@ semo generate command application/test --extend=application
 
 通过 `semo application help` 可以看到当前业务项目定义的所有顶级子命令，因为如果项目实现的命令过多，层次也多的话，一般我们很难记住所有命令和参数，所以帮助命令是我们经常要执行的。
 
+## `semo config`
+
+我们可以通过核心内置的这个命令来查看和修改配置文件，可以操作当前项目的配置文件，也可以操作全局配置文件。
+
+```
+semo config <op>
+
+Manage rc config
+
+命令：
+  semo config delete <configKey>                                Delete configs by key                     [aliases: del]
+  semo config get <configKey>                                   Get configs by key
+  semo config list                                              List configs                   [默认值] [aliases: ls, l]
+  semo config set <configKey> <configValue> [configComment]     Set config by key
+  [configType]
+
+Options:
+  --global, -g  For reading/writing configs from/to global yml rc file, default is false
+  --watch       Watch config change, maybe only work on Mac
+```
+
+注意，这里的 <configKey> 的格式是 `a.b.c` 的形式，代表多层级配置。另外，这里支持对设置的最后一个层级的配置添加注释。
+
 ## `semo hook`
 
 :::tip

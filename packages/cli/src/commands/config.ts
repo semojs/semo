@@ -1,7 +1,7 @@
 import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
-export const command = 'config [op]'
+export const command = 'config <op>'
 export const desc = 'Manage rc config'
 export const aliases = 'cfg'
 // export const middleware = (argv) => {}
@@ -9,7 +9,7 @@ export const aliases = 'cfg'
 export const builder = function (yargs: any) {
   yargs.option('global', {
     alias: 'g',
-    describe: 'For reading and writing configs to global yml or not, default is false.'
+    describe: 'For reading/writing configs from/to global yml rc file, default is false'
   })
 
   const argv: any = Utils.getInternalCache().get('argv') || {}
