@@ -62,9 +62,9 @@ export const handler = async function (argv: any) {
   } else {
     config = Utils.yaml.parseDocument('')
 
-    config.commentBefore = `THIS IS CLI TOOL SEMO(@semo/cli)'s RC FILE.
-YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
-RUN semo config help TO SEE THE RELATED COMMANDS.
+    config.commentBefore = ` THIS IS SEMO(@semo/cli)'s RC FILE.
+ YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
+ RUN semo config help TO SEE RELATED COMMANDS.
 `
     config.contents = Utils.yaml.createNode({})
   }
