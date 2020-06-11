@@ -178,7 +178,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         pluginsReturn = []
         break
       case 'replace':
-        pluginsReturn = ''
+        pluginsReturn = undefined
         break
       case 'group':
       case 'assign':
@@ -259,7 +259,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
 
         if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
-          if (loadedPlugin[hook]) {
+          if (_.isNull(loadedPlugin[hook])) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
               pluginReturn = (await loadedPlugin[hook](pluginsReturn, options.opts))
