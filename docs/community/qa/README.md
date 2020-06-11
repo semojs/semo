@@ -15,22 +15,18 @@ sidebar: auto
 semo status --disable-global-plugin --disable-home-plugin
 ```
 
-如果不想每次都输入，可以放到 `.semorc.json` 文件当中：
+如果不想每次都输入，可以放到 `.semorc.yml` 文件当中：
 
-```json
-{
-  "--disable-global-plugin": true,
-  "--disable-home-plugin": true
-}
+```yml
+--disable-global-plugin: true,
+--disable-home-plugin: true
 ```
 
 或
 
-```json
-{
-  "--disableGlobalPlugin": true,
-  "--disableHomePlugin": true
-}
+```yml
+disableGlobalPlugin: true,
+disableHomePlugin: true
 ```
 
 

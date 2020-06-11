@@ -673,12 +673,10 @@ const getApplicationConfig = function(opts: any = {}) {
   let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
   let applicationConfig
 
-  const configPath = findUp.sync([`.${scriptName}rc.yml`, `.${scriptName}rc.json`], {
+  const configPath = findUp.sync([`.${scriptName}rc.yml`], {
     cwd: opts.cwd
   })
 
-  // .semorc.yml > .semorc.json
-  const homeSemoJsonRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.json`) : ''
   const homeSemoYamlRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.yml`) : ''
   if (homeSemoYamlRcPath && fileExistsSyncCache(homeSemoYamlRcPath)) {
     try {
@@ -688,14 +686,7 @@ const getApplicationConfig = function(opts: any = {}) {
       debugCore('load rc:', e)
       warn(`Global ${homeSemoYamlRcPath} config load failed!`)
     }
-  } else if (homeSemoJsonRcPath && fileExistsSyncCache(homeSemoJsonRcPath)) {
-    try {
-      applicationConfig = formatRcOptions(require(homeSemoJsonRcPath))
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Global ${homeSemoJsonRcPath} config load failed!`)
-    }
-  } else {
+  } {
     applicationConfig = {}
   }
 
@@ -771,8 +762,6 @@ const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
   argv = argv || cachedInstance.get('argv') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
-  // .semorc.yml > .semorc.json
-  const pluginSemoJsonRcPath = path.resolve(pluginPath, `.${scriptName}rc.json`)
   const pluginSemoYamlRcPath = path.resolve(pluginPath, `.${scriptName}rc.yml`)
   let pluginConfig
   if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
@@ -782,14 +771,6 @@ const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
     } catch (e) {
       debugCore('load rc:', e)
       warn(`Plugin ${plugin} .semorc.yml config load failed!`)
-      pluginConfig = {}
-    }
-  } else if (fileExistsSyncCache(pluginSemoJsonRcPath)) {
-    try {
-      pluginConfig = formatRcOptions(require(pluginSemoJsonRcPath))
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Plugin ${plugin} .semorc.json config load failed!`)
       pluginConfig = {}
     }
   }

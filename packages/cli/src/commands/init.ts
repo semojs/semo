@@ -33,11 +33,6 @@ export const builder = function(yargs) {
     alias: 'ts',
     describe: 'Generate typescript style code'
   })
-
-  yargs.option('rc-format', {
-    default: 'yml',
-    describe: 'Rc format, default is yml, also support json'
-  })
 }
 
 export const handler = async function(argv: any) {
@@ -46,10 +41,6 @@ export const handler = async function(argv: any) {
     Utils.info('yarn.lock found, use yarn for package management.')
   }
 
-  if (!['yml', 'json'].includes(argv.rcFormat)) {
-    Utils.error('Invalid --rc-format option, only support yml and json.')
-    return
-  }
   let defaultRc: any = argv.plugin
     ? Utils._.pickBy({
         typescript: argv.typescript ? true : null,
@@ -69,14 +60,14 @@ export const handler = async function(argv: any) {
   let currentPath = path.resolve(process.cwd())
 
   try {
-    const configPath = `${currentPath}/.${argv.scriptName}rc.${argv.rcFormat ? argv.rcFormat : 'yml'}`
+    const configPath = `${currentPath}/.${argv.scriptName}rc.yml`
     const { override } =
       Utils.fileExistsSyncCache(configPath) && !argv.force
         ? await Utils.inquirer.prompt([
             {
               type: 'confirm',
               name: 'override',
-              message: `.${argv.scriptName}rc.json exists, override?`,
+              message: `.${argv.scriptName}rc.yml exists, override?`,
               default: false
             }
           ])
@@ -85,11 +76,8 @@ export const handler = async function(argv: any) {
       console.log(Utils.chalk.yellow('User aborted!'))
       return
     }
-    if (argv.rcFormat === 'yml') {
-      fs.writeFileSync(configPath, Utils.yaml.stringify(defaultRc, {}))
-    } else if (argv.rcFormat === 'json') {
-      fs.writeFileSync(configPath, JSON.stringify(defaultRc, null, 2))
-    }
+
+    fs.writeFileSync(configPath, Utils.yaml.stringify(defaultRc, {}))
     
     console.log(Utils.chalk.green(`Default .${argv.scriptName}rc created!`))
     const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)

@@ -56,7 +56,7 @@ Hook                         :  Package :  Description
 业务项目中，我们默认将 `Semo` 的目录结构放到 `bin` 目录:
 
 ```
-├── .semorc.json
+├── .semorc.yml
 ├── bin
 │   └── semo
 │       ├── commands
@@ -71,7 +71,7 @@ Hook                         :  Package :  Description
 而在插件项目中，我们是把所有代码放到 `src` 目录:
 
 ```
-├── .semorc.json
+├── .semorc.yml
 ├── src
 │    ├── commands
 │    ├── extends
@@ -82,7 +82,7 @@ Hook                         :  Package :  Description
 这个命令存在的意义也仅仅是为了节省工程师若干秒的时间，也就是说如果不用这个命令，手动去创建这些目录和文件夹也是 OK 的。
 
 :::tip
-关于 `.semorc.json` 的结构和用途将在配置管理小节说明
+关于 `.semorc.yml` 的结构和用途将在配置管理小节说明
 :::
 
 另外，如果我们真的要创建一个插件，通过初始化的方式进行还是太慢了，这里推荐使用插件项目模板进行，具体的命令如下：
@@ -143,7 +143,7 @@ semo create PROJECT_NAME -yfie
 项目的目录结构如下：
 
 ```
-├── .semorc.json
+├── .semorc.yml
 ├── bin
 │   └── semo
 │       ├── commands
@@ -167,7 +167,7 @@ semo create semo-plugin-[PLUGIN_NAME] -yfie
 项目的目录结构如下：
 
 ```
-├── .semorc.json
+├── .semorc.yml
 ├── package.json
 └── src
     ├── commands
@@ -251,14 +251,12 @@ semo generate command generate/test --extend=semo
 
 具体怎么实现这些代码生成命令，这里是没有做约束的，因为首先 es6 内置的模板字符串机制可以解决大多数问题，然后 `Semo` 还内置了 `lodash`，其 `_.template` 方法也比较灵活，最后只要把组装好的样板代码放到想放的位置即可。
 
-因为这部分都是基于 `Semo` 的，所以相关的配置建议放到 `.semorc.json` 文件，例如自动生成的配置里就有的：
+因为这部分都是基于 `Semo` 的，所以相关的配置建议放到 `.semorc.yml` 文件，例如自动生成的配置里就有的：
 
-```
-{
-  "commandDir": "src/commands",
-  "extendDir": "src/extends",
-  "hookDir": "src/hooks"
-}
+```yml
+commandDir: src/commands
+extendDir: src/extends
+hookDir: src/hooks
 ```
 
 可以看到，`create` 命令生成默认配置也仅仅是约定了一些代码自动生成的目录，同时也给出一种定义目录的配置风格，如果想保持配置的一致性，可以用同样的风格定义其他目录。
@@ -425,7 +423,7 @@ export const handler = async function (argv: any) {
 }
 ```
 
-可以看到，作为一个脚本，不是一上来就写业务逻辑，也不需要声明 `shebang` 标识，只需要定义两个方法，一个是 `builder`，一个是 `handler`。其中 `builder` 用于声明脚本的参数，格式可以参考 `yargs`，如果脚本不需要参数，其实也可以不定义，由于是模板自动生成，放到那里即可，以备不时之需。`handler` 是具体的执行逻辑，传入的参数就是解析好的脚本参数，也包含了项目的 `.semorc.json` 里的配置。可以看到 `handler` 支持 `async` 所以这里可以执行一些异步操作。
+可以看到，作为一个脚本，不是一上来就写业务逻辑，也不需要声明 `shebang` 标识，只需要定义两个方法，一个是 `builder`，一个是 `handler`。其中 `builder` 用于声明脚本的参数，格式可以参考 `yargs`，如果脚本不需要参数，其实也可以不定义，由于是模板自动生成，放到那里即可，以备不时之需。`handler` 是具体的执行逻辑，传入的参数就是解析好的脚本参数，也包含了项目的 `.semorc.yml` 里的配置。可以看到 `handler` 支持 `async` 所以这里可以执行一些异步操作。
 
 所以，脚本和命令最大的区别其实就是使用的频率，以及业务的定位，我们经常做的分层是定义原子命令，然后在脚本中调度。
 
