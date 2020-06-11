@@ -262,7 +262,7 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           if (loadedPlugin[hook]) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options.opts)) || {}
+              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options.opts))
             } else {
               pluginReturn = loadedPlugin[hook]
             }
