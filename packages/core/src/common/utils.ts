@@ -1462,6 +1462,7 @@ export {
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
   /** [yargs-parser](https://www.npmjs.com/package/yargs) reference */
+  yargs,
   yParser,
   /** [yargs-parser](https://www.npmjs.com/package/yaml) reference */
   yaml,
