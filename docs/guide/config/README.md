@@ -152,3 +152,9 @@ semo config del a.b.c
 semo config list
 semo config list --watch
 ```
+
+## 应用环境配置
+
+> 此特性 `v0.8.0` 引入
+
+在应用目录（一般是指运行 semo 命令的当前目录），我们会用 Semo 的机制组织我们的项目代码，比如命令行工具，计划任务，钩子扩展，命令扩展，脚本等等。之前系统只能识别 `.semorc.yml` 这个配置文件，最新的版本已经可以继续加载一个环境配置，比如当前 `NODE_ENV=development`(默认值)，则 `.semorc.development.yml` 如果存在也会识别和加载，并会覆盖主配置的同名配置（用的是 Lodash 的 `_.merge`）

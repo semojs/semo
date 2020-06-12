@@ -574,7 +574,10 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
 
     if (process.env.HOME && !argv.disableHomePlugin) {
       // Semo home is a special directory 
-      plugins['.' + scriptName] = path.resolve(process.env.HOME, '.' + scriptName)
+      if (fileExistsSyncCache(path.resolve(process.env.HOME, '.' + scriptName, `.${scriptName}rc.yml`))) {
+        plugins['.' + scriptName] = path.resolve(process.env.HOME, '.' + scriptName)
+      }
+
 
       // process home npm plugins
       glob
