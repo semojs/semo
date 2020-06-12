@@ -513,7 +513,7 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
 /**
  * Get all plugins path mapping.
  * Same name plugins would be overriden orderly.
- * This function also influence final valid commands and configs.
+ * This function also influences final valid commands and configs.
  */
 const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: string } {
   argv = argv || cachedInstance.get('argv') || {}
