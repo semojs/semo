@@ -680,6 +680,12 @@ const getApplicationConfig = function(opts: any = {}) {
     cwd: opts.cwd
   })
 
+  const nodeEnv = getNodeEnv(argv)
+  const configEnvPath = findUp.sync([`.${scriptName}rc.${nodeEnv}.yml`], {
+    cwd: opts.cwd
+  })
+
+  // Load home config if exists
   const homeSemoYamlRcPath = process.env.HOME ? path.resolve(process.env.HOME, `.${scriptName}`, `.${scriptName}rc.yml`) : ''
   if (homeSemoYamlRcPath && fileExistsSyncCache(homeSemoYamlRcPath)) {
     try {
@@ -723,6 +729,7 @@ const getApplicationConfig = function(opts: any = {}) {
     }
   }
 
+  // Load current directory main rc config
   if (configPath) {
     let semoRcInfo = {}
 
@@ -734,10 +741,29 @@ const getApplicationConfig = function(opts: any = {}) {
         semoRcInfo = require(configPath)
         semoRcInfo = formatRcOptions(semoRcInfo)
       }
-      applicationConfig = Object.assign({}, applicationConfig, semoRcInfo)
+      applicationConfig = _.merge(applicationConfig, semoRcInfo)
     } catch(e) {
       debugCore('load rc:', e)
       warn(`application rc config load failed!`)
+    }
+  }
+
+  // Load current directory env rc config
+  if (configEnvPath) {
+    let semoEnvRcInfo = {}
+
+    try {
+      if (configEnvPath.endsWith('.yml')) {
+        const rcFile = fs.readFileSync(configEnvPath, 'utf8')
+        semoEnvRcInfo = formatRcOptions(yaml.parse(rcFile))
+      } else {
+        semoEnvRcInfo = require(configEnvPath)
+        semoEnvRcInfo = formatRcOptions(semoEnvRcInfo)
+      }
+      applicationConfig = _.merge(applicationConfig, semoEnvRcInfo)
+    } catch(e) {
+      debugCore('load rc:', e)
+      warn(`application env rc config load failed!`)
     }
   }
 
@@ -997,8 +1023,8 @@ const exec = function(command: string, options: any = {}): any {
  *
  * You can change the node-env-key in command args or semo rc file
  */
-const getNodeEnv = () => {
-  const argv: any = cachedInstance.get('argv') || {}
+const getNodeEnv = (argv: any = null) => {
+  argv = argv || cachedInstance.get('argv') || {}
   const nodeEnvKey = argv.nodeEnvKey || argv.nodeEnv || 'NODE_ENV'
   return process.env[nodeEnvKey] || 'development'
 }
