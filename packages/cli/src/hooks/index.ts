@@ -12,6 +12,11 @@ export const hook_hook = {
   create_project_template: 'Hook triggered in create command.'
 }
 
+export const hook_repl = () => {
+  const corePkgInfo = Utils.loadCorePackageInfo()
+  return { VERSION: corePkgInfo.version }
+}
+
 export const hook_create_project_template = () => {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
