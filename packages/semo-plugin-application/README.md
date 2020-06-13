@@ -17,8 +17,6 @@ semo generate command application/deploy --extend=application
 semo generate command application/other --extend=application
 ```
 
-There are builtin commands, `test`, `build`, `deploy`, if you don't like there commands, you can set `disabled=true` in your extended commands to hide these commands.
-
 To use these commands:
 
 ```
