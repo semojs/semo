@@ -10,6 +10,7 @@ export const desc = 'Run any plugin command directly'
 export const builder = function (yargs: any) {
   yargs.option('UPGRADE', { describe: 'Force upgrade plugin cache', alias: 'UP' })
   yargs.option('SCOPE', { default: '', describe: 'Set plugin npm scope' })
+  yargs.option('DEP', { default: '', describe: 'Set plugin dependent plugins' })
   // yargs.commandDir('run')
 }
 
@@ -23,6 +24,26 @@ export const handler = async function (argv: any) {
   if (argv.SCOPE) {
     argv.PLUGIN = `@${argv.SCOPE}/${argv.PLUGIN}`
   }
+
+  argv.DEP = Utils._.castArray(argv.DEP)
+
+  argv.DEP.forEach(dep => {
+    if (dep.indexOf(`${scriptName}-plugin-`) === -1) {
+      dep = `${scriptName}-plugin-${dep}`
+    }
+  
+    if (argv.SCOPE) {
+      dep = `@${argv.SCOPE}/${dep}`
+    }
+
+    try {
+      Utils.importPackage(dep, 'run-plugin-cache', true, argv.UPGRADE)
+    } catch (e) {
+      Utils.error('Plugin not found')
+    }
+  })
+
+
 
   let plugin
   try {

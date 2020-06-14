@@ -399,8 +399,20 @@ semo run xxx --SCOPE yyy
 `run` 命令运行的插件肯定是缓存到本地了，只不过不在全局插件目录 `.semo/node_modules`, 而是在 `.semo/run_plugin_cache/node_modules` 目录，默认如果存在就会用缓存里的插件，如果想更新需要用参数 --upgrade
 
 ```
-semo run serve --UPGRADE
+semo run serve --UPGRADE|--UP
 ```
+
+有些插件可能依赖于另一些插件，如果有这种情况，就需要手动指定依赖插件，实现一起下载，为什么不能基于 npm 的依赖关系呢，可以看一下下面这个例子：
+
+:::tip
+此特性 v0.9.0 引入
+:::
+
+```
+semo run read READ_URL --format=editor --DEP=read-extend-format-editor
+```
+
+editor 这个插件在开发时是依赖于 read 的，但是在运行时，read 指定的参数却是 editor 这个插件实现的，所以只能手动指定依赖了。
 
 你可能已经发现这个命令的所有参数和选项都是大写的，这是为了减少与其他插件的冲突，我们最好约定所有的插件的参数和选项都用小写。
 
