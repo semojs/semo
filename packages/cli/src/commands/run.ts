@@ -37,9 +37,9 @@ export const handler = async function (argv: any) {
     }
 
     try {
-      Utils.importPackage(dep, 'run-plugin-cache', true, argv.UPGRADE)
+      Utils.installPackage(dep, 'run-plugin-cache', true, argv.UPGRADE)
     } catch (e) {
-      Utils.error('Plugin not found')
+      Utils.error(`Plugin ${dep} not found or entry not exist`)
     }
   })
 
@@ -49,16 +49,20 @@ export const handler = async function (argv: any) {
   try {
     plugin = Utils.importPackage(argv.PLUGIN, 'run-plugin-cache', true, argv.UPGRADE)
   } catch (e) {
-    Utils.error('Plugin not found')
+    Utils.error(`Plugin ${plugin} not found or entry not exist`)
   }
 
+  let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_EXTRA_PLUGIN_DIR'
+  let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache')
+
+  process.env[extraPluginDirEnvName] = runPluginDir
   if (!argv.COMMAND || argv.COMMAND.length === 0) {
     // If command option not provided, it's a conversion that you can call the module exported handler mothod
     // If handler not exist, run command will failed
     if (plugin.handler) {
       await plugin.handler(argv)
     } else {
-      Utils.error('Default handler not found.')
+      Utils.error(`Plugin ${plugin}'s default handler not found`)
       return
     }
   } else {
