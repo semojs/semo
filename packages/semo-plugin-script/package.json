@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-script",
-  "version": "0.8.3",
+  "version": "0.8.4",
   "description": "A semo plugin to provide project scripts convension.",
   "keywords": [
     "cli",
@@ -34,7 +34,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^0.8.3"
+    "@semo/core": "^0.8.4"
   },
   "publishConfig": {
     "access": "public"
