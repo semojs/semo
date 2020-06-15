@@ -518,10 +518,9 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
 const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: string } {
   argv = argv || cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
+  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
-  if (_.isEmpty(plugins)) {
-    let pluginPrefix = argv.pluginPrefix || 'semo'
-    let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  let pluginPrefix = argv.pluginPrefix || 'semo'
     if (_.isString(pluginPrefix)) {
       pluginPrefix = [pluginPrefix]
     }
@@ -537,6 +536,7 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
       ? '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
       : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
 
+  if (_.isEmpty(plugins)) {
     plugins = {}
 
     // process core plugins
@@ -662,6 +662,29 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
     }
 
     cachedInstance.set('plugins', plugins)
+  }
+
+  let extraPluginDirEnvName = _.upperCase(scriptName) + '_EXTRA_PLUGIN_DIR'
+  if (extraPluginDirEnvName && process.env[extraPluginDirEnvName] && fileExistsSyncCache(process.env[extraPluginDirEnvName])) {
+    // process cwd npm plugins
+    glob
+    .sync(topPluginPattern, {
+      noext:true,
+      cwd: path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules')
+    })
+    .map(function(plugin) {
+      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules', plugin)
+    })
+
+  // process cwd npm scope plugins
+  glob
+    .sync(orgPluginPattern, {
+      noext:true,
+      cwd: path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules')
+    })
+    .map(function(plugin) {
+      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules', plugin)
+    })
   }
 
   return plugins
@@ -1380,7 +1403,7 @@ const resolvePackage = (name, location = '', home = true) => {
   return pkgPath
 }
 
-const installPackage = (name, location = '', home = true) => {
+const installPackage = (name, location = '', home = true, force = false) => {
   const nameArray = _.castArray(name)
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
@@ -1393,9 +1416,22 @@ const installPackage = (name, location = '', home = true) => {
   if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
     exec(`cd ${downloadDir} && npm init -y`)
   }
+
+  if (force) {
+    exec(`npm install ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+  }
+
+  nameArray.forEach(pkg => {
+    try {
+      require.resolve(pkg, { paths: [downloadDir] })
+    } catch (err) {
+      if (err.code == 'MODULE_NOT_FOUND') {
+        exec(`npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+      }
+    }
+  })
   
 
-  exec(`npm install ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
 }
 
 const uninstallPackage = (name, location = '', home = true) => {
