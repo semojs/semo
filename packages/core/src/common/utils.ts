@@ -664,7 +664,7 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
     cachedInstance.set('plugins', plugins)
   }
 
-  let extraPluginDirEnvName = _.upperCase(scriptName) + '_EXTRA_PLUGIN_DIR'
+  let extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
   if (extraPluginDirEnvName && process.env[extraPluginDirEnvName] && fileExistsSyncCache(process.env[extraPluginDirEnvName])) {
     // process cwd npm plugins
     glob

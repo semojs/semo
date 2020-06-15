@@ -221,7 +221,7 @@ semo help --plugin-dir=dir1 --plugin-dir=dir2
 另外，还支持通过常量的方式指定：
 
 ```
-SEMO_EXTRA_PLUGIN_DIR=dir3 semo help
+SEMO_PLUGIN_DIR=dir3 semo help
 ```
 
 这种方式是扫描的目录下的 `node_modules` 目录。
