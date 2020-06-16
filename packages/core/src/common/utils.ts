@@ -666,28 +666,41 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
 
   let extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
   if (extraPluginDirEnvName && process.env[extraPluginDirEnvName] && fileExistsSyncCache(process.env[extraPluginDirEnvName])) {
+    let envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
+
     // process cwd npm plugins
     glob
     .sync(topPluginPattern, {
       noext:true,
-      cwd: path.resolve(String(process.env[extraPluginDirEnvName]))
+      cwd: path.resolve(envDir)
     })
     .map(function(plugin) {
-      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), plugin)
+      plugins[plugin] = path.resolve(envDir, plugin)
     })
 
   // process cwd npm scope plugins
   glob
     .sync(orgPluginPattern, {
       noext:true,
-      cwd: path.resolve(String(process.env[extraPluginDirEnvName]))
+      cwd: path.resolve(envDir)
     })
     .map(function(plugin) {
-      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), plugin)
+      plugins[plugin] = path.resolve(envDir, plugin)
     })
   }
 
   return plugins
+}
+
+/**
+ * Get absolute path or dir, this func will not judge if exist
+ */
+const getAbsolutePath = (filePath) => {
+  if (filePath[0] === '/') return filePath
+
+  if (filePath[0] === '~') return filePath.replace(/^~/, process.env.HOME)
+
+  return path.resolve(filePath)
 }
 
 /**
@@ -1561,6 +1574,7 @@ export {
   getInternalCache,
   getCache,
   getNodeEnv,
+  getAbsolutePath,
   isProduction,
   isDevelopment,
   fileExistsSyncCache,
