@@ -670,20 +670,20 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
     glob
     .sync(topPluginPattern, {
       noext:true,
-      cwd: path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules')
+      cwd: path.resolve(String(process.env[extraPluginDirEnvName]))
     })
     .map(function(plugin) {
-      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules', plugin)
+      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), plugin)
     })
 
   // process cwd npm scope plugins
   glob
     .sync(orgPluginPattern, {
       noext:true,
-      cwd: path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules')
+      cwd: path.resolve(String(process.env[extraPluginDirEnvName]))
     })
     .map(function(plugin) {
-      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), 'node_modules', plugin)
+      plugins[plugin] = path.resolve(String(process.env[extraPluginDirEnvName]), plugin)
     })
   }
 

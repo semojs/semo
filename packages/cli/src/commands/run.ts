@@ -52,7 +52,7 @@ export const handler = async function (argv: any) {
   }
 
   let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_PLUGIN_DIR'
-  let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache')
+  let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache', 'node_modules')
 
   process.env[extraPluginDirEnvName] = runPluginDir
   if (!argv.COMMAND || argv.COMMAND.length === 0) {

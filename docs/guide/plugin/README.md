@@ -222,6 +222,3 @@ semo help --plugin-dir=dir1 --plugin-dir=dir2
 
 ```
 SEMO_PLUGIN_DIR=dir3 semo help
-```
-
-这种方式是扫描的目录下的 `node_modules` 目录。
