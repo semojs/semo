@@ -468,6 +468,7 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
         console.log()
         
         // Give command a plugin level config
+        argv['$config'] = {};
         command.plugin = command.plugin || moduler
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
@@ -477,8 +478,6 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
               argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
             } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
               argv['$config'] = formatRcOptions(argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {})
-            } else {
-              argv['$config'] = {}
             }
           }
         } 
@@ -1214,6 +1213,7 @@ const launchDispatcher = (opts: any = {}) => {
 
       command.middlewares.unshift(async (argv) => {
 
+        argv['$config'] = {};
         // Give command a plugin level config
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
@@ -1223,8 +1223,6 @@ const launchDispatcher = (opts: any = {}) => {
               argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
             } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
               argv['$config'] = formatRcOptions(argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {})
-            } else {
-              argv['$config'] = {}
             }
           }
         }
