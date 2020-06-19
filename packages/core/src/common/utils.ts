@@ -1543,6 +1543,18 @@ const importPackage = (name, location = '', home = true, force = false) => {
 }
 
 /**
+ * Get final config value
+ * 
+ * Only work in command handler
+ * 
+ * @param argv yargs's argv
+ * @param key config key
+ */
+const config = (argv, key) {
+  return !_.isNull(argv[key]) ? argv[key] : argv.$config[key]
+}
+
+/**
  * Semo utils functions and references to common modules.
  * @module Utils
  */
@@ -1603,6 +1615,7 @@ export {
   loadCorePackageInfo,
   exec,
   sleep,
+  config,
   getInternalCache,
   getCache,
   getNodeEnv,
