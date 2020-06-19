@@ -8,6 +8,7 @@ export const aliases = 'i'
 
 export const builder = function (yargs: any) {
   yargs.option('scope', { default: '', describe: 'Set plugin npm scope' })
+  yargs.option('force', { describe: 'Force reinstall' })
   // yargs.commandDir('install')
 }
 
@@ -27,6 +28,6 @@ export const handler = async function (argv: any) {
     return plugin
   })
 
-  Utils.installPackage(argv.plugin, 'home-plugin-cache', true)
+  Utils.installPackage(argv.plugin, 'home-plugin-cache', true, argv.force)
  
 }
