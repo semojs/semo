@@ -1550,7 +1550,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
  * @param argv yargs's argv
  * @param key config key
  */
-const config = (argv, key) {
+const config = (argv, key) => {
   return !_.isNull(argv[key]) ? argv[key] : argv.$config[key]
 }
 
