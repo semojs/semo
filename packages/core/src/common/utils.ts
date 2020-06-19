@@ -1548,10 +1548,15 @@ const importPackage = (name, location = '', home = true, force = false) => {
  * Only work in command handler
  * 
  * @param key config key
+ * @param defaultValue default value
  */
-const config = (key) => {
+const config = (key: string, defaultValue) => {
   const argv: any = getInternalCache().get('argv')
-  return !_.isNull(argv[key]) ? argv[key] : argv.$config[key]
+  return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
+    ? argv[key] 
+    : !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key]) 
+      ? argv.$config[key]
+      : defaultValue
 }
 
 /**
