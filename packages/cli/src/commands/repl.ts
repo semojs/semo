@@ -52,7 +52,8 @@ function corepl(cli: repl.REPLServer) {
   return cli
 }
 
-export const command = ['repl', '$0']
+export const plugin = 'semo'
+export const command = 'repl'
 export const aliases = 'r'
 export const desc = 'Play with REPL'
 

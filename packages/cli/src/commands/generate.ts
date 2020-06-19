@@ -1,5 +1,6 @@
 import { Utils } from '@semo/core'
 
+export const plugin = 'semo'
 export const command = 'generate <component>'
 export const desc = 'Generate component sample code'
 export const aliases = ['g']

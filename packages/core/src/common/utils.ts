@@ -445,11 +445,11 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
  *   Utils.extendSubCommand('make', 'semo', yargs, __dirname)
  * }
  * @param {String} command Current command name.
- * @param {String} module Current plugin name.
+ * @param {String} moduler Current plugin name.
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function(command: string, module: string, yargs: any, basePath: string): void {
+const extendSubCommand = function(command: string, moduler: string, yargs: any, basePath: string): void {
   let argv: any = cachedInstance.get('argv') || {}
   if (_.isEmpty(argv)) {
     argv = yargs.getOptions().configObjects[0]
@@ -466,6 +466,19 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
       command.middlewares.unshift(async (argv) => {
          // Insert a blank line to terminal
          console.log()
+         
+         // Give command a plugin level config
+         command.plugin = command.plugin || moduler
+         command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
+        if (command.plugin && argv['$plugin']) {
+          if (argv['$plugin'][command.plugin]) {
+            argv['$config'] = argv['$plugin'][command.plugin]
+          } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
+            argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]
+          }
+        }
+
+        argv.$command = command
         argv.$input = await getStdin()
         getInternalCache().set('argv', argv)
       })
@@ -490,11 +503,11 @@ const extendSubCommand = function(command: string, module: string, yargs: any, b
       if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
         if (
           fileExistsSyncCache(
-            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduler}/src/commands`, command)
           )
         ) {
           yargs.commandDir(
-            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${module}/src/commands`, command)
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduler}/src/commands`, command)
           , opts)
         }
       }
@@ -804,6 +817,12 @@ const getApplicationConfig = function(opts: any = {}) {
       debugCore('load rc:', e)
       warn(`application env rc config load failed!`)
     }
+  }
+
+  if (applicationConfig['$core'] && applicationConfig['$core']['env'] && _.isObject(applicationConfig['$core']['env'])) {
+    Object.keys(applicationConfig['$core']['env']).forEach(key => {
+      process.env[key] = applicationConfig['$core']['env'][key]
+    })
   }
 
   return applicationConfig
@@ -1184,16 +1203,29 @@ const launchDispatcher = (opts: any = {}) => {
   let scriptName = parsedArgv.scriptName || 'semo'
   const yargsOpts = {
     // Give each command an ability to disable temporarily
-    visit: (command) => {
-      // console.log()
+    visit: (command, pathTofile, filename) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
+
+        // Give command a plugin level config
+        command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
+        if (command.plugin && argv['$plugin']) {
+          if (argv['$plugin'][command.plugin]) {
+            argv['$config'] = argv['$plugin'][command.plugin]
+          } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
+            argv['$config'] = argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]
+          }
+        }
+
         // Insert a blank line to terminal
         console.log()
+
+        argv.$command = command
         argv.$input = await getStdin()
         getInternalCache().set('argv', argv)
       })
+
       if (command.middleware) {
         command.middlewares = command.middlewares.concat(command.middleware)
       }

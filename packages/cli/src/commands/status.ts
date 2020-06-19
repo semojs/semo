@@ -1,5 +1,6 @@
 import { Utils } from '@semo/core'
 
+export const plugin = 'semo'
 export const command = 'status'
 export const aliases = 'st'
 export const desc = 'Show environment status info'

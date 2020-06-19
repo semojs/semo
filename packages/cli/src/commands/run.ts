@@ -1,6 +1,7 @@
 import { Utils } from '@semo/core'
 import path from 'path'
 
+export const plugin = 'semo'
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'run <PLUGIN> [COMMAND...]'
 export const desc = 'Run any plugin command directly'

@@ -1,6 +1,7 @@
 import path from 'path'
 import { Utils } from '@semo/core'
 
+export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
 export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'

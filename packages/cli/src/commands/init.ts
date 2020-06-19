@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Utils } from '@semo/core'
 
+export const plugin = 'semo'
 export const command = 'init'
 export const desc = 'Init basic config file and directories'
 export const aliases = 'i'

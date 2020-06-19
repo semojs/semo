@@ -2,6 +2,7 @@ import fs from 'fs'
 import path from 'path'
 import { Utils } from '@semo/core'
 
+export const plugin = 'semo'
 export const command = 'command <name> [description]'
 export const desc = 'Generate a command template'
 export const aliases = ['com']
@@ -62,6 +63,7 @@ export const handler = function(argv: any) {
   let handerTpl, code
   if (argv.typescript) {
     code = `export const disabled = false // Set to true to disable this command temporarily
+// export const plugin = '' // Set this for importing plugin config
 export const command = '${name}'
 export const desc = '${argv.description || name}'
 // export const aliases = ''
@@ -82,6 +84,7 @@ export const handler = async function (argv: any) {
 }`
   
     code = `exports.disabled = false // Set to true to disable this command temporarily
+// exports.plugin = '' // Set this for importing plugin config
 exports.command = '${name}'
 exports.desc = '${argv.description || name}'
 // exports.aliases = ''

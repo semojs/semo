@@ -3,6 +3,7 @@ import { Utils } from '@semo/core'
 import { spawn } from 'child_process'
 
 export const disabled = false // Set to true to disable this command temporarily
+export const plugin = 'semo'
 export const command = ['list', '$0']
 export const desc = 'List configs'
 export const aliases = ['ls', 'l']

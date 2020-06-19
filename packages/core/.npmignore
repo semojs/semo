@@ -12,3 +12,5 @@ tsconfig.json
 /lib/**/*.map
 /lib/examples
 .semorc.yml 
+lib/localBin.js
+lib/localBin.d.ts

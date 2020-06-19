@@ -2,6 +2,7 @@ import { Utils } from '@semo/core'
 import path from 'path'
 
 export const disabled = false // Set to true to disable this command temporarily
+export const plugin = 'semo'
 export const command = 'set <configKey> <configValue> [configComment] [configType]'
 export const desc = 'Set config by key'
 // export const aliases = ''

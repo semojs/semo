@@ -1,6 +1,7 @@
 import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
+export const plugin = 'semo'
 export const command = 'config <op>'
 export const desc = 'Manage rc config'
 export const aliases = 'cfg'
