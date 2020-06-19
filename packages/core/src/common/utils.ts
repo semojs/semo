@@ -1547,10 +1547,10 @@ const importPackage = (name, location = '', home = true, force = false) => {
  * 
  * Only work in command handler
  * 
- * @param argv yargs's argv
  * @param key config key
  */
-const config = (argv, key) => {
+const config = (key) => {
+  const argv: any = getInternalCache().get('argv')
   return !_.isNull(argv[key]) ? argv[key] : argv.$config[key]
 }
 
