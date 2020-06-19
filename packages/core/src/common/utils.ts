@@ -469,16 +469,19 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
         
         // Give command a plugin level config
         command.plugin = command.plugin || moduler
-         command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
-        if (command.plugin && argv['$plugin']) {
-          if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
-          } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = formatRcOptions(argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {})
-          } else {
-            argv['$config'] = {}
+        if (command.plugin) {
+          command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
+          
+          if (command.plugin && argv['$plugin']) {
+            if (argv['$plugin'][command.plugin]) {
+              argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
+            } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
+              argv['$config'] = formatRcOptions(argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {})
+            } else {
+              argv['$config'] = {}
+            }
           }
-        }
+        } 
 
         argv.$command = command
         argv.$input = await getStdin()
@@ -1212,14 +1215,17 @@ const launchDispatcher = (opts: any = {}) => {
       command.middlewares.unshift(async (argv) => {
 
         // Give command a plugin level config
-        command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
-        if (command.plugin && argv['$plugin']) {
-          if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
-          } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = formatRcOptions(argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {})
-          } else {
-            argv['$config'] = {}
+        if (command.plugin) {
+          command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
+        
+          if (command.plugin && argv['$plugin']) {
+            if (argv['$plugin'][command.plugin]) {
+              argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
+            } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
+              argv['$config'] = formatRcOptions(argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {})
+            } else {
+              argv['$config'] = {}
+            }
           }
         }
 
