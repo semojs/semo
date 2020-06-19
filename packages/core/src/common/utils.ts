@@ -1550,7 +1550,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
  * @param key config key
  * @param defaultValue default value
  */
-const config = (key: string, defaultValue) => {
+const config = (key: string, defaultValue = undefined) => {
   const argv: any = getInternalCache().get('argv')
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
     ? argv[key] 
