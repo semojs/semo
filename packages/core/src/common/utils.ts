@@ -475,6 +475,8 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
             argv['$config'] = argv['$plugin'][command.plugin] || {}
           } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
             argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {}
+          } else {
+            argv['$config'] = {}
           }
         }
 
@@ -1171,6 +1173,7 @@ const launchDispatcher = (opts: any = {}) => {
     scriptName: opts.scriptName || 'semo',
     coreDir: opts.coreDir,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
+    [`$${opts.scriptName || 'semo'}`]: { Utils: module.exports, VERSION: pkg.version }
   })
   
   yargs.config(appConfig)
@@ -1215,12 +1218,15 @@ const launchDispatcher = (opts: any = {}) => {
             argv['$config'] = argv['$plugin'][command.plugin] || {}
           } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
             argv['$config'] = argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {}
+          } else {
+            argv['$config'] = {}
           }
         }
 
         // Insert a blank line to terminal
         console.log()
 
+        // argv['$' + scriptName] = { Utils: module.exports }
         argv.$command = command
         argv.$input = await getStdin()
         getInternalCache().set('argv', argv)
@@ -1551,7 +1557,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
  * @param defaultValue default value
  */
 const config = (key: string, defaultValue = undefined) => {
-  const argv: any = getInternalCache().get('argv')
+  const argv: any = getInternalCache().get('argv') || {}
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
     ? argv[key] 
     : !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key]) 
