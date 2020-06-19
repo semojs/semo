@@ -464,17 +464,17 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
-         // Insert a blank line to terminal
-         console.log()
-         
-         // Give command a plugin level config
-         command.plugin = command.plugin || moduler
+        // Insert a blank line to terminal
+        console.log()
+        
+        // Give command a plugin level config
+        command.plugin = command.plugin || moduler
          command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
         if (command.plugin && argv['$plugin']) {
           if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = argv['$plugin'][command.plugin]
+            argv['$config'] = argv['$plugin'][command.plugin] || {}
           } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]
+            argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {}
           }
         }
 
@@ -1212,9 +1212,9 @@ const launchDispatcher = (opts: any = {}) => {
         command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
         if (command.plugin && argv['$plugin']) {
           if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = argv['$plugin'][command.plugin]
+            argv['$config'] = argv['$plugin'][command.plugin] || {}
           } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]
+            argv['$config'] = argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {}
           }
         }
 

@@ -52,10 +52,21 @@ export const handler = async function (argv: any) {
     Utils.error(`Plugin ${plugin} not found or entry not exist`)
   }
 
+  // Pass plugin config
+  let pluginConfigKey = argv.PLUGIN.substring(argv.PLUGIN.lastIndexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
+  if (pluginConfigKey && argv['$plugin']) {
+    if (argv['$plugin'][pluginConfigKey]) {
+      argv['$config'] = argv['$plugin'][pluginConfigKey] || {}
+    } else if (argv['$plugin'][argv.scriptName + '-plugin-' + pluginConfigKey]) {
+      argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + pluginConfigKey] || {}
+    }
+  }
+
+  // Pass SEMO_PLUGIN_DIR
   let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_PLUGIN_DIR'
   let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache', 'node_modules')
-
   process.env[extraPluginDirEnvName] = runPluginDir
+
   if (!argv.COMMAND || argv.COMMAND.length === 0) {
     // If command option not provided, it's a conversion that you can call the module exported handler mothod
     // If handler not exist, run command will failed
