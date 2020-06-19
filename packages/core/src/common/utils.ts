@@ -472,9 +472,9 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
          command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
         if (command.plugin && argv['$plugin']) {
           if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = argv['$plugin'][command.plugin] || {}
+            argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
           } else if (argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {}
+            argv['$config'] = formatRcOptions(argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin] || {})
           } else {
             argv['$config'] = {}
           }
@@ -1215,13 +1215,15 @@ const launchDispatcher = (opts: any = {}) => {
         command.plugin = command.plugin.startsWith(appConfig.scriptName + '-plugin-') ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length) : command.plugin
         if (command.plugin && argv['$plugin']) {
           if (argv['$plugin'][command.plugin]) {
-            argv['$config'] = argv['$plugin'][command.plugin] || {}
+            argv['$config'] = formatRcOptions(argv['$plugin'][command.plugin] || {})
           } else if (argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin]) {
-            argv['$config'] = argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {}
+            argv['$config'] = formatRcOptions(argv['$plugin'][appConfig.scriptName + '-plugin-' + command.plugin] || {})
           } else {
             argv['$config'] = {}
           }
         }
+
+        
 
         // Insert a blank line to terminal
         console.log()
