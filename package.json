@@ -26,7 +26,7 @@
     "watch:script": "cd packages/semo-plugin-script && yarn watch",
     "watch:shell": "cd packages/semo-plugin-shell && yarn watch",
     "watch:cli": "cd packages/cli && yarn watch",
-    "watch": "stmux -M -e Error -- [ -t core 'yarn watch:core' .. -t cli 'yarn watch:cli' .. -t application 'yarn watch:application' .. -t plugin 'yarn watch:plugin' .. -t script 'yarn watch:script' .. -t shell 'yarn watch:shell' ]"
+    "watch": "stmux -M -e Error -- [ [ -t core 'yarn watch:core' .. -t cli 'yarn watch:cli' ] : [ -t application 'yarn watch:application' .. -t plugin 'yarn watch:plugin' .. -t script 'yarn watch:script' .. -t shell 'yarn watch:shell' ] ]"
   },
   "husky": {
     "hooks": {
