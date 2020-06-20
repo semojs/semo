@@ -4,6 +4,7 @@
   "devDependencies": {
     "husky": "^4.2.5",
     "lerna": "^3.22.1",
+    "stmux": "^1.8.0",
     "vuepress": "^1.5.0"
   },
   "scripts": {
@@ -17,7 +18,15 @@
     "upgrade": "lerna exec -- ncu -u --timeout 300 && lerna exec -- yarn && ncu -u --timeout 300 && yarn",
     "deploy:major": "lerna version major",
     "deploy:minor": "lerna version minor",
-    "deploy": "lerna version patch -y"
+    "deploy": "lerna version patch -y",
+    "watch:core": "cd packages/core && yarn watch",
+    "watch:application": "cd packages/semo-plugin-application && yarn watch",
+    "watch:hook": "cd packages/semo-plugin-hook && yarn watch",
+    "watch:plugin": "cd packages/semo-plugin-plugin && yarn watch",
+    "watch:script": "cd packages/semo-plugin-script && yarn watch",
+    "watch:shell": "cd packages/semo-plugin-shell && yarn watch",
+    "watch:cli": "cd packages/cli && yarn watch",
+    "watch": "stmux -M -e Error -- [ -t core 'yarn watch:core' .. -t cli 'yarn watch:cli' .. -t application 'yarn watch:application' .. -t plugin 'yarn watch:plugin' .. -t script 'yarn watch:script' .. -t shell 'yarn watch:shell' ]"
   },
   "husky": {
     "hooks": {
