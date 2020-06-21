@@ -68,7 +68,7 @@ async function openRepl(context: any): Promise<any> {
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
-  Utils.replHistory(r, `${Home}/.${argv.scriptName}_history`)
+  Utils.replHistory(r, `${Home}/.${argv.scriptName}_repl_history`)
 
   // @ts-ignore
   // context即为REPL中的上下文环境
