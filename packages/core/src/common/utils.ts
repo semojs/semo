@@ -1472,6 +1472,7 @@ const installPackage = (name, location = '', home = true, force = false) => {
 
   if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
     exec(`cd ${downloadDir} && npm init -y`)
+    convertToPrivate(path.resolve(downloadDir, 'package.json'))
   }
 
   if (force) {
@@ -1503,6 +1504,7 @@ const uninstallPackage = (name, location = '', home = true) => {
 
   if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
     exec(`cd ${downloadDir} && npm init -y`)
+    convertToPrivate(path.resolve(downloadDir, 'package.json'))
   }
   
 
@@ -1534,6 +1536,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
 
   if (!fs.existsSync(path.resolve(downloadDir, 'package.json'))) {
     exec(`cd ${downloadDir} && npm init -y`)
+    convertToPrivate(path.resolve(downloadDir, 'package.json'))
   }
 
   if (force) {
@@ -1552,6 +1555,20 @@ const importPackage = (name, location = '', home = true, force = false) => {
   }
 
   return pkg
+}
+
+/**
+ * convert pakcage.json to private, for internal use
+ * @param packageJsonPath package.json file path
+ */
+const convertToPrivate = (packageJsonPath) => {
+  try {
+    const pkg = require(packageJsonPath)
+    pkg.private = true
+    fs.writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2))
+  } catch (e) {
+    warn(e.message)
+  }
 }
 
 /**

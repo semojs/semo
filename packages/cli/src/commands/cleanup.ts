@@ -5,20 +5,18 @@ import rimraf from 'rimraf'
 export const disabled = false // Set to true to disable this command temporarily
 // export const plugin = '' // Set this for importing plugin config
 export const command = 'cleanup [type]'
-export const desc = 'Cleanup semo caches.'
+export const desc = 'Cleanup internal caches.'
 export const aliases = 'clean'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  yargs.option('yes', { describe: 'Confirm to cleanup.' })
+  yargs.option('yes', { describe: 'Confirm to cleanup.', alias: 'y' })
   // yargs.commandDir('cleanup')
 }
 
 export const handler = async function (argv: any) {
   const appConfig = Utils.getApplicationConfig()
-
   const scriptName = argv.scriptName || 'semo'
-
 
   let coreCleanupSteps, coreCleanupStepKeys
   let cleanupSteps = {}
@@ -55,7 +53,7 @@ export const handler = async function (argv: any) {
         name: key + ' ' + Utils.shell.exec(`du -sh ${cleanupSteps[key]}`, { silent: true }).split("\t")[0],
         value: key
       }
-    }).concat([{ name: 'CLEANUP ALL ABOVE', value: 'all'}])
+    }).concat([{ name: '** CLEANUP ALL ABOVE **', value: 'all'}])
   
     const answers: any = await Utils.inquirer.prompt([
       {
