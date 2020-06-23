@@ -449,7 +449,7 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function(command: string, moduler: string, yargs: any, basePath: string): void {
+const extendSubCommand = function(command: string, moduleName: string, yargs: any, basePath: string): void {
   let argv: any = cachedInstance.get('argv') || {}
   if (_.isEmpty(argv)) {
     argv = yargs.getOptions().configObjects[0]
@@ -469,7 +469,7 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
         
         // Give command a plugin level config
         argv['$config'] = {};
-        command.plugin = command.plugin || moduler
+        command.plugin = command.plugin || moduleName
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
           
@@ -507,11 +507,11 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
       if (config.pluginConfigs[plugin] && config.pluginConfigs[plugin].extendDir) {
         if (
           fileExistsSyncCache(
-            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduler}/src/commands`, command)
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`, command)
           )
         ) {
           yargs.commandDir(
-            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduler}/src/commands`, command)
+            path.resolve(plugins[plugin], `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`, command)
           , opts)
         }
       }
@@ -521,9 +521,9 @@ const extendSubCommand = function(command: string, moduler: string, yargs: any, 
   // Load application commands
   if (
     config.extendDir &&
-    fileExistsSyncCache(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command))
+    fileExistsSyncCache(path.resolve(process.cwd(), `${config.extendDir}/${moduleName}/src/commands`, command))
   ) {
-    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${module}/src/commands`, command), opts)
+    yargs.commandDir(path.resolve(process.cwd(), `${config.extendDir}/${moduleName}/src/commands`, command), opts)
   }
 }
 
