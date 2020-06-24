@@ -1612,6 +1612,12 @@ const config = (key: any = undefined, defaultValue = undefined) => {
  */
 const extendConfig = (extendRcPath, prefix: any = undefined) => {
   let argv: any = getInternalCache().get('argv') || {}
+  
+  if (_.isEmpty(argv)) {
+    argv = getApplicationConfig() || {}
+    getInternalCache().set('argv', argv)
+  }
+
   extendRcPath = path.resolve(process.cwd(), extendRcPath)
   if (extendRcPath && fileExistsSyncCache(extendRcPath)) {
     try {
