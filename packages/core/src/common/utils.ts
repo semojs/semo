@@ -1579,7 +1579,7 @@ const convertToPrivate = (packageJsonPath) => {
  * @param key config key
  * @param defaultValue default value
  */
-const pluginConfig = (key: string, defaultValue = undefined) => {
+const pluginConfig = (key: string, defaultValue: any = undefined) => {
   const argv: any = getInternalCache().get('argv') || {}
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
     ? argv[key] 
@@ -1591,7 +1591,7 @@ const pluginConfig = (key: string, defaultValue = undefined) => {
 /**
  * Get current argv config
  */
-const config = (key: any = undefined, defaultValue = undefined) => {
+const config = (key: any = undefined, defaultValue: any = undefined) => {
   let argv: any = getInternalCache().get('argv') || {}
 
   if (_.isEmpty(argv)) {
@@ -1612,7 +1612,7 @@ const config = (key: any = undefined, defaultValue = undefined) => {
  */
 const extendConfig = (extendRcPath, prefix: any = undefined) => {
   let argv: any = getInternalCache().get('argv') || {}
-  
+
   if (_.isEmpty(argv)) {
     argv = getApplicationConfig() || {}
     getInternalCache().set('argv', argv)
