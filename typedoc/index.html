@@ -89,6 +89,7 @@
 								<li class="tsd-kind-function"><a href="index.html#debugcore" class="tsd-kind-icon">debug<wbr>Core</a></li>
 								<li class="tsd-kind-function"><a href="index.html#error" class="tsd-kind-icon">error</a></li>
 								<li class="tsd-kind-function"><a href="index.html#exec" class="tsd-kind-icon">exec</a></li>
+								<li class="tsd-kind-function"><a href="index.html#extendconfig" class="tsd-kind-icon">extend<wbr>Config</a></li>
 								<li class="tsd-kind-function"><a href="index.html#extendsubcommand" class="tsd-kind-icon">extend<wbr>Sub<wbr>Command</a></li>
 								<li class="tsd-kind-function"><a href="index.html#fileexistssynccache" class="tsd-kind-icon">file<wbr>Exists<wbr>Sync<wbr>Cache</a></li>
 								<li class="tsd-kind-function"><a href="index.html#formatrcoptions" class="tsd-kind-icon">format<wbr>RcOptions</a></li>
@@ -116,6 +117,7 @@
 								<li class="tsd-kind-function"><a href="index.html#outputtable" class="tsd-kind-icon">output<wbr>Table</a></li>
 								<li class="tsd-kind-function"><a href="index.html#parsepackagenames" class="tsd-kind-icon">parse<wbr>Package<wbr>Names</a></li>
 								<li class="tsd-kind-function"><a href="index.html#parsercfile" class="tsd-kind-icon">parse<wbr>RcFile</a></li>
+								<li class="tsd-kind-function"><a href="index.html#pluginconfig" class="tsd-kind-icon">plugin<wbr>Config</a></li>
 								<li class="tsd-kind-function"><a href="index.html#replhistory" class="tsd-kind-icon">repl<wbr>History</a></li>
 								<li class="tsd-kind-function"><a href="index.html#resolvepackage" class="tsd-kind-icon">resolve<wbr>Package</a></li>
 								<li class="tsd-kind-function"><a href="index.html#sleep" class="tsd-kind-icon">sleep</a></li>
@@ -137,7 +139,7 @@
 					<div class="tsd-signature tsd-kind-icon">cached<wbr>Instance<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">NodeCache</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L32">utils.ts:32</a></li>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L32">utils.ts:32</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -147,7 +149,7 @@
 					<div class="tsd-signature tsd-kind-icon">delay<span class="tsd-signature-symbol">:</span> <a href="index.html#sleep" class="tsd-signature-type">sleep</a><span class="tsd-signature-symbol"> = sleep</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1109">utils.ts:1109</a></li>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1109">utils.ts:1109</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -157,7 +159,7 @@
 					<div class="tsd-signature tsd-kind-icon">hash<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">hash</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L30">utils.ts:30</a></li>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L30">utils.ts:30</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -167,7 +169,7 @@
 					<div class="tsd-signature tsd-kind-icon">y<wbr>Parser<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = yargsInternal.Parser</span></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L28">utils.ts:28</a></li>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L28">utils.ts:28</a></li>
 						</ul>
 					</aside>
 				</section>
@@ -178,38 +180,27 @@
 					<a name="config" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> config</h3>
 					<ul class="tsd-signatures tsd-kind-function">
-						<li class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, defaultValue<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+						<li class="tsd-signature tsd-kind-icon">config<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span>, defaultValue<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1582">utils.ts:1582</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1594">utils.ts:1594</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
 								<div class="lead">
-									<p>Get final config value</p>
+									<p>Get current argv config</p>
 								</div>
-								<p>Only work in command handler</p>
 							</div>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>key: <span class="tsd-signature-type">string</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>config key</p>
-										</div>
-									</div>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> key: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = undefined</span></h5>
 								</li>
 								<li>
 									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> defaultValue: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> = undefined</span></h5>
-									<div class="tsd-comment tsd-typography">
-										<div class="lead">
-											<p>default value</p>
-										</div>
-									</div>
 								</li>
 							</ul>
 							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
@@ -226,7 +217,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1564">utils.ts:1564</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1564">utils.ts:1564</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -259,7 +250,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L81">utils.ts:81</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L81">utils.ts:81</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -287,7 +278,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L917">utils.ts:917</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L917">utils.ts:917</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -331,7 +322,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1075">utils.ts:1075</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1075">utils.ts:1075</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -363,6 +354,38 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="extendconfig" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> extend<wbr>Config</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">extend<wbr>Config<span class="tsd-signature-symbol">(</span>extendRcPath<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span>, prefix<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1608">utils.ts:1608</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Attach config info in another file to argv config</p>
+								</div>
+								<p>This is often for Application usage</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>extendRcPath: <span class="tsd-signature-type">any</span></h5>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> prefix: <span class="tsd-signature-type">any</span><span class="tsd-signature-symbol"> = undefined</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="extendsubcommand" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> extend<wbr>Sub<wbr>Command</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -372,7 +395,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L452">utils.ts:452</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L452">utils.ts:452</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -433,7 +456,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L96">utils.ts:96</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L96">utils.ts:96</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -456,7 +479,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L840">utils.ts:840</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L840">utils.ts:840</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -485,7 +508,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L715">utils.ts:715</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L715">utils.ts:715</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -513,7 +536,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L535">utils.ts:535</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L535">utils.ts:535</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -548,7 +571,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L730">utils.ts:730</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L730">utils.ts:730</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -581,7 +604,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L57">utils.ts:57</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L57">utils.ts:57</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -609,7 +632,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L875">utils.ts:875</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L875">utils.ts:875</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -642,7 +665,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L38">utils.ts:38</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L38">utils.ts:38</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -664,7 +687,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1088">utils.ts:1088</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1088">utils.ts:1088</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -693,7 +716,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1043">utils.ts:1043</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1043">utils.ts:1043</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -734,7 +757,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1524">utils.ts:1524</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1524">utils.ts:1524</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -792,7 +815,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L941">utils.ts:941</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L941">utils.ts:941</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -831,7 +854,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1463">utils.ts:1463</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1463">utils.ts:1463</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -863,7 +886,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L132">utils.ts:132</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L132">utils.ts:132</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -914,7 +937,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L320">utils.ts:320</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L320">utils.ts:320</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -966,7 +989,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1102">utils.ts:1102</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1102">utils.ts:1102</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -988,7 +1011,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1097">utils.ts:1097</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1097">utils.ts:1097</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1010,7 +1033,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1162">utils.ts:1162</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1162">utils.ts:1162</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1038,7 +1061,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1063">utils.ts:1063</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1063">utils.ts:1063</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1060,7 +1083,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1055">utils.ts:1055</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1055">utils.ts:1055</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1101,7 +1124,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1428">utils.ts:1428</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1428">utils.ts:1428</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1150,7 +1173,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L903">utils.ts:903</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L903">utils.ts:903</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1183,7 +1206,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L965">utils.ts:965</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L965">utils.ts:965</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1215,7 +1238,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1002">utils.ts:1002</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1002">utils.ts:1002</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1267,7 +1290,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1026">utils.ts:1026</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1026">utils.ts:1026</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1301,7 +1324,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L852">utils.ts:852</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L852">utils.ts:852</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1321,6 +1344,48 @@
 					</ul>
 				</section>
 				<section class="tsd-panel tsd-member tsd-kind-function">
+					<a name="pluginconfig" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagConst">Const</span> plugin<wbr>Config</h3>
+					<ul class="tsd-signatures tsd-kind-function">
+						<li class="tsd-signature tsd-kind-icon">plugin<wbr>Config<span class="tsd-signature-symbol">(</span>key<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span>, defaultValue<span class="tsd-signature-symbol">?: </span><span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1582">utils.ts:1582</a></li>
+								</ul>
+							</aside>
+							<div class="tsd-comment tsd-typography">
+								<div class="lead">
+									<p>Get final config value</p>
+								</div>
+								<p>Only work in command handler, use top level config first than use plugin config</p>
+							</div>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>key: <span class="tsd-signature-type">string</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>config key</p>
+										</div>
+									</div>
+								</li>
+								<li>
+									<h5><span class="tsd-flag ts-flagDefault value">Default value</span> defaultValue: <span class="tsd-signature-type">undefined</span><span class="tsd-signature-symbol"> = undefined</span></h5>
+									<div class="tsd-comment tsd-typography">
+										<div class="lead">
+											<p>default value</p>
+										</div>
+									</div>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+						</li>
+					</ul>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-function">
 					<a name="replhistory" class="tsd-anchor"></a>
 					<h3><span class="tsd-flag ts-flagConst">Const</span> repl<wbr>History</h3>
 					<ul class="tsd-signatures tsd-kind-function">
@@ -1330,7 +1395,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1116">utils.ts:1116</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1116">utils.ts:1116</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1362,7 +1427,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1448">utils.ts:1448</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1448">utils.ts:1448</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1391,7 +1456,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1108">utils.ts:1108</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1108">utils.ts:1108</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1423,7 +1488,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L990">utils.ts:990</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L990">utils.ts:990</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1460,7 +1525,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L979">utils.ts:979</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L979">utils.ts:979</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1494,7 +1559,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L953">utils.ts:953</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L953">utils.ts:953</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1533,7 +1598,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L1495">utils.ts:1495</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L1495">utils.ts:1495</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -1562,7 +1627,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/83a7fb1/packages/core/src/common/utils.ts#L929">utils.ts:929</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/2436d32/packages/core/src/common/utils.ts#L929">utils.ts:929</a></li>
 								</ul>
 							</aside>
 							<div class="tsd-comment tsd-typography">
@@ -1635,6 +1700,9 @@
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="index.html#exec" class="tsd-kind-icon">exec</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="index.html#extendconfig" class="tsd-kind-icon">extend<wbr>Config</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="index.html#extendsubcommand" class="tsd-kind-icon">extend<wbr>Sub<wbr>Command</a>
@@ -1716,6 +1784,9 @@
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="index.html#parsercfile" class="tsd-kind-icon">parse<wbr>RcFile</a>
+					</li>
+					<li class=" tsd-kind-function">
+						<a href="index.html#pluginconfig" class="tsd-kind-icon">plugin<wbr>Config</a>
 					</li>
 					<li class=" tsd-kind-function">
 						<a href="index.html#replhistory" class="tsd-kind-icon">repl<wbr>History</a>
