@@ -829,11 +829,6 @@ const getApplicationConfig = function(opts: any = {}) {
     })
   }
 
-  // If we use Semo in web application, it will be not loaded  from bin 
-  if (_.isEmpty(argv)) {
-    getInternalCache().set('argv', argv)
-  }
-
   return applicationConfig
 }
 
@@ -1598,6 +1593,11 @@ const pluginConfig = (key: string, defaultValue = undefined) => {
  */
 const config = (key: any = undefined, defaultValue = undefined) => {
   const argv: any = getInternalCache().get('argv') || {}
+
+  if (_.isEmpty(argv)) {
+    const argv = getApplicationConfig() || {}
+    getInternalCache().set('argv', argv)
+  }
 
   return key ? _.get(argv, key, defaultValue) : argv
 }
