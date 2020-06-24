@@ -1592,10 +1592,10 @@ const pluginConfig = (key: string, defaultValue = undefined) => {
  * Get current argv config
  */
 const config = (key: any = undefined, defaultValue = undefined) => {
-  const argv: any = getInternalCache().get('argv') || {}
+  let argv: any = getInternalCache().get('argv') || {}
 
   if (_.isEmpty(argv)) {
-    const argv = getApplicationConfig() || {}
+    argv = getApplicationConfig() || {}
     getInternalCache().set('argv', argv)
   }
 
