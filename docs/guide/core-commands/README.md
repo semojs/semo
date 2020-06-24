@@ -20,6 +20,14 @@ semo generate command application/test --extend=application
 
 通过 `semo application help` 可以看到当前业务项目定义的所有顶级子命令，因为如果项目实现的命令过多，层次也多的话，一般我们很难记住所有命令和参数，所以帮助命令是我们经常要执行的。
 
+## `semo cleanup`
+
+> alias: clean
+
+这个命令用于清理一些 Semo 内部产生的文件，常见的有 repl 命令的历史， shell 命令的历史， repl 里临时下载的包，run 命令临时下载的包，以及全局插件目录。
+
+目前提供了有限的扩展，只允许应用目录定义清理目录，不支持插件来添加清理目录，主要是为了安全性考虑。
+
 ## `semo config`
 
 我们可以通过核心内置的这个命令来查看和修改配置文件，可以操作当前项目的配置文件，也可以操作全局配置文件。

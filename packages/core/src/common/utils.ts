@@ -1574,12 +1574,12 @@ const convertToPrivate = (packageJsonPath) => {
 /**
  * Get final config value
  * 
- * Only work in command handler
+ * Only work in command handler, use top level config first than use plugin config
  * 
  * @param key config key
  * @param defaultValue default value
  */
-const config = (key: string, defaultValue = undefined) => {
+const pluginConfig = (key: string, defaultValue = undefined) => {
   const argv: any = getInternalCache().get('argv') || {}
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
     ? argv[key] 
@@ -1587,6 +1587,70 @@ const config = (key: string, defaultValue = undefined) => {
       ? argv.$config[key]
       : defaultValue
 }
+
+/**
+ * Get current argv config
+ */
+const config = (key: any = undefined, defaultValue = undefined) => {
+  const argv: any = getInternalCache().get('argv') || {}
+
+  return key ? _.get(argv, key, defaultValue) : argv
+}
+
+/**
+ * Attach config info in another file to argv config
+ * 
+ * This is often for Application usage
+ * 
+ * @param prefix 
+ * @param configPath 
+ */
+const extendConfig = (extendRcPath, prefix: any = undefined) => {
+  let argv: any = getInternalCache().get('argv') || {}
+  extendRcPath = path.resolve(process.cwd(), extendRcPath)
+  if (extendRcPath && fileExistsSyncCache(extendRcPath)) {
+    try {
+      const rcFile = fs.readFileSync(extendRcPath, 'utf8')
+      const parsedRc = yaml.parse(rcFile)
+      let extendRc = formatRcOptions(parsedRc)
+      if (prefix) {
+        let prefixPart = _.get(argv, prefix)
+        let mergePart = _.merge(prefixPart, extendRc)
+        argv = _.set(argv, prefix, mergePart)
+      } else {
+        argv = _.merge(argv, extendRc)
+      }
+      getInternalCache().set('argv', argv) 
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Global ${extendRcPath} config load failed!`)
+    }
+  }
+
+  const nodeEnv = getNodeEnv(argv)
+  let extendRcEnvPath = path.resolve(path.dirname(extendRcPath), `${path.basename(extendRcPath, '.yml')}.${nodeEnv}.yml`)
+  if (extendRcEnvPath && fileExistsSyncCache(extendRcEnvPath)) {
+    try {
+      const rcFile = fs.readFileSync(extendRcEnvPath, 'utf8')
+      const parsedRc = yaml.parse(rcFile)
+      let extendRc = formatRcOptions(parsedRc)
+      if (prefix) {
+        let prefixPart = _.get(argv, prefix)
+        let mergePart = _.merge(prefixPart, extendRc)
+        argv = _.set(argv, prefix, mergePart)
+      } else {
+        argv = _.merge(argv, extendRc)
+      }
+      getInternalCache().set('argv', argv) 
+    } catch (e) {
+      debugCore('load rc:', e)
+      warn(`Global ${extendRcEnvPath} config load failed!`)
+    }
+  }
+
+  return argv
+}
+
 
 /**
  * Semo utils functions and references to common modules.
@@ -1650,6 +1714,8 @@ export {
   exec,
   sleep,
   config,
+  pluginConfig,
+  extendConfig,
   getInternalCache,
   getCache,
   getNodeEnv,
