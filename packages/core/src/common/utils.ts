@@ -829,6 +829,10 @@ const getApplicationConfig = function(opts: any = {}) {
     })
   }
 
+  if (_.isEmpty(argv)) {
+    getInternalCache().set('argv', argv)
+  }
+
   return applicationConfig
 }
 
