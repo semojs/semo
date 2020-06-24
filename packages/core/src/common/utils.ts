@@ -829,6 +829,7 @@ const getApplicationConfig = function(opts: any = {}) {
     })
   }
 
+  // If we use Semo in web application, it will be not loaded  from bin 
   if (_.isEmpty(argv)) {
     getInternalCache().set('argv', argv)
   }
