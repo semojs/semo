@@ -6,13 +6,13 @@ function corepl(cli: repl.REPLServer) {
 
   // @ts-ignore
   cli.eval = function coEval(cmd, context, filename, callback) {
-    if (cmd.trim() === '?') {
+    if (cmd.trim() === '\\?') {
       console.log()
       Utils.outputTable(
         [
-          ['quit', 'Quit the REPL, alias: exit, q.'],
           ['await', 'Run generator or promise function.'],
-          ['?', 'Show this help info.']
+          ['\\quit', 'Quit the REPL, alias: exit, q.'],
+          ['\\?', 'Show this help info.']
         ],
         'Internal commands:'
       )
@@ -21,7 +21,7 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
+    if (['\\exit', '\\quit', '\\q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       console.log(Utils.chalk.yellow('Bye!'))
       process.exit(0)
     }
@@ -57,9 +57,10 @@ export const command = 'repl'
 export const aliases = 'r'
 export const desc = 'Play with REPL'
 
+let r // will be used in extract method
 async function openRepl(context: any): Promise<any> {
   const { argv } = context
-  const r = repl.start({
+  r = repl.start({
     prompt: argv.prompt,
   })
 
@@ -91,9 +92,21 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   argv.hook = argv.hook || false
   try {
-    let context = { argv, await: true, package: (name, force = false) => {
-      return Utils.importPackage(name, 'repl-package-cache', true, force)
-    } }
+    let context = { 
+      argv, 
+      await: true, 
+      package: (name, force = false) => {
+        return Utils.importPackage(name, 'repl-package-cache', true, force)
+      },
+      extract: (obj, keys: string[] | string = []) => {
+        const keysCast = Utils._.castArray(keys)
+        Object.keys(obj).forEach(key => {
+          if (keys.length === 0 || keysCast.includes(key)) {
+            Object.defineProperty(r.context, key, { value: obj[key] })
+          }
+        })
+      }
+    }
 
     if (argv.hook) {
       const pluginsReturn = await Utils.invokeHook(

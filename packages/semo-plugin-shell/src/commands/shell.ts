@@ -12,7 +12,7 @@ function corepl(cli: repl.REPLServer) {
     const { argv } = context
     cmd = cmd.trim()
 
-    if (['exit', 'quit', 'q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
+    if (['\\exit', '\\quit', '\\q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
       Utils.info('Bye.')
       process.exit(0)
     }
@@ -21,13 +21,13 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    if (cmd === '?') {
+    if (cmd === '\\?') {
       console.log()
       Utils.outputTable(
         [
-          ['quit', 'Quit the shell, alias: exit, q.'],
-          ['prefix', 'You can change prefix option at any time.'],
-          ['?', 'Show this help info.']
+          ['\\prefix', 'You can change prefix option at any time.'],
+          ['\\quit', 'Quit the shell, alias: exit, q.'],
+          ['\\?', 'Show this help info.']
         ],
         'Internal commands:'
       )
@@ -37,7 +37,7 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    if (cmd.match(/^prefix[\s|=]+/)) {
+    if (cmd.match(/^\\prefix[\s|=]+/)) {
       let prefix = Utils.splitByChar(cmd, '=')
       prefix.shift()
       argv.prefix = prefix.join(' ').trim()
