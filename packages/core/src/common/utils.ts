@@ -1610,7 +1610,7 @@ const config = (key: any = undefined, defaultValue: any = undefined) => {
  * @param prefix 
  * @param configPath 
  */
-const extendConfig = (extendRcPath, prefix: any = undefined) => {
+const extendConfig = (extendRcPath: string[] | string, prefix: any = undefined) => {
   let argv: any = getInternalCache().get('argv') || {}
 
   if (_.isEmpty(argv)) {
@@ -1618,46 +1618,50 @@ const extendConfig = (extendRcPath, prefix: any = undefined) => {
     getInternalCache().set('argv', argv)
   }
 
-  extendRcPath = path.resolve(process.cwd(), extendRcPath)
-  if (extendRcPath && fileExistsSyncCache(extendRcPath)) {
-    try {
-      const rcFile = fs.readFileSync(extendRcPath, 'utf8')
-      const parsedRc = yaml.parse(rcFile)
-      let extendRc = formatRcOptions(parsedRc)
-      if (prefix) {
-        let prefixPart = _.get(argv, prefix)
-        let mergePart = _.merge(prefixPart, extendRc)
-        argv = _.set(argv, prefix, mergePart)
-      } else {
-        argv = _.merge(argv, extendRc)
-      }
-      getInternalCache().set('argv', argv) 
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Global ${extendRcPath} config load failed!`)
-    }
-  }
+  const extendRcPathArray = _.castArray(extendRcPath)
 
-  const nodeEnv = getNodeEnv(argv)
-  let extendRcEnvPath = path.resolve(path.dirname(extendRcPath), `${path.basename(extendRcPath, '.yml')}.${nodeEnv}.yml`)
-  if (extendRcEnvPath && fileExistsSyncCache(extendRcEnvPath)) {
-    try {
-      const rcFile = fs.readFileSync(extendRcEnvPath, 'utf8')
-      const parsedRc = yaml.parse(rcFile)
-      let extendRc = formatRcOptions(parsedRc)
-      if (prefix) {
-        let prefixPart = _.get(argv, prefix)
-        let mergePart = _.merge(prefixPart, extendRc)
-        argv = _.set(argv, prefix, mergePart)
-      } else {
-        argv = _.merge(argv, extendRc)
+  extendRcPathArray.forEach(rcPath => {
+    rcPath = path.resolve(process.cwd(), rcPath)
+    if (rcPath && fileExistsSyncCache(rcPath)) {
+      try {
+        const rcFile = fs.readFileSync(rcPath, 'utf8')
+        const parsedRc = yaml.parse(rcFile)
+        let extendRc = formatRcOptions(parsedRc)
+        if (prefix) {
+          let prefixPart = _.get(argv, prefix)
+          let mergePart = _.merge(prefixPart, extendRc)
+          argv = _.set(argv, prefix, mergePart)
+        } else {
+          argv = _.merge(argv, extendRc)
+        }
+        getInternalCache().set('argv', argv) 
+      } catch (e) {
+        debugCore('load rc:', e)
+        warn(`Global ${rcPath} config load failed!`)
       }
-      getInternalCache().set('argv', argv) 
-    } catch (e) {
-      debugCore('load rc:', e)
-      warn(`Global ${extendRcEnvPath} config load failed!`)
     }
-  }
+
+    const nodeEnv = getNodeEnv(argv)
+    let extendRcEnvPath = path.resolve(path.dirname(rcPath), `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`)
+    if (extendRcEnvPath && fileExistsSyncCache(extendRcEnvPath)) {
+      try {
+        const rcFile = fs.readFileSync(extendRcEnvPath, 'utf8')
+        const parsedRc = yaml.parse(rcFile)
+        let extendRc = formatRcOptions(parsedRc)
+        if (prefix) {
+          let prefixPart = _.get(argv, prefix)
+          let mergePart = _.merge(prefixPart, extendRc)
+          argv = _.set(argv, prefix, mergePart)
+        } else {
+          argv = _.merge(argv, extendRc)
+        }
+        getInternalCache().set('argv', argv) 
+      } catch (e) {
+        debugCore('load rc:', e)
+        warn(`Global ${extendRcEnvPath} config load failed!`)
+      }
+    }
+  })
 
   return argv
 }
