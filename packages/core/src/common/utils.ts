@@ -257,11 +257,12 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
           continue
         }
 
-        if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
-          if (options.reload) {
-            delete require.cache[path.resolve(plugins[plugin], pluginEntry)]
+        const pluginEntryPath = path.resolve(plugins[plugin], pluginEntry)
+        if (fileExistsSyncCache(pluginEntryPath)) {
+          if (options.reload && require.cache[pluginEntryPath]) {
+            delete require.cache[pluginEntryPath]
           }
-          const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
+          const loadedPlugin = require(pluginEntryPath)
           if (!_.isNull(loadedPlugin[hook])) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
@@ -413,12 +414,13 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
           continue
         }
 
-        if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
-          if (options.reload) {
-            delete require.cache[path.resolve(plugins[plugin], pluginEntry)]
+        const pluginEntryPath = path.resolve(plugins[plugin], pluginEntry)
+        if (fileExistsSyncCache(pluginEntryPath)) {
+          if (options.reload && require.cache[pluginEntryPath]) {
+            delete require.cache[pluginEntryPath]
           }
 
-          const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
+          const loadedPlugin = require(pluginEntryPath)
           const hook_alter = `${hook}_alter`
           if (loadedPlugin[hook_alter]) {
             if (_.isFunction(loadedPlugin[hook_alter])) {
