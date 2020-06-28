@@ -2,6 +2,9 @@ import repl from 'repl'
 
 import { Utils } from '@semo/core'
 
+let r: any // repl instance
+
+export const plugin = 'shell'
 export const command = 'shell'
 export const desc = 'Quick shell'
 export const aliases = 'sh'
@@ -12,38 +15,23 @@ function corepl(cli: repl.REPLServer) {
     const { argv } = context
     cmd = cmd.trim()
 
-    if (['\\exit', '\\quit', '\\q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
-      Utils.info('Bye.')
-      process.exit(0)
-    }
-
     if (!cmd) {
       return callback()
     }
 
-    if (cmd === '\\?') {
-      console.log()
-      Utils.outputTable(
-        [
-          ['\\prefix', 'You can change prefix option at any time.'],
-          ['\\quit', 'Quit the shell, alias: exit, q.'],
-          ['\\?', 'Show this help info.']
-        ],
-        'Internal commands:'
-      )
-
-      Utils.info(`Current prefix: ${Utils.chalk.yellow(argv.prefix || '[empty]')}`)
-      console.log()
-      return callback()
-    }
-
-    if (cmd.match(/^\\prefix[\s|=]+/)) {
+    if (cmd.match(/^prefix[\s|=]+/) || cmd.trim() === 'prefix') {
       let prefix = Utils.splitByChar(cmd, '=')
       prefix.shift()
       argv.prefix = prefix.join(' ').trim()
       Utils.success(
         `Prefix has been changed to: ${argv.prefix || '[empty], so you can run any shell commands now.'}`
       )
+
+      if (argv.prefix) {
+        r._initialPrompt = `${argv.prefix}:${argv.prompt}`
+      } else {
+        r._initialPrompt = `${argv.prompt}`
+      }
       return callback()
     }
 
@@ -81,20 +69,19 @@ function corepl(cli: repl.REPLServer) {
 async function openRepl(context: any): Promise<any> {
   const { argv } = context
   const prefix = argv.prefix || ''
-  const r: repl.REPLServer = repl.start({
-    prompt: `${prefix}:${argv.prompt}`,
-    completer: () => {
-      // TODO: implments auto completion in REPL by Shell suggestions.
-      // For now, it is just for disabling Node completion.
-      return []
+
+  r = repl.start({
+    prompt: prefix ? `${prefix}:${argv.prompt}` : argv.prompt,
+    completer: (line) => {
+      const completions = '.break .clear .exit .save .load .editor prefix'.split(' ');
+      const hits = completions.filter((c) => c.startsWith(line));
+      // 如果没有匹配，则显示所有补全。
+      return [hits.length ? hits : completions, line];
     }
   })
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
   Utils.fs.ensureDirSync(Home)
-  if (!Utils.fileExistsSyncCache(Home)) {
-    Utils.exec(`mkdir -p ${Home}`)
-  }
   Utils.replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
 
   // @ts-ignore
@@ -105,29 +92,26 @@ async function openRepl(context: any): Promise<any> {
 }
 
 export const builder = function(yargs: any) {
-  const argv: any = yargs.getOptions().configObjects[0]
-  const scriptName = argv.scriptName || 'semo'
-
   yargs.option('prompt', {
-    default: `$ `,
     describe: 'Prompt for input.'
   })
 
   yargs.option('prefix', {
-    default: scriptName,
     describe: 'Make input command a little bit faster.'
   })
 
   yargs.option('debug', {
-    default: false,
     describe: 'Debug mode, show error stack'
   })
 }
 
 export const handler = async function(argv) {
   const scriptName = argv.scriptName || 'semo'
-  argv.prefix = argv.prefix || scriptName
-  argv.prompt = argv.prompt || '$ '
+
+  const { Utils } = argv.$semo
+  argv.prefix = Utils.pluginConfig('prefix', scriptName)
+  argv.prompt = Utils.pluginConfig('prompt', '$ ')
+  argv.debug = Utils.pluginConfig('debug', false)
 
   try {
     let context = { argv }

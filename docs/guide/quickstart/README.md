@@ -12,6 +12,8 @@ semo [命令]
 
 命令：
   semo completion                     Generate completion script
+  semo cleanup [type]                 Cleanup internal caches.
+  semo config <op>                    Manage rc config                                           [aliases: cfg]
   semo create <name> [repo] [branch]  Create a new project from specific repo                               [aliases: c]
   semo generate <component>           Generate component sample code                                        [aliases: g]
   semo init                           Init basic config file and directories                                [aliases: i]

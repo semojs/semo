@@ -212,7 +212,17 @@ $app:
 
 ### `Utils.extendConfig`
 
-这个方法支持扩展一个新的配置文件，这样可以支持配置文件组，不用把所有的配置都放到 `.semorc.yml` 里。
+这个方法支持扩展一个新的配置文件，这样可以支持配置文件组，不用把所有的配置都放到 `.semorc.yml` 里，同时支持环境配置，例如：
+
+```js
+Utils.extendConfig('application.yml')
+```
+
+```
+application.yml
+application.development.yml
+application.production.yml
+```
 
 ### `Utils.config`
 

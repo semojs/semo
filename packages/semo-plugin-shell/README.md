@@ -12,5 +12,4 @@ $ semo shell
 > status # semo status
 $ semo shell --prefix=git
 > log # git log
-> q # quit
 ``` 

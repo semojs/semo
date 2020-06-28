@@ -1,31 +1,30 @@
 import repl from 'repl'
 import { Utils } from '@semo/core'
 
-function corepl(cli: repl.REPLServer) {
+let r // repl instance
+let v // yargs argv
+
+const reload = async () => {
+  const pluginsReturn = await Utils.invokeHook(
+    'repl',
+    Utils._.isBoolean(v.hook)
+      ? {
+        reload: true
+      }
+      : {
+          include: Utils.splitComma(v.hook),
+          reload: true
+        }
+  )
+  Object.assign(r.context.Semo, pluginsReturn)
+  console.log(Utils.chalk.green('Hooked files reloaded.'))
+}
+
+const corepl = (cli: repl.REPLServer) => {
   var originalEval = cli.eval
 
   // @ts-ignore
   cli.eval = function coEval(cmd, context, filename, callback) {
-    if (cmd.trim() === '\\?') {
-      console.log()
-      Utils.outputTable(
-        [
-          ['await', 'Run generator or promise function.'],
-          ['\\quit', 'Quit the REPL, alias: exit, q.'],
-          ['\\?', 'Show this help info.']
-        ],
-        'Internal commands:'
-      )
-
-      console.log()
-      return callback()
-    }
-
-    if (['\\exit', '\\quit', '\\q'].includes(cmd.replace(/(^\s*)|(\s*$)/g, ''))) {
-      console.log(Utils.chalk.yellow('Bye!'))
-      process.exit(0)
-    }
-
     if (cmd.match(/^await\s+/) || cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/)) {
       if (cmd.match(/=/)) {
         cmd = '(async function() { (' + cmd + ') })()'
@@ -57,13 +56,22 @@ export const command = 'repl'
 export const aliases = 'r'
 export const desc = 'Play with REPL'
 
-let r // will be used in extract method
 async function openRepl(context: any): Promise<any> {
   const { Semo } = context
   const argv = Semo.argv
   r = repl.start({
     prompt: argv.prompt,
+    ignoreUndefined: true
   })
+
+  r.defineCommand('reload', {
+    help: 'Reload hooked files',
+    async action(name) {
+      this.clearBufferedCommand();
+      await reload()
+      this.displayPrompt();
+    }
+  });
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
   Utils.fs.ensureDirSync(Home)
@@ -75,6 +83,7 @@ async function openRepl(context: any): Promise<any> {
   // @ts-ignore
   // context即为REPL中的上下文环境
   r.context = Object.assign(r.context, context)
+  r.context.Semo.repl = r
 
   corepl(r)
 }
@@ -93,6 +102,7 @@ export const handler = async function(argv: any) {
   const { Utils } = argv.$semo
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
+  v = argv
   try {
     let context: any = {
       await: true, 
@@ -110,7 +120,7 @@ export const handler = async function(argv: any) {
       context  = Object.assign(context, { Semo: Object.assign({ 
         Utils, 
         argv, 
-        package: (name, force = false) => {
+        'import': (name, force = false) => {
           return Utils.importPackage(name, 'repl-package-cache', true, force)
         },
         extract: (obj, keys: string[] | string = []) => {
@@ -121,21 +131,7 @@ export const handler = async function(argv: any) {
             }
           })
         },
-        reload: async () => {
-          const pluginsReturn = await Utils.invokeHook(
-            'repl',
-            Utils._.isBoolean(argv.hook)
-              ? {
-                reload: true
-              }
-              : {
-                  include: Utils.splitComma(argv.hook),
-                  reload: true
-                }
-          )
-          Object.assign(context.Semo, pluginsReturn)
-          return true
-        }
+        reload
       }, pluginsReturn)})
     }
 

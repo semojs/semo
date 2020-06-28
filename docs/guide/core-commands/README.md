@@ -322,8 +322,6 @@ REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言
 
 ### 对 `REPL` 的一些扩展
 
-默认 REPL 的退出只能通过 `ctrl+c` 或者 `ctrl+d` 或者 `.exit` 来进行，这里我们加入了几个快捷的命令，`quit`, `q`, `exit`。
-
 在开发Semo 和这个脚手架时，Node 的 REPL 还不支持 `await`，这里是模拟实现了这个机制，目的是可以触发执行项目中的一些 promise 或 generator 方法。通过这个能力，再加上我们可以把一些业务代码注入到 `REPL` 我们就可以在接口控制器，脚本，单元测试之外多了一种执行方式，而这种执行方式还是交互式的。
 
 ### 为 `REPL` 注入新的对象
@@ -367,6 +365,40 @@ export const hook_repl = () => {
 :::tip
 在具体的实践中，我们把数据库，缓存，OSS，Consul, ElasticSearch 等等多种公司的基础设施注入了进来，写成插件，使得我们更容易的直接访问基础设施。
 :::
+
+### 重新载入一遍钩子文件
+
+`.reload` 或者 `Semo.reload()` 可以重新执行一遍 `hook_repl` 钩子，然后把最新的结果注入 Semo。这个的用途是希望在不退出 REPL 环境的情况下能够调用最新的钩子结果，这里只能保证重新加载和执行钩子文件本身，如果钩子内部用了  `require` 还是会被缓存，这部分就需要用户自己来处理了，比如每次 `require` 之前先尝试删除 `require.cache`
+
+### 临时试用 npm 包
+
+在 REPL 下支持用 `Semo.import` 临时下载和调试一些包，这个调试包下载不会进入当前项目的 node_modules 目录。
+
+```
+>>> let _ = Semo.import('lodash')
+>>> _.VERSION
+```
+
+### 释放对象的属性到 REPL 环境
+
+```
+>>> Semo.extract(Semo)
+```
+
+这个操作的潜在风险就是会覆盖 REPL 环境里内置的对象，但是这个 API 的目的和作用是释放一些明确的对象，比如从 ORM 里释放一个数据库中所有的表模型。
+
+### Semo 对象简介
+
+最早的时候本来打算核心和插件可以自由的注入到 REPL 环境，后来觉得不可控，所以决定核心和插件都只能注入到 `Semo` 对象。下面说一下 Semo 对象的结构
+
+* Semo.VERSION 顾名思义，这个可以看到 Semo 的当前版本
+* Semo.argv 这个是进入命令的 `yargs` argv参数，有时可以用于看看配置合并是否生效，以及实验 yargs 的参数解析。
+* Semo.repl 当前 REPL 环境的对象实例
+* Semo.Utils 核心工具包，里面除了自定义的若干函数之外，会暴露出一些常用的第三方包，比如 `lodash`, `chalk` 等
+* Semo.reload 重新执行 `hook_repl` 钩子，使用最新的钩子文件
+* Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
+* Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
+
 
 ## `semo run <PLUGIN> [COMMAND]`
 
@@ -487,12 +519,15 @@ semo shell
 > repl
 ```
 
-这个命令平时的使用频率不是很高，但是也许有一些人会喜欢使用。退出和 `repl` 命令一样支持：`q`, `quit`, `exit`。这里还有个额外的用法是，你也可以修改前缀，对其他多层级的命令行工具实现类似的效果，比如:
-
 ```
 semo shell --prefix=git
 > log
 > remote -v
+```
+
+```
+semo: prefix=git
+git: log
 ```
 
 ## `semo status`

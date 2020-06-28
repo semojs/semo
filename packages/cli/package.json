@@ -35,7 +35,7 @@
     "typescript": "^3.9.5"
   },
   "scripts": {
-    "semo": "node lib/localBin.js",
+    "semo": "node lib/bin.js",
     "watch": "tsc -w",
     "build": "tsc",
     "clean": "rimraf lib",
