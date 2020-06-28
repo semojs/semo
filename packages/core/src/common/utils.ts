@@ -112,7 +112,7 @@ interface IHookOption {
   useCache?: boolean
   include?: boolean | string[]
   exclude?: boolean | string[]
-  opts?: any
+  reload?: boolean
 }
 
 /**
@@ -127,7 +127,7 @@ interface IHookOption {
  * @param {bool} options.useCache If or not use cached hook result
  * @param {array} options.include set plugins to be used in invoking
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
- * @param {array} options.opts opts will be sent to hook implementation
+ * @param {boolean} options.reload If or not clear module cache before require
  */
 const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }, argv: any = null) {
   argv = argv || getInternalCache().get('argv') || {}
@@ -258,11 +258,14 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
         }
 
         if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
+          if (options.reload) {
+            delete require.cache[path.resolve(plugins[plugin], pluginEntry)]
+          }
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           if (!_.isNull(loadedPlugin[hook])) {
             let pluginReturn
             if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options.opts))
+              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options))
             } else {
               pluginReturn = loadedPlugin[hook]
             }
@@ -411,11 +414,15 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
         }
 
         if (fileExistsSyncCache(path.resolve(plugins[plugin], pluginEntry))) {
+          if (options.reload) {
+            delete require.cache[path.resolve(plugins[plugin], pluginEntry)]
+          }
+
           const loadedPlugin = require(path.resolve(plugins[plugin], pluginEntry))
           const hook_alter = `${hook}_alter`
           if (loadedPlugin[hook_alter]) {
             if (_.isFunction(loadedPlugin[hook_alter])) {
-              data = await loadedPlugin[hook_alter](data, options.opts)
+              data = await loadedPlugin[hook_alter](data, options)
             } else {
               data = loadedPlugin[hook_alter]
             }

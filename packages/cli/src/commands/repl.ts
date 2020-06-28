@@ -94,7 +94,7 @@ export const handler = async function(argv: any) {
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
   try {
-    let context = {
+    let context: any = {
       await: true, 
     }
 
@@ -107,7 +107,7 @@ export const handler = async function(argv: any) {
               include: Utils.splitComma(argv.hook)
             }
       )
-      context = Object.assign(context, { Semo: Object.assign({ 
+      context  = Object.assign(context, { Semo: Object.assign({ 
         Utils, 
         argv, 
         package: (name, force = false) => {
@@ -120,7 +120,22 @@ export const handler = async function(argv: any) {
               Object.defineProperty(r.context, key, { value: obj[key] })
             }
           })
-        } 
+        },
+        reload: async () => {
+          const pluginsReturn = await Utils.invokeHook(
+            'repl',
+            Utils._.isBoolean(argv.hook)
+              ? {
+                reload: true
+              }
+              : {
+                  include: Utils.splitComma(argv.hook),
+                  reload: true
+                }
+          )
+          Object.assign(context.Semo, pluginsReturn)
+          return true
+        }
       }, pluginsReturn)})
     }
 
