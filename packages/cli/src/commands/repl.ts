@@ -59,7 +59,8 @@ export const desc = 'Play with REPL'
 
 let r // will be used in extract method
 async function openRepl(context: any): Promise<any> {
-  const { argv } = context
+  const { Semo } = context
+  const argv = Semo.argv
   r = repl.start({
     prompt: argv.prompt,
   })
@@ -90,22 +91,11 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  argv.hook = argv.hook || false
+  const { Utils } = argv.$semo
+  argv.hook = Utils.pluginConfig('hook', false)
   try {
-    let context = { 
-      argv, 
+    let context = {
       await: true, 
-      package: (name, force = false) => {
-        return Utils.importPackage(name, 'repl-package-cache', true, force)
-      },
-      extract: (obj, keys: string[] | string = []) => {
-        const keysCast = Utils._.castArray(keys)
-        Object.keys(obj).forEach(key => {
-          if (keys.length === 0 || keysCast.includes(key)) {
-            Object.defineProperty(r.context, key, { value: obj[key] })
-          }
-        })
-      }
     }
 
     if (argv.hook) {
@@ -117,7 +107,21 @@ export const handler = async function(argv: any) {
               include: Utils.splitComma(argv.hook)
             }
       )
-      context = Object.assign(context, { Semo: Object.assign({ Utils }, pluginsReturn)})
+      context = Object.assign(context, { Semo: Object.assign({ 
+        Utils, 
+        argv, 
+        package: (name, force = false) => {
+          return Utils.importPackage(name, 'repl-package-cache', true, force)
+        },
+        extract: (obj, keys: string[] | string = []) => {
+          const keysCast = Utils._.castArray(keys)
+          Object.keys(obj).forEach(key => {
+            if (keys.length === 0 || keysCast.includes(key)) {
+              Object.defineProperty(r.context, key, { value: obj[key] })
+            }
+          })
+        } 
+      }, pluginsReturn)})
     }
 
     return await openRepl(context)
