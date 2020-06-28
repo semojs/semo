@@ -85,14 +85,14 @@ export const builder = function(yargs) {
   })
 
   yargs.option('prompt', {
-    default: '>>> ',
-    describe: 'Prompt for input.'
+    describe: 'Prompt for input. default is >>>'
   })
 }
 
 export const handler = async function(argv: any) {
   const { Utils } = argv.$semo
   argv.hook = Utils.pluginConfig('hook', false)
+  argv.prompt = Utils.pluginConfig('prompt', '>>> ')
   try {
     let context = {
       await: true, 
