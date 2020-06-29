@@ -850,8 +850,8 @@ const formatRcOptions = (opts) => {
   if (!_.isObject(opts)) {
     throw new Error('Not valid rc options!')
   }
-  Object.keys(opts).filter(key => key.indexOf('-') > -1).forEach(key => {
-    const newKey = key.replace(/--+/g, '-').replace(/^-/g, '').replace(/-([a-z])/g, (m, p1) => p1.toUpperCase())
+  Object.keys(opts).filter(key => key.indexOf('-') > -1 || key.indexOf('.') > -1).forEach(key => {
+    const newKey = key.replace(/--+/g, '-').replace(/^-/g, '').replace(/-([a-z])/g, (m, p1) => p1.toUpperCase()).replace('.', '_')
     opts[newKey] = opts[key]
     // delete opts[key] // sometimes we need original style
   })

@@ -3,21 +3,38 @@ import { Utils } from '@semo/core'
 
 let r // repl instance
 let v // yargs argv
+let u // Semo Utils
+
+const importPackage = (name, force = false) => {
+  return Utils.importPackage(name, 'repl-package-cache', true, force)
+}
 
 const reload = async () => {
   const pluginsReturn = await Utils.invokeHook(
     'repl',
     Utils._.isBoolean(v.hook)
       ? {
-        reload: true
+        reload: true,
+        mode: 'group'
       }
       : {
+          mode: 'group',
           include: Utils.splitComma(v.hook),
           reload: true
         }
   )
-  Object.assign(r.context.Semo, pluginsReturn)
+  r.context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
+
   console.log(Utils.chalk.green('Hooked files reloaded.'))
+}
+
+const extract = (obj, keys: string[] | string = []) => {
+  const keysCast = Utils._.castArray(keys)
+  Object.keys(obj).forEach(key => {
+    if (keys.length === 0 || keysCast.includes(key)) {
+      Object.defineProperty(r.context, key, { value: obj[key] })
+    }
+  })
 }
 
 const corepl = (cli: repl.REPLServer) => {
@@ -103,6 +120,7 @@ export const handler = async function(argv: any) {
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
   v = argv
+  u = Utils
   try {
     let context: any = {
       await: true, 
@@ -112,27 +130,22 @@ export const handler = async function(argv: any) {
       const pluginsReturn = await Utils.invokeHook(
         'repl',
         Utils._.isBoolean(argv.hook)
-          ? {}
+          ? {
+            mode: 'group'
+          }
           : {
-              include: Utils.splitComma(argv.hook)
+              include: Utils.splitComma(argv.hook),
+              mode: 'group'
             }
       )
-      context  = Object.assign(context, { Semo: Object.assign({ 
+      context  = Object.assign(context, { Semo: { 
         Utils, 
         argv, 
-        'import': (name, force = false) => {
-          return Utils.importPackage(name, 'repl-package-cache', true, force)
-        },
-        extract: (obj, keys: string[] | string = []) => {
-          const keysCast = Utils._.castArray(keys)
-          Object.keys(obj).forEach(key => {
-            if (keys.length === 0 || keysCast.includes(key)) {
-              Object.defineProperty(r.context, key, { value: obj[key] })
-            }
-          })
-        },
-        reload
-      }, pluginsReturn)})
+        'import': importPackage,
+        extract,
+        reload,
+        hooks: Utils.formatRcOptions(pluginsReturn)
+      }})
     }
 
     return await openRepl(context)
