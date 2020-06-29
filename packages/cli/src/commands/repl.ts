@@ -9,7 +9,7 @@ const importPackage = (name, force = false) => {
 }
 
 const reload = async () => {
-  const pluginsReturn = await Utils.invokeHook(
+  let pluginsReturn = await Utils.invokeHook(
     'repl',
     Utils._.isBoolean(v.hook)
       ? {
@@ -22,6 +22,8 @@ const reload = async () => {
           reload: true
         }
   )
+
+  pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
   r.context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
 
   if (v.extract && v.extract.length > 0) {
@@ -137,7 +139,7 @@ export const handler = async function(argv: any) {
     }
 
     if (argv.hook) {
-      const pluginsReturn = await Utils.invokeHook(
+      let pluginsReturn = await Utils.invokeHook(
         'repl',
         Utils._.isBoolean(argv.hook)
           ? {
@@ -148,6 +150,8 @@ export const handler = async function(argv: any) {
               mode: 'group'
             }
       )
+
+      pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
 
       context = Object.assign(context, { Semo: { 
         Utils, 
