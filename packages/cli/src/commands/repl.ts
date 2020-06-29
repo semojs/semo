@@ -24,8 +24,10 @@ const reload = async () => {
   )
   r.context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
 
-  if (v.extract) {
-    r.context = Object.assign(r.context, Utils._.get(r.context, v.extract) || {})
+  if (v.extract && v.extract.length > 0) {
+    v.extract.forEach(keyPath => {
+      r.context = Object.assign(r.context, Utils._.get(r.context, keyPath) || {})
+    })
   }
 
   console.log(Utils.chalk.green('Hooked files reloaded.'))
@@ -126,7 +128,8 @@ export const handler = async function(argv: any) {
   const { Utils } = argv.$semo
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
-  argv.extract = Utils.pluginConfig('extract', null)
+  argv.extract = Utils.pluginConfig('extract', '')
+  argv.extract = Utils._.castArray(argv.extract)
   v = argv
   try {
     let context: any = {
@@ -155,8 +158,10 @@ export const handler = async function(argv: any) {
         hooks: Utils.formatRcOptions(pluginsReturn)
       }})
 
-      if (argv.extract) {
-        context = Object.assign(context, Utils._.get(context, argv.extract) || {})
+      if (argv.extract && argv.extract.length > 0) {
+        argv.extract.forEach(keyPath => {
+          context = Object.assign(context, Utils._.get(context, keyPath) || {})
+        })
       }
     }
 
