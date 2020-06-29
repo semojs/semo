@@ -3,7 +3,6 @@ import { Utils } from '@semo/core'
 
 let r // repl instance
 let v // yargs argv
-let u // Semo Utils
 
 const importPackage = (name, force = false) => {
   return Utils.importPackage(name, 'repl-package-cache', true, force)
@@ -24,6 +23,10 @@ const reload = async () => {
         }
   )
   r.context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
+
+  if (v.extract) {
+    r.context = Object.assign(r.context, Utils._.get(r.context, v.extract) || {})
+  }
 
   console.log(Utils.chalk.green('Hooked files reloaded.'))
 }
@@ -113,14 +116,18 @@ export const builder = function(yargs) {
   yargs.option('prompt', {
     describe: 'Prompt for input. default is >>>'
   })
+
+  yargs.option('extract', {
+    describe: 'Auto extract k/v from Semo object by key path'
+  })
 }
 
 export const handler = async function(argv: any) {
   const { Utils } = argv.$semo
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
+  argv.extract = Utils.pluginConfig('extract', null)
   v = argv
-  u = Utils
   try {
     let context: any = {
       await: true, 
@@ -138,7 +145,8 @@ export const handler = async function(argv: any) {
               mode: 'group'
             }
       )
-      context  = Object.assign(context, { Semo: { 
+
+      context = Object.assign(context, { Semo: { 
         Utils, 
         argv, 
         'import': importPackage,
@@ -146,6 +154,10 @@ export const handler = async function(argv: any) {
         reload,
         hooks: Utils.formatRcOptions(pluginsReturn)
       }})
+
+      if (argv.extract) {
+        context = Object.assign(context, Utils._.get(context, argv.extract) || {})
+      }
     }
 
     return await openRepl(context)

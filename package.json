@@ -10,6 +10,7 @@
   "scripts": {
     "test": "exit 0",
     "lerna": "lerna",
+    "semo": "lerna exec  --scope @semo/cli -- yarn semo",
     "prepublish": "lerna run prepublish",
     "lerna:publish": "lerna publish from-git --yes",
     "docs:dev": "vuepress dev docs",

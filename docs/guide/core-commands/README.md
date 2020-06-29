@@ -399,6 +399,29 @@ export const hook_repl = () => {
 * Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
 * Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
 
+### 默认注入到全局作用域的方法
+
+如果觉得默认的对象层次比较深，可以通过配置或者参数使得默认注入到 REPL 的全局作用域。方式就是 `--extract`
+
+```
+semo repl --extract Semo.hooks
+```
+
+配置的方式: 修改 `.semorc.yml`
+
+```
+$plugin:
+  semo:
+    extract: Semo.hooks
+```
+
+或
+
+```
+CommandDefault:
+  repl:
+    extract: Semo.hooks
+```
 
 ## `semo run <PLUGIN> [COMMAND]`
 

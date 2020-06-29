@@ -1,3 +1,8 @@
+/**
+ * @file
+ * 
+ * Semo core utils .
+ */
 import crypto from 'crypto'
 import path from 'path'
 import fs from 'fs-extra'
