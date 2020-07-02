@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.2">
     
     <meta name="description" content="一个Node项目命令行开发规范">
-    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.b0690172.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/11.bc828ec0.js" as="script"><link rel="prefetch" href="/assets/js/10.75388bf5.js"><link rel="prefetch" href="/assets/js/12.817c2ce4.js"><link rel="prefetch" href="/assets/js/13.a8db6f05.js"><link rel="prefetch" href="/assets/js/14.fe6adeb3.js"><link rel="prefetch" href="/assets/js/15.1f8578a2.js"><link rel="prefetch" href="/assets/js/16.94b0d158.js"><link rel="prefetch" href="/assets/js/17.110f7c08.js"><link rel="prefetch" href="/assets/js/3.3ae9385c.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.791d078c.js">
+    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.7492eb2c.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/11.3e1ebc4f.js" as="script"><link rel="prefetch" href="/assets/js/10.47d467b1.js"><link rel="prefetch" href="/assets/js/12.817c2ce4.js"><link rel="prefetch" href="/assets/js/13.a8db6f05.js"><link rel="prefetch" href="/assets/js/14.fe6adeb3.js"><link rel="prefetch" href="/assets/js/15.1f8578a2.js"><link rel="prefetch" href="/assets/js/16.94b0d158.js"><link rel="prefetch" href="/assets/js/17.110f7c08.js"><link rel="prefetch" href="/assets/js/3.3ae9385c.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.791d078c.js">
     <link rel="stylesheet" href="/assets/css/0.styles.34d67128.css">
   </head>
   <body>
@@ -65,7 +65,7 @@ semo hi
 [Function: multiple]
 &gt;&gt;&gt; await Semo.multiple(3, 4)
 12
-</code></pre></div><p>插件和业务项目在实现这个钩子时的出发点是不一样的，业务项目一般注入的是具体的业务逻辑，而插件一般注入的是公共的方法，具有一定的复用性，比如可以注入底层服务的实例方法，常用的库等等，比如核心注入的 <code>Utils</code> 里面就包含 <code>lodash</code> 库。</p> <h2 id="暴露方法"><a href="#暴露方法" class="header-anchor">#</a> 暴露方法</h2> <p>实现插件还有一个最原始的目的，就是当做一个模块，对外暴露出实例，方法或者类库。这种情况下一方面，我们可以用标准的方式定义模块，例如：</p> <div class="language-json extra-class"><pre class="language-json"><code><span class="token comment">// package.json</span>
+</code></pre></div><p>插件和业务项目在实现这个钩子时的出发点是不一样的，业务项目一般注入的是具体的业务逻辑，而插件一般注入的是公共的方法，具有一定的复用性，比如可以注入底层服务的实例方法，常用的库等等，比如核心注入的 <code>Utils</code> 里面就包含 <code>lodash</code> 库。</p> <h2 id="暴露方法"><a href="#暴露方法" class="header-anchor">#</a> 暴露方法</h2> <p>实现插件还有一个最原始的目的，就是当做一个模块，对外暴露出实例，方法或者类库。这种情况下一方面，我们可以用标准的方式定义模块，例如：</p> <div class="custom-block warning"><p class="custom-block-title">WARNING</p> <p>由于 <code>Semo</code> 后来引入了 <code>run</code> 命令，而这个命令依赖于入口文件进行定位，因此要求 <code>Semo</code> 的插件声明一个入口，不管这个入口是否有暴露方法。</p></div> <div class="language-json extra-class"><pre class="language-json"><code><span class="token comment">// package.json</span>
 <span class="token punctuation">{</span>
   <span class="token property">&quot;main&quot;</span><span class="token operator">:</span> <span class="token string">&quot;lib/index.js&quot;</span>
 <span class="token punctuation">}</span>
@@ -96,6 +96,6 @@ npm publish
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.b0690172.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/11.bc828ec0.js" defer></script>
+    <script src="/assets/js/app.7492eb2c.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/11.3e1ebc4f.js" defer></script>
   </body>
 </html>

@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.2">
     
     <meta name="description" content="一个Node项目命令行开发规范">
-    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.b0690172.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/10.75388bf5.js" as="script"><link rel="prefetch" href="/assets/js/11.bc828ec0.js"><link rel="prefetch" href="/assets/js/12.817c2ce4.js"><link rel="prefetch" href="/assets/js/13.a8db6f05.js"><link rel="prefetch" href="/assets/js/14.fe6adeb3.js"><link rel="prefetch" href="/assets/js/15.1f8578a2.js"><link rel="prefetch" href="/assets/js/16.94b0d158.js"><link rel="prefetch" href="/assets/js/17.110f7c08.js"><link rel="prefetch" href="/assets/js/3.3ae9385c.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.791d078c.js">
+    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.7492eb2c.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/10.47d467b1.js" as="script"><link rel="prefetch" href="/assets/js/11.3e1ebc4f.js"><link rel="prefetch" href="/assets/js/12.817c2ce4.js"><link rel="prefetch" href="/assets/js/13.a8db6f05.js"><link rel="prefetch" href="/assets/js/14.fe6adeb3.js"><link rel="prefetch" href="/assets/js/15.1f8578a2.js"><link rel="prefetch" href="/assets/js/16.94b0d158.js"><link rel="prefetch" href="/assets/js/17.110f7c08.js"><link rel="prefetch" href="/assets/js/3.3ae9385c.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.791d078c.js">
     <link rel="stylesheet" href="/assets/css/0.styles.34d67128.css">
   </head>
   <body>
@@ -181,7 +181,7 @@ Plugin management tool
 </code></pre></div><h2 id="semo-run-plugin-command"><a href="#semo-run-plugin-command" class="header-anchor">#</a> <code>semo run &lt;PLUGIN&gt; [COMMAND]</code></h2> <p>这个命令可以像 yarn create 一样，实现直接执行远程插件包里的命令的效果</p> <p>例如：</p> <div class="language- extra-class"><pre class="language-text"><code>semo run semo-plugin-serve serve
 </code></pre></div><p>这里是调用了 semo-plugin-serve 插件实现简单的 HTTP 服务，也许我们会觉得这样写起来还是不是很方便，那么我们可以简化一下。</p> <div class="language- extra-class"><pre class="language-text"><code>semo run serve
 </code></pre></div><p>这样看是不是简洁多了，这里能把 <code>semo-plugin-</code> 省略的原因是这里只支持 semo 系列插件，而不是所有的 npm 包，所以可以内部帮着加上，而后面的 serve 命令去掉是因为插件为此实现了一个约定，插件就是一个普通的 node 包，可以对外暴露方法，这里暴露了一个 handler 方法，而这个 handler 方法又去掉了包里的 serve 命令，因为这个命令文件也是一个 Node 模块。如果插件里面包含多个命令，可以用这个机制对外暴露最常用的，其他的还是应该明确传参。另外，需要注意的是一些命令需要传递参数，这里需要把所有的参数和选项都改造成选项。</p> <p>之前是命令的时候：</p> <div class="language- extra-class"><pre class="language-text"><code>semo serve [publicDir]
-</code></pre></div><p>在用 <code>run</code> 命令调度时：</p> <div class="language- extra-class"><pre class="language-text"><code>semo run serve --public-dir=.
+</code></pre></div><p>在用 <code>run</code> 命令调度时：注意，插件命令里的参数需要放到 <code>--</code> 后</p> <div class="language- extra-class"><pre class="language-text"><code>semo run serve -- --public-dir=.
 </code></pre></div><p>如果你在 npm 的 semo 插件包也是在 scope 下的，在用 run 时需要指定 scope</p> <div class="language- extra-class"><pre class="language-text"><code>semo run xxx --SCOPE yyy
 </code></pre></div><p><code>run</code> 命令运行的插件肯定是缓存到本地了，只不过不在全局插件目录 <code>.semo/node_modules</code>, 而是在 <code>.semo/run_plugin_cache/node_modules</code> 目录，默认如果存在就会用缓存里的插件，如果想更新需要用参数 --upgrade</p> <div class="language- extra-class"><pre class="language-text"><code>semo run serve --UPGRADE|--UP
 </code></pre></div><p>有些插件可能依赖于另一些插件，如果有这种情况，就需要手动指定依赖插件，实现一起下载，为什么不能基于 npm 的依赖关系呢，可以看一下下面这个例子：</p> <div class="custom-block tip"><p class="custom-block-title">TIP</p> <p>此特性 v0.8.2 引入</p></div> <div class="language- extra-class"><pre class="language-text"><code>semo run read READ_URL --format=editor --DEP=read-extend-format-editor
@@ -223,6 +223,6 @@ git: log
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.b0690172.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/10.75388bf5.js" defer></script>
+    <script src="/assets/js/app.7492eb2c.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/10.47d467b1.js" defer></script>
   </body>
 </html>
