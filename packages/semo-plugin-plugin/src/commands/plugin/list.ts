@@ -2,7 +2,7 @@ import { Utils } from '@semo/core'
 import path from 'path'
 
 export const disabled = false // Set to true to disable this command temporarily
-export const command = 'list'
+export const command = ['list', '$0']
 export const desc = 'List all plugins'
 export const aliases = ['l', 'ls']
 // export const middleware = (argv) => {}

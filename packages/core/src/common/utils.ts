@@ -834,7 +834,7 @@ const getApplicationConfig = function(opts: any = {}) {
 
   if (applicationConfig['$core'] && applicationConfig['$core']['env'] && _.isObject(applicationConfig['$core']['env'])) {
     Object.keys(applicationConfig['$core']['env']).forEach(key => {
-      process.env[key] = applicationConfig['$core']['env'][key]
+      process.env[key] = process.env[key] || applicationConfig['$core']['env'][key]
     })
   }
 
@@ -1176,7 +1176,10 @@ const launchDispatcher = (opts: any = {}) => {
   })
 
   const cache = getInternalCache()
-  let parsedArgv = yParser(process.argv.slice(2))
+  let parsedArgv = yParser(process.argv.slice(2), {
+    'sort-commands': true,
+    'populate--': true
+  })
   let parsedArgvOrigin = parsedArgv
   cache.set('argv', parsedArgv) // set argv first time
   let appConfig = getApplicationConfig({
@@ -1253,7 +1256,7 @@ const launchDispatcher = (opts: any = {}) => {
       return command.disabled === true ? false : command
     }
   }
-  if (!parsedArgv.disableCoreCommand && opts.coreDir) {
+  if (!parsedArgv.disableCoreCommand && opts.coreDir && packageConfig.name !== scriptName) {
     // Load local commands
     yargs.commandDir(path.resolve(opts.coreDir, appConfig.coreCommandDir), yargsOpts)
   }
@@ -1273,8 +1276,6 @@ const launchDispatcher = (opts: any = {}) => {
 
   // Load application commands
   if (
-    packageConfig.name !== scriptName &&
-    packageConfig.name !== opts.packageName &&
     appConfig.commandDir &&
     fileExistsSyncCache(path.resolve(process.cwd(), appConfig.commandDir))
   ) {
@@ -1409,7 +1410,8 @@ const launchDispatcher = (opts: any = {}) => {
         .exitProcess(false)
         .recommendCommands()
         .parserConfiguration({
-          'sort-commands': true
+          'sort-commands': true,
+          'populate--': true
         })
         .wrap(Math.min(120, yargs.terminalWidth())).argv
 

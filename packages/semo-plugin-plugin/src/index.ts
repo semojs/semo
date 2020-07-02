@@ -1,1 +1,0 @@
-export { handler } from './commands/plugin/list'
