@@ -1,1 +1,1 @@
-export { handler } from './commands/script'
+export = {}

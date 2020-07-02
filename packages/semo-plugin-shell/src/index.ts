@@ -1,1 +1,1 @@
-export { handler } from './commands/shell'
+export = {}

@@ -447,10 +447,10 @@ semo run serve
 semo serve [publicDir]
 ```
 
-在用 `run` 命令调度时：
+在用 `run` 命令调度时：注意，插件命令里的参数需要放到 `--` 后
 
 ```
-semo run serve --public-dir=.
+semo run serve -- --public-dir=.
 ```
 
 如果你在 npm 的 semo 插件包也是在 scope 下的，在用 run 时需要指定 scope
