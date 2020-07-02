@@ -45,27 +45,15 @@ export const handler = async function (argv: any) {
     })
   }
 
-  let plugin
   try {
-    plugin = Utils.importPackage(argv.PLUGIN, 'run-plugin-cache', true, argv.UPGRADE)
+    Utils.installPackage(argv.PLUGIN, 'run-plugin-cache', true, argv.UPGRADE)
   } catch (e) {
     Utils.error(`Plugin ${plugin} not found or entry not exist`)
-  }
-
-  // Pass plugin config
-  let pluginConfigKey = argv.PLUGIN.substring(argv.PLUGIN.lastIndexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
-  if (pluginConfigKey && argv['$plugin']) {
-    if (argv['$plugin'][pluginConfigKey]) {
-      argv['$config'] = argv['$plugin'][pluginConfigKey] || {}
-    } else if (argv['$plugin'][argv.scriptName + '-plugin-' + pluginConfigKey]) {
-      argv['$config'] = argv['$plugin'][argv.scriptName + '-plugin-' + pluginConfigKey] || {}
-    }
   }
 
   // Pass SEMO_PLUGIN_DIR
   let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_PLUGIN_DIR'
   let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache', 'node_modules')
-  process.env[extraPluginDirEnvName] = runPluginDir
 
   // Populate command string
   let pluginShort = argv.PLUGIN.substring(argv.PLUGIN.indexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
