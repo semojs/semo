@@ -2,7 +2,7 @@ import path from 'path'
 import os from 'os'
 import { Utils } from '@semo/core'
 
-export const hook_hook = {
+export const semo__hook_hook = {
   before_command: 'Hook triggered before command execution.',
   after_command: 'Hook triggered after command execution.',
   component: 'Hook triggered when needing to fetch components',
@@ -12,12 +12,12 @@ export const hook_hook = {
   create_project_template: 'Hook triggered in create command.'
 }
 
-export const hook_repl = () => {
+export const semo__hook_repl = () => {
   const corePkgInfo = Utils.loadCorePackageInfo()
   return { VERSION: corePkgInfo.version }
 }
 
-export const hook_create_project_template = () => {
+export const semo__hook_create_project_template = () => {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   return scriptName === 'semo' ? {
@@ -34,7 +34,7 @@ export const hook_create_project_template = () => {
   } : {}
 }
 
-export const hook_status = async () => {
+export const semo__hook_status = async () => {
   let info = JSON.parse(
     await Utils.envinfo.run(
       {

@@ -38,14 +38,14 @@ semo generate command xyz
 通过这个命令查询当前环境支持哪些钩子：
 
 ```
-semo hook
+semo hook list
 ```
 
 ### 例子1：实现 `hook_create_project_template`
 
 ```js
 // src/hooks/index.ts
-export const hook_create_project_template = {
+export const semo__hook_create_project_template = {
   demo_repo: {
     repo: 'demo_repo.git',
     branch: 'master',
@@ -60,7 +60,7 @@ export const hook_create_project_template = {
 
 ```js
 // src/hooks/index.ts
-export const hook_repl = () => {
+export const semo__hook_repl = () => {
   return {
     add: async (a, b) => {
       return a + b
@@ -118,7 +118,7 @@ export const func = () => {}
 
 ```js
 // src/hooks/index.ts
-export const hook_component = async () {
+export const semo__hook_component = async () {
   return {
     a: 'b'
   }
@@ -128,8 +128,8 @@ export const hook_component = async () {
 使用
 
 ```js
-import { Utils } from 'semo'
-const { a } = await Utils.invokeHook('component')
+import { Utils } from '@semo/core'
+const { a } = await Utils.invokeHook('semo:component')
 console.log(a)
 // -> 'b'
 ```

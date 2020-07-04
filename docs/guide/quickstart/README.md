@@ -132,9 +132,9 @@ import lib from 'semo-plugin-xxx'
 利用 `Semo` 提供的钩子机制，也可以使用另一种风格来使用插件提供的业务逻辑支持。
 
 ```js
-import { Utils } from 'semo'
+import { Utils } from '@semo/core'
 
-const { xxx } = await Utils.invokeHook('component')
+const { xxx } = await Utils.invokeHook('semo:component')
 ```
 
 可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。

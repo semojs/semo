@@ -62,6 +62,7 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
+  const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'
 
@@ -80,7 +81,7 @@ export const handler = async function(argv: any) {
       Utils.shell.cd(argv.name)
     } else {
       if (argv.template) {
-        const defaultRepos = await Utils.invokeHook('create_project_template')
+        const defaultRepos = await Utils.invokeHook(`${scriptName}:create_project_template`)
         if (Object.keys(defaultRepos).length === 0) {
           Utils.error('No pre-defined repos available.')
         }

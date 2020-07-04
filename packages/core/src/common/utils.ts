@@ -120,7 +120,7 @@ interface IHookOption {
  * Plugins implement hook in `module.exports`, could be generator function or promise function or non-function
  * For non-function, it will be used as hook data directly, likely to be returned by function
  * @example
- * const hookReturn = await Utils.invokeHook('hook')
+ * const hookReturn = await Utils.invokeHook('semo:hook')
  * @param {string} hook Hook name, suggest plugin defined hook include a prefix, e.g. `prefix:hook`
  * @param {string} options Options
  * @param {string} options.mode Hook mode, could be `assign`, `merge`, `push`, `replace`, `group`, default is assign.
@@ -129,7 +129,20 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {boolean} options.reload If or not clear module cache before require
  */
-const invokeHook = async function(hook: string, options: IHookOption = { mode: 'assign' }, argv: any = null) {
+const invokeHook = async function (hook: any = null, options: IHookOption = { mode: 'assign' }, argv: any = null) {
+  const splitHookName = hook.split(':')
+  let moduler
+  if (splitHookName.length === 1) {
+    moduler = ''
+  } else if (splitHookName.length === 2) {
+    moduler = splitHookName[0]
+    hook = splitHookName[1]
+
+    moduler = moduler.replace('-', '__')
+  } else {
+    throw Error('Invalid hook name')
+  }
+
   argv = argv || getInternalCache().get('argv') || {}
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   const invokedHookCache: { [propName: string]: any } = cachedInstance.get('invokedHookCache') || {}
@@ -263,34 +276,68 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
             delete require.cache[pluginEntryPath]
           }
           const loadedPlugin = require(pluginEntryPath)
-          if (!_.isNull(loadedPlugin[hook])) {
-            let pluginReturn
-            if (_.isFunction(loadedPlugin[hook])) {
-              pluginReturn = (await loadedPlugin[hook](pluginsReturn, options))
-            } else {
-              pluginReturn = loadedPlugin[hook]
-            }
 
-            switch (options.mode) {
-              case 'group':
-                pluginReturn = pluginReturn || {}
-                pluginsReturn[plugin] = pluginReturn
-                break
-              case 'push':
-                pluginsReturn.push(pluginReturn)
-                break
-              case 'replace':
-                pluginsReturn = pluginReturn
-                break
-              case 'merge':
-                pluginReturn = pluginReturn || {}
-                pluginsReturn = _.merge(pluginsReturn, pluginReturn)
-                break
-              case 'assign':
-              default:
-                pluginReturn = pluginReturn || {}
-                pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
-                break
+          if (moduler) {
+            if (!_.isNull(loadedPlugin[`${moduler}__${hook}`])) {
+              let pluginReturn
+              if (_.isFunction(loadedPlugin[`${moduler}__${hook}`])) {
+                pluginReturn = (await loadedPlugin[`${moduler}__${hook}`](pluginsReturn, options))
+              } else {
+                pluginReturn = loadedPlugin[`${moduler}__${hook}`]
+              }
+  
+              switch (options.mode) {
+                case 'group':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn[plugin] = pluginReturn
+                  break
+                case 'push':
+                  pluginsReturn.push(pluginReturn)
+                  break
+                case 'replace':
+                  pluginsReturn = pluginReturn
+                  break
+                case 'merge':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+                  break
+                case 'assign':
+                default:
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+                  break
+              }
+            }
+          } else {
+            if (!_.isNull(loadedPlugin[hook])) {
+              let pluginReturn
+              if (_.isFunction(loadedPlugin[hook])) {
+                pluginReturn = (await loadedPlugin[hook](pluginsReturn, options))
+              } else {
+                pluginReturn = loadedPlugin[hook]
+              }
+  
+              switch (options.mode) {
+                case 'group':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn[plugin] = pluginReturn
+                  break
+                case 'push':
+                  pluginsReturn.push(pluginReturn)
+                  break
+                case 'replace':
+                  pluginsReturn = pluginReturn
+                  break
+                case 'merge':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+                  break
+                case 'assign':
+                default:
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+                  break
+              }
             }
           }
         }
@@ -321,7 +368,21 @@ const invokeHook = async function(hook: string, options: IHookOption = { mode: '
  * @param {object} data need alter data
  * @param {object} options Same as invokeHook 
  */
-const invokeHookAlter = async function(hook: string, data, options: IHookOption = {}, argv: any = null) {
+const invokeHookAlter = async function(hook: any = null, data, options: IHookOption = {}, argv: any = null) {
+
+  const splitHookName = hook.split(':')
+  let moduler
+  if (splitHookName.length === 1) {
+    moduler = ''
+  } else if (splitHookName.length === 2) {
+    moduler = splitHookName[0]
+    hook = splitHookName[1]
+
+    moduler = moduler.replace('-', '__')
+  } else {
+    throw Error('Invalid hook name')
+  }
+
   argv = argv || getInternalCache().get('argv') || {}
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
@@ -422,11 +483,21 @@ const invokeHookAlter = async function(hook: string, data, options: IHookOption 
 
           const loadedPlugin = require(pluginEntryPath)
           const hook_alter = `${hook}_alter`
-          if (loadedPlugin[hook_alter]) {
-            if (_.isFunction(loadedPlugin[hook_alter])) {
-              data = await loadedPlugin[hook_alter](data, options)
-            } else {
-              data = loadedPlugin[hook_alter]
+          if (moduler) {
+            if (loadedPlugin[`${moduler}__${hook_alter}`]) {
+              if (_.isFunction(loadedPlugin[`${moduler}__${hook_alter}`])) {
+                data = await loadedPlugin[`${moduler}__${hook_alter}`](data, options)
+              } else {
+                data = loadedPlugin[`${moduler}__${hook_alter}`]
+              }
+            }
+          } else {
+            if (loadedPlugin[hook_alter]) {
+              if (_.isFunction(loadedPlugin[hook_alter])) {
+                data = await loadedPlugin[hook_alter](data, options)
+              } else {
+                data = loadedPlugin[hook_alter]
+              }
             }
           }
         }
@@ -1321,7 +1392,7 @@ const launchDispatcher = (opts: any = {}) => {
       })
 
       if (!parsedArgv.getYargsCompletions) {
-        let beforeHooks = await invokeHook('before_command')
+        let beforeHooks = await invokeHook(`${scriptName}:before_command`)
         Object.keys(beforeHooks).map(function(hook) {
           beforeHooks[hook](parsedArgv, yargs)
         })
@@ -1416,7 +1487,7 @@ const launchDispatcher = (opts: any = {}) => {
         .wrap(Math.min(120, yargs.terminalWidth())).argv
 
       if (!parsedArgv.getYargsCompletions) {
-        let afterHooks = await invokeHook('after_command')
+        let afterHooks = await invokeHook(`${scriptName}:after_command`)
         Object.keys(afterHooks).map(function(hook) {
           afterHooks[hook](parsedArgv, yargs)
         })
@@ -1715,6 +1786,7 @@ export {
   yParser,
   /** [yargs-parser](https://www.npmjs.com/package/yaml) reference */
   yaml,
+  
 
   // custom functions
   md5,

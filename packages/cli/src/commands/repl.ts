@@ -9,8 +9,9 @@ const importPackage = (name, force = false) => {
 }
 
 const reload = async () => {
+  const scriptName = v.scriptName || 'semo'
   let pluginsReturn = await Utils.invokeHook(
-    'repl',
+    `${scriptName}:repl`,
     Utils._.isBoolean(v.hook)
       ? {
         reload: true,
@@ -128,6 +129,7 @@ export const builder = function(yargs) {
 
 export const handler = async function(argv: any) {
   const { Utils } = argv.$semo
+  const scriptName = argv.scriptName || 'semo'
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
   argv.extract = Utils.pluginConfig('extract', '')
@@ -139,8 +141,8 @@ export const handler = async function(argv: any) {
     }
 
     if (argv.hook) {
-      let pluginsReturn = await Utils.invokeHook(
-        'repl',
+      let pluginsReturn = await Utils.invokeHook(scriptName,
+        `${scriptName}:repl`,
         Utils._.isBoolean(argv.hook)
           ? {
             mode: 'group'

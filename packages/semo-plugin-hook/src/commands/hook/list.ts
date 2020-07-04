@@ -7,8 +7,9 @@ export const aliases = ['ls']
 export const builder = function(yargs) {}
 
 export const handler = async function(argv: any) {
+  const scriptName = argv.scriptName || 'semo'
   try {
-    const hookInfo = await Utils.invokeHook('hook', {
+    const hookInfo = await Utils.invokeHook(scriptName + ':hook', {
       mode: 'group'
     }, argv)
     const columns = [['Hook', 'Package', 'Description'].map(item => Utils.chalk.green(item))]

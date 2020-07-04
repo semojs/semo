@@ -39,7 +39,7 @@ export const handler = async function (argv: any) {
   }
 
   // Limit only application can hook cleanup
-  const hookAppCleanup = await Utils.invokeHook('cleanup', { include: ['application'] })
+  const hookAppCleanup = await Utils.invokeHook(`${scriptName}:cleanup`, { include: ['application'] })
   Object.keys(hookAppCleanup).forEach(key => {
     let cachePath = hookAppCleanup[key]
     if (cachePath.indexOf(appConfig.applicationDir) > -1 && coreCleanupStepKeys.indexOf(key) === -1) {

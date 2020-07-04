@@ -11,7 +11,7 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookStatus = await Utils.invokeHook('status', { mode: 'group' })
+    const hookStatus = await Utils.invokeHook(`${scriptName}:status`, { mode: 'group' })
 
     Object.keys(hookStatus).forEach((key) => {
       const kvs = hookStatus[key] ? hookStatus[key] : {}
