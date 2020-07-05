@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-hook",
-  "version": "0.13.1",
+  "version": "0.13.2",
   "description": "A semo plugin to provide hook management.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
