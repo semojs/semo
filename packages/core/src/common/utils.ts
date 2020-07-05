@@ -24,6 +24,8 @@ import yargsInternal from 'yargs/yargs'
 import updateNotifier from 'update-notifier'
 import envinfo from 'envinfo'
 
+import { Hook } from './hook'
+
 // @ts-ignore
 const yParser = yargsInternal.Parser
 
@@ -131,13 +133,16 @@ interface IHookOption {
  */
 const invokeHook = async function (hook: any = null, options: IHookOption = { mode: 'assign' }, argv: any = null) {
   const splitHookName = hook.split(':')
-  let moduler
+  let moduler, originModuler
   if (splitHookName.length === 1) {
     moduler = ''
+    originModuler = ''
+    hook = splitHookName[0]
   } else if (splitHookName.length === 2) {
     moduler = splitHookName[0]
     hook = splitHookName[1]
 
+    originModuler = moduler
     moduler = moduler.replace('-', '__')
   } else {
     throw Error('Invalid hook name')
@@ -276,9 +281,10 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
             delete require.cache[pluginEntryPath]
           }
           const loadedPlugin = require(pluginEntryPath)
-
+          let hookFound = false
           if (moduler) {
-            if (!_.isNull(loadedPlugin[`${moduler}__${hook}`])) {
+            if (!_.isNull(loadedPlugin[`${moduler}__${hook}`]) && !_.isUndefined(loadedPlugin[`${moduler}__${hook}`])) {
+              hookFound = true
               let pluginReturn
               if (_.isFunction(loadedPlugin[`${moduler}__${hook}`])) {
                 pluginReturn = (await loadedPlugin[`${moduler}__${hook}`](pluginsReturn, options))
@@ -307,9 +313,42 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
                   pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
                   break
               }
+            } else if (loadedPlugin[hook] instanceof Hook) {
+              hookFound = true
+              let loadedPluginHook = loadedPlugin[hook].getHook(originModuler)
+              let pluginReturn
+              if (_.isFunction(loadedPluginHook)) {
+                pluginReturn = (await loadedPluginHook(pluginsReturn, options))
+              } else {
+                pluginReturn = loadedPluginHook
+              }
+  
+              switch (options.mode) {
+                case 'group':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn[plugin] = pluginReturn
+                  break
+                case 'push':
+                  pluginsReturn.push(pluginReturn)
+                  break
+                case 'replace':
+                  pluginsReturn = pluginReturn
+                  break
+                case 'merge':
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+                  break
+                case 'assign':
+                default:
+                  pluginReturn = pluginReturn || {}
+                  pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
+                  break
+              }
             }
-          } else {
-            if (!_.isNull(loadedPlugin[hook])) {
+          } 
+          
+          if (!hookFound) {
+            if (!_.isNull(loadedPlugin[hook]) && !_.isUndefined(loadedPlugin[hook])) {
               let pluginReturn
               if (_.isFunction(loadedPlugin[hook])) {
                 pluginReturn = (await loadedPlugin[hook](pluginsReturn, options))
@@ -371,13 +410,14 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
 const invokeHookAlter = async function(hook: any = null, data, options: IHookOption = {}, argv: any = null) {
 
   const splitHookName = hook.split(':')
-  let moduler
+  let moduler, originModuler
   if (splitHookName.length === 1) {
     moduler = ''
+    originModuler = ''
   } else if (splitHookName.length === 2) {
     moduler = splitHookName[0]
     hook = splitHookName[1]
-
+    originModuler = moduler
     moduler = moduler.replace('-', '__')
   } else {
     throw Error('Invalid hook name')
@@ -482,17 +522,29 @@ const invokeHookAlter = async function(hook: any = null, data, options: IHookOpt
           }
 
           const loadedPlugin = require(pluginEntryPath)
+          let hookFound = false
           const hook_alter = `${hook}_alter`
           if (moduler) {
-            if (loadedPlugin[`${moduler}__${hook_alter}`]) {
+            if (!_.isNull(loadedPlugin[`${moduler}__${hook_alter}`]) && !_.isUndefined(loadedPlugin[`${moduler}__${hook_alter}`])) {
+              hookFound = true
               if (_.isFunction(loadedPlugin[`${moduler}__${hook_alter}`])) {
                 data = await loadedPlugin[`${moduler}__${hook_alter}`](data, options)
               } else {
                 data = loadedPlugin[`${moduler}__${hook_alter}`]
               }
+            } else if (loadedPlugin[hook_alter] instanceof Hook) {
+              hookFound = true
+              let loadedPluginHook = loadedPlugin[hook_alter].getHook(originModuler)
+              if (_.isFunction(loadedPluginHook)) {
+                data = await loadedPluginHook(data, options)
+              } else {
+                data = loadedPluginHook
+              }
             }
-          } else {
-            if (loadedPlugin[hook_alter]) {
+          } 
+          
+          if (!hookFound) {
+            if (!_.isNull(loadedPlugin[hook_alter]) && !_.isUndefined(loadedPlugin[hook_alter])) {
               if (_.isFunction(loadedPlugin[hook_alter])) {
                 data = await loadedPlugin[hook_alter](data, options)
               } else {
@@ -1798,6 +1850,7 @@ export {
   info,
   success,
   error,
+  Hook,
   outputTable,
   invokeHook,
   invokeHookAlter,

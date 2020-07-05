@@ -9,9 +9,10 @@ export const builder = function(yargs) {}
 export const handler = async function(argv: any) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookInfo = await Utils.invokeHook(scriptName + ':hook', {
+    const hookInfo = await Utils.invokeHook(`${scriptName}:hook`, {
       mode: 'group'
     }, argv)
+
     const columns = [['Hook', 'Package', 'Description'].map(item => Utils.chalk.green(item))]
     Object.keys(hookInfo).map(k => {
       Object.keys(hookInfo[k]).map(hook => {

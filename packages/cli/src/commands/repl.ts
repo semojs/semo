@@ -141,7 +141,7 @@ export const handler = async function(argv: any) {
     }
 
     if (argv.hook) {
-      let pluginsReturn = await Utils.invokeHook(scriptName,
+      let pluginsReturn = await Utils.invokeHook(
         `${scriptName}:repl`,
         Utils._.isBoolean(argv.hook)
           ? {

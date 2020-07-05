@@ -1,21 +1,25 @@
+import lodash from 'lodash'
+
+type HookItem = {
+  [key: string]: any
+}
+
 export class Hook {
-  // Hook name
-  private name: string
+  private mappings: HookItem = {}
 
-  // Hook handler
-  private handler: any
-
-  constructor(name: string, handler: any) {
-    this.name = name
-    this.handler = handler
+  constructor(name: string | HookItem, handler: any) {
+    if (lodash.isString(name)) {
+      this.mappings[name] = handler
+    } else if (lodash.isObject(name)) {
+      this.mappings = name
+    } else {
+      throw new Error('Invalid hook')
+    }
   }
 
-  public getName() {
-    return this.name
+  public getHook(name: string) {
+    return this.mappings[name] || {}
   }
 
-  public getHandler() {
-    return this.handler
-  }
 
 }

@@ -2,7 +2,7 @@ import path from 'path'
 import os from 'os'
 import { Utils } from '@semo/core'
 
-export const semo__hook_hook = {
+export const hook_hook = new Utils.Hook('semo', {
   before_command: 'Hook triggered before command execution.',
   after_command: 'Hook triggered after command execution.',
   component: 'Hook triggered when needing to fetch components',
@@ -10,14 +10,14 @@ export const semo__hook_hook = {
   repl: 'Hook triggered in repl command.',
   status: 'Hook triggered in status command.',
   create_project_template: 'Hook triggered in create command.'
-}
+})
 
-export const semo__hook_repl = () => {
+export const hook_repl = new Utils.Hook('semo', () => {
   const corePkgInfo = Utils.loadCorePackageInfo()
   return { VERSION: corePkgInfo.version }
-}
+})
 
-export const semo__hook_create_project_template = () => {
+export const hook_create_project_template = new Utils.Hook('semo', () => {
   const argv: any = Utils.getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   return scriptName === 'semo' ? {
@@ -32,9 +32,9 @@ export const semo__hook_create_project_template = () => {
       alias: ['semo-starter-application-simple-typescript', 'application-simple']
     }
   } : {}
-}
+})
 
-export const semo__hook_status = async () => {
+export const hook_status = new Utils.Hook('semo', async () => {
   let info = JSON.parse(
     await Utils.envinfo.run(
       {
@@ -71,4 +71,4 @@ export const semo__hook_status = async () => {
   )
 
   return kvs
-}
+})
