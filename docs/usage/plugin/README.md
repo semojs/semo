@@ -44,6 +44,7 @@ semo-plugin-convert-a-to-b
 * **semo-plugin-ssh**, 【扩展】提供了简单的 `SSH` 账户管理功能。
 * **semo-plugin-read**，【扩展】提供了将 URL 转换成 `Markdown`，进而转换成各种格式的工具。
   * **semo-plugin-read-extend-format-wechat** 这是 read 插件的一个扩展，提供了微信公众号文章在线编辑器的功能，需要和 read 一起使用。
+  * ... 这里可能有很多相关子插件，就不一一列举了。
 * **semo-plugin-serve**，【扩展】提供了一个简单的 `HTTP` 服务器的功能，类似于 `serve`。
 * **semo-plugin-sequelize**, 【扩展】提供了对  `Sequelize` 的集成以提供数据库的访问能力
 * **semo-plugin-redis**，【扩展】提供了对 `Redis` 的集成已提供缓存的访问能力
