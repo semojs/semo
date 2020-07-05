@@ -1,5 +1,3 @@
-import { Utils } from '@semo/core'
-
 export const plugin = 'hook'
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'info <hook>'
@@ -13,6 +11,7 @@ export const builder = function (yargs: any) {
 }
 
 export const handler = async function (argv: any) {
+  const { Utils } = argv.$semo
   if (!argv.hook) {
     Utils.error('A hook is required.')
   }
