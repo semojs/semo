@@ -143,7 +143,7 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
     hook = splitHookName[1]
 
     originModuler = moduler
-    moduler = moduler.replace('-', '__')
+    moduler = moduler.replace('-', '__').replace('/', '__').replace('@', '')
   } else {
     throw Error('Invalid hook name')
   }
@@ -418,7 +418,7 @@ const invokeHookAlter = async function(hook: any = null, data, options: IHookOpt
     moduler = splitHookName[0]
     hook = splitHookName[1]
     originModuler = moduler
-    moduler = moduler.replace('-', '__')
+    moduler = moduler.replace('-', '__').replace('/', '__').replace('@', '')
   } else {
     throw Error('Invalid hook name')
   }
