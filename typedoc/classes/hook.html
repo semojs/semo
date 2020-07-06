@@ -86,11 +86,13 @@
 							<h3>Properties</h3>
 							<ul class="tsd-index-list">
 								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="hook.html#mappings" class="tsd-kind-icon">mappings</a></li>
+								<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><a href="hook.html#scriptname" class="tsd-kind-icon">script<wbr>Name</a></li>
 							</ul>
 						</section>
 						<section class="tsd-index-section ">
 							<h3>Methods</h3>
 							<ul class="tsd-index-list">
+								<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><a href="hook.html#convertname" class="tsd-kind-icon">convert<wbr>Name</a></li>
 								<li class="tsd-kind-method tsd-parent-kind-class"><a href="hook.html#gethook" class="tsd-kind-icon">get<wbr>Hook</a></li>
 							</ul>
 						</section>
@@ -103,19 +105,19 @@
 					<a name="constructor" class="tsd-anchor"></a>
 					<h3>constructor</h3>
 					<ul class="tsd-signatures tsd-kind-constructor tsd-parent-kind-class">
-						<li class="tsd-signature tsd-kind-icon">new <wbr>Hook<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../index.html#hookitem" class="tsd-signature-type">HookItem</a>, handler<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="hook.html" class="tsd-signature-type">Hook</a></li>
+						<li class="tsd-signature tsd-kind-icon">new <wbr>Hook<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../index.html#hookitem" class="tsd-signature-type">HookItem</a><span class="tsd-signature-symbol">[]</span>, handler<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><a href="hook.html" class="tsd-signature-type">Hook</a></li>
 					</ul>
 					<ul class="tsd-descriptions">
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/6769cfc/packages/core/src/common/hook.ts#L8">hook.ts:8</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/3081ab5/packages/core/src/common/hook.ts#L9">hook.ts:9</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
 							<ul class="tsd-parameters">
 								<li>
-									<h5>name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../index.html#hookitem" class="tsd-signature-type">HookItem</a></h5>
+									<h5>name: <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> | </span><a href="../index.html#hookitem" class="tsd-signature-type">HookItem</a><span class="tsd-signature-symbol">[]</span></h5>
 								</li>
 								<li>
 									<h5>handler: <span class="tsd-signature-type">any</span></h5>
@@ -134,13 +136,46 @@
 					<div class="tsd-signature tsd-kind-icon">mappings<span class="tsd-signature-symbol">:</span> <a href="../index.html#hookitem" class="tsd-signature-type">HookItem</a></div>
 					<aside class="tsd-sources">
 						<ul>
-							<li>Defined in <a href="https://github.com/semojs/semo/blob/6769cfc/packages/core/src/common/hook.ts#L8">hook.ts:8</a></li>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/3081ab5/packages/core/src/common/hook.ts#L8">hook.ts:8</a></li>
+						</ul>
+					</aside>
+				</section>
+				<section class="tsd-panel tsd-member tsd-kind-property tsd-parent-kind-class tsd-is-private">
+					<a name="scriptname" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> script<wbr>Name</h3>
+					<div class="tsd-signature tsd-kind-icon">script<wbr>Name<span class="tsd-signature-symbol">:</span> <span class="tsd-signature-type">string</span><span class="tsd-signature-symbol"> = &quot;semo&quot;</span></div>
+					<aside class="tsd-sources">
+						<ul>
+							<li>Defined in <a href="https://github.com/semojs/semo/blob/3081ab5/packages/core/src/common/hook.ts#L9">hook.ts:9</a></li>
 						</ul>
 					</aside>
 				</section>
 			</section>
 			<section class="tsd-panel-group tsd-member-group ">
 				<h2>Methods</h2>
+				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class tsd-is-private">
+					<a name="convertname" class="tsd-anchor"></a>
+					<h3><span class="tsd-flag ts-flagPrivate">Private</span> convert<wbr>Name</h3>
+					<ul class="tsd-signatures tsd-kind-method tsd-parent-kind-class tsd-is-private">
+						<li class="tsd-signature tsd-kind-icon">convert<wbr>Name<span class="tsd-signature-symbol">(</span>name<span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span><span class="tsd-signature-symbol">)</span><span class="tsd-signature-symbol">: </span><span class="tsd-signature-type">any</span></li>
+					</ul>
+					<ul class="tsd-descriptions">
+						<li class="tsd-description">
+							<aside class="tsd-sources">
+								<ul>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/3081ab5/packages/core/src/common/hook.ts#L32">hook.ts:32</a></li>
+								</ul>
+							</aside>
+							<h4 class="tsd-parameters-title">Parameters</h4>
+							<ul class="tsd-parameters">
+								<li>
+									<h5>name: <span class="tsd-signature-type">any</span></h5>
+								</li>
+							</ul>
+							<h4 class="tsd-returns-title">Returns <span class="tsd-signature-type">any</span></h4>
+						</li>
+					</ul>
+				</section>
 				<section class="tsd-panel tsd-member tsd-kind-method tsd-parent-kind-class">
 					<a name="gethook" class="tsd-anchor"></a>
 					<h3>get<wbr>Hook</h3>
@@ -151,7 +186,7 @@
 						<li class="tsd-description">
 							<aside class="tsd-sources">
 								<ul>
-									<li>Defined in <a href="https://github.com/semojs/semo/blob/6769cfc/packages/core/src/common/hook.ts#L20">hook.ts:20</a></li>
+									<li>Defined in <a href="https://github.com/semojs/semo/blob/3081ab5/packages/core/src/common/hook.ts#L27">hook.ts:27</a></li>
 								</ul>
 							</aside>
 							<h4 class="tsd-parameters-title">Parameters</h4>
@@ -187,6 +222,12 @@
 							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
 								<a href="hook.html#mappings" class="tsd-kind-icon">mappings</a>
 							</li>
+							<li class=" tsd-kind-property tsd-parent-kind-class tsd-is-private">
+								<a href="hook.html#scriptname" class="tsd-kind-icon">script<wbr>Name</a>
+							</li>
+							<li class=" tsd-kind-method tsd-parent-kind-class tsd-is-private">
+								<a href="hook.html#convertname" class="tsd-kind-icon">convert<wbr>Name</a>
+							</li>
 							<li class=" tsd-kind-method tsd-parent-kind-class">
 								<a href="hook.html#gethook" class="tsd-kind-icon">get<wbr>Hook</a>
 							</li>
@@ -208,10 +249,11 @@
 				<li class="tsd-kind-method tsd-parent-kind-class"><span class="tsd-kind-icon">Method</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-method tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private method</span></li>
 			</ul>
 			<ul class="tsd-legend">
-				<li class="tsd-kind-property tsd-parent-kind-class tsd-is-private"><span class="tsd-kind-icon">Private property</span></li>
+				<li class="tsd-kind-property tsd-parent-kind-interface"><span class="tsd-kind-icon">Property</span></li>
 			</ul>
 		</div>
 	</div>
