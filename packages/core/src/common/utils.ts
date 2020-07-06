@@ -312,7 +312,7 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
                   pluginsReturn = Object.assign(pluginsReturn, pluginReturn)
                   break
               }
-            } else if (loadedPlugin[hook] instanceof Hook) {
+            } else if (loadedPlugin[hook] && loadedPlugin[hook].getHook && _.isFunction(loadedPlugin[hook].getHook)) {
               hookFound = true
               let loadedPluginHook = loadedPlugin[hook].getHook(originModuler)
               let pluginReturn
@@ -531,7 +531,7 @@ const invokeHookAlter = async function(hook: any = null, data, options: IHookOpt
               } else {
                 data = loadedPlugin[`${moduler}__${hook_alter}`]
               }
-            } else if (loadedPlugin[hook_alter] instanceof Hook) {
+            } else if (loadedPlugin[hook_alter] && loadedPlugin[hook_alter].getHook && _.isFunction(loadedPlugin[hook_alter].getHook)) {
               hookFound = true
               let loadedPluginHook = loadedPlugin[hook_alter].getHook(originModuler)
               if (_.isFunction(loadedPluginHook)) {
