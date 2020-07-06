@@ -12,7 +12,6 @@ import chalk from 'chalk'
 import day from 'dayjs'
 import shell from 'shelljs'
 import debug from 'debug'
-import inquirer from 'inquirer'
 import fuzzy from 'fuzzy'
 import { execSync } from 'child_process'
 import objectHash from 'node-object-hash'
@@ -1292,6 +1291,9 @@ const replHistory = function (repl, file) {
  * Launch dispatcher
  */
 const launchDispatcher = (opts: any = {}) => {
+  // process.on('warning', e => console.warn(e.stack));
+  process.setMaxListeners(0);
+
   const pkg = loadCorePackageInfo()
   updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
     defer: false,
@@ -1800,12 +1802,11 @@ const extendConfig = (extendRcPath: string[] | string, prefix: any = undefined) 
   return argv
 }
 
-
 /**
  * Semo utils functions and references to common modules.
  * @module Utils
  */
-export {
+const Utils = {
   // npm packages
   /** [lodash](https://www.npmjs.com/package/lodash) reference, check [doc](https://lodash.com/docs). */
   _,
@@ -1827,8 +1828,6 @@ export {
   fuzzy,
   /** [fuzzy](https://www.npmjs.com/package/glob) reference. */
   glob,
-  /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
-  inquirer,
   /** [get-stdin](https://www.npmjs.com/package/get-stdin) reference */
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
@@ -1881,5 +1880,18 @@ export {
   importPackage,
   installPackage,
   uninstallPackage,
-  resolvePackage
+  resolvePackage,
 }
+
+/** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
+Object.defineProperty(Utils, 'inquirer', {
+  get: () => {
+    const inquirer = require('inquirer')
+    return inquirer
+  },
+  enumerable: true
+})
+
+type UtilsExtra = typeof Utils & { inquirer: any }
+
+export = Utils as UtilsExtra

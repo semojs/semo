@@ -1,4 +1,4 @@
-import * as Utils from '@semo/core'
+import Utils from '@semo/core'
 
 export {
   Utils
