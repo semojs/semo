@@ -24,14 +24,7 @@ export const handler = async function(argv: any) {
       }
 
       Object.keys(hookHandler).map(hook => {
-        let realHook
-        if (k === argv.scriptName) {
-          realHook = hook
-        } else {
-          let pluginShortName = k.substring(`${argv.scriptName}-plugin-`.length)
-          realHook = hook.indexOf(`${pluginShortName}_`) === 0 ? hook : `${pluginShortName}_${hook}`
-        }
-        columns.push([`hook_${realHook}`, k, hookHandler[hook]])
+        columns.push([`hook_${hook}`, k, hookHandler[hook]])
       })
     })
     Utils.outputTable(columns)
