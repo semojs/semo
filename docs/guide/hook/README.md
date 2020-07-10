@@ -44,6 +44,18 @@ exports.hook_bar = new Utils.Hook({
 })
 ```
 
+第三方插件在实现钩子的时候，如果需要用 `Utils.Hook` 意味着需要添加 `@semo/core` 依赖，可以采用另一种风格，省掉这个依赖。
+
+```js
+export = (Utils) {
+  return {
+    hook_bar: new Utils.Hook({
+      'semo-plugin-foo1': () => {},
+      'semo-plugin-foo2': () => {},
+    })
+  }
+}
+
 ## 钩子的返回值
 
 钩子实现的目的主要是为程序执行节点进行某种操作，或者提供某些信息，为了灵活性，这里支持直接返回对象 `{}`，也支持返回一个函数，甚至是一个 `Promise` 函数，如果是函数，会得到函数的执行结果再合并。 `Promise` 的钩子用途很广泛，因为这样就可以执行一些异步操作，包括但不限于数据库，网络，Redis, ES 等。

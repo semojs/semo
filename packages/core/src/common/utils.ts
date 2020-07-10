@@ -279,7 +279,11 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
           if (options.reload && require.cache[pluginEntryPath]) {
             delete require.cache[pluginEntryPath]
           }
-          const loadedPlugin = require(pluginEntryPath)
+          let loadedPlugin = require(pluginEntryPath)
+          if (_.isFunction(loadedPlugin)) {
+            loadedPlugin = await loadedPlugin(Utils)
+          }
+
           let hookFound = false
           if (moduler) {
             if (!_.isNull(loadedPlugin[`${moduler}__${hook}`]) && !_.isUndefined(loadedPlugin[`${moduler}__${hook}`])) {
@@ -520,7 +524,11 @@ const invokeHookAlter = async function(hook: any = null, data, options: IHookOpt
             delete require.cache[pluginEntryPath]
           }
 
-          const loadedPlugin = require(pluginEntryPath)
+          let loadedPlugin = require(pluginEntryPath)
+          if (_.isFunction(loadedPlugin)) {
+            loadedPlugin = await loadedPlugin(Utils)
+          }
+
           let hookFound = false
           const hook_alter = `${hook}_alter`
           if (moduler) {
