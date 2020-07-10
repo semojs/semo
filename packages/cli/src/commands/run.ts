@@ -1,6 +1,8 @@
 import { Utils } from '@semo/core'
 import path from 'path'
 
+const debug = Utils.debug('semo:')
+
 export const plugin = 'semo'
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'run <PLUGIN>'
@@ -63,7 +65,13 @@ export const handler = async function (argv: any) {
     command = [pluginShort]
   }
   command = command.concat(argv['--'] || [])
-  Utils.info(`Running: ${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
-  Utils.exec(`${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
+
+  if (Utils.shell.which('semo')) {
+    debug(`Running: ${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
+    Utils.exec(`${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
+  } else {
+    debug(`Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(' ')}`)
+    Utils.exec(`${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(' ')}`)
+  }
 }
 
