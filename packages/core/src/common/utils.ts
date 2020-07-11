@@ -603,8 +603,10 @@ const extendSubCommand = function(command: string, moduleName: string, yargs: an
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
-        // Insert a blank line to terminal
-        console.log()
+        if (!command.noblank) {
+          // Insert a blank line to terminal
+          console.log()
+        }
         
         // Give command a plugin level config
         argv['$config'] = {};
@@ -1357,6 +1359,10 @@ const launchDispatcher = (opts: any = {}) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
 
       command.middlewares.unshift(async (argv) => {
+        if (!command.noblank) {
+          // Insert a blank line to terminal
+          console.log()
+        }
 
         argv['$config'] = {};
         // Give command a plugin level config
@@ -1371,11 +1377,6 @@ const launchDispatcher = (opts: any = {}) => {
             }
           }
         }
-
-        
-
-        // Insert a blank line to terminal
-        console.log()
 
         // argv['$' + scriptName] = { Utils: module.exports }
         argv.$command = command

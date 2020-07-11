@@ -3,6 +3,7 @@ import path from 'path'
 
 const debug = Utils.debug('semo:')
 
+export const noblank = true // run call another command so disable one blank line
 export const plugin = 'semo'
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'run <PLUGIN>'
