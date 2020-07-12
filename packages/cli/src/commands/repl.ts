@@ -161,6 +161,7 @@ export const handler = async function(argv: any) {
         'import': importPackage,
         extract,
         reload,
+        run: Utils.run,
         hooks: Utils.formatRcOptions(pluginsReturn)
       }})
 

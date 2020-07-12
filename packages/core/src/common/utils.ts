@@ -1748,6 +1748,40 @@ const config = (key: any = undefined, defaultValue: any = undefined) => {
 }
 
 /**
+ * Check if obj is a Promise
+ * 
+ * Copy from `is-promise` npm module
+ */
+const isPromise = (obj) => {
+  return !!obj && (typeof obj === 'object' || typeof obj === 'function') && typeof obj.then === 'function';
+}
+
+/**
+ * Used for get deep value from a object or function or Promise
+ * 
+ * @param func a Promise, a Function or a literal object
+ * @param getPath a key path
+ */
+const run = async (func, getPath = '') => {
+  let result
+  if (isPromise(func)) {
+    result = await func
+  } else if (_.isFunction(func)) {
+    result = await func()
+  } else  if (_.isObject(func)) {
+    result = func
+  } else {
+    throw new Error('invalid func')
+  }
+  
+  if (!getPath) {
+    return result
+  } else {
+    return _.get(result, getPath)
+  }
+}
+
+/**
  * Attach config info in another file to argv config
  * 
  * This is often for Application usage
@@ -1871,6 +1905,8 @@ const Utils = {
   loadPluginRc,
   loadCorePackageInfo,
   exec,
+  run,
+  isPromise,
   sleep,
   config,
   pluginConfig,
