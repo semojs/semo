@@ -77,6 +77,29 @@ export = (Utils) {
 * `component`: 这个钩子用于搜集一些插件里定义的组件，一般是返回一个包含实例的对象，例如 `{ redis, db }`
 * `hook`: 这个钩子用于声明钩子以及用途，这不是强制的，但是是一个规范，让其他人知道定义了哪些钩子
 * `repl`: 用于向 repl 中注入信息，不会相互覆盖，一般用于调试，格式不固定
+* `repl_command`: 让第三方插件可以扩展 repl 里的命令
 * `status`: 用于向 `semo status` 命令注入新的属性信息
 * `create_project_template`: 用于给 `semo create` 命令的 `--template` 参数注入可选模板
 
+部分核心钩子的用法示例
+
+### `repl_command`
+
+在 REPL 模式里定义一个 .hello 命令，接收参数
+
+```js
+const hook_repl_command = new Utils.Hook('semo', () => {
+  return {
+    hello: {
+      help: 'hello',
+      action(name) {
+        this.clearBufferedCommand()
+        console.log('hello1', name ? name : 'world')
+        this.displayPrompt()
+      }
+    }
+  }
+})
+```
+
+其中，`this.clearBufferedCommand()` 和 `this.displayPrompt()` 都是 Node 的 REPL 类里的方法。注意两点：一个是这里的 action 是支持 `async/await` 的，还有就是为了 `this` 能够正确指向，这里不要写成箭头函数。

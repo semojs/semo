@@ -8,6 +8,7 @@ export = (Utils) => {
     component: 'Hook triggered when needing to fetch components',
     hook: 'Hook triggered in hook command.',
     repl: 'Hook triggered in repl command.',
+    repl_command: 'Define custom repl command.',
     status: 'Hook triggered in status command.',
     create_project_template: 'Hook triggered in create command.'
   })
@@ -16,7 +17,7 @@ export = (Utils) => {
     const corePkgInfo = Utils.loadCorePackageInfo()
     return { VERSION: corePkgInfo.version }
   })
-  
+
   const hook_create_project_template = new Utils.Hook('semo', () => {
     const argv: any = Utils.getInternalCache().get('argv')
     const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'

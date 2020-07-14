@@ -33,6 +33,13 @@ const reload = async () => {
     })
   }
 
+  const hookReplCommands = await Utils.invokeHook('semo:repl_command')
+  Object.keys(hookReplCommands).filter(command => {
+    return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
+  }).forEach(command => {
+    r.defineCommand(command, hookReplCommands[command])
+  }) 
+
   console.log(Utils.chalk.green('Hooked files reloaded.'))
 }
 
@@ -96,7 +103,14 @@ async function openRepl(context: any): Promise<any> {
       await reload()
       this.displayPrompt();
     }
-  });
+  })
+
+  const hookReplCommands = await Utils.invokeHook('semo:repl_command')
+  Object.keys(hookReplCommands).filter(command => {
+    return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
+  }).forEach(command => {
+    r.defineCommand(command, hookReplCommands[command])
+  })
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
   Utils.fs.ensureDirSync(Home)
