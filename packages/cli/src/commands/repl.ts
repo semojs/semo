@@ -136,9 +136,14 @@ export const handler = async function(argv: any) {
   argv.extract = Utils._.castArray(argv.extract)
   v = argv
   try {
-    let context: any = {
-      await: true, 
-    }
+    let context:any = Object.assign({ await: true }, { Semo: { 
+      Utils, 
+      argv, 
+      'import': importPackage,
+      extract,
+      reload,
+      run: Utils.run,
+    }})
 
     if (argv.hook) {
       let pluginsReturn = await Utils.invokeHook(
@@ -150,26 +155,17 @@ export const handler = async function(argv: any) {
           : {
               include: Utils.splitComma(argv.hook),
               mode: 'group'
-            }
+          }
       )
 
       pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
+      context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
+    }
 
-      context = Object.assign(context, { Semo: { 
-        Utils, 
-        argv, 
-        'import': importPackage,
-        extract,
-        reload,
-        run: Utils.run,
-        hooks: Utils.formatRcOptions(pluginsReturn)
-      }})
-
-      if (argv.extract && argv.extract.length > 0) {
-        argv.extract.forEach(keyPath => {
-          context = Object.assign(context, Utils._.get(context, keyPath) || {})
-        })
-      }
+    if (argv.extract && argv.extract.length > 0) {
+      argv.extract.forEach(keyPath => {
+        context = Object.assign(context, Utils._.get(context, keyPath) || {})
+      })
     }
 
     return await openRepl(context)
