@@ -689,16 +689,19 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
       if (!plugin.startsWith('.') && plugin.indexOf(scriptName + '-plugin-') === -1) {
         plugin = scriptName + '-plugin-' + plugin
       }
-      if (pluginPath.startsWith('/') || pluginPath.startsWith('.') || pluginPath.startsWith('~')) {
-        pluginPath = getAbsolutePath(pluginPath)
-        plugins[plugin] = pluginPath 
-      } else {
+
+      if (_.isBoolean(pluginPath) && pluginPath) {
         try {
-          pluginPath = getPackagePath(plugin)
+          pluginPath = path.dirname(getPackagePath(plugin, [process.cwd()]))
           plugins[plugin] = pluginPath 
         } catch(e) {
           warn(e.message)
         } 
+      } else if (_.isString(pluginPath) && pluginPath.startsWith('/') || pluginPath.startsWith('.') || pluginPath.startsWith('~')) {
+        pluginPath = getAbsolutePath(pluginPath)
+        plugins[plugin] = pluginPath 
+      } else {
+        // Means not register for now
       }
     })
     cachedInstance.set('plugins', plugins)
