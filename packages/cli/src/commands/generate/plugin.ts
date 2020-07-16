@@ -41,5 +41,5 @@ export const handler = function(argv: any) {
     Utils.error(`Script ${scriptName} not found!`)
   }
   Utils.exec('npm init --yes')
-  Utils.exec(`${scriptName} init --plugin`
+  Utils.exec(`${scriptName} init --plugin`)
 }
