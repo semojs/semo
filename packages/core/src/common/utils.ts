@@ -680,7 +680,7 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   if (_.isEmpty(plugins) && !configPluginLoaded) {
-    const configPlugins = Utils.config('$plugins')
+    const configPlugins = Utils.config('$plugins') || {}
     if (!_.isEmpty(configPlugins)) {
       enablePluginAutoScan = false
     }
