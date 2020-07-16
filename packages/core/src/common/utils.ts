@@ -673,28 +673,56 @@ const extendSubCommand = function(command: string, moduleName: string, yargs: an
  * Same name plugins would be overriden orderly.
  * This function also influences final valid commands and configs.
  */
+let configPluginLoaded = false
+let enablePluginAutoScan = true 
 const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: string } {
   argv = argv || cachedInstance.get('argv') || {}
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  if (_.isEmpty(plugins) && !configPluginLoaded) {
+    const configPlugins = Utils.config('$plugins')
+    if (!_.isEmpty(configPlugins)) {
+      enablePluginAutoScan = false
+    }
+    Object.keys(configPlugins).forEach(plugin => {
+      let pluginPath = configPlugins[plugin]
+      if (!plugin.startsWith('.') && plugin.indexOf(scriptName + '-plugin-') === -1) {
+        plugin = scriptName + '-plugin-' + plugin
+      }
+      if (pluginPath.startsWith('/') || pluginPath.startsWith('.') || pluginPath.startsWith('~')) {
+        pluginPath = getAbsolutePath(pluginPath)
+        plugins[plugin] = pluginPath 
+      } else {
+        try {
+          pluginPath = getPackagePath(plugin)
+          plugins[plugin] = pluginPath 
+        } catch(e) {
+          warn(e.message)
+        } 
+      }
+    })
+    cachedInstance.set('plugins', plugins)
+    configPluginLoaded = true
+
+  }
 
   let pluginPrefix = argv.pluginPrefix || 'semo'
-    if (_.isString(pluginPrefix)) {
-      pluginPrefix = [pluginPrefix]
-    }
+  if (_.isString(pluginPrefix)) {
+    pluginPrefix = [pluginPrefix]
+  }
 
-    if (!_.isArray(pluginPrefix)) {
-      error('invalid --plugin-prefix')
-    }
+  if (!_.isArray(pluginPrefix)) {
+    error('invalid --plugin-prefix')
+  }
 
-    let topPluginPattern = pluginPrefix.length > 1 
-      ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
-      : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
-    let orgPluginPattern = pluginPrefix.length > 1 
-      ? '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
-      : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
+  let topPluginPattern = pluginPrefix.length > 1 
+    ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
+    : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
+  let orgPluginPattern = pluginPrefix.length > 1 
+    ? '{' + pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') + '}'
+    : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
 
-  if (_.isEmpty(plugins)) {
+  if (_.isEmpty(plugins) && enablePluginAutoScan) {
     plugins = {}
 
     // process core plugins

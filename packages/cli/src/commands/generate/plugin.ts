@@ -40,6 +40,6 @@ export const handler = function(argv: any) {
   if (!Utils.shell.which(scriptName)) {
     Utils.error(`Script ${scriptName} not found!`)
   }
-  Utils.shell.exec('npm init --yes')
-  Utils.shell.exec(`${scriptName} init --plugin --exec-mode`, (code, stdout, stderr) => {})
+  Utils.exec('npm init --yes')
+  Utils.exec(`${scriptName} init --plugin`
 }

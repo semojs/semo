@@ -226,3 +226,42 @@ semo help --plugin-dir=dir1 --plugin-dir=dir2
 
 ```
 SEMO_PLUGIN_DIR=dir3 semo help
+
+## 应用内部定义的插件在 Typescript 模式下失效的问题
+
+这是由于 `tsc` 在编译时，只能识别 ts 和 js 相关文件，不能识别我们的 `yml` 格式，而且官方也不打算支持复制 ts 之外的文件，因为 ts 毕竟不是一个完整的构建工具，所以我们需要自己来把确实的文件拷过去，这件事用 `cpy-cli` 或者 `copyfiles` 都可以实现，以 `copyfiles` 为例：
+
+```json
+// package.json
+{
+  "scripts": {
+    "copyfiles": "copyfiles -u 1 -a src/**/*.yml dist -E"
+  }
+}
+```
+
+其中参数含义:
+
+* `-u` 表示去掉一层再拷贝
+* `-a` 表示支持隐藏文件
+* `dist` 是我们 ts 的 out 目录
+* `-E` 表示如果什么都没有 copy 时抛异常
+
+## 插件的主动注册机制
+
+> `v1.2.0` 引入
+
+早期的 `Semo` 只支持插件的自动注册机制，而且为了灵活性，可以在多个位置进行遍历，有一定的 IO 性能损失，所以加入了主动注册机制，一旦使用主动注册机制，则自动注册机制自动失效。
+
+### 开启方法
+
+在 `.semorc.yml` 的 `$plugins` 段下写插件的键值对
+
+```yml
+$plugins:
+  plugin-a: /绝对路径
+  plugin-b: .相对路径
+  plugin-c: true
+```
+
+支持三种风格，绝对路径和相对路径比较好理解，第三种就是用 node.js 的模块加载机制来声明。作为 key 的插件名，这里可以省略 `semo-plugin-` 前缀。另外，这里也支持家目录的简写 `~`
