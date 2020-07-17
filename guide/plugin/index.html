@@ -7,7 +7,7 @@
     <meta name="generator" content="VuePress 1.5.2">
     
     <meta name="description" content="一个Node项目命令行开发规范">
-    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.e9280b80.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/12.3a25a048.js" as="script"><link rel="prefetch" href="/assets/js/10.47d467b1.js"><link rel="prefetch" href="/assets/js/11.89e7afad.js"><link rel="prefetch" href="/assets/js/13.92ad83d7.js"><link rel="prefetch" href="/assets/js/14.04ae2bb7.js"><link rel="prefetch" href="/assets/js/15.19cdaa10.js"><link rel="prefetch" href="/assets/js/16.25d7cdd3.js"><link rel="prefetch" href="/assets/js/17.fd2983e3.js"><link rel="prefetch" href="/assets/js/18.19fed18c.js"><link rel="prefetch" href="/assets/js/3.2468536f.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.791d078c.js">
+    <link rel="preload" href="/assets/css/0.styles.34d67128.css" as="style"><link rel="preload" href="/assets/js/app.8a2d99b3.js" as="script"><link rel="preload" href="/assets/js/2.0600126e.js" as="script"><link rel="preload" href="/assets/js/12.be9411b2.js" as="script"><link rel="prefetch" href="/assets/js/10.47d467b1.js"><link rel="prefetch" href="/assets/js/11.89e7afad.js"><link rel="prefetch" href="/assets/js/13.92ad83d7.js"><link rel="prefetch" href="/assets/js/14.04ae2bb7.js"><link rel="prefetch" href="/assets/js/15.19cdaa10.js"><link rel="prefetch" href="/assets/js/16.25d7cdd3.js"><link rel="prefetch" href="/assets/js/17.fd2983e3.js"><link rel="prefetch" href="/assets/js/18.19fed18c.js"><link rel="prefetch" href="/assets/js/3.2468536f.js"><link rel="prefetch" href="/assets/js/4.7d5f245c.js"><link rel="prefetch" href="/assets/js/5.397435b1.js"><link rel="prefetch" href="/assets/js/6.ccf15d46.js"><link rel="prefetch" href="/assets/js/7.fbcb49c8.js"><link rel="prefetch" href="/assets/js/8.42401f0c.js"><link rel="prefetch" href="/assets/js/9.7bdc0bc2.js">
     <link rel="stylesheet" href="/assets/css/0.styles.34d67128.css">
   </head>
   <body>
@@ -101,9 +101,10 @@ npm publish
   }
 }
 </code></pre></div><p>其中参数含义:</p> <ul><li><code>-u</code> 表示去掉一层再拷贝</li> <li><code>-a</code> 表示支持隐藏文件</li> <li><code>dist</code> 是我们 ts 的 out 目录</li> <li><code>-E</code> 表示如果什么都没有 copy 时抛异常</li></ul> <h2 id="插件的主动注册机制"><a href="#插件的主动注册机制" class="header-anchor">#</a> 插件的主动注册机制</h2> <blockquote><p><code>v1.3.0</code> 引入</p></blockquote> <p>早期的 <code>Semo</code> 只支持插件的自动注册机制，而且为了灵活性，可以在多个位置进行遍历，有一定的 IO 性能损失，所以加入了主动注册机制，一旦使用主动注册机制，则自动注册机制自动失效。</p> <h3 id="开启方法"><a href="#开启方法" class="header-anchor">#</a> 开启方法</h3> <p>在 <code>.semorc.yml</code> 的 <code>$plugins</code> 段下写插件的键值对</p> <div class="language-yml extra-class"><pre class="language-yml"><code><span class="token key atrule">$plugins</span><span class="token punctuation">:</span>
-  <span class="token key atrule">plugin-a</span><span class="token punctuation">:</span> /绝对路径
-  <span class="token key atrule">plugin-b</span><span class="token punctuation">:</span> .相对路径
-  <span class="token key atrule">plugin-c</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
+  <span class="token key atrule">register</span><span class="token punctuation">:</span>
+    <span class="token key atrule">plugin-a</span><span class="token punctuation">:</span> /绝对路径
+    <span class="token key atrule">plugin-b</span><span class="token punctuation">:</span> .相对路径
+    <span class="token key atrule">plugin-c</span><span class="token punctuation">:</span> <span class="token boolean important">true</span>
 </code></pre></div><p>支持三种风格，绝对路径和相对路径比较好理解，第三种就是用 node.js 的模块加载机制来声明。作为 key 的插件名，这里可以省略 <code>semo-plugin-</code> 前缀。另外，这里也支持家目录的简写 <code>~</code></p></div> <footer class="page-edit"><div class="edit-link"><a href="https://github.com/semojs/semo/edit/master/docs/guide/plugin/README.md" target="_blank" rel="noopener noreferrer">帮助改进此页文档</a> <svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg></div> <!----></footer> <div class="page-nav"><p class="inner"><span class="prev">
       ←
       <a href="/guide/hook/" class="prev">
@@ -113,6 +114,6 @@ npm publish
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.e9280b80.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/12.3a25a048.js" defer></script>
+    <script src="/assets/js/app.8a2d99b3.js" defer></script><script src="/assets/js/2.0600126e.js" defer></script><script src="/assets/js/12.be9411b2.js" defer></script>
   </body>
 </html>
