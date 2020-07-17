@@ -1816,23 +1816,29 @@ const isPromise = (obj) => {
  * @param func a Promise, a Function or a literal object
  * @param getPath a key path
  */
-const run = async (func, getPath = '') => {
+const run = async (func, getPath = '', ...args) => {
   let result
   if (isPromise(func)) {
     result = await func
   } else if (_.isFunction(func)) {
     result = await func()
+  } else if (_.isArray(func) && _.isFunction(func[0])) {
+    const newFunc = func[0]
+    func.shift()
+    result = await newFunc(...func)
   } else  if (_.isObject(func)) {
     result = func
   } else {
     throw new Error('invalid func')
   }
   
-  if (!getPath) {
-    return result
-  } else {
-    return _.get(result, getPath)
+  result = !getPath ? result : _.get(result, getPath)
+
+  if (_.isFunction(result)) {
+    result = await result(...args)
   }
+
+  return result
 }
 
 /**
