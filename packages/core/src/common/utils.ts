@@ -680,12 +680,12 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
   let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
   if (_.isEmpty(plugins) && !configPluginLoaded) {
-    const configPlugins = Utils.config('$plugins') || {}
-    if (!_.isEmpty(configPlugins)) {
+    const registerPlugins = Utils.config('$plugins.register') || {}
+    if (!_.isEmpty(registerPlugins)) {
       enablePluginAutoScan = false
     }
-    Object.keys(configPlugins).forEach(plugin => {
-      let pluginPath = configPlugins[plugin]
+    Object.keys(registerPlugins).forEach(plugin => {
+      let pluginPath = registerPlugins[plugin]
       if (!plugin.startsWith('.') && plugin.indexOf(scriptName + '-plugin-') === -1) {
         plugin = scriptName + '-plugin-' + plugin
       }
@@ -877,6 +877,29 @@ const getAllPluginsMapping = function(argv: any = {}): { [propName: string]: str
       plugins[plugin] = path.resolve(envDir, plugin)
     })
   }
+
+  // Second filter for registered or scanned plugins
+  const includePlugins = Utils.config('$plugins.include') || []
+  const excludePlugins = Utils.config('$plugins.exclude') || []
+
+  if (_.isArray(includePlugins) && includePlugins.length > 0) {
+    plugins = _.pickBy(plugins, (pluginPath, plugin) => {
+      if (plugin.indexOf(scriptName + '-plugin-') === 0) {
+        plugin = plugin.substring((scriptName + '-plugin-').length)
+      }
+      return includePlugins.includes(plugin) || includePlugins.includes(scriptName + '-plugin-' + plugin)
+    })
+  }
+
+  if (_.isArray(excludePlugins) && excludePlugins.length > 0) {
+    plugins = _.omitBy(plugins, (pluginPath, plugin) => {
+      if (plugin.indexOf(scriptName + '-plugin-') === 0) {
+        plugin = plugin.substring((scriptName + '-plugin-').length)
+      }
+      return excludePlugins.includes(plugin) || excludePlugins.includes(scriptName + '-plugin-' + plugin)
+    })
+  }
+
 
   return plugins
 }

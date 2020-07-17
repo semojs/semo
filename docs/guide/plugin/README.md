@@ -259,9 +259,10 @@ SEMO_PLUGIN_DIR=dir3 semo help
 
 ```yml
 $plugins:
-  plugin-a: /绝对路径
-  plugin-b: .相对路径
-  plugin-c: true
+  register:
+    plugin-a: /绝对路径
+    plugin-b: .相对路径
+    plugin-c: true
 ```
 
 支持三种风格，绝对路径和相对路径比较好理解，第三种就是用 node.js 的模块加载机制来声明。作为 key 的插件名，这里可以省略 `semo-plugin-` 前缀。另外，这里也支持家目录的简写 `~`
