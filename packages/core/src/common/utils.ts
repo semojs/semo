@@ -1832,10 +1832,13 @@ const run = async (func, getPath = '', ...args) => {
     throw new Error('invalid func')
   }
   
+  const that = result
+
   result = !getPath ? result : _.get(result, getPath)
 
   if (_.isFunction(result)) {
-    result = await result(...args)
+    // pass this obj to function/method call
+    result = await result.call(that, ...args)
   }
 
   return result
