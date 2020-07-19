@@ -173,7 +173,18 @@ export const handler = async function(argv: any) {
       )
 
       pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
-      context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
+
+      const shortenKeysPluginsReturn = {}
+      Object.keys(pluginsReturn).forEach(plugin => {
+        let newKey = plugin
+        const prefix = scriptName + '-plugin-'
+        if (plugin.indexOf(prefix) > -1) {
+          newKey = plugin.substring(prefix.length)
+        }
+        shortenKeysPluginsReturn[newKey] = pluginsReturn[plugin]
+      })
+
+      context.Semo.hooks = Utils.formatRcOptions(shortenKeysPluginsReturn)
     }
 
     if (argv.extract && argv.extract.length > 0) {
