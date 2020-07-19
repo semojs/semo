@@ -281,7 +281,7 @@ const invokeHook = async function (hook: any = null, options: IHookOption = { mo
           }
           let loadedPlugin = require(pluginEntryPath)
           if (_.isFunction(loadedPlugin)) {
-            loadedPlugin = await loadedPlugin(Utils)
+            loadedPlugin = await loadedPlugin(Utils, argv)
           }
 
           let hookFound = false
@@ -526,7 +526,7 @@ const invokeHookAlter = async function(hook: any = null, data, options: IHookOpt
 
           let loadedPlugin = require(pluginEntryPath)
           if (_.isFunction(loadedPlugin)) {
-            loadedPlugin = await loadedPlugin(Utils)
+            loadedPlugin = await loadedPlugin(Utils, argv)
           }
 
           let hookFound = false
