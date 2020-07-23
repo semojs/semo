@@ -610,7 +610,6 @@ const extendSubCommand = function(command: string, moduleName: string, yargs: an
         
         // Give command a plugin level config
         argv['$config'] = {};
-        command.plugin = command.plugin || moduleName
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(argv.scriptName + '-plugin-') ? command.plugin.substring(argv.scriptName + '-plugin-'.length) : command.plugin
           
