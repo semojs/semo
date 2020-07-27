@@ -1,5 +1,5 @@
 {
-  "name": "semo",
+  "name": "semo-mono",
   "private": true,
   "devDependencies": {
     "husky": "^4.2.5",
