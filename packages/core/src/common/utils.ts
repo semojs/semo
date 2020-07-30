@@ -1674,7 +1674,7 @@ const installPackage = (name, location = '', home = true, force = false) => {
   }
 
   if (force) {
-    exec(`npm install ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+    exec(`npm install ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund`)
   }
 
   nameArray.forEach(pkg => {
@@ -1682,7 +1682,7 @@ const installPackage = (name, location = '', home = true, force = false) => {
       require.resolve(pkg, { paths: [downloadDir] })
     } catch (err) {
       if (err.code == 'MODULE_NOT_FOUND') {
-        exec(`npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+        exec(`npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund`)
       }
     }
   })
@@ -1706,7 +1706,7 @@ const uninstallPackage = (name, location = '', home = true) => {
   }
   
 
-  exec(`npm uninstall ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+  exec(`npm uninstall ${nameArray.join(' ')} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund`)
 }
 
 /**
@@ -1738,7 +1738,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
   }
 
   if (force) {
-    exec(`npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+    exec(`npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund`)
   }
 
   try {
