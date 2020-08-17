@@ -6,7 +6,7 @@ const debug = Utils.debug('semo:')
 export const noblank = true // run call another command so disable one blank line
 export const plugin = 'semo'
 export const disabled = false // Set to true to disable this command temporarily
-export const command = 'run <plugin>'
+export const command = 'run [plugin]'
 export const desc = 'Run any plugin command directly'
 // export const aliases = ''
 // export const middleware = (argv) => {}
@@ -20,13 +20,27 @@ export const builder = function (yargs: any) {
 
 export const handler = async function (argv: any) {
   const scriptName= argv.scriptName || 'semo'
-  if (argv.plugin.indexOf(`${scriptName}-plugin-`) === -1) {
-    argv.plugin = `${scriptName}-plugin-${argv.plugin}`
-  }
 
-  if (argv.scope) {
-    argv.plugin = `@${argv.scope}/${argv.plugin}`
+  // Populate command string
+  let pluginShort
+  if (argv.plugin) {
+    if (argv.plugin.indexOf(`${scriptName}-plugin-`) === -1) {
+      argv.plugin = `${scriptName}-plugin-${argv.plugin}`
+    }
+  
+    if (argv.scope) {
+      argv.plugin = `@${argv.scope}/${argv.plugin}`
+    }
+
+    try {
+      Utils.installPackage(argv.plugin, 'run-plugin-cache', true, argv.force)
+    } catch (e) {
+      Utils.error(`Plugin ${argv.plugin} not found or entry not exist`)
+    }
+
+    pluginShort = argv.plugin.substring(argv.plugin.indexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
   }
+  
 
   argv.with = argv.with ? Utils._.castArray(argv.with) : []
 
@@ -48,21 +62,16 @@ export const handler = async function (argv: any) {
     })
   }
 
-  try {
-    Utils.installPackage(argv.plugin, 'run-plugin-cache', true, argv.force)
-  } catch (e) {
-    Utils.error(`Plugin ${argv.plugin} not found or entry not exist`)
-  }
+ 
 
   // Pass SEMO_PLUGIN_DIR
   let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_PLUGIN_DIR'
   let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache', 'node_modules')
 
-  // Populate command string
-  let pluginShort = argv.plugin.substring(argv.plugin.indexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
+  
   let command = argv._
   command.shift()
-  if (command.length === 0) {
+  if (command.length === 0 && pluginShort) {
     command = [pluginShort]
   }
   command = command.concat(argv['--'] || [])
