@@ -99,8 +99,23 @@ async function openRepl(context: any): Promise<any> {
   r.defineCommand('reload', {
     help: 'Reload hooked files',
     async action(name) {
+      this.clearBufferedCommand()
+      try {
+        await reload()
+      } catch (e) {
+        Utils.error(e.message)
+      }
+      this.displayPrompt()
+    }
+  })
+
+  r.defineCommand('shell', {
+    help: 'Execute shell commands',
+    async action(cmd) {
       this.clearBufferedCommand();
-      await reload()
+      try {
+        Utils.exec(cmd)
+      } catch (e) {}
       this.displayPrompt();
     }
   })
