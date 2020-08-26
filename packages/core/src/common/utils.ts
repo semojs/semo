@@ -1908,6 +1908,38 @@ const extendConfig = (extendRcPath: string[] | string, prefix: any = undefined) 
 }
 
 /**
+ * Console Reader
+ * 
+ * Mostly use less mode, if HOME can not be detected, it will fallback to console.log
+ * 
+ * @param content The content to read
+ * @param plugin Plugin name, used to make up cache path
+ * @param identifier The content identifier, used to make up cache path
+ */
+const consoleReader = (content: string, opts: { plugin?: string, identifier?: string } = {}) => {
+  const argv: any = getInternalCache().get('argv')
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+
+  opts.plugin = opts.plugin || scriptName
+  opts.identifier = opts.identifier || Math.random() + ''
+
+  if (process.env.HOME) {
+    const tmpPath = path.resolve(process.env.HOME, `.${scriptName}/cache`, <string>opts.plugin, Utils.md5(opts.identifier))
+    fs.ensureDirSync(path.dirname(tmpPath))
+    fs.writeFileSync(tmpPath, content)
+    exec(`cat ${tmpPath} | less -r`)
+
+    // Maybe the file already removed
+    if (fs.existsSync(tmpPath)) {
+      fs.unlinkSync(tmpPath)
+    }
+
+  } else {
+    console.log((content))
+  }
+}
+
+/**
  * Semo utils functions and references to common modules.
  * @module Utils
  */
@@ -1988,6 +2020,7 @@ const Utils = {
   installPackage,
   uninstallPackage,
   resolvePackage,
+  consoleReader,
 }
 
 /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */

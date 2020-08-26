@@ -22,6 +22,7 @@ export const handler = async function (argv: any) {
   let cleanupSteps = {}
   if (process.env.HOME) {
     coreCleanupSteps = {
+      'cache': path.resolve(process.env.HOME, '.' + scriptName, 'cache'),
       'home-plugin-cache': path.resolve(process.env.HOME, '.' + scriptName, 'home-plugin-cache'),
       'run-plugin-cache': path.resolve(process.env.HOME, '.' + scriptName, 'run-plugin-cache'),
       'repl-package-cache': path.resolve(process.env.HOME, '.' + scriptName, 'repl-package-cache'),
