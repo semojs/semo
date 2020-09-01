@@ -1916,7 +1916,7 @@ const extendConfig = (extendRcPath: string[] | string, prefix: any = undefined) 
  * @param plugin Plugin name, used to make up cache path
  * @param identifier The content identifier, used to make up cache path
  */
-const consoleReader = (content: string, opts: { plugin?: string, identifier?: string } = {}) => {
+const consoleReader = (content: string, opts: { plugin?: string, identifier?: string, tmpPathOnly ?: boolean } = {}) => {
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
@@ -1927,6 +1927,11 @@ const consoleReader = (content: string, opts: { plugin?: string, identifier?: st
     const tmpPath = path.resolve(process.env.HOME, `.${scriptName}/cache`, <string>opts.plugin, Utils.md5(opts.identifier))
     fs.ensureDirSync(path.dirname(tmpPath))
     fs.writeFileSync(tmpPath, content)
+
+    if (opts.tmpPathOnly) {
+      return tmpPath
+    }
+
     exec(`cat ${tmpPath} | less -r`)
 
     // Maybe the file already removed
@@ -1937,6 +1942,8 @@ const consoleReader = (content: string, opts: { plugin?: string, identifier?: st
   } else {
     console.log((content))
   }
+
+  return true
 }
 
 /**
