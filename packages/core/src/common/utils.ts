@@ -1947,6 +1947,15 @@ const consoleReader = (content: string, opts: { plugin?: string, identifier?: st
 }
 
 /**
+ * Clear console
+ */
+const clearConsole = () => {
+  process.stdout.write(
+    process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H'
+  );
+}
+
+/**
  * Semo utils functions and references to common modules.
  * @module Utils
  */
@@ -2028,6 +2037,7 @@ const Utils = {
   uninstallPackage,
   resolvePackage,
   consoleReader,
+  clearConsole,
 }
 
 /** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
