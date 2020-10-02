@@ -36,7 +36,9 @@ function cutstr(str, len) {
 }
 
 export const handler = async function (argv: any) {
+  const { Utils } = argv.$semo
   const plugins = Utils.getAllPluginsMapping(argv)
+  const config = Utils.getCombinedConfig(argv)
 
   if (!argv.remote) {
     if (Object.keys(plugins).length === 0) {
@@ -67,21 +69,27 @@ export const handler = async function (argv: any) {
     })
     Utils.outputTable(rows)
   } else {
-    Utils.info('Remote plugins list may be unavailable temporarily...')
-    console.log()
-
     const headers = ['Plugin', 'Version', 'Description', 'Status'].map(item => Utils.chalk.green(item))
     const rows = [headers]
+    
 
-    let searched = await Utils.shell.exec('npm search semo-plugin --no-description --registry http://registry.npmjs.org --json', { silent: true, timeout: 30000 })
-    let results: any = JSON.parse(searched.stdout ? searched.stdout : '')
-    results.length > 0 && results.sort((a, b) => a.name.localeCompare(b.name))
+    let searched = await Utils.shell.exec('curl -s "https://api.npms.io/v2/search?from=0&q=semo-plugin&size=100"', { silent:true })
+
+    let { results } = JSON.parse(searched.stdout ? searched.stdout : '')
+    results = [
+      ...results.filter(item => Boolean(plugins[item.package.name])).sort((a, b) => a.package.name.localeCompare(b.package.name))
+,
+      ...results.filter(item => !Boolean(plugins[item.package.name])).sort((a, b) => a.package.name.localeCompare(b.package.name))
+
+    ]
+
     for (let item of results) {
+      const hasUpdate = config.pluginConfigs[item.package.name] ? item.package.version !== config.pluginConfigs[item.package.name].version : false
       rows.push([
-        item.name,
-        item.version,
-        cutstr(item.description, 50),
-        plugins[item.name] ? 'Installed' : 'Not installed']
+        item.package.name,
+        item.package.version,
+        cutstr(item.package.description, 50),
+        plugins[item.package.name] ? 'Installed' + (hasUpdate ? Utils.chalk.yellow('(update)') : '') : 'Not installed']
       )
     }
     Utils.outputTable(rows)

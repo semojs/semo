@@ -1048,11 +1048,21 @@ const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
   const pluginSemoYamlRcPath = path.resolve(pluginPath, `.${scriptName}rc.yml`)
+  const pluginPackagePath = path.resolve(pluginPath, `package.json`)
   let pluginConfig
   if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
     try {
       const rcFile = fs.readFileSync(pluginSemoYamlRcPath, 'utf8')
       pluginConfig = formatRcOptions(yaml.parse(rcFile))
+
+      
+      try {
+        const packageConfig = require(pluginPackagePath)
+        pluginConfig.version = packageConfig.version
+      } catch (e) {
+        pluginConfig.version = '0.0.0'
+      }
+
     } catch (e) {
       debugCore('load rc:', e)
       warn(`Plugin ${plugin} .semorc.yml config load failed!`)

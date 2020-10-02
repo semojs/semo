@@ -9,4 +9,4 @@ hookMakeDir: src/hooks
 
 $core:
   env:
-    # SEMO_PLUGIN_DIR: ..
+    SEMO_PLUGIN_DIR: ..
