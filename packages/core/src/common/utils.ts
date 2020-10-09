@@ -1948,7 +1948,6 @@ const consoleReader = (content: string, opts: { plugin?: string, identifier?: st
     if (fs.existsSync(tmpPath)) {
       fs.unlinkSync(tmpPath)
     }
-
   } else {
     console.log((content))
   }
