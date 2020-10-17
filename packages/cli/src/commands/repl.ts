@@ -169,6 +169,7 @@ export const handler = async function(argv: any) {
       Utils, 
       argv, 
       'import': importPackage,
+      'require': importPackage,
       extract,
       reload,
       run: Utils.run,

@@ -14,7 +14,7 @@ import shell from 'shelljs'
 import debug from 'debug'
 import fuzzy from 'fuzzy'
 import { execSync } from 'child_process'
-import objectHash from 'node-object-hash'
+import hash from 'object-hash'
 import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
@@ -27,8 +27,6 @@ import { Hook } from './hook'
 
 // @ts-ignore
 const yParser = yargsInternal.Parser
-
-const { hash } = objectHash({ sort: true })
 
 let cachedInstance: NodeCache
 
@@ -1994,6 +1992,8 @@ const Utils = {
   getStdin,
   /** [node-cache](https://www.npmjs.com/package/node-cache) reference */
   NodeCache,
+  /** [node-cache](https://www.npmjs.com/package/object-hash) reference */
+  hash,
   /** [yargs-parser](https://www.npmjs.com/package/yargs) reference */
   yargs,
   yParser,
