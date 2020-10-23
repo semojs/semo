@@ -16,7 +16,7 @@
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "upgrade:preview": "lerna exec -- ncu && ncu",
-    "upgrade": "lerna exec -- ncu -u --timeout 300 && lerna exec -- yarn && ncu -u --timeout 300 && yarn",
+    "upgrade": "lerna exec -- ncu -u --timeout 30000 && lerna exec -- yarn && ncu -u --timeout 30000 && yarn",
     "deploy:major": "lerna version major",
     "deploy:minor": "lerna version minor",
     "deploy": "lerna version patch -y",
