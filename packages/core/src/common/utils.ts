@@ -921,7 +921,15 @@ const getAbsolutePath = (filePath) => {
  */
 const getApplicationConfig = function(opts: any = {}) {
   let argv: any = cachedInstance.get('argv') || {}
+  
+  const cache = cachedInstance.get(`getApplicationConfig`)
+  if (!_.isEmpty(cache)) {
+    return cache
+  }
+
   let scriptName = opts.scriptName ? opts.scriptName : (argv && argv.scriptName ? argv.scriptName : 'semo')
+  argv = Object.assign(argv, opts, { scriptName })
+
   let applicationConfig
 
   const configPath = findUp.sync([`.${scriptName}rc.yml`], {
@@ -960,10 +968,6 @@ const getApplicationConfig = function(opts: any = {}) {
 
     if (packageInfo.name) {
       applicationConfig.name = packageInfo.name
-    }
-
-    if (packageInfo.version) {
-      applicationConfig.version = packageInfo.version
     }
 
     // args > package > current rc
@@ -1020,6 +1024,8 @@ const getApplicationConfig = function(opts: any = {}) {
       process.env[key] = process.env[key] || applicationConfig['$core']['env'][key]
     })
   }
+
+  cachedInstance.set(`getApplicationConfig`, applicationConfig)
 
   return applicationConfig
 }
@@ -1377,10 +1383,13 @@ const launchDispatcher = (opts: any = {}) => {
     'populate--': true
   })
   let parsedArgvOrigin = parsedArgv
-  cache.set('argv', parsedArgv) // set argv first time
-  let appConfig = getApplicationConfig({
-    packageName: opts.packageName,
+  cache.set('argv', Object.assign(parsedArgv, {
     scriptName: opts.scriptName || 'semo',
+  })) // set argv first time
+  let appConfig = getApplicationConfig()
+
+  appConfig = Object.assign(appConfig, {
+    packageName: opts.packageName,
     coreDir: opts.coreDir,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
     [`$${opts.scriptName || 'semo'}`]: { Utils: module.exports, VERSION: pkg.version }

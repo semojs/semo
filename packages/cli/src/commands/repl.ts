@@ -157,15 +157,19 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  const { Utils } = argv.$semo
+  const { Utils, VERSION } = argv.$semo
   const scriptName = argv.scriptName || 'semo'
   argv.hook = Utils.pluginConfig('hook', false)
   argv.prompt = Utils.pluginConfig('prompt', '>>> ')
   argv.extract = Utils.pluginConfig('extract', '')
-  argv.extract = Utils._.castArray(argv.extract)
+
+  if (Utils._.isString(argv.extract)) {
+    argv.extract = Utils._.castArray(argv.extract)
+  }
   v = argv
   try {
     let context:any = Object.assign({ await: true }, { Semo: { 
+      VERSION,
       Utils, 
       argv, 
       'import': importPackage,
@@ -203,9 +207,20 @@ export const handler = async function(argv: any) {
       context.Semo.hooks = Utils.formatRcOptions(shortenKeysPluginsReturn)
     }
 
-    if (argv.extract && argv.extract.length > 0) {
-      argv.extract.forEach(keyPath => {
-        context = Object.assign(context, Utils._.get(context, keyPath) || {})
+    if (Utils._.isArray(argv.extract)) {
+      if (argv.extract && argv.extract.length > 0) {
+        argv.extract.forEach(keyPath => {
+          context = Object.assign(context, Utils._.get(context, keyPath) || {})
+        })
+      }
+    } else {
+      Object.keys(argv.extract).forEach(key => {
+        const extractKeys: string[] = Utils._.castArray(argv.extract[key])
+        extractKeys.forEach(extractKey => {
+          const splitExtractKey = extractKey.split('.')
+          const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
+          context[finalExtractKey] = Utils._.get(context, `${key}.${extractKey}`)
+        })
       })
     }
 
