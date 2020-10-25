@@ -517,7 +517,6 @@ export const builder = function (yargs: any) {
 
 export const handler = async function (argv: any) {
   console.log('Start to draw your dream code!')
-  process.exit(0)
 }
 ```
 

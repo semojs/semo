@@ -84,10 +84,11 @@ const debugCore = function(...args) {
     const argv: any = getInternalCache().get('argv')
     const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     debugCache = debug(`${scriptName}-core`)
-    debugCache(...args)
 
     getInternalCache().set('debug', debugCache)
   }
+
+  debugCache(...args)
 
   return debugCache
 }
@@ -1051,6 +1052,13 @@ const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
   argv = argv || cachedInstance.get('argv') || {}
   let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
+  const cacheKey = `parseRcFile:${plugin}:${pluginPath}`
+  const cache = cachedInstance.get(cacheKey)
+
+  if (!_.isEmpty(cache)) {
+    return cache
+  }
+
   const pluginSemoYamlRcPath = path.resolve(pluginPath, `.${scriptName}rc.yml`)
   const pluginPackagePath = path.resolve(pluginPath, `package.json`)
   let pluginConfig
@@ -1073,6 +1081,8 @@ const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
       pluginConfig = {}
     }
   }
+
+  cachedInstance.set(cacheKey, pluginConfig)
 
   return pluginConfig
 }
@@ -1422,6 +1432,11 @@ const launchDispatcher = (opts: any = {}) => {
     describe: 'Set plugin prefix.'
   })
 
+  yargs.hide('enable-core-hook').option('enable-core-hook', {
+    default: [],
+    describe: 'Enable core default disabled hook'
+  })
+
   let scriptName = parsedArgv.scriptName || 'semo'
   const yargsOpts = {
     // Give each command an ability to disable temporarily
@@ -1524,7 +1539,8 @@ const launchDispatcher = (opts: any = {}) => {
         return argv
       })
 
-      if (!parsedArgv.getYargsCompletions) {
+      if (!parsedArgv.getYargsCompletions && parsedArgv.enableCoreHook && parsedArgv.enableCoreHook.includes('before_command')) {
+        debugCore("Core hook before_command triggered")
         let beforeHooks = await invokeHook(`${scriptName}:before_command`)
         Object.keys(beforeHooks).map(function(hook) {
           beforeHooks[hook](parsedArgv, yargs)
@@ -1617,14 +1633,22 @@ const launchDispatcher = (opts: any = {}) => {
           'sort-commands': true,
           'populate--': true
         })
-        .wrap(Math.min(120, yargs.terminalWidth())).argv
+        .onFinishCommand(async (hook) => {
 
-      if (!parsedArgv.getYargsCompletions) {
-        let afterHooks = await invokeHook(`${scriptName}:after_command`)
-        Object.keys(afterHooks).map(function(hook) {
-          afterHooks[hook](parsedArgv, yargs)
+          if (hook !== false) {
+            console.log()
+            if (!parsedArgv.getYargsCompletions && parsedArgv.enableCoreHook && parsedArgv.enableCoreHook.includes('after_command')) {
+              let afterHooks = await invokeHook(`${scriptName}:after_command`)
+              Object.keys(afterHooks).map(function(hook) {
+                afterHooks[hook](parsedArgv, yargs)
+              })
+              debugCore("Core hook after_command triggered")
+            }
+            process.exit(0)
+          }
+
         })
-      }
+        .wrap(Math.min(120, yargs.terminalWidth())).argv
     } catch (e) {
       if (!e.name || e.name !== 'YError') {
         error(e.stack)

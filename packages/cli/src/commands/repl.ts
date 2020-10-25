@@ -224,7 +224,10 @@ export const handler = async function(argv: any) {
       })
     }
 
-    return await openRepl(context)
+    await openRepl(context)
+
+    return false
+
   } catch(e) {
     Utils.error(e.stack)
   }

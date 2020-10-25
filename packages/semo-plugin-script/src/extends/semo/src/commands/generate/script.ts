@@ -34,7 +34,6 @@ export const handler = function(argv: any) {
 
 export const handler = async function (argv: any) {
   console.log('Start to draw your dream code!')
-  process.exit(0)
 }
 `
   } else {
@@ -44,7 +43,6 @@ export const handler = async function (argv: any) {
 
 exports.handler = async function (argv) {
   console.log('Start to draw your dream code!')
-  process.exit(0)
 }
 `
   }

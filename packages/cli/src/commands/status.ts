@@ -21,8 +21,6 @@ export const handler = async function(argv: any) {
         Utils.outputTable(columns, key === scriptName ? '' : key)
       }
     })
-
-    process.exit(0)
   } catch(e) {
     Utils.error(e.stack)
   }
