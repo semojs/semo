@@ -59,7 +59,7 @@ export const handler = function(argv: any) {
   }
 
   const name = argv.name.split('/').pop()
-
+  
   let handerTpl, code
   if (argv.typescript) {
     code = `export const disabled = false // Set to true to disable this command temporarily

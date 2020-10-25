@@ -231,4 +231,6 @@ export const handler = async function(argv: any) {
   } catch(e) {
     Utils.error(e.stack)
   }
+
+  return true
 }

@@ -81,6 +81,12 @@ export = (Utils) {
 * `status`: 用于向 `semo status` 命令注入新的属性信息
 * `create_project_template`: 用于给 `semo create` 命令的 `--template` 参数注入可选模板
 
+:::tip
+在 `v1.15.1` 版本中，已经将 `before_command` 和 `after-command` 两个钩子设置为默认不执行。
+
+启动命令时通过添加 `--enable-core-hook=before_command` 和 `--enable-core-hook=after_command` 来启用。
+:::
+
 部分核心钩子的用法示例
 
 ### `repl_command`
