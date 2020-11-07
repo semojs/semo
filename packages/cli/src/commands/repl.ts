@@ -159,9 +159,9 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   const { Utils, VERSION } = argv.$semo
   const scriptName = argv.scriptName || 'semo'
-  argv.hook = Utils.pluginConfig('hook', false)
-  argv.prompt = Utils.pluginConfig('prompt', '>>> ')
-  argv.extract = Utils.pluginConfig('extract', '')
+  argv.hook = Utils.pluginConfig('repl.hook', false)
+  argv.prompt = Utils.pluginConfig('repl.prompt', '>>> ')
+  argv.extract = Utils.pluginConfig('repl.extract', '')
 
   if (Utils._.isString(argv.extract)) {
     argv.extract = Utils._.castArray(argv.extract)

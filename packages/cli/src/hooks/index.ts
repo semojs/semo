@@ -25,12 +25,12 @@ export = (Utils) => {
       semo_starter_plugin_typescript: {
         repo: 'https://github.com/semojs/semo-starter-plugin-typescript.git',
         branch: 'master',
-        alias: ['semo-plugin-starter-typescript', 'plugin-typescript']
+        alias: ['plugin-typescript']
       },
       semo_starter_application_simple_typescript: {
         repo: 'https://github.com/semojs/semo-starter-application-simple-typescript.git',
         branch: 'master',
-        alias: ['semo-starter-application-simple-typescript', 'application-simple']
+        alias: ['application-simple']
       }
     } : {}
   })

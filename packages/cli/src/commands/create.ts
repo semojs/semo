@@ -62,6 +62,8 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
+  const { Utils } = argv.$semo
+
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'
@@ -81,40 +83,54 @@ export const handler = async function(argv: any) {
       Utils.shell.cd(argv.name)
     } else {
       if (argv.template) {
-        const defaultRepos = await Utils.invokeHook(`${scriptName}:create_project_template`)
-        if (Object.keys(defaultRepos).length === 0) {
+        let repos = await Utils.invokeHook(`${scriptName}:create_project_template`)
+        Object.assign(repos, Utils.pluginConfig('create.repos', {}))
+
+        if (Object.keys(repos).length === 0) {
           Utils.error('No pre-defined repos available.')
         }
-        const template = defaultRepos[argv.template]
+
+        Object.keys(repos).forEach(key => {
+          if (Utils._.isObject[repos[key]]) {
+            if (!repos[key].alias) {
+              repos[key].alias = [key.replace(/_/g, '-')]
+            }
+          } else if (Utils._.isString(repos[key])) {
+            repos[key] = {
+              repo: repos[key],
+              alias: [key.replace(/_/g, '-')],
+              branch: 'master'
+            }
+          }
+        })
+
+        const template = repos[argv.template]
           ? argv.template
-          : Object.keys(defaultRepos).find(
-              key => defaultRepos[key].alias && defaultRepos[key].alias.join('|').indexOf(argv.template) > -1
+          : Object.keys(repos).find(
+              key => repos[key].alias && repos[key].alias.join('|').indexOf(argv.template) > -1
             )
-        if (template && defaultRepos[template]) {
-          argv.repo = defaultRepos[template].repo || Utils.error('Repo not found')
-          argv.branch = defaultRepos[template].branch || 'master'
+        if (template && repos[template]) {
+          argv.repo = repos[template].repo || Utils.error('Repo not found')
+          argv.branch = repos[template].branch || 'master'
         } else {
           const answers: any = await Utils.inquirer.prompt([
             {
               type: 'list',
               name: 'selected',
               message: `Please choose a pre-defined repo to continue:`,
-              choices: Object.keys(defaultRepos).map(key => {
-                return { name: `${defaultRepos[key].alias.join(', ')}`, value: key }
+              choices: Object.keys(repos).map(key => {
+                return { name: `[${key}]: ${repos[key].alias.join(', ')}`, value: key }
               })
             }
           ])
 
-          argv.repo = defaultRepos[answers.selected].repo || Utils.error('Repo not found')
-          argv.branch = defaultRepos[answers.selected].branch || 'master'
+          argv.repo = repos[answers.selected].repo || Utils.error('Repo not found')
+          argv.branch = repos[answers.selected].branch || 'master'
         }
       } else if (argv.empty || !argv.repo) {
         Utils.shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
         Utils.shell.cd(argv.name)
-        argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
-        if (argv.yarn) {
-          Utils.info('yarn.lock found, use yarn for package management.')
-        }
+        
         if (argv.yarn) {
           if (argv.yes) {
             Utils.exec('yarn init -y')
@@ -144,8 +160,9 @@ export const handler = async function(argv: any) {
   
           Utils.success('Succeeded!')
           Utils.shell.cd(argv.name)
-          argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
-          if (argv.yarn) {
+          const yarnFound = Utils.fileExistsSyncCache('yarn.lock')
+          if (yarnFound) {
+            argv.yarn = true
             Utils.info('yarn.lock found, use yarn for package management.')
           }
           Utils.shell.rm('-rf', path.resolve(process.cwd(), `.git`))

@@ -1824,7 +1824,7 @@ const pluginConfig = (key: string, defaultValue: any = undefined) => {
     ? argv[key] 
     : !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key]) 
       ? argv.$config[key]
-      : defaultValue
+      : _.get(argv.$config, key, defaultValue)
 }
 
 /**
