@@ -1,5 +1,1 @@
-import Utils from './common/utils'
-
-export {
-  Utils
-}
+export * from './common/utils'

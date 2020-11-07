@@ -1,5 +1,5 @@
 import path from 'path'
-import { Utils } from '@semo/core'
+import { UtilsType } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
@@ -62,8 +62,7 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  const { Utils } = argv.$semo
-
+  const Utils: UtilsType = argv.$semo.Utils
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'

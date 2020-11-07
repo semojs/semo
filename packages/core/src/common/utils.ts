@@ -19,7 +19,7 @@ import getStdin from 'get-stdin'
 import NodeCache from 'node-cache'
 import yargs from 'yargs'
 import yargsInternal from 'yargs/yargs'
-
+import inquirer from 'inquirer'
 import updateNotifier from 'update-notifier'
 import envinfo from 'envinfo'
 
@@ -1999,7 +1999,7 @@ const clearConsole = () => {
  * Semo utils functions and references to common modules.
  * @module Utils
  */
-const Utils = {
+export const Utils = {
   // npm packages
   /** [lodash](https://www.npmjs.com/package/lodash) reference, check [doc](https://lodash.com/docs). */
   _,
@@ -2032,6 +2032,8 @@ const Utils = {
   yParser,
   /** [yargs-parser](https://www.npmjs.com/package/yaml) reference */
   yaml,
+  /** [inquirer](https://www.npmjs.com/package/inquirer) reference */
+  inquirer,
   
 
   // custom functions
@@ -2082,15 +2084,5 @@ const Utils = {
   clearConsole,
 }
 
-/** [inquirer](https://www.npmjs.com/package/inquirer) reference, with autocomplete plugin */
-Object.defineProperty(Utils, 'inquirer', {
-  get: () => {
-    const inquirer = require('inquirer')
-    return inquirer
-  },
-  enumerable: true
-})
+export type UtilsType = typeof Utils
 
-type UtilsExtra = typeof Utils & { inquirer: any }
-
-export = Utils as UtilsExtra
