@@ -27,11 +27,6 @@ export = (Utils) => {
         branch: 'master',
         alias: ['plugin-typescript']
       },
-      semo_starter_application_simple_typescript: {
-        repo: 'https://github.com/semojs/semo-starter-application-simple-typescript.git',
-        branch: 'master',
-        alias: ['application-simple']
-      }
     } : {}
   })
   
@@ -48,17 +43,19 @@ export = (Utils) => {
   
     let kvs = {}
     const appConfig = Utils.getApplicationConfig({
-      cwd: path.resolve(__dirname, '../../')
+      cwd: process.cwd()
     })
+
+    const location = path.resolve(__dirname, '../../')
+
     kvs = Object.assign(
       kvs,
       Utils._.pickBy(
         {
           version: appConfig.version,
-          location:
-            appConfig.applicationDir.indexOf(process.env.HOME) === 0
-              ? appConfig.applicationDir.replace(process.env.HOME, '~')
-              : appConfig.applicationDir,
+          location: process.env.HOME && location.indexOf(process.env.HOME) === 0
+            ? location.replace(process.env.HOME, '~')
+            : location,
           os: info.System.OS,
           node: info.Binaries.Node ? info.Binaries.Node.version : null,
           npm: info.Binaries.npm ? info.Binaries.npm.version : null,

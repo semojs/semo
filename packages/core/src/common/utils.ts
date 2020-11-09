@@ -1402,7 +1402,7 @@ const launchDispatcher = (opts: any = {}) => {
     packageName: opts.packageName,
     coreDir: opts.coreDir,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
-    [`$${opts.scriptName || 'semo'}`]: { Utils: module.exports, VERSION: pkg.version }
+    [`$${opts.scriptName || 'semo'}`]: { Utils, VERSION: pkg.version }
   })
   
   yargs.config(appConfig)
