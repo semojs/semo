@@ -60,10 +60,10 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@semo/core@^1.5.0":
-  version "1.5.0"
-  resolved "https://registry.yarnpkg.com/@semo/core/-/core-1.5.0.tgz#068959b92c02a9f240646c18dcfe720a6415a120"
-  integrity sha512-4c4cd+eqX2s+/QysFRUGnfxLuXc9IX7ZBCCBCg4CdHEc18PIpZ0J1XjjnnHd2lzu6KdmDzIf8Rb9Wk4xPADRAw==
+"@semo/core@^1.5.4":
+  version "1.5.4"
+  resolved "https://registry.yarnpkg.com/@semo/core/-/core-1.5.4.tgz#3992656abb411e8c48df6ef7b2a6a4f099d7cc54"
+  integrity sha512-BjHDYl/8E38kzenldjIP/uw+98YBFFHQ15NcP+7THAj26Y564nzi7zizCPg884pZJHnZZnMtPtQtrUCnmADVfQ==
   dependencies:
     chalk "^4.1.0"
     dayjs "^1.9.4"

@@ -1,5 +1,5 @@
 import repl from 'repl'
-import { Utils } from '@semo/core'
+import { Utils, UtilsType } from '@semo/core'
 
 let r // repl instance
 let v // yargs argv
@@ -157,11 +157,13 @@ export const builder = function(yargs) {
 }
 
 export const handler = async function(argv: any) {
-  const { Utils, VERSION } = argv.$semo
+  const VERSION = argv.$semo.VERSION
+  const Utils: UtilsType = argv.$semo.Utils
   const scriptName = argv.scriptName || 'semo'
-  argv.hook = Utils.pluginConfig('repl.hook', false)
-  argv.prompt = Utils.pluginConfig('repl.prompt', '>>> ')
-  argv.extract = Utils.pluginConfig('repl.extract', '')
+
+  argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
+  argv.prompt = Utils.pluginConfig('repl.prompt', Utils.pluginConfig('prompt', '>>> '))
+  argv.extract = Utils.pluginConfig('repl.extract', Utils.pluginConfig('extract', ''))
 
   if (Utils._.isString(argv.extract)) {
     argv.extract = Utils._.castArray(argv.extract)
@@ -178,7 +180,7 @@ export const handler = async function(argv: any) {
       reload,
       run: Utils.run,
     }})
-
+    
     if (argv.hook) {
       let pluginsReturn = await Utils.invokeHook(
         `${scriptName}:repl`,

@@ -1820,6 +1820,9 @@ const convertToPrivate = (packageJsonPath) => {
  */
 const pluginConfig = (key: string, defaultValue: any = undefined) => {
   const argv: any = getInternalCache().get('argv') || {}
+  if (key === 'repl.hook') {
+    console.log(argv)
+  }
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key]) 
     ? argv[key] 
     : !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key]) 
