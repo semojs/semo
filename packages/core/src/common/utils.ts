@@ -22,6 +22,9 @@ import yargsInternal from 'yargs/yargs'
 import inquirer from 'inquirer'
 import updateNotifier from 'update-notifier'
 import envinfo from 'envinfo'
+import dotenv, { DotenvConfigOptions } from 'dotenv'
+import dotenvExpand from 'dotenv-expand'
+
 
 import { Hook } from './hook'
 
@@ -72,6 +75,22 @@ const getCache = function(namespace: string): NodeCache {
     cachedInstance.set('cachedNamespaceInstances', cachedNamespaceInstances)
   }
   return cachedNamespaceInstances[namespace]
+}
+
+/**
+ * Use dotenv style
+ * @param expand expand dotenv
+ * @param options dotenv options
+ */
+const useDotEnv = (expand: true, options: DotenvConfigOptions = {}) => {
+  try {
+    const myEnv = dotenv.config()
+    if (expand && !myEnv.error) {
+      dotenvExpand(myEnv)
+    }
+  } catch(e) {
+    // .env may not exist, it's not a serious bug
+  }
 }
 
 /**
@@ -1381,6 +1400,8 @@ const launchDispatcher = (opts: any = {}) => {
   // process.on('warning', e => console.warn(e.stack));
   process.setMaxListeners(0);
 
+  useDotEnv(true)
+
   const pkg = loadCorePackageInfo()
   updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
     defer: false,
@@ -2082,6 +2103,7 @@ export const Utils = {
   resolvePackage,
   consoleReader,
   clearConsole,
+  useDotEnv,
 }
 
 export type UtilsType = typeof Utils
