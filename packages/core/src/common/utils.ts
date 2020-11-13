@@ -1039,12 +1039,6 @@ const getApplicationConfig = function(opts: any = {}) {
     }
   }
 
-  if (applicationConfig['$core'] && applicationConfig['$core']['env'] && _.isObject(applicationConfig['$core']['env'])) {
-    Object.keys(applicationConfig['$core']['env']).forEach(key => {
-      process.env[key] = process.env[key] || applicationConfig['$core']['env'][key]
-    })
-  }
-
   cachedInstance.set(`getApplicationConfig`, applicationConfig)
 
   return applicationConfig
