@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-shell",
-  "version": "1.5.9",
+  "version": "1.5.10",
   "description": "A semo plugin to provide a quick shell.",
   "keywords": [
     "cli",
@@ -34,7 +34,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^1.5.9"
+    "@semo/core": "^1.5.10"
   },
   "publishConfig": {
     "access": "public"
