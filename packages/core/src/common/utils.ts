@@ -2102,3 +2102,6 @@ export const Utils = {
 
 export type UtilsType = typeof Utils
 
+export type COMMON_OBJECT = {
+  [key: string]: any
+}

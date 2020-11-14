@@ -1,5 +1,5 @@
 import repl from 'repl'
-import { Utils, UtilsType } from '@semo/core'
+import { Utils, UtilsType, COMMON_OBJECT } from '@semo/core'
 
 let r // repl instance
 let v // yargs argv
@@ -10,7 +10,7 @@ const importPackage = (name, force = false) => {
 
 const reload = async () => {
   const scriptName = v.scriptName || 'semo'
-  let pluginsReturn = await Utils.invokeHook(
+  let pluginsReturn = await Utils.invokeHook<COMMON_OBJECT>(
     `${scriptName}:repl`,
     Utils._.isBoolean(v.hook)
       ? {
@@ -33,7 +33,7 @@ const reload = async () => {
     })
   }
 
-  const hookReplCommands = await Utils.invokeHook('semo:repl_command')
+  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
   Object.keys(hookReplCommands).filter(command => {
     return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
   }).forEach(command => {
@@ -120,7 +120,7 @@ async function openRepl(context: any): Promise<any> {
     }
   })
 
-  const hookReplCommands = await Utils.invokeHook('semo:repl_command')
+  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
   Object.keys(hookReplCommands).filter(command => {
     return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
   }).forEach(command => {
@@ -182,7 +182,7 @@ export const handler = async function(argv: any) {
     }})
     
     if (argv.hook) {
-      let pluginsReturn = await Utils.invokeHook(
+      let pluginsReturn = await Utils.invokeHook<COMMON_OBJECT>(
         `${scriptName}:repl`,
         Utils._.isBoolean(argv.hook)
           ? {

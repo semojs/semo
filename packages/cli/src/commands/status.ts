@@ -1,4 +1,4 @@
-import { Utils } from '@semo/core'
+import { Utils, COMMON_OBJECT } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'status'
@@ -11,7 +11,7 @@ export const builder = function(yargs) {
 export const handler = async function(argv: any) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookStatus = await Utils.invokeHook(`${scriptName}:status`, { mode: 'group' })
+    const hookStatus = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:status`, { mode: 'group' })
 
     Object.keys(hookStatus).forEach((key) => {
       const kvs = hookStatus[key] ? hookStatus[key] : {}

@@ -1,5 +1,5 @@
 import path from 'path'
-import { Utils } from '@semo/core'
+import { Utils, COMMON_OBJECT } from '@semo/core'
 import rimraf from 'rimraf'
 
 export const disabled = false // Set to true to disable this command temporarily
@@ -40,7 +40,7 @@ export const handler = async function (argv: any) {
   }
 
   // Limit only application can hook cleanup
-  const hookAppCleanup = await Utils.invokeHook(`${scriptName}:cleanup`, { include: ['application'] })
+  const hookAppCleanup = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:cleanup`, { include: ['application'] })
   Object.keys(hookAppCleanup).forEach(key => {
     let cachePath = hookAppCleanup[key]
     if (cachePath.indexOf(appConfig.applicationDir) > -1 && coreCleanupStepKeys.indexOf(key) === -1) {

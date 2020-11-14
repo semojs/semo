@@ -1,5 +1,5 @@
 import path from 'path'
-import { UtilsType } from '@semo/core'
+import { UtilsType, COMMON_OBJECT } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
@@ -82,7 +82,7 @@ export const handler = async function(argv: any) {
       Utils.shell.cd(argv.name)
     } else {
       if (argv.template) {
-        let repos = await Utils.invokeHook(`${scriptName}:create_project_template`)
+        let repos = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:create_project_template`)
         Object.assign(repos, Utils.pluginConfig('create.repos', {}))
 
         if (Object.keys(repos).length === 0) {
