@@ -148,7 +148,7 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {boolean} options.reload If or not clear module cache before require
  */
-const invokeHook = async function<T> (hook: any = null, options: IHookOption = { mode: 'assign' }, argv: any = null): T {
+const invokeHook = async function<T> (hook: any = null, options: IHookOption = { mode: 'assign' }, argv: any = null): Promise<T> {
   const splitHookName = hook.split(':')
   let moduler, originModuler
   if (splitHookName.length === 1) {
