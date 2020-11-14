@@ -1556,7 +1556,7 @@ const launchDispatcher = (opts: any = {}) => {
 
       if (!parsedArgv.getYargsCompletions && parsedArgv.enableCoreHook && parsedArgv.enableCoreHook.includes('before_command')) {
         debugCore("Core hook before_command triggered")
-        let beforeHooks = await invokeHook(`${scriptName}:before_command`)
+        let beforeHooks = await invokeHook<Function[]>(`${scriptName}:before_command`)
         Object.keys(beforeHooks).map(function(hook) {
           beforeHooks[hook](parsedArgv, yargs)
         })
@@ -1653,7 +1653,7 @@ const launchDispatcher = (opts: any = {}) => {
           if (hook !== false) {
             console.log()
             if (!parsedArgv.getYargsCompletions && parsedArgv.enableCoreHook && parsedArgv.enableCoreHook.includes('after_command')) {
-              let afterHooks = await invokeHook(`${scriptName}:after_command`)
+              let afterHooks = await invokeHook<Function[]>(`${scriptName}:after_command`)
               Object.keys(afterHooks).map(function(hook) {
                 afterHooks[hook](parsedArgv, yargs)
               })
