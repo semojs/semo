@@ -1414,12 +1414,13 @@ const launchDispatcher = (opts: any = {}) => {
   let appConfig = getApplicationConfig()
 
   appConfig = Object.assign(appConfig, {
+    scriptName: opts.scriptName,
     packageName: opts.packageName,
     coreDir: opts.coreDir,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
     [`$${opts.scriptName || 'semo'}`]: { Utils, VERSION: pkg.version }
   })
-  
+
   yargs.config(appConfig)
   parsedArgv = _.merge(appConfig, parsedArgv)
   cache.set('argv', parsedArgv) // set argv second time
