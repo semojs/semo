@@ -372,12 +372,23 @@ export const hook_repl = () => {
 
 ### 临时试用 npm 包
 
-在 REPL 下支持用 `Semo.import` 临时下载和调试一些包，这个调试包下载不会进入当前项目的 node_modules 目录。
+在 REPL 下支持用 `Semo.import` 临时下载和调试一些包，这个调试包下载不会进入当前项目的 node_modules 目录。(还有一个等价方法是：Semo.require)
 
 ```
 >>> let _ = Semo.import('lodash')
 >>> _.VERSION
 ```
+
+#### 使用内部命令的方式
+
+> v1.5.14 新增
+`.require` 和 `.import` 是等价的，可以快速导入一些常用包用于调试，例如：
+
+```
+>>> .import lodash:_ dayjs:day
+```
+
+冒号后面的是别名，意思是导入后存成什么变量名。
 
 ### 释放对象的属性到 REPL 环境
 

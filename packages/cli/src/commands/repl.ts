@@ -120,6 +120,43 @@ async function openRepl(context: any): Promise<any> {
     }
   })
 
+  const requireAction = async function (input) {
+    // @ts-ignore
+    this.clearBufferedCommand();
+    try {
+      let opts =  Utils.yParser(input)
+
+      const packages = {}
+      for (let part of opts._) {
+        let split = part.split(':')
+        if (split.length == 1) {
+          packages[part] = part
+        } else if (split.length > 1) {
+          packages[split[0]] = split[1]
+        }
+      }
+
+      for (let pack in packages) {
+        let imported = importPackage(pack)
+        Object.defineProperty(r.context, packages[pack], { value: imported })
+      }
+    } catch (e) {}
+
+    // @ts-ignore
+    this.displayPrompt();
+  }
+
+  // Add require and import command
+  r.defineCommand('require', {
+    help: 'Require npm packages',
+    action: requireAction
+  })
+
+  r.defineCommand('import', {
+    help: 'import npm packages',
+    action: requireAction
+  })
+
   const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
   Object.keys(hookReplCommands).filter(command => {
     return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
