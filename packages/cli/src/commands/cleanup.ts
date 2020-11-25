@@ -101,4 +101,6 @@ export const handler = async function (argv: any) {
   } else {
     Utils.info('Nothing has been cleanup!')
   }
+
+  return false
 }

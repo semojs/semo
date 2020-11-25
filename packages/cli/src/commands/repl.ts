@@ -191,6 +191,15 @@ export const builder = function(yargs) {
   yargs.option('extract', {
     describe: 'Auto extract k/v from Semo object by key path'
   })
+
+  yargs.option('import', {
+    describe: 'import package, same as require option, e.g. --import=lodash:_'
+  })
+
+  yargs.option('require', {
+    describe: 'require package, same as import option, e.g. --require=lodash:_',
+    alias: 'r'
+  })
 }
 
 export const handler = async function(argv: any) {
@@ -201,6 +210,21 @@ export const handler = async function(argv: any) {
   argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
   argv.prompt = Utils.pluginConfig('repl.prompt', Utils.pluginConfig('prompt', '>>> '))
   argv.extract = Utils.pluginConfig('repl.extract', Utils.pluginConfig('extract', ''))
+  argv.require = Utils.pluginConfig('repl.require', Utils.pluginConfig('require', []))
+  argv.import = Utils.pluginConfig('repl.import', Utils.pluginConfig('import', []))
+
+  const requiredPackages = Utils._.castArray(argv.require)
+  const importedPackages = Utils._.castArray(argv.import)
+  let concatPackages = Utils._.chain(requiredPackages).concat(importedPackages).uniq().filter().value()
+  let packages = {}
+  concatPackages.forEach(item => {
+    let splited = item.split(':')
+    if (splited.length === 1) {
+      packages[item] = item
+    } else {
+      packages[splited[0]] = splited[1]
+    }
+  })
 
   if (Utils._.isString(argv.extract)) {
     argv.extract = Utils._.castArray(argv.extract)
@@ -217,6 +241,10 @@ export const handler = async function(argv: any) {
       reload,
       run: Utils.run,
     }})
+
+    for (let pack in packages) {
+      context[packages[pack]] = importPackage(pack)
+    }
     
     if (argv.hook) {
       let pluginsReturn = await Utils.invokeHook<COMMON_OBJECT>(

@@ -1799,13 +1799,17 @@ const importPackage = (name, location = '', home = true, force = false) => {
   }
 
   try {
-    pkgPath = require.resolve(name, { paths: [downloadDir] })    
+    pkgPath = require.resolve(name, { paths: [downloadDir] })   
     pkg = require(pkgPath)
   } catch (err) {
     if (err.code == 'MODULE_NOT_FOUND') {
-      exec(`npm install ${name} --prefix ${downloadDir}`)
-      pkgPath = require.resolve(name, { paths: [downloadDir] })
-      pkg = require(pkgPath)
+      exec(`npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`)
+      try {
+        pkgPath = require.resolve(name, { paths: [downloadDir] })
+        pkg = require(pkgPath)
+      } catch(e) {
+        warn(`Module ${name} not found, you may need to re-run the command`)
+      }
     }
   }
 
