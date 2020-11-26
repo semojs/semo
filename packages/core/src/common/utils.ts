@@ -1777,7 +1777,7 @@ const uninstallPackage = (name, location = '', home = true) => {
  * @param home if true save modules to .semo, if false, save to cwd 
  */
 const importPackage = (name, location = '', home = true, force = false) => {
-  let pkg, pkgPath
+  let pkg!: string, pkgPath: string
 
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
