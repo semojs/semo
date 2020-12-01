@@ -210,8 +210,8 @@ export const handler = async function(argv: any) {
   argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
   argv.prompt = Utils.pluginConfig('repl.prompt', Utils.pluginConfig('prompt', '>>> '))
   argv.extract = Utils.pluginConfig('repl.extract', Utils.pluginConfig('extract', ''))
-  argv.require = Utils.pluginConfig('repl.require', Utils.pluginConfig('require', []))
-  argv.import = Utils.pluginConfig('repl.import', Utils.pluginConfig('import', []))
+  argv.require = Utils.pluginConfig('repl.require', []).concat(Utils.pluginConfig('require', []))
+  argv.import = Utils.pluginConfig('repl.import', []).concat(Utils.pluginConfig('import', []))
 
   const requiredPackages = Utils._.castArray(argv.require)
   const importedPackages = Utils._.castArray(argv.import)
