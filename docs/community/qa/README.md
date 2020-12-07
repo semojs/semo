@@ -29,6 +29,53 @@ disableGlobalPlugin: true,
 disableHomePlugin: true
 ```
 
+## `Semo` 可以直接运行 `Typescript` 命令么？
+
+简单来说，不可以，如果可以的话，岂不是就成 `Deno` 啦，但是，在特殊的条件下是可以的，以下是步骤：
 
 
+### 项目中应该有 `typescript` 和 `ts-node` 两个包
+
+```
+yarn add typescript ts-node -D
+```
+
+### 初始化 tsconfig.json
+
+```
+npx tsc --init
+```
+
+可以根据需要进行配置，这里最少要修改的配置如下:
+
+```
+"target": "es6",
+```
+
+原因是，转换的代码里有 `async/await`
+
+### package.json 里配置一个 scripts 命令
+
+```
+"scripts": {
+    "semo": "node --require ts-node/register ./node_modules/@semo/cli/lib/bin.js",
+}
+```
+
+### 修改 `.semorc.yml`
+
+添加对 typescript 的支持
+
+```
+typescript: true
+```
+
+### 最后创建一个ts的命令行脚本吧
+
+```
+semo g command test
+yarn semo test
+```
+
+最后，这种方式比较适合于定义本地命令，性能要比执行编译之后的代码要慢一些，但是开发体验较好，一般常用的方式还是让 Semo 去执行编译之后的命令。
 

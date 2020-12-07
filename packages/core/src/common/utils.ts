@@ -616,6 +616,9 @@ const extendSubCommand = function(command: string, moduleName: string, yargs: an
   const plugins = getAllPluginsMapping(argv)
   const config = getCombinedConfig(argv)
   const opts = {
+    // try to use ts command with ts-node/register
+    extensions: ['ts', 'js'],
+    exclude: /.d.ts$/,
     // Give each command an ability to disable temporarily
     visit: (command) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
@@ -1455,6 +1458,9 @@ const launchDispatcher = (opts: any = {}) => {
 
   let scriptName = parsedArgv.scriptName || 'semo'
   const yargsOpts = {
+    // try to use ts command with ts-node/register
+    extensions: ['ts', 'js'],
+    exclude: /.d.ts$/,
     // Give each command an ability to disable temporarily
     visit: (command, pathTofile, filename) => {
       command.middlewares = command.middlewares ? _.castArray(command.middlewares) : []
@@ -1643,6 +1649,7 @@ const launchDispatcher = (opts: any = {}) => {
       yargs
         .help()
         .alias('h', 'help')
+        .alias('v', 'version')
         .exitProcess(false)
         .recommendCommands()
         .parserConfiguration({
