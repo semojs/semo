@@ -34,13 +34,13 @@ disableHomePlugin: true
 简单来说，不可以，如果可以的话，岂不是就成 `Deno` 啦，但是，在特殊的条件下是可以的，以下是步骤：
 
 
-### 项目中应该有 `typescript` 和 `ts-node` 两个包
+### 1、项目中应该有 `typescript` 和 `ts-node` 两个包
 
 ```
 yarn add typescript ts-node -D
 ```
 
-### 初始化 tsconfig.json
+### 2、初始化 tsconfig.json
 
 ```
 npx tsc --init
@@ -54,7 +54,7 @@ npx tsc --init
 
 原因是，转换的代码里有 `async/await`
 
-### package.json 里配置一个 scripts 命令
+### 3、package.json 里配置一个 scripts 命令
 
 ```
 "scripts": {
@@ -62,7 +62,7 @@ npx tsc --init
 }
 ```
 
-### 修改 `.semorc.yml`
+### 4、修改 `.semorc.yml`
 
 添加对 typescript 的支持
 
@@ -70,7 +70,7 @@ npx tsc --init
 typescript: true
 ```
 
-### 最后创建一个ts的命令行脚本吧
+### 5、最后创建一个ts的命令行脚本吧
 
 ```
 semo g command test
