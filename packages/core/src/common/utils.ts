@@ -1645,6 +1645,29 @@ const launchDispatcher = (opts: any = {}) => {
         describe: 'Set node env key'
       })
 
+      let defaultCommand: any = {
+        handler: () => {
+          warn('Semo command file is required.')
+          warn('Semo default behavior is to execute a Semo style command file.')
+        },
+        builder: () => {}
+      }
+
+      if (process.argv[2] && fs.existsSync(path.resolve(process.cwd(), process.argv[2]))) {
+         let command = require(path.resolve(process.cwd(), process.argv[2]))
+         if (command.default) {
+          command = command.default
+         }
+
+         if (command.handler) {
+           defaultCommand.handler = command.handler
+         }
+
+         if (command.builder) {
+          defaultCommand.builder = command.builder
+        }
+      }
+
       // eslint-disable-next-line
       yargs
         .help()
@@ -1656,6 +1679,7 @@ const launchDispatcher = (opts: any = {}) => {
           'sort-commands': true,
           'populate--': true
         })
+        .command('$0', 'Execute a Semo style command file', defaultCommand.builder, defaultCommand.handler)
         .onFinishCommand(async (hook) => {
 
           if (hook !== false) {
