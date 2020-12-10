@@ -23,9 +23,11 @@ export = (Utils) => {
     const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     return scriptName === 'semo' ? {
       semo_starter_plugin_typescript: {
+        name: 'Semo plugin typescript template',
+        description: 'A Semo plugin project template in typescript.',
         repo: 'https://github.com/semojs/semo-starter-plugin-typescript.git',
         branch: 'master',
-        alias: ['plugin-typescript']
+        tags: ['plugin'],
       },
     } : {}
   })

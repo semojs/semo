@@ -35,7 +35,12 @@ export const builder = function(yargs) {
 
   yargs.option('template', {
     alias: 'T',
-    describe: 'Select from registered template repos'
+    describe: 'Select from registered project template repos'
+  })
+
+  yargs.option('template-tag', {
+    alias: 'tag',
+    describe: 'Registered project template tag, work with --template'
   })
 
   yargs.option('add', {
@@ -82,7 +87,9 @@ export const handler = async function(argv: any) {
       Utils.shell.cd(argv.name)
     } else {
       if (argv.template) {
+        // Fetch repos from hook
         let repos = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:create_project_template`)
+        // Combine repos with config
         Object.assign(repos, Utils.pluginConfig('create.repos', {}))
 
         if (Object.keys(repos).length === 0) {
@@ -91,22 +98,36 @@ export const handler = async function(argv: any) {
 
         Object.keys(repos).forEach(key => {
           if (Utils._.isObject[repos[key]]) {
-            if (!repos[key].alias) {
-              repos[key].alias = [key.replace(/_/g, '-')]
+            repos[key].tags = repos[key].tags ? Utils._.castArray(repos[key].tags) : []
+            if (!repos[key].name) {
+              repos[key].name = key.replace(/_/g, '-')
             }
           } else if (Utils._.isString(repos[key])) {
             repos[key] = {
               repo: repos[key],
-              alias: [key.replace(/_/g, '-')],
-              branch: 'master'
+              name: key.replace(/_/g, '-'),
+              description: '',
+              branch: 'master',
+              tags:[]
             }
           }
         })
 
+        if (argv.tag) {
+          repos = Utils._.pickBy(repos, (repo, key) => {
+            if (repo.tags) {
+              repo.tags = Utils._.castArray(repo.tags)
+              return repo.tags.includes(argv.tag)
+            } else {
+              return false
+            }
+          })
+        }
+
         const template = repos[argv.template]
           ? argv.template
           : Object.keys(repos).find(
-              key => repos[key].alias && repos[key].alias.join('|').indexOf(argv.template) > -1
+              key => repos[key].name && repos[key].name.indexOf(argv.template) > -1
             )
         if (template && repos[template]) {
           argv.repo = repos[template].repo || Utils.error('Repo not found')
@@ -118,7 +139,9 @@ export const handler = async function(argv: any) {
               name: 'selected',
               message: `Please choose a pre-defined repo to continue:`,
               choices: Object.keys(repos).map(key => {
-                return { name: `[${key}]: ${repos[key].alias.join(', ')}`, value: key }
+                return { name: `${Utils.chalk.green.underline(repos[key].name)} ${repos[key].tags.map(
+                  tag => Utils.chalk.white.bgGreen(` ${tag} `)
+                ).join(' ')}: ${Utils.chalk.white(repos[key].repo)}${repos[key].description ? '\n  ' + repos[key].description : ''}`, value: key }
               })
             }
           ])
