@@ -97,7 +97,7 @@ export const handler = async function(argv: any) {
         }
 
         Object.keys(repos).forEach(key => {
-          if (Utils._.isObject[repos[key]]) {
+          if (Utils._.isObject(repos[key])) {
             repos[key].tags = repos[key].tags ? Utils._.castArray(repos[key].tags) : []
             if (!repos[key].name) {
               repos[key].name = key.replace(/_/g, '-')
