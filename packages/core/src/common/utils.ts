@@ -300,6 +300,8 @@ const invokeHook = async function<T> (hook: any = null, options: IHookOption = {
           let loadedPlugin = require(pluginEntryPath)
           if (_.isFunction(loadedPlugin)) {
             loadedPlugin = await loadedPlugin(Utils, argv)
+          } else if (_.isFunction(loadedPlugin.default)) {
+            loadedPlugin = await loadedPlugin.default(Utils, argv)
           }
 
           let hookFound = false
