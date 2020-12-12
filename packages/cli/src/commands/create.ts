@@ -90,7 +90,7 @@ export const handler = async function(argv: any) {
         // Fetch repos from hook
         let repos = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:create_project_template`)
         // Combine repos with config
-        Object.assign(repos, Utils.pluginConfig('create.repos', {}))
+        Object.assign(repos, Utils.pluginConfig('create.template', {}))
 
         if (Object.keys(repos).length === 0) {
           Utils.error('No pre-defined repos available.')

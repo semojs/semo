@@ -55,14 +55,16 @@
     "@nodelib/fs.scandir" "2.1.3"
     fastq "^1.6.0"
 
-"@semo/core@^1.5.4":
-  version "1.5.4"
-  resolved "https://registry.yarnpkg.com/@semo/core/-/core-1.5.4.tgz#3992656abb411e8c48df6ef7b2a6a4f099d7cc54"
-  integrity sha512-BjHDYl/8E38kzenldjIP/uw+98YBFFHQ15NcP+7THAj26Y564nzi7zizCPg884pZJHnZZnMtPtQtrUCnmADVfQ==
+"@semo/core@^1.5.21":
+  version "1.5.21"
+  resolved "https://registry.yarnpkg.com/@semo/core/-/core-1.5.21.tgz#3360e650a23cef95b72a78bbed06904a97c01aca"
+  integrity sha512-pngAjJdhboFPDHiGt4aemdw+1abS57DbQjtnX74gyE0TqUqFiHBr02eSk29uD4sVb7/eM5V2N9vKgbMioRIojw==
   dependencies:
     chalk "^4.1.0"
     dayjs "^1.9.4"
     debug "^4.2.0"
+    dotenv "^8.2.0"
+    dotenv-expand "^5.1.0"
     envinfo "^7.7.3"
     find-up "^5.0.0"
     fs-extra "^9.0.1"
@@ -592,6 +594,16 @@ dot-prop@^5.2.0:
   integrity sha512-uEUyaDKoSQ1M4Oq8l45hSE26SnTxL6snNnqvK/VWx5wJhmff5z0FUVJDKDanor/6w3kzE3i7XZOk+7wC0EXr1A==
   dependencies:
     is-obj "^2.0.0"
+
+dotenv-expand@^5.1.0:
+  version "5.1.0"
+  resolved "https://registry.yarnpkg.com/dotenv-expand/-/dotenv-expand-5.1.0.tgz#3fbaf020bfd794884072ea26b1e9791d45a629f0"
+  integrity sha512-YXQl1DSa4/PQyRfgrv6aoNjhasp/p4qs9FjJ4q4cQk+8m4r6k4ZSiEyytKG8f8W9gi8WsQtIObNmKd+tMzNTmA==
+
+dotenv@^8.2.0:
+  version "8.2.0"
+  resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-8.2.0.tgz#97e619259ada750eea3e4ea3e26bceea5424b16a"
+  integrity sha512-8sJ78ElpbDJBHNeBzUbUVLsqKdccaa/BXF1uPTw3GrvQTBgrQrtObr2mUrE38vzYd8cEv+m/JBfDLioYcfXoaw==
 
 duplexer3@^0.1.4:
   version "0.1.4"
