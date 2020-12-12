@@ -234,6 +234,10 @@ export const handler = async function(argv: any) {
       }
       Utils.success('Initial basic structure complete!')
     }
+
+    // change package.json attributes
+    Utils.exec(`sed -i -r 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
+
   } catch(e) {
     Utils.error(e.stack)
   }
