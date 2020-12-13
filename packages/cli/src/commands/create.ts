@@ -71,6 +71,7 @@ export const handler = async function(argv: any) {
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'
+  argv.tag = argv.tag ? Utils._.castArray(argv.tag) : []
 
   try {
     if (Utils.fileExistsSyncCache(path.resolve(process.cwd(), argv.name))) {
@@ -117,7 +118,7 @@ export const handler = async function(argv: any) {
           repos = Utils._.pickBy(repos, (repo, key) => {
             if (repo.tags) {
               repo.tags = Utils._.castArray(repo.tags)
-              return repo.tags.includes(argv.tag)
+              return Utils._.intersection(repo.tags, argv.tag).length > 0
             } else {
               return false
             }
