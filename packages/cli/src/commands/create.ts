@@ -114,7 +114,7 @@ export const handler = async function(argv: any) {
           }
         })
 
-        if (argv.tag) {
+        if (argv.tag && argv.tag.length > 0) {
           repos = Utils._.pickBy(repos, (repo, key) => {
             if (repo.tags) {
               repo.tags = Utils._.castArray(repo.tags)
