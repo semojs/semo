@@ -430,7 +430,7 @@ const invokeHook = async function<T> (hook: any = null, options: IHookOption = {
  * @param {object} data need alter data
  * @param {object} options Same as invokeHook 
  */
-const invokeHookAlter = async function(hook: any = null, data, options: IHookOption = {}, argv: any = null) {
+const invokeHookAlter = async function<T>(hook: any = null, data, options: IHookOption = {}, argv: any = null):Promise<T> {
 
   const splitHookName = hook.split(':')
   let moduler, originModuler
