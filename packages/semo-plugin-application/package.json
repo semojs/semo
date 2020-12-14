@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-application",
-  "version": "1.5.26",
+  "version": "1.5.28",
   "description": "A semo plugin to provide project commands convension.",
   "keywords": [
     "cli",
@@ -34,7 +34,7 @@
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^1.5.26"
+    "@semo/core": "^1.5.28"
   },
   "publishConfig": {
     "access": "public"
