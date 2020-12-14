@@ -2,7 +2,7 @@
   "packages": [
     "packages/*"
   ],
-  "version": "1.5.25",
+  "version": "1.5.26",
   "npmClient": "yarn",
   "npmClientArgs": [
     "--pure-lockfile"
