@@ -1656,18 +1656,23 @@ const launchDispatcher = (opts: any = {}) => {
       }
 
       if (process.argv[2] && fs.existsSync(path.resolve(process.cwd(), process.argv[2]))) {
-         let command = require(path.resolve(process.cwd(), process.argv[2]))
-         if (command.default) {
-          command = command.default
-         }
+        // if command exist but process.arg[2] also exist, but not a command js module
+        // here will throw an exception, so ignore this error to make existed command can run
+        try {
+          let command = require(path.resolve(process.cwd(), process.argv[2]))
+          if (command.default) {
+            command = command.default
+          }
 
-         if (command.handler) {
-           defaultCommand.handler = command.handler
-         }
+          if (command.handler) {
+            defaultCommand.handler = command.handler
+          }
 
-         if (command.builder) {
-          defaultCommand.builder = command.builder
-        }
+          if (command.builder) {
+            defaultCommand.builder = command.builder
+          }
+
+        } catch(e) {}
       }
 
       // eslint-disable-next-line
