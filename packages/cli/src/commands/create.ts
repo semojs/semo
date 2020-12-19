@@ -237,7 +237,7 @@ export const handler = async function(argv: any) {
     }
 
     // change package.json attributes
-    Utils.exec(`sed -i -r 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
+    Utils.exec(`sed -ir 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
 
   } catch(e) {
     Utils.error(e.stack)
