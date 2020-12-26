@@ -1423,6 +1423,16 @@ const launchDispatcher = (opts: any = {}) => {
           'populate--': true
         })
         .command('$0', 'Execute a Semo style command file', defaultCommand.builder, defaultCommand.handler)
+        .command('version', 'Show version number', () => {
+          console.log(pkg.version)
+        })
+        .example([
+          ['$0 run hello-world', 'Run a remote plugin command.'],
+          ['$0 run --with project-templates — create PROJECT_NAME -T', 'Clone project template as a starter.'],
+          ['$0 repl --require lodash:_', 'Start Semo repl and inject lodash object to _.'],
+          ['$0 generate command test', 'Generate command template.'],
+          ['$0 clean all', 'Clean all cache files and installed npm packages.'],
+        ])
         .onFinishCommand(async (hook) => {
 
           if (hook !== false) {
