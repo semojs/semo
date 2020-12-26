@@ -1384,6 +1384,7 @@ const launchDispatcher = (opts: any = {}) => {
 
       let defaultCommand: any = {
         handler: () => {
+          yargs.showHelp();
           warn('Semo command file is required.')
           warn('Semo default behavior is to execute a Semo style command file.')
         },
