@@ -91,7 +91,7 @@ async function openRepl(context: any): Promise<any> {
   corepl(r)
 }
 
-export const builder = function(yargs: any) {
+export const builder = function (yargs: any) {
   yargs.option('prompt', {
     describe: 'Prompt for input.'
   })
@@ -105,7 +105,7 @@ export const builder = function(yargs: any) {
   })
 }
 
-export const handler = async function(argv) {
+export const handler = async function (argv) {
   const scriptName = argv.scriptName || 'semo'
 
   const { Utils } = argv.$semo
@@ -115,8 +115,11 @@ export const handler = async function(argv) {
 
   try {
     let context = { argv }
-    return await openRepl(context)
-  } catch(e) {
+    await openRepl(context)
+    return false
+  } catch (e) {
     Utils.error(e.stack)
   }
+
+  return true
 }
