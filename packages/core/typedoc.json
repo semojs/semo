@@ -1,9 +1,7 @@
 {
   "out": "../../public/typedoc",
-  "mode": "file",
   "theme": "default",
-  "exclude": [
-  ],
+  "exclude": [],
   "readme": "none",
   "excludeExternals": true
 }
