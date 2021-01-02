@@ -13,7 +13,7 @@ footer: Enterprise level Node CLI building rules
 ---
 
 ```bash
-# Install globally in your local machine.
+# Install globally to your local machine.
 npm install -g @semo/cli
 semo help
 
@@ -23,7 +23,7 @@ npm install @semo/cli
 semo init
 semo generate command test
 
-# Use application to reduce first level commands
+# Use application convention to reduce first level commands
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 ```

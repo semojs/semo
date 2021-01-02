@@ -72,7 +72,7 @@ module.exports = {
         editLinkText: 'Help improve this page',
         nav: [
           { text: 'Home', link: '/en/'},
-          { text: 'Guide', link: '/guide/'},
+          { text: 'Guide', link: '/en/guide/'},
           { text: 'Usage', link: '/usage/'},
           { text: 'Reference', link: `http://${host}/typedoc/`}
         ],
@@ -82,7 +82,7 @@ module.exports = {
             title: 'Guide',
             collapsable: false,
             children: [
-              '/guide/',
+              '/en/guide/',
               '/guide/quickstart/',
               '/guide/core-commands/',
               '/guide/custom-commands/',
