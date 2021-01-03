@@ -8,7 +8,7 @@
     
     <meta name="description" content="一个Node项目命令行开发规范">
     
-    <link rel="preload" href="/assets/css/0.styles.992cb7aa.css" as="style"><link rel="preload" href="/assets/js/app.2f7804fa.js" as="script"><link rel="preload" href="/assets/js/2.c8f551f9.js" as="script"><link rel="preload" href="/assets/js/18.b5e552d4.js" as="script"><link rel="prefetch" href="/assets/js/10.e10ec60f.js"><link rel="prefetch" href="/assets/js/11.59c070fc.js"><link rel="prefetch" href="/assets/js/12.f6fbc28f.js"><link rel="prefetch" href="/assets/js/13.1340cf6e.js"><link rel="prefetch" href="/assets/js/14.40b79d67.js"><link rel="prefetch" href="/assets/js/15.2ba1c3b9.js"><link rel="prefetch" href="/assets/js/16.204e5452.js"><link rel="prefetch" href="/assets/js/17.109f5139.js"><link rel="prefetch" href="/assets/js/19.b5ca7501.js"><link rel="prefetch" href="/assets/js/20.be7e574b.js"><link rel="prefetch" href="/assets/js/21.01f69f36.js"><link rel="prefetch" href="/assets/js/22.2bb1a8bb.js"><link rel="prefetch" href="/assets/js/23.b1fa4537.js"><link rel="prefetch" href="/assets/js/3.5fe7f172.js"><link rel="prefetch" href="/assets/js/4.09fd2c39.js"><link rel="prefetch" href="/assets/js/5.b99a1609.js"><link rel="prefetch" href="/assets/js/6.ffe6f60a.js"><link rel="prefetch" href="/assets/js/7.f056ed1e.js"><link rel="prefetch" href="/assets/js/8.7f59801b.js"><link rel="prefetch" href="/assets/js/9.bd50b831.js">
+    <link rel="preload" href="/assets/css/0.styles.992cb7aa.css" as="style"><link rel="preload" href="/assets/js/app.40d25f32.js" as="script"><link rel="preload" href="/assets/js/2.c8f551f9.js" as="script"><link rel="preload" href="/assets/js/19.bdefffb3.js" as="script"><link rel="prefetch" href="/assets/js/10.e10ec60f.js"><link rel="prefetch" href="/assets/js/11.59c070fc.js"><link rel="prefetch" href="/assets/js/12.e405fa04.js"><link rel="prefetch" href="/assets/js/13.64b1feea.js"><link rel="prefetch" href="/assets/js/14.8873c437.js"><link rel="prefetch" href="/assets/js/15.3c1595a5.js"><link rel="prefetch" href="/assets/js/16.b1b1c71d.js"><link rel="prefetch" href="/assets/js/17.b155d6eb.js"><link rel="prefetch" href="/assets/js/18.6730a008.js"><link rel="prefetch" href="/assets/js/20.5831d239.js"><link rel="prefetch" href="/assets/js/21.7deee7a8.js"><link rel="prefetch" href="/assets/js/22.dd1d3069.js"><link rel="prefetch" href="/assets/js/23.d30e906a.js"><link rel="prefetch" href="/assets/js/24.e64e645a.js"><link rel="prefetch" href="/assets/js/3.b2dce630.js"><link rel="prefetch" href="/assets/js/4.09fd2c39.js"><link rel="prefetch" href="/assets/js/5.b99a1609.js"><link rel="prefetch" href="/assets/js/6.ffe6f60a.js"><link rel="prefetch" href="/assets/js/7.f056ed1e.js"><link rel="prefetch" href="/assets/js/8.7f59801b.js"><link rel="prefetch" href="/assets/js/9.bd50b831.js">
     <link rel="stylesheet" href="/assets/css/0.styles.992cb7aa.css">
   </head>
   <body>
@@ -22,7 +22,7 @@
   参考
   <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="Select language" class="dropdown-title"><span class="title">Languages</span> <span class="arrow down"></span></button> <button type="button" aria-label="Select language" class="mobile-dropdown-title"><span class="title">Languages</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/guide/quickstart/" aria-current="page" class="nav-link router-link-exact-active router-link-active">
   zh-CN
-</a></li><li class="dropdown-item"><!----> <a href="/en/" class="nav-link">
+</a></li><li class="dropdown-item"><!----> <a href="/en/guide/quickstart/" class="nav-link">
   en-US
 </a></li></ul></div></div> <a href="https://github.com/semojs/semo" target="_blank" rel="noopener noreferrer" class="repo-link">
     Github
@@ -36,29 +36,39 @@
   参考
   <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></div><div class="nav-item"><div class="dropdown-wrapper"><button type="button" aria-label="Select language" class="dropdown-title"><span class="title">Languages</span> <span class="arrow down"></span></button> <button type="button" aria-label="Select language" class="mobile-dropdown-title"><span class="title">Languages</span> <span class="arrow right"></span></button> <ul class="nav-dropdown" style="display:none;"><li class="dropdown-item"><!----> <a href="/guide/quickstart/" aria-current="page" class="nav-link router-link-exact-active router-link-active">
   zh-CN
-</a></li><li class="dropdown-item"><!----> <a href="/en/" class="nav-link">
+</a></li><li class="dropdown-item"><!----> <a href="/en/guide/quickstart/" class="nav-link">
   en-US
 </a></li></ul></div></div> <a href="https://github.com/semojs/semo" target="_blank" rel="noopener noreferrer" class="repo-link">
     Github
     <span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a></nav>  <ul class="sidebar-links"><li><section class="sidebar-group depth-0"><p class="sidebar-heading open"><span>基础</span> <!----></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/guide/" aria-current="page" class="sidebar-link">介绍</a></li><li><a href="/guide/quickstart/" aria-current="page" class="active sidebar-link">快速上手</a><ul class="sidebar-sub-headers"><li class="sidebar-sub-header"><a href="/guide/quickstart/#全局安装" class="sidebar-link">全局安装</a></li><li class="sidebar-sub-header"><a href="/guide/quickstart/#项目集成" class="sidebar-link">项目集成</a></li><li class="sidebar-sub-header"><a href="/guide/quickstart/#开发插件" class="sidebar-link">开发插件</a></li><li class="sidebar-sub-header"><a href="/guide/quickstart/#安装别人开发的插件" class="sidebar-link">安装别人开发的插件</a></li></ul></li><li><a href="/guide/core-commands/" class="sidebar-link">核心命令</a></li><li><a href="/guide/custom-commands/" class="sidebar-link">自定义命令</a></li><li><a href="/guide/config/" class="sidebar-link">配置管理</a></li><li><a href="/guide/hook/" class="sidebar-link">钩子机制</a></li><li><a href="/guide/plugin/" class="sidebar-link">插件开发</a></li></ul></section></li><li><section class="sidebar-group depth-0"><p class="sidebar-heading"><span>用法</span> <!----></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/usage/" class="sidebar-link">概述</a></li><li><a href="/usage/plugin/" class="sidebar-link">插件</a></li><li><a href="/usage/integration/" class="sidebar-link">项目整合</a></li><li><a href="/usage/solution/" class="sidebar-link">解决方案</a></li><li><a href="/usage/distribution/" class="sidebar-link">发行版</a></li></ul></section></li><li><section class="sidebar-group depth-0"><p class="sidebar-heading"><span>社区</span> <!----></p> <ul class="sidebar-links sidebar-group-items"><li><a href="/community/contrib/" class="sidebar-link">如何贡献</a></li><li><a href="/community/qa/" class="sidebar-link">常见问题</a></li></ul></section></li></ul> </aside> <main class="page"> <div class="theme-default-content content__default"><h1 id="快速上手"><a href="#快速上手" class="header-anchor">#</a> 快速上手</h1> <h2 id="全局安装"><a href="#全局安装" class="header-anchor">#</a> 全局安装</h2> <p><code>Semo</code> 命令行工具同时也是一个辅助工程师日常开发，运维和调试的命令行工具，建议你在本地环境全局安装，具体的使用说明可以参考<a href="https://semo.js.org" target="_blank" rel="noopener noreferrer">这里<span><svg xmlns="http://www.w3.org/2000/svg" aria-hidden="true" focusable="false" x="0px" y="0px" viewBox="0 0 100 100" width="15" height="15" class="icon outbound"><path fill="currentColor" d="M18.8,85.1h56l0,0c2.2,0,4-1.8,4-4v-32h-8v28h-48v-48h28v-8h-32l0,0c-2.2,0-4,1.8-4,4v56C14.8,83.3,16.6,85.1,18.8,85.1z"></path> <polygon fill="currentColor" points="45.7,48.7 51.3,54.3 77.2,28.5 77.2,37.2 85.2,37.2 85.2,14.9 62.8,14.9 62.8,22.9 71.5,22.9"></polygon></svg> <span class="sr-only">(opens new window)</span></span></a>。</p> <div class="language- extra-class"><pre class="language-text"><code>$ npm i -g @semo/cli
 $ semo help
+semo
 
-semo [命令]
+Execute a Semo style command file
 
-命令：
+Commands:
+  semo                                Execute a Semo style command file                                        [default]
+  semo cleanup [type]                 Cleanup internal caches.                                          [aliases: clean]
   semo completion                     Generate completion script
-  semo cleanup [type]                 Cleanup internal caches.
-  semo config &lt;op&gt;                    Manage rc config                                           [aliases: cfg]
+  semo config &lt;op&gt;                    Manage rc config                                                    [aliases: cfg]
   semo create &lt;name&gt; [repo] [branch]  Create a new project from specific repo                               [aliases: c]
   semo generate &lt;component&gt;           Generate component sample code                                        [aliases: g]
   semo init                           Init basic config file and directories                                [aliases: i]
   semo repl                           Play with REPL                                                        [aliases: r]
-  semo run &lt;PLUGIN&gt; [COMMAND...]      Run any plugin command directly
+  semo run [plugin]                   Run any plugin command directly
   semo status                         Show environment status info                                         [aliases: st]
+  semo version                        Show version number
 
 Options:
-  --version   显示版本号                                                                                          [布尔]
-  -h, --help  显示帮助信息                                                                                        [布尔]
+  -h, --help     Show help                                                                                     [boolean]
+  -v, --version  Show version number                                                                           [boolean]
+
+Examples:
+  semo run hello-world                                        Run a remote plugin command.
+  semo run --with project-templates — create PROJECT_NAME -T  Clone project template as a starter.
+  semo repl --require lodash:_                                Start Semo repl and inject lodash object to _.
+  semo generate command test                                  Generate command template.
+  semo clean all                                              Clean all cache files and installed npm packages.
 
 Find more information at https://semo.js.org
 </code></pre></div><p>可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 <code>Semo</code> 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 <code>Semo</code> 的作用和价值。</p> <h2 id="项目集成"><a href="#项目集成" class="header-anchor">#</a> 项目集成</h2> <p><code>Semo</code> 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 <code>Semo</code>，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。</p> <div class="language- extra-class"><pre class="language-text"><code>cd YOUR_PROJECT
@@ -99,6 +109,6 @@ yarn add semo-plugin-xxx // 或
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.2f7804fa.js" defer></script><script src="/assets/js/2.c8f551f9.js" defer></script><script src="/assets/js/18.b5e552d4.js" defer></script>
+    <script src="/assets/js/app.40d25f32.js" defer></script><script src="/assets/js/2.c8f551f9.js" defer></script><script src="/assets/js/19.bdefffb3.js" defer></script>
   </body>
 </html>
