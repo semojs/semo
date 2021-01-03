@@ -1,8 +1,8 @@
-# 快速上手
+# Get started
 
-## 全局安装
+## Global Installation
 
-`Semo` 命令行工具同时也是一个辅助工程师日常开发，运维和调试的命令行工具，建议你在本地环境全局安装，具体的使用说明可以参考[这里](https://semo.js.org)。
+`Semo` is also a developer tool to help development, devops and debug. So you can install it globally.
 
 ```
 $ npm i -g @semo/cli
@@ -38,39 +38,39 @@ Examples:
 Find more information at https://semo.js.org
 ```
 
-可以看到里面有很多的内置命令，但是，需要注意的是，这些命令都是有使用场景的，在不配合任何插件和具体的业务项目时对大家的帮助不会很大，因为 `Semo` 核心在开发过程中，主要放在定义扩展规范，具体的业务逻辑需要自己去实现，而只有配合具体的业务逻辑进去才能进一步体现 `Semo` 的作用和价值。
+We can see that there are many internal commands, these commands have special usage, Semo provides rules not specific functions, so mostly you need to install plugins.
 
-## 项目集成
+
+## Project integration
 
 `Semo` 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 `Semo`，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。
+
+`Semo` 's main usage is interated with an existed project to provide CLI machanism. You can implement your own CLI implementation, but different projects have different ways to add CLI, This difference brings about an increase in maintenance costs. For enterprise-level development, reducing costs means increasing profits
 
 ```
 cd YOUR_PROJECT
 semo init
 ```
 
-如果仅仅使用 Semo 的插件调度方式，那么不需要安装 `@semo/core`， 如果想要使用 `@semo/core` 里的方法，则业务项目要将 `@semo/core` 添加为项目依赖，但是具体放到 `devDependencies` 还是 `dependencies`，需要根据实际情况而定，在业务项目使用 `@semo/core` 的时候有几种使用模式：
+If you just use basic Semo rules, you do not need `@semo/core`, if you want to use methods of `@semo/core`, then you need add `@semo/core` as dependency. There are several usage modes:
 
-- 业务项目服务核心逻辑依赖 `@semo/core`，这种侵入式的，必须添加到 `dependencies`。
-- 业务项目服务核心逻辑不依赖 `@semo/core`，但是有使用 @semo/core 来定义命令行或者脚本，而脚本需要在线上执行：这种是非侵入式的，但是由于要在线上执行，也需要添加到 `dependencies`。
-- 业务项目服务核心逻辑不依赖 `@semo/core`，也没有使用 `@semo/core` 来定义命令行或脚本，仅仅是用了 REPL 的扩展机制，将项目的公共类和函数放到 `REPL` 环境来协助开发调试，这种也是非侵入的，而且不需要在线上执行，所以可以放到 `devDependencies`。
-- 如果容器环境本身没有安装 `Semo`， 也可以在项目依赖中添加 `@semo/cli`， 然后通过 `npx semo` 来调度。
+- If you use `@semo/core` in business logic, you need add `@semo/core` to `package.json`'s `dependencies`.
+- If you do not use `@semo/core` in business logic, and only use Semo in commands and scripts and these need to use online, then you also need to add `@semo/core` to `package.json`'s `dependencies`.
+- If you do not use `@semo/core` in business logic, only use REPL in development stage, then you can add `@semo/core` to `package.json`'s `devDependencies`.
+- If Semo CLI not included in docker container, you can add `@semo/cli`, then use `npx semo` to trigger commands.
 
-### 添加一个项目命令
+### Add a project command
 
-这里要考虑的是未来项目命令行工具的规划，如果很多，最好划分一下层次，另外，第一层子命令是一些核心命令，如果我们的命令都放到第一层，会容易混淆和误用。
+You need to plan you project commands levels, it's best not add all command in first level.
 
-
-**定义一个一级子命令**
-
-
+**Define a first level command**
 
 ```
 semo generate command test
-semo test # 执行刚刚添加的命令
+semo test
 ```
 
-**定义一个二级子命令**
+**Define a second level command**
 
 ```
 npm install semo-plugin-application
@@ -79,6 +79,8 @@ semo application test
 ```
 
 为了让项目命令和核心以及插件定义的命令隔离，这里推荐的是将项目命令用上面第二种方式添加，同时如果是复杂的项目，还可以继续分层次。当然这样造成了一个问题就是命令的层次增加导致的记忆负担，以及要多输入很多前面的命令才能找到要执行的命令。所以一般，我们在项目里还需要为运行环境的 `bashrc` 增加几个 `alias`:
+
+
 
 **假设线上环境是用 Docker 容器部署的**
 
