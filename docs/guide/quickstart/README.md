@@ -119,8 +119,6 @@ npm version patch && npm publish
 
 ## 安装别人开发的插件
 
-如果打开 package.json，你会发现在插件模板里，`semo` 放在了 `peerDependencies`，也就是所有的插件如果要生效，需要和 `semo` 一起安装。
-
 ```
 npm i -g @semo/cli semo-plugin-xxx
 ```

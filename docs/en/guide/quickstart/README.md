@@ -43,8 +43,6 @@ We can see that there are many internal commands, these commands have special us
 
 ## Project integration
 
-`Semo` 的主要使用场景就是为一个已经存在的业务项目添加命令行机制，如果没有 `Semo`，各个业务项目当然也是可以开发出自己的命令行的，但是这部分基本都属于重复投入，而且不同的团队实现的方案肯定是有差异的，这种差异带来的是维护成本的增加，而企业级开发，降低成本就是提高利润。
-
 `Semo` 's main usage is interated with an existed project to provide CLI machanism. You can implement your own CLI implementation, but different projects have different ways to add CLI, This difference brings about an increase in maintenance costs. For enterprise-level development, reducing costs means increasing profits
 
 ```
@@ -78,11 +76,10 @@ semo generate command application/test --extend=application
 semo application test
 ```
 
-为了让项目命令和核心以及插件定义的命令隔离，这里推荐的是将项目命令用上面第二种方式添加，同时如果是复杂的项目，还可以继续分层次。当然这样造成了一个问题就是命令的层次增加导致的记忆负担，以及要多输入很多前面的命令才能找到要执行的命令。所以一般，我们在项目里还需要为运行环境的 `bashrc` 增加几个 `alias`:
+For seperating project commands, plugin commands and core commands, here we suggest use the second way to add project commands, and if the project is complicated, the project commands can be hierachical. The problem is the more hierachical commands, the more difficult to memorize, so you can add some bash alias to shorten input.
 
 
-
-**假设线上环境是用 Docker 容器部署的**
+**Suppose the production is deployed in Docker**
 
 ```
 // Dockerfile
@@ -90,22 +87,21 @@ RUN echo 'alias semo="npx semo"' >> /home/node/.bashrc
 RUN echo 'alias app="npx semo app"' >> /home/node/.bashrc
 ```
 
-这面的命令演示了缩减命令长度的方法，在实际使用过程中，如果命令分层特别深，这里可以多定义一些 `alias`。
+The above code shows how to shorten commands length, if you have many deep commands, you can define more here.
 
-## 开发插件
+## Plugin development
 
-如果不是在项目中使用 `Semo`，仅仅是要快速实现一些脚本命令，帮助自己提高工作效率，这时你可以使用 `Semo` 快速开始。
+If you just want to implement some features not integrating with project, you can juse `Semo` plugin support.
 
 ```
-cd ~/.semo/node_modules # 这个目录下定义的插件会全局加载
-semo create semo-plugin-xxx --template=plugin # 选择插件模板
+cd ~/.semo/node_modules # This directory hold global Semo plugins.
+semo create semo-plugin-xxx --template=plugin # Choose template repo.
 cd semo-plugin-xxx
-semo hi # # 默认里面有一个示例命令
-code . # 用 Vscode 开始开发
-yarn watch # 基于 `Typescript` 开发，需要实时编译
+semo hi # There is a default commands in the template repo.
+code . # Develop using vscode.
+yarn watch # Based on `Typescript`, watch files change.
 ```
 
-如果你对插件很满意，想和其他人分享，你直接将你的代码发布到 `npm`。
 
 ```
 git remove add origin GIT_REPO_URL
@@ -116,18 +112,16 @@ npm version patch && npm publish
 ```
 
 :::warning
-注意，`Semo` 不保证每个插件定义命令的隔离性，所以如果插件安装的多了，可能会有些命令因重名而相互覆盖，但是日常使用中很少有这种情况发生，为了简单，这里没有做特殊的设计。
+`Semo` does not guarantee the isolation of plugin commands. If you install many plugins, you may meet commands conflicts. But it's just rare case. For simplicity `Semo` does not design absolute command isolation.
 :::
 
-## 安装别人开发的插件
-
-如果打开 package.json，你会发现在插件模板里，`semo` 放在了 `peerDependencies`，也就是所有的插件如果要生效，需要和 `semo` 一起安装。
+## Install third plugins
 
 ```
 npm i -g @semo/cli semo-plugin-xxx
 ```
 
-如果别人的插件仅仅是定义了一些你需要的命令，则你可以把命令安装在全局，如果别人的插件在业务项目中要用，则要放到项目依赖当中。
+If the plugins commands only useful to yourself, you can install it globally, if the plugin commands needed in business project, you need to install plugins in `dependencies`.
 
 ```
 cd YOUR_PROJECT
@@ -135,13 +129,13 @@ npm install semo-plugin-xxx
 yarn add semo-plugin-xxx // 或
 ```
 
-由于 `Semo` 的插件同时也是一个 `Node` 模块，因此，我们也可以在插件中定义一些库函数，被别人在项目中引入
+Semo plugins are also normal `Node` module, so we can also export lib functions, imported by other projects.
 
 ```js
 import lib from 'semo-plugin-xxx'
 ```
 
-利用 `Semo` 提供的钩子机制，也可以使用另一种风格来使用插件提供的业务逻辑支持。
+Use `Semo` hooks, we can use another style to use plugin features.
 
 ```js
 import { Utils } from '@semo/core'
@@ -149,6 +143,6 @@ import { Utils } from '@semo/core'
 const { xxx } = await Utils.invokeHook('semo:component')
 ```
 
-可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。
+In this way, we do not need to import packages explicitly. This way use directory scan, so performance is an issue and no IDE support, but in command scenario, this style is OK to use. 
 
 
