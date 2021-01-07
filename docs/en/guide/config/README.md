@@ -1,12 +1,12 @@
-# 配置管理
+# Configuration
 
-`Semo` 的一个核心概念就是配置，我们可以用多种方法干预 `Semo` 的配置，从而影响核心和插件的行为。
+`Configuration` is one of the core concept of `Semo`, we can use many ways to interfere `Semo` behavior, then influence core or plugins. 
 
-## 全局配置
+## Global configuration
 
-在家目录有一个全局 `Semo` 目录，里面有一个配置文件会在当前账户下全局生效，在 `~/.semo/.semorc.yml`。
+There is a global `Semo` directory in system home directory, and there is a global `Semo` configration, located at `~/.semo/.semorc.yml`
 
-这个全局配置可以对一些命令的默认值进行调整，使得实际在使用命令的时候可以不用每次都写选项，例如：
+This global `Semo` configration can set default value for commands, then you don't need to provide commands options each time you running commands. So comparing with normal CLI commands, you can change commands default value, for example:
 
 ```yml
 $plugin:
@@ -16,21 +16,17 @@ $plugin:
       branch: master
 ```
 
-这里的意思是，`semo create` 命令基于模板项目初始化项目时本来应该是这么写的：
+This config means `semo create` command normal format is:
 
 ```
 semo create PROJECT_NAME PROJECT_REPO_URL master -f
 ```
 
-但是，因为有了默认配置，我们就可以省略两个参数，而变成：
+But we set specific default option value, then it reduce two arguments when we use is, and changed to:
 
 ```
 semo create PROJECT_NAME -f
 ```
-
-:::tip
-可以看到，这里的配置是放到 `commandDefault` 这个 Key 下的，这是因为，如果配置的第一级，会对所有的命令都生效，如果这个是你希望的，就可以放到第一级。否则，可以在 `commandDefault` 下仅对单个命令生效。
-:::
 
 我们经常会用到全局配置，尤其是对一些功能命令，如果我们发现每次都要传一些参数，那么就可以通过全局配置固定下来，再举个例子：
 
