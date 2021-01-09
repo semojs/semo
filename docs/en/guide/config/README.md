@@ -28,33 +28,28 @@ But we set specific default option value, then it reduce two arguments when we u
 semo create PROJECT_NAME -f
 ```
 
-我们经常会用到全局配置，尤其是对一些功能命令，如果我们发现每次都要传一些参数，那么就可以通过全局配置固定下来，再举个例子：
+We often use this kind of global settings, if we find out we always set some command arguments, we can settle those settings down in global config file, here is another example:
 
-在我们执行 `semo repl` 命令时，有个 `--hook` 参数，如果传了就会调用 `hook_repl` 从而注入一些业务逻辑进来，但是核心默认是 `--hook=false`，这样启动可以稍微快一点，但是后来发现在业务场景中每次都需要传 `--hook=true`，那么就可以把这个配置放到全局配置中。
+When we run `semo repl` command, there is `--hook` option, if we pass this option, `hook_repl` can trigger other business logics, and inject some objects into REPL. But the default value is `--hook=false`, this can launch faster, but if you need the hook every time, you can put `--hook=true` into global config file `~/.semo/.semorc.yml`.
 
 ```yml
-commandDefault:
-  repl:
-    hook: true
+$plugin:
+  semo:
+    repl:
+      hook: true
 ```
 
-这时，执行 `repl` 命令就会默认注入业务逻辑了。
+## Plugin config
 
-```
-semo repl
-```
+Plugin directory also has a `.semorc.yml` file, only 3 settings affected.
 
-## 插件配置
-
-插件目录下也有一个 `.semorc.yml` 文件，配置的文件名和原理都是类似的，但是真正能生效的配置项比较少，默认生成的只有三个
-
-```json
+```yml
 commandDir: src/commands
 extendDir: src/extends
 hookDir: src/hooks
 ```
 
-随着项目的更新，这里能够生效的配置项可能更多，目前这3个，分别控制了插件开发时的命令目录，扩展插件命令目录和钩子目录。
+`commandDir` is for keeping commands, `extendDir` is for extending other plugins, `hookDir` is for hooking.
 
 除了以上常用的插件配置，插件有时会对外暴露一些配置项，这些配置行一般约定除了从根取以外，还会从插件名命名空间之下取。
 
