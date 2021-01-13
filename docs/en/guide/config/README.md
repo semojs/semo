@@ -51,17 +51,19 @@ hookDir: src/hooks
 
 `commandDir` is for keeping commands, `extendDir` is for extending other plugins, `hookDir` is for hooking.
 
-除了以上常用的插件配置，插件有时会对外暴露一些配置项，这些配置行一般约定除了从根取以外，还会从插件名命名空间之下取。
+Except above configs, plugins would expose some configs also, these configs has special config path, if not defined, will also try to take from root level.
+
 
 ```yml
-semo-plugin-xxx:
-  foo: bar
+$plugin:
+  xxx:
+    foo: bar
 ```
 
-这个配置的生效依赖于插件自身实现时的主动尝试获取
+This config can be read in this way:
 
 ```js
-const foo = Utils._.get(argv, 'semo-plugin-xxx.foo', argv.foo)
+const foo = Utils._.get(argv, '$plugin.xxx.foo', argv.foo)
 ```
 
 这样就给了插件内部一个灵活约定专属参数的机会，如果插件内部用了太多顶级配置参数，就很可能会跟其他插件的参数发生冲突。这种风格的配置约定是对 `commandDefault` 这种配置的一个补充，插件配置重点是配置，而 commandDefault 是从命令参数的角度的覆盖顺序，前者是主动获取，后者可以做到自动识别。具体插件用的是哪一种需要具体的插件明确给出说明。
