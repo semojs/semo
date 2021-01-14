@@ -39,7 +39,7 @@ $plugin:
       hook: true
 ```
 
-## Plugin config
+## Plugin configuration
 
 Plugin directory also has a `.semorc.yml` file, only 3 settings affected.
 
@@ -66,11 +66,11 @@ This config can be read in this way:
 const foo = Utils._.get(argv, '$plugin.xxx.foo', argv.foo)
 ```
 
-这样就给了插件内部一个灵活约定专属参数的机会，如果插件内部用了太多顶级配置参数，就很可能会跟其他插件的参数发生冲突。这种风格的配置约定是对 `commandDefault` 这种配置的一个补充，插件配置重点是配置，而 commandDefault 是从命令参数的角度的覆盖顺序，前者是主动获取，后者可以做到自动识别。具体插件用的是哪一种需要具体的插件明确给出说明。
+This give an opportunity for plugin to define their own config, if plugin use more top level config, it will conflict with each other. This style config is compatible with `commandDefault`, `$plugin.PLUGIN` is for plugins, `commandDefault` is for commands, the former depends on code logic, the latter works automatically. If you are a plugin author, you need describe how to use your plugin in your README.md.
 
-## 项目配置
+## Project configuration
 
-当我们把 `Semo` 整合到项目中的时候，项目里同样也有命令目录，扩展插件命令目录和钩子目录，但是还有更多，比如插件目录和脚本目录:
+When we integrate `Semo` with our projects, there are also commands, extends, hooks directories, and there are more like plugins and scripts and so on.
 
 ```yml
 commandDir: bin/semo/commands
@@ -81,10 +81,10 @@ hookDir: bin/semo/hooks
 ```
 
 :::tip
-插件里没有插件目录的原因是我们不支持在插件里定义插件这种嵌套的声明方式，但是我们支持在项目里定义插件。
+`Semo` does not support define plugins in plugin, but support project define plugins.
 :::
 
-除了配置一些目录之外，我们还可以配置一些覆盖命令的选项，比如上面提到的 `repl` 命令选项覆盖：
+Except for configing some directories, we can also override some command options, like the `repl` command mentioned above.
 
 ```yml
 hook: true
