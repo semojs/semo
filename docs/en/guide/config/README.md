@@ -90,7 +90,7 @@ Except for configing some directories, we can also override some command options
 hook: true
 ```
 
-再比如：`semo init` 命令有个选项 `--typescript`，如果加了这个选项初始化目录结构，项目配置里也会有对应的覆盖配置，这样在执行 `semo generate` 命令时，我们很多代码生成命令都是同时支持 `js` 和 `ts` 两个版本的，通过这个选项会让所有的代码自动生成时都是 `typescript` 风格。
+For another example: `semo init` command has an option `--typescript`, if using this option in project configuration file, it will share with other commands using this option like `semo generate`, it will let all generated file has typescript code style.
 
 ```json
 typescript: true
