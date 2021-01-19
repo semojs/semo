@@ -96,38 +96,40 @@ For another example: `semo init` command has an option `--typescript`, if using 
 typescript: true
 ```
 
-在项目配置里配置的选项覆盖仅在当前项目目录生效。这里只是演示用法，实际上我们后面都可以在插件开发时提供多种选项，在项目使用插件时对行为进行限定，以同时支持实现灵活性和个性化。
+Congurations in project configration file only work in current project. because of plugins, there may be many more configurations in project level Semo config file, that can provide specific needed features.
 
-## 隐藏配置
+## Hidden configrations
 
 `Semo` 有一些隐藏选项，平时很少使用，可以通过 `semo help --show-hidden` 查看：
+`Semo` has some hidden options, those are rarely used in common cases. You can run `semo help --show-hidden` to see them. 
 
 ```
-选项：
-  --script-name                                       Rename script name.                    [字符串] [默认值: "semo"]
-  --plugin-prefix                                     Set plugin prefix.                              [默认值: "semo"]
+Option：
+  --script-name                                       Rename script name.                    [String] [Default: "semo"]
+  --plugin-prefix                                     Set plugin prefix.                              [Default: "semo"]
   --disable-core-command, --disable-core              Disable core commands.
   --disable-completion-command, --disable-completion  Disable completion command.
   --hide-completion-command, --hide-completion        Hide completion command.
   --disable-global-plugin, --disable-global-plugins   Disable global plugins.
   --disable-home-plugin, --disable-home-plugins       Disable home plugins.
   --hide-epilog                                       Hide epilog.
-  --set-epilog                                        Set epilog.                                        [默认值: false]
+  --set-epilog                                        Set epilog.                                        [Default: false]
   --set-version                                       Set version.
-  --node-env-key, --node-env                          Set node env key                              [默认值: "NODE_ENV"]
+  --node-env-key, --node-env                          Set node env key                              [Default: "NODE_ENV"]
 ```
 
-可以看到，通过传这些选项我们可以改变一些核心的行为，甚至连自己的命令名称和版本都可以改掉。这里重点说一下其中的两个：
+As we see, by passing these options, we can change some core behaviours, even the command name itself.
+
 
 ```yml
 --disable-global-plugin: true
 --disable-home-plugin: true
 ```
 
-我们一般在项目配置中加上这两个配置，使得在做插件和钩子扫描时可以只扫描当前项目目录，可以稍微提高一点命令的性能。
+We can use these two options in project to disable global plugins, that will improve performance a little bit.
 
 :::tip
-在 Semo 配置环境里以下配置是完全等价的
+In `Semo` Configrations below are all equivalent.
 --foo-bar
 --foo--bar
 --fooBar
