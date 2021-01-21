@@ -1,5 +1,9 @@
 # Configuration
 
+:::tip
+Translating...
+:::
+
 `Configuration` is one of the core concept of `Semo`, we can use many ways to interfere `Semo` behavior, then influence core or plugins. 
 
 ## Global configuration
@@ -137,9 +141,9 @@ foo-bar
 fooBar
 :::
 
-## 通过命令行修改配置
+## Changing configration by CLI commands
 
-我们当然可以通过编辑配置文件的方式修改配置，但是 Semo 也提供了编辑配置的命令行工具，在命令行工具的帮助下，就可以用脚本的方式定制某些配置了。
+Of course, we could modify configuration by editing, but `Semo` also provide commands to do this job, so with this, you can modify configuration in scripts.
 
 ```
 semo config set a.b.c d 'some comment' -g
@@ -149,11 +153,11 @@ semo config list
 semo config list --watch
 ```
 
-## 应用环境配置
+## Application configuraion
 
-> 此特性 `v0.8.0` 引入
+> Added from `v0.8.0`
 
-在应用目录（一般是指运行 semo 命令的当前目录），我们会用 Semo 的机制组织我们的项目代码，比如命令行工具，计划任务，钩子扩展，命令扩展，脚本等等。之前系统只能识别 `.semorc.yml` 这个配置文件，最新的版本已经可以继续加载一个环境配置，比如当前 `NODE_ENV=development`(默认值)，则 `.semorc.development.yml` 如果存在也会识别和加载，并会覆盖主配置的同名配置（用的是 Lodash 的 `_.merge`）
+In application root, we use `Semo` way to construct our code, like commands, cronjobs, hooks and extensions, scripts and so on. we can only recognize `.semorc.yml` before, but now it can load another env config file, e.g. when `NODE_ENV=development`, then `.semorc.development.yml` will be loaded and can override default configurations (using `Lodash` `_.merge`)
 
 ## 特殊配置项
 
