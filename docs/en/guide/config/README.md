@@ -155,31 +155,32 @@ semo config list --watch
 
 ## Application configuraion
 
-> Added from `v0.8.0`
+> Added since `v0.8.0`
 
 In application root, we use `Semo` way to construct our code, like commands, cronjobs, hooks and extensions, scripts and so on. we can only recognize `.semorc.yml` before, but now it can load another env config file, e.g. when `NODE_ENV=development`, then `.semorc.development.yml` will be loaded and can override default configurations (using `Lodash` `_.merge`)
 
 ## 特殊配置项
 
-> 此特性 `v0.9.0` 引入
+## Special configrations
 
-Semo 的配置和命令行的 `argv` 是紧密耦合在一起的，argv 原本的意图只是存储命令行参数，Semo 进一步扩展，希望其能承担项目配置管理的重任，这里约定了几个 `$` 开头的配置，有特殊的含义：
+> Added since `v0.9.0`
 
+Semo's configurations are combined with yargs's argv, argv was designed to store command line arguments and options. Semo extended this behaviour, make it to be configuration management tool, here added several special configuration started by `$`, and have special meanings.
 ### `$plugin`
 
-这个配置约定了插件级别的配置项，以前命令只能通过参数来约定配置，但是有一些复杂的配置，没有必要声明成参数，所以设计了这个配置项：
+This key defines plugin level configurations, make some configurations are not needed to pass by CLI, but in config file.
 
-以 `$plugin.ssh.key = 1` 举例，意思是给 `semo-plugin-ssh` 这个插件下的每个命令都提供了一个配置 `key=1`， 那这个配置到那里去取呢，Semo 已经帮助装配到 `argv.$config` 了，所以你在 ssh 插件的命令下取到的 `argv.$config` 就都是 `$plugin.ssh` 下的配置。
+Take `$plugin.ssh.key = 1` as an example, it means to set `key=` to all commands of `semo-plugin-ssh`. But where can we get the config value? Semo has processed it into `argv.$config`, so you can get values of `$plugin.ssh` in `argv.$config` in plugin `semo-plugin-ssh` code.
 
-为了实现这一点，每个命令在声明的时候，添加了一个 `export const plugin = 'ssh'` 这样的声明。
+In order to archive this, each command must add `export const plugin = 'ssh'` in command defination.
 
 ### `$plugins`
 
-上面的 `$plugin` 是给每个具体的插件添加配置的，而这个是决定整个环境生效的插件的，支持三个配置
+The above `$plugin` is to set specific settings for each plugin, but this `$plugins` is for the whole environment. There are 3 config keys.
 
-* `$plugins.register` 决定是否启用主动注册机制，如果启用，则自动扫描机制失效。参考[插件的主动注册机制](../plugin/README.md)
-* `$plugins.include` 对注册的插件进行二次过滤，这个是允许名单，是数组，支持插件名的简写形式。
-* `$plugins.exclude` 对注册的插件进行二次过滤，这个是禁止名单，是数组，支持插件名的简写形式。
+* `$plugins.register` Whether or not to enable active plugin registration mechanism， if enabled, auto-detect mode will not work anymore.
+* `$plugins.include` Secondary filter to included plugins, it's an array, support short plugin style。
+* `$plugins.exclude` Secondary filter to excluded plugins, it's an array, support short plugin style。
 
 ### `$config`
 
