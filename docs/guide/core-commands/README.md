@@ -326,7 +326,7 @@ Plugin management tool
   semo p uninstall <plugin>  Uninstall plugin                                                              [aliases: un]
 ```
 
-## `semo repl`
+## `semo repl [replFile]`
 
 > alias: `r`
 
@@ -462,6 +462,24 @@ CommandDefault:
   repl:
     extract: Semo.hooks
 ```
+
+### 支持执行一个repl文件
+
+用途也是执行逻辑后将一些结果注入到REPL，文件也是Node模块，需要符合指定格式。
+
+```js
+exports.handler = async (argv, context) => {}
+
+// 或者
+
+module.exports = async (argv, context) => {}
+```
+
+需要注意，只有通过 `context` 才能注入到 REPL，如果你的代码不放到函数当中，也是可以执行的，但是不能获取到之前其他逻辑注入到context中的内容，也不同获得 `argv` 对象，另外，必须通过 `global` 对象注入到REPL当中。
+
+这个机制有什么作用呢？主要用途是在我们开发调试时，有一些想在REPL里进行的调试是有许多前置逻辑的，如果都在REPL里一行一行的输入太麻烦，所以通过这种方式就可以把调试逻辑固化下来。
+
+还有一个角度是: `semo repl --require` 这种方式，如果全局设置会比较固定，不宜太多，而通过命令行设置又需要每次都输入，不够方便，利用执行脚本的方式，我们可以灵活的组织逻辑，将我们想要注入的常用工具库注入，甚至在注入之前还可以做一番设置，部分可以取代之前的 `--require` 机制和 hook 机制。
 
 ## `semo run <PLUGIN> [COMMAND]`
 
