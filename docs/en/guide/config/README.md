@@ -184,11 +184,11 @@ The above `$plugin` is to set specific settings for each plugin, but this `$plug
 
 ### `$config`
 
-自动解析出的插件配置，一般只是插件开发的时候才需要，如果是应用，建议使用 `$app` 来管理配置
+This is auto-parsed configuration. Often it will be used in plugin development. For project application project, we often use `$app` to manage app configration.
 
 ### `$app` 或者 `$application`
 
-这里没有特殊功能，只是建议应用自己的配置也收到一起，防止跟命令行的选项混淆。比如：
+`$app` have nothing special, but a suggestion to put all app configration together, then it will not conflict with `Semo` internal options.
 
 ```yml
 $app:
@@ -197,15 +197,15 @@ $app:
 
 ### `$input`
 
-这个的作用是当实现支持管道的命令时，`$input` 可以自动接收前面命令的输出，不管是不是 Semo 插件的输出，但是输出的格式是不确定的，需要当前命令自己去校验和约束。
+This is for command line pipe feature, `$input` will be the output by pipe from previous command. It can be not `Semo` output, but the format is not defined.
 
 ### `$0`
 
-这个是 `yargs` 自带的，表明当前运行的脚本名称。
+This is inlucded by `yargs`, stands for the current script file name.
 
 ### `$command`
 
-这个里放的是当前命令的信息，一般来说用处不是很大
+This is about the current command info.
 
 ### `$semo`
 
