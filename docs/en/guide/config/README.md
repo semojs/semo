@@ -1,9 +1,5 @@
 # Configuration
 
-:::tip
-Translating...
-:::
-
 `Configuration` is one of the core concept of `Semo`, we can use many ways to interfere `Semo` behavior, then influence core or plugins. 
 
 ## Global configuration
@@ -104,7 +100,6 @@ Congurations in project configration file only work in current project. because 
 
 ## Hidden configrations
 
-`Semo` 有一些隐藏选项，平时很少使用，可以通过 `semo help --show-hidden` 查看：
 `Semo` has some hidden options, those are rarely used in common cases. You can run `semo help --show-hidden` to see them. 
 
 ```
@@ -186,7 +181,7 @@ The above `$plugin` is to set specific settings for each plugin, but this `$plug
 
 This is auto-parsed configuration. Often it will be used in plugin development. For project application project, we often use `$app` to manage app configration.
 
-### `$app` 或者 `$application`
+### `$app` or `$application`
 
 `$app` have nothing special, but a suggestion to put all app configration together, then it will not conflict with `Semo` internal options.
 
@@ -209,13 +204,13 @@ This is about the current command info.
 
 ### `$semo`
 
-这里放的是对工具函数库 `Utils` 的引用，用这个主要原因是插件有时也想知道和处理内部信息，但是如果是在自己插件内部依赖和导入 `@semo/core` 由于位置不同，实际上是占用两份内存，而且自己导入这部分由于没有经过初始化，所以缺失必要的信息，通过 `argv.$semo.Utils.getInternalCache().get('argv')` 能够正确取到运行时的数据。
+This is an reference to `Utils`, the reason of this key is that you need to know and process the internal info of `Semo`, but if you import `@semo/core`, you may lose some runtime info. By running `argv.$semo.Utils.getInternalCache().get('argv')` you can get correct runtime info.
 
-## 内置的配置管理相关方法
+## Internal configration management methods
 
 ### `Utils.extendConfig`
 
-这个方法支持扩展一个新的配置文件，这样可以支持配置文件组，不用把所有的配置都放到 `.semorc.yml` 里，同时支持环境配置，例如：
+This method support to extend a new config file, so you don't need to put all configuration in `.semorc.yml`, also support configuration by environment.
 
 ```js
 Utils.extendConfig('application.yml')
@@ -229,15 +224,15 @@ application.production.yml
 
 ### `Utils.config`
 
-这个方法用于取出总配置里的一段，默认取出所有，基于 Lodash 的 `_.get` 方法。
+This method is for getting part of configuration, based on `_.get`.
 
 ### `Utils.pluginConfig`
 
-这个方法用于取出插件配置，只能在命令 `handler` 下工作，默认取出还是命令行参数优先，但是如果命令行参数没有指定并且没有默认值，则可以取插件级别的配置。
+This method is for getting plugin configuration, it only works in command handler, by default command options is to take precedence over the plugin configration.
 
-## 环境变量设置 `.env`
+## `.env` support
 
-通过整合 `dotenv`，我们引入了对 `.env` 文件的支持，对于命令行工具来说是默认开启的。对于程序来说需要手动开启。
+By npm package `dotenv`, we support `.env` file, and enabled by default for CLI, but need to manually enable for project.
 
 ```typescript
 import { Utils } from '@semo/core'

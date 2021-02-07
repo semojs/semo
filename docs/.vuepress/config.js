@@ -27,10 +27,10 @@ module.exports = {
       '/': {
         editLinkText: '帮助改进此页文档',
         nav: [
-          { text: '首页', link: '/'},
-          { text: '指南', link: '/guide/'},
-          { text: '用法', link: '/usage/'},
-          { text: '参考', link: `http://${host}/typedoc/`}
+          { text: '首页', link: '/' },
+          { text: '指南', link: '/guide/' },
+          { text: '用法', link: '/usage/' },
+          { text: '参考', link: `http://${host}/typedoc/` }
         ],
         sidebarDepth: 1,
         sidebar: [
@@ -67,14 +67,14 @@ module.exports = {
             ]
           }
         ]
-      }, 
+      },
       '/en/': {
         editLinkText: 'Help improve this page',
         nav: [
-          { text: 'Home', link: '/en/'},
-          { text: 'Guide', link: '/en/guide/'},
-          { text: 'Usage', link: '/usage/'},
-          { text: 'Reference', link: `http://${host}/typedoc/`}
+          { text: 'Home', link: '/en/' },
+          { text: 'Guide', link: '/en/guide/' },
+          { text: 'Usage', link: '/usage/' },
+          { text: 'Reference', link: `http://${host}/typedoc/` }
         ],
         sidebarDepth: 1,
         sidebar: [
@@ -86,7 +86,7 @@ module.exports = {
               '/guide/quickstart/',
               '/guide/core-commands/',
               '/guide/custom-commands/',
-              '/guide/config/',
+              '/en/guide/config/',
               '/guide/hook/',
               '/guide/plugin/',
             ]
