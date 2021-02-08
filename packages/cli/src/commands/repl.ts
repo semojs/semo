@@ -294,17 +294,20 @@ export const handler = async function (argv: any) {
       })
     }
 
-    const replFilePath = path.resolve(process.cwd(), argv.replFile)
-    if (argv.replFile && Utils.fs.existsSync(replFilePath)) {
-      try {
-        const replRequired = require(replFilePath)
-        if (replRequired.handler && Utils._.isFunction(replRequired.handler)) {
-          await replRequired.handler(argv, context)
-        } else if (Utils._.isFunction(replRequired)) {
-          await replRequired(argv, context)
-        }
-      } catch (e) { }
+    if (argv.replFile) {
+      const replFilePath = path.resolve(process.cwd(), argv.replFile)
+      if (argv.replFile && Utils.fs.existsSync(replFilePath)) {
+        try {
+          const replRequired = require(replFilePath)
+          if (replRequired.handler && Utils._.isFunction(replRequired.handler)) {
+            await replRequired.handler(argv, context)
+          } else if (Utils._.isFunction(replRequired)) {
+            await replRequired(argv, context)
+          }
+        } catch (e) { }
+      }
     }
+
 
     await openRepl(context)
 
