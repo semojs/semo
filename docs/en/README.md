@@ -1,7 +1,7 @@
 ---
 home: true
 actionText: Get started →
-actionLink: /guide/quickstart/
+actionLink: /en/guide/quickstart/
 features:
 - title: Consistency
   details: No matter what framework used and how structured, you can use this package to implement consistent command line scripts.

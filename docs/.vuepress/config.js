@@ -83,8 +83,8 @@ module.exports = {
             collapsable: false,
             children: [
               '/en/guide/',
-              '/guide/quickstart/',
-              '/guide/core-commands/',
+              '/en/guide/quickstart/',
+              '/en/guide/core-commands/',
               '/guide/custom-commands/',
               '/en/guide/config/',
               '/guide/hook/',
