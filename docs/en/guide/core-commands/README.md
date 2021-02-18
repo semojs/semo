@@ -6,15 +6,15 @@ Translating...
 
 ## `semo`
 
-Semo provide a default behavior to run any `Semo` command style file.
+Semo provides default behavior to run any `Semo` command style file.
 
 ```
 semo command.js
 ```
 
-一般我们定义的命令都不会出现 `.js` 这样的扩展名，所以会按照命令的方式直接执行这个文件。如果需要执行 `.ts` 的命令文件风格，需要 `ts` 环境，请参考 FAQ 里的条目。
+Normally our commands do not have `.js` extension, so if you pass an argument with `.js` you must want to execute the file. If you run a `.ts` file, you need to construct `ts` environment, please refer to our FAQ about how to do it.
 
-这种机制的意义何在，可以使用 `Semo` 来定义和执行脚本文件，也就是模糊了命令和脚本的概念，他们是相通的，先有脚本，如果觉得需要频繁使用，就起个好名字，然后封装成插件。早期的时候还封装了一个 `semo-plugin-script` 的插件，目的也是做这件事情，现在有了这个默认机制就可以内置对脚本文件的支持了。不过 `semo-plugin-script` 插件还有脚本样板代码生成器的功能，这个特性 `Semo` 核心并不打算提供。因为这里更倾向理解成是快速开发命令行工具的一个简化方式。
+What is this way used for? We can use this way to define scripts, then you combine the concepts of commands and scripts.You can define scripts first, then if they are used frequently, you can make a plugin with a proper name. We also have a plugin called `semo-plugin-script`, which is also used to define scripts, but it has a code template generator with will not be provided by `Semo` core.
 
 ## `semo application`
 
