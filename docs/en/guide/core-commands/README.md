@@ -21,28 +21,27 @@ What is this way used for? We can use this way to define scripts, then you combi
 > alias: `app`
 
 :::tip
-这条命令已经转移到 `semo-plugin-application` 插件
+This command has been migrated to `semo-plugin-application`.
 :::
 
-
-默认这个命令没有任何功能，存在的意思是跟业务项目建立一个约定，建议业务项目添加的命令都写成这个命令的子命令。而业务项目之所以能为这个命令添加子命令是利用了 `Semo` 的命令扩展机制。
+By default this command does not have any functionalities. it's just a convention, suggest that you add your application commands under `semo application`. Your application need to add commands by using `semo` command extension feature.
 
 ```bash
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 ```
 
-这样就可以为项目添加一个 test 命令，而这个命令在执行的时候需要使用 `semo application test` 的方式来调用。
+In this way, it add an `test` command for `semo application`, and you can run it by `semo application test`
 
-通过 `semo application help` 可以看到当前业务项目定义的所有顶级子命令，因为如果项目实现的命令过多，层次也多的话，一般我们很难记住所有命令和参数，所以帮助命令是我们经常要执行的。
+By running `semo application help`, you can see all top level commands in this project. Because you may have many commands in many levels, so you may need to run help command very often.
 
 ## `semo cleanup`
 
 > alias: clean
 
-这个命令用于清理一些 Semo 内部产生的文件，常见的有 repl 命令的历史， shell 命令的历史， repl 里临时下载的包，run 命令临时下载的包，以及全局插件目录。
+This command is used to clean some `Semo` internal files, e.g. repl command history, shell command history, repl temp downloaded files, run command temp downloaded files and global plugin directories and files.
 
-目前提供了有限的扩展，只允许应用目录定义清理目录，不支持插件来添加清理目录，主要是为了安全性考虑。
+For now it only support limited extension, and only allows application defining clean directories, but not support plugins adding clean directories for security reason.
 
 ## `semo config`
 
