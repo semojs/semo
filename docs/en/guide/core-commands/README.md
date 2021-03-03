@@ -39,13 +39,13 @@ By running `semo application help`, you can see all top level commands in this p
 
 > alias: clean
 
-This command is used to clean some `Semo` internal files, e.g. repl command history, shell command history, repl temp downloaded files, run command temp downloaded files and global plugin directories and files.
+This command is used to clean some `Semo` internal files, e.g. repl command history, shell command history, repl temp downloaded files, run command temp downloaded files, and global plugin directories and files.
 
-For now it only support limited extension, and only allows application defining clean directories, but not support plugins adding clean directories for security reason.
+For now, it only supports a limited extension, and only allows applications defining clean directories, but not support plugins adding clean directories for security reasons.
 
 ## `semo config`
 
-我们可以通过核心内置的这个命令来查看和修改配置文件，可以操作当前项目的配置文件，也可以操作全局配置文件。
+We can use this command to view and modify config, including project config and global config.
 
 ```
 semo config <op>
