@@ -8,7 +8,7 @@
     
     <meta name="description" content="A Node.js CLI building rules.">
     
-    <link rel="preload" href="/assets/css/0.styles.992cb7aa.css" as="style"><link rel="preload" href="/assets/js/app.a3d84be1.js" as="script"><link rel="preload" href="/assets/js/2.c8f551f9.js" as="script"><link rel="preload" href="/assets/js/13.514cacc2.js" as="script"><link rel="prefetch" href="/assets/js/10.e10ec60f.js"><link rel="prefetch" href="/assets/js/11.59c070fc.js"><link rel="prefetch" href="/assets/js/12.3ef0cef5.js"><link rel="prefetch" href="/assets/js/14.693e2c27.js"><link rel="prefetch" href="/assets/js/15.66434cd6.js"><link rel="prefetch" href="/assets/js/16.7f54cb8d.js"><link rel="prefetch" href="/assets/js/17.e35721d7.js"><link rel="prefetch" href="/assets/js/18.4bc54445.js"><link rel="prefetch" href="/assets/js/19.852f73df.js"><link rel="prefetch" href="/assets/js/20.137e95ab.js"><link rel="prefetch" href="/assets/js/21.07432b76.js"><link rel="prefetch" href="/assets/js/22.30f2f370.js"><link rel="prefetch" href="/assets/js/23.c2e02ffe.js"><link rel="prefetch" href="/assets/js/24.8c45e9e3.js"><link rel="prefetch" href="/assets/js/25.b89ad2b9.js"><link rel="prefetch" href="/assets/js/26.048fa03e.js"><link rel="prefetch" href="/assets/js/3.c94d9973.js"><link rel="prefetch" href="/assets/js/4.09fd2c39.js"><link rel="prefetch" href="/assets/js/5.b99a1609.js"><link rel="prefetch" href="/assets/js/6.ffe6f60a.js"><link rel="prefetch" href="/assets/js/7.f056ed1e.js"><link rel="prefetch" href="/assets/js/8.7f59801b.js"><link rel="prefetch" href="/assets/js/9.bd50b831.js">
+    <link rel="preload" href="/assets/css/0.styles.992cb7aa.css" as="style"><link rel="preload" href="/assets/js/app.6991e85c.js" as="script"><link rel="preload" href="/assets/js/2.c8f551f9.js" as="script"><link rel="preload" href="/assets/js/13.8489d105.js" as="script"><link rel="prefetch" href="/assets/js/10.e10ec60f.js"><link rel="prefetch" href="/assets/js/11.59c070fc.js"><link rel="prefetch" href="/assets/js/12.3ef0cef5.js"><link rel="prefetch" href="/assets/js/14.693e2c27.js"><link rel="prefetch" href="/assets/js/15.66434cd6.js"><link rel="prefetch" href="/assets/js/16.7f54cb8d.js"><link rel="prefetch" href="/assets/js/17.e35721d7.js"><link rel="prefetch" href="/assets/js/18.4bc54445.js"><link rel="prefetch" href="/assets/js/19.852f73df.js"><link rel="prefetch" href="/assets/js/20.137e95ab.js"><link rel="prefetch" href="/assets/js/21.07432b76.js"><link rel="prefetch" href="/assets/js/22.30f2f370.js"><link rel="prefetch" href="/assets/js/23.c2e02ffe.js"><link rel="prefetch" href="/assets/js/24.8c45e9e3.js"><link rel="prefetch" href="/assets/js/25.b89ad2b9.js"><link rel="prefetch" href="/assets/js/26.048fa03e.js"><link rel="prefetch" href="/assets/js/3.c94d9973.js"><link rel="prefetch" href="/assets/js/4.09fd2c39.js"><link rel="prefetch" href="/assets/js/5.b99a1609.js"><link rel="prefetch" href="/assets/js/6.ffe6f60a.js"><link rel="prefetch" href="/assets/js/7.f056ed1e.js"><link rel="prefetch" href="/assets/js/8.7f59801b.js"><link rel="prefetch" href="/assets/js/9.bd50b831.js">
     <link rel="stylesheet" href="/assets/css/0.styles.992cb7aa.css">
   </head>
   <body>
@@ -57,7 +57,7 @@ Manage rc config
 Options:
   --global, -g  For reading/writing configs from/to global yml rc file, default is false
   --watch       Watch config change, maybe only work on Mac
-</code></pre></div><p>注意，这里的 <code>&lt;configKey&gt;</code> 的格式是 <code>a.b.c</code> 的形式，代表多层级配置。另外，这里支持对设置的最后一个层级的配置添加注释。</p> <h2 id="semo-hook"><a href="#semo-hook" class="header-anchor">#</a> <code>semo hook</code></h2> <div class="custom-block tip"><p class="custom-block-title">TIP</p> <p>这条命令已经转移到 <code>semo-plugin-hook</code> 插件</p></div> <p>这个命令的输出显示了当前环境下可用的所有的钩子，所有实现这些钩子的逻辑都可以被执行。在输出当中能够看到钩子的名称，描述，以及钩子在哪个模块声明的：</p> <div class="language- extra-class"><pre class="language-text"><code>Hook                         :  Package :  Description                                     
+</code></pre></div><p>Here, <code>&lt;configKey&gt;</code>'s format is <code>a.b.c</code>, means hierarchical config. It also supports adding comments to the last level config.</p> <h2 id="semo-hook"><a href="#semo-hook" class="header-anchor">#</a> <code>semo hook</code></h2> <div class="custom-block tip"><p class="custom-block-title">TIP</p> <p>This command has been migrated to <code>semo-plugin-hook</code></p></div> <p>This command's output shows all available hooks in current environment, all implemented hooks can be invoked. You can see the hook name, description, and definition location.</p> <div class="language- extra-class"><pre class="language-text"><code>Hook                         :  Package :  Description                                     
   hook_beforeCommand           :  semo    :  Hook triggered before command execution.        
   hook_afterCommand            :  semo    :  Hook triggered after command execution.         
   hook_component               :  semo    :  Hook triggered when needing to fetch component 
@@ -65,7 +65,7 @@ Options:
   hook_repl                    :  semo    :  Hook triggered in repl command.                 
   hook_status                  :  semo    :  Hook triggered in status command.               
   hook_create_project_template :  semo    :  Hook triggered in create command.  
-</code></pre></div><p>这里可以看到有一个特殊的钩子是 <code>hook_hook</code> 实现这个钩子就可以声明钩子，任何插件都可以声明自己的钩子，让其他命令来调用，从而影响自身的行为，一般业务项目是不需要声明自己的钩子的，除非业务项目深度使用了这个机制，来构成自己业务的插件系统。</p> <p>另外需要注意的是，即使不声明，钩子也是可以被使用的，只要其被实现了，这里声明钩子只是为了透明。具体如何声明和实现钩子将在钩子相关小节说明。</p> <div class="custom-block warning"><p class="custom-block-title">WARNING</p> <p>这里未来有可能改成不声明的钩子不让使用的逻辑</p></div> <h2 id="semo-init"><a href="#semo-init" class="header-anchor">#</a> <code>semo init</code></h2> <blockquote><p>alias: <code>i</code></p></blockquote> <p>这个命令用来做初始化，可以实现两种场景，对业务项目的初始化或者对插件的初始化，这两个场景的差别在于目录结构稍有差异。</p> <p>业务项目中，我们默认将 <code>Semo</code> 的目录结构放到 <code>bin</code> 目录:</p> <div class="language- extra-class"><pre class="language-text"><code>├── .semorc.yml
+</code></pre></div><p>Here you can see a special hook <code>hook_hook</code>, using this hook to declare new hooks. Any plugin can declare its own hooks, and other plugins can hook them to influence plugin behaviors. Most of applications projects do not need to declare hooks, except it need to build their application level plugin system.</p> <p>Another thing to note, it's not necessary to declare hooks before using, declaration code is just for clarification.</p> <div class="custom-block warning"><p class="custom-block-title">WARNING</p> <p>Maybe we do not allow to invoke non-declared hooks in the future.</p></div> <h2 id="semo-init"><a href="#semo-init" class="header-anchor">#</a> <code>semo init</code></h2> <blockquote><p>alias: <code>i</code></p></blockquote> <p>This command is for initialization for projects or plugins, these two scenarios have a little differences.</p> <p>In application projects, we put <code>Semo</code> directory into <code>bin</code> under the project root.</p> <div class="language- extra-class"><pre class="language-text"><code>├── .semorc.yml
 ├── bin
 │   └── semo
 │       ├── commands
@@ -75,7 +75,7 @@ Options:
 │       └── scripts
 └── package.json
 
-</code></pre></div><p>而在插件项目中，我们是把所有代码放到 <code>src</code> 目录:</p> <div class="language- extra-class"><pre class="language-text"><code>├── .semorc.yml
+</code></pre></div><p>But in plugin project, we put all code into <code>src</code> directory.</p> <div class="language- extra-class"><pre class="language-text"><code>├── .semorc.yml
 ├── src
 │    ├── commands
 │    ├── extends
@@ -246,6 +246,6 @@ git: log
       </a>
       →
     </span></p></div> </main></div><div class="global-ui"></div></div>
-    <script src="/assets/js/app.a3d84be1.js" defer></script><script src="/assets/js/2.c8f551f9.js" defer></script><script src="/assets/js/13.514cacc2.js" defer></script>
+    <script src="/assets/js/app.6991e85c.js" defer></script><script src="/assets/js/2.c8f551f9.js" defer></script><script src="/assets/js/13.8489d105.js" defer></script>
   </body>
 </html>
