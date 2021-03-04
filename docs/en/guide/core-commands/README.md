@@ -64,15 +64,14 @@ Options:
   --watch       Watch config change, maybe only work on Mac
 ```
 
-注意，这里的 `<configKey>` 的格式是 `a.b.c` 的形式，代表多层级配置。另外，这里支持对设置的最后一个层级的配置添加注释。
-
+Here, `<configKey>`'s format is `a.b.c`, means hierarchical config. It also supports adding comments to the last level config.
 ## `semo hook`
 
 :::tip
-这条命令已经转移到 `semo-plugin-hook` 插件
+This command has been migrated to `semo-plugin-hook`
 :::
 
-这个命令的输出显示了当前环境下可用的所有的钩子，所有实现这些钩子的逻辑都可以被执行。在输出当中能够看到钩子的名称，描述，以及钩子在哪个模块声明的：
+This command's output shows all available hooks in current environment, all implemented hooks can be invoked. You can see the hook name, description, and definition location.
 
 ```
 Hook                         :  Package :  Description                                     
@@ -85,21 +84,21 @@ Hook                         :  Package :  Description
   hook_create_project_template :  semo    :  Hook triggered in create command.  
 ```
 
-这里可以看到有一个特殊的钩子是 `hook_hook` 实现这个钩子就可以声明钩子，任何插件都可以声明自己的钩子，让其他命令来调用，从而影响自身的行为，一般业务项目是不需要声明自己的钩子的，除非业务项目深度使用了这个机制，来构成自己业务的插件系统。
+Here you can see a special hook `hook_hook`, using this hook to declare new hooks. Any plugin can declare its own hooks, and other plugins can hook them to influence plugin behaviors. Most of applications projects do not need to declare hooks, except it need to build their application level plugin system.
 
-另外需要注意的是，即使不声明，钩子也是可以被使用的，只要其被实现了，这里声明钩子只是为了透明。具体如何声明和实现钩子将在钩子相关小节说明。
+Another thing to note, it's not necessary to declare hooks before using, declaration code is just for clarification.
 
 ::: warning
-这里未来有可能改成不声明的钩子不让使用的逻辑
+Maybe we do not allow to invoke non-declared hooks in the future.
 :::
 
 ## `semo init`
 
 > alias: `i`
 
-这个命令用来做初始化，可以实现两种场景，对业务项目的初始化或者对插件的初始化，这两个场景的差别在于目录结构稍有差异。
+This command is for initialization for projects or plugins, these two scenarios have a little differences.
 
-业务项目中，我们默认将 `Semo` 的目录结构放到 `bin` 目录:
+In application projects, we put `Semo` directory into `bin` under the project root.
 
 ```
 ├── .semorc.yml
@@ -114,7 +113,7 @@ Hook                         :  Package :  Description
 
 ```
 
-而在插件项目中，我们是把所有代码放到 `src` 目录:
+But in plugin project, we put all code into `src` directory.
 
 ```
 ├── .semorc.yml
