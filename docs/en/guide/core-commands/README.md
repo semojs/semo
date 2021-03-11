@@ -124,10 +124,10 @@ But in plugin project, we put all code into `src` directory.
 └── package.json
 ```
 
-这个命令存在的意义也仅仅是为了节省工程师若干秒的时间，也就是说如果不用这个命令，手动去创建这些目录和文件夹也是 OK 的。
+This command is to save developers seconds to init a project. It's OK to create those files and directories manually. 
 
 :::tip
-关于 `.semorc.yml` 的结构和用途将在配置管理小节说明
+The structure and usage of `.semorc.yml` is located at `Configuration management` section.
 :::
 
 另外，如果我们真的要创建一个插件，通过初始化的方式进行还是太慢了，这里推荐使用插件项目模板进行，具体的命令如下：
