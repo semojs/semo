@@ -130,19 +130,19 @@ This command is to save developers seconds to init a project. It's OK to create 
 The structure and usage of `.semorc.yml` is located at `Configuration management` section.
 :::
 
-另外，如果我们真的要创建一个插件，通过初始化的方式进行还是太慢了，这里推荐使用插件项目模板进行，具体的命令如下：
+If we want to build a new plugin, it is still not so easy to do, here we suggest using project template as follows.
 
 ```
 semo create semo-plugin-xxx --template=plugin
 ```
 
-很明显这里还可以使用其他项目模板，关于 `create` 命令，参见下放关于 `create` 命令的介绍。
+Obviously, there are more templates. Please refer to the `create` command.
 
 ## `semo create <name> [repo] [branch]`
 
-> alias: `n`
+> alias: `c`
 
-这个命令和 `generate` 以及 `init` 都不一样，是用来初始化一个新的项目目录的，这个项目可以是业务项目，也可以是一个插件。这个命令有很多参数，也有一些约定：
+This command is different from `generate` and `init` command. It's used to create a new project directory. It can be application projects or plugin projects. It has some options to control.
 
 ```
 $ semo create help
@@ -165,27 +165,30 @@ Create a create project from specific repo
   -h, --help     显示帮助信息                                                                                     [布尔]
 ```
 
-单个的说明上面已经有了，下面我们用具体的使用场景说明一下
+The above are specific command descriptions, and next we describe the some senarios.
 
-### 从任意代码仓库初始化
+### Initialize project from any repo
 
 ```
 semo create PROJECT_NAME PROJECT_REPO_URL master -f
 ```
+We use `create` command to download code from any git repo, that means any git repo can be our project template. `master` is the default branch name, so we can ignore it, `-f` means `--force`, it will override existed directory.
 
-这里可以看出，我们用 create 命令可以从任意 git 仓库地址下载代码，任何代码仓库都可以是我们的项目模板。其中 `master` 是分支名，默认就是 `master` 所以可以省略，`-f` 的意思是如果目录已经存在，会先删除原来的，再重新创建。
-
-create 命令除了把代码下载下来，还帮着把原来的 `.git` 目录删除了，并且重新初始化了一个空的 `.git` 目录，然后把项目的依赖都自动下载下来了。
-
-### 创建一个空项目，不基于任何项目模板
+### Create an empty project, no project template
 
 ```
 semo create PROJECT_NAME -yfie
 ```
+The `-yfie` means `-y -f -i -e`, it's a `yargs` feature.
 
-这里可以看到一个 `yargs` 的特性，可以把短参数连起来用，这里相当于 `-y -f -i -e`，也就是，`-y` 帮我们在创建了 `package.json`时自动回答 `yes`，`-f` 是强制删除已存在的目录，`-i` 是自动执行 `semo init` 初始化项目目录， `-e` 是告诉命令，即不基于代码仓库，也不基于内置模板，而是要声明一个空项目。
+> `-i` is to run `semo init` automatically.
+> `-y` is to answer `yes` when creating `package.json`.
+> `-f` is to override exsited directories.
+> `-e` is to tell it's just an empty repo.
 
-项目的目录结构如下：
+
+
+The structure is as follows.
 
 ```
 ├── .semorc.yml
@@ -199,7 +202,7 @@ semo create PROJECT_NAME -yfie
 └── package.json
 ```
 
-### 创建一个 `Semo` 插件目录
+### Create a `Semo` plugin directory
 
 如果不基于插件模板，我们可以手动创建一个基本的插件结构：
 
