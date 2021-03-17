@@ -204,15 +204,16 @@ The structure is as follows.
 
 ### Create a `Semo` plugin directory
 
-如果不基于插件模板，我们可以手动创建一个基本的插件结构：
+If we do not base on code template repo, we can create basic plugin structure manually.
 
 ```
 semo create semo-plugin-[PLUGIN_NAME] -yfie
 ```
 
-可以看到，和上面很类似，除了项目名，这里存在一个项目名称的约定，如果项目名称以 `semo-plugin-` 开头，则认为是在初始化一个 `Semo` 插件，初始化时会执行 `semo init --plugin`。
+It's similar with the above case, except that project name has a `plugin` convention. If the project name starts with `semo-plugin-`, then `Semo` knows it's a plugin project intialization, and `semo init --plugin` executed automatically.
 
-项目的目录结构如下：
+
+The structure of this project is:
 
 ```
 ├── .semorc.yml
