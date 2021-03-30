@@ -226,13 +226,13 @@ The structure of this project is:
 
 ### 基于内置模板创建项目
 
-如果我们创建项目执行下面的命令:
+If we create a project by running follow command:
 
 ```
 semo create PROJECT_NAME --template
 ```
 
-则会看到下面的输出:
+Then we'll see the output as follows:
 
 ```
 ? Please choose a pre-defined repo to continue: (Use arrow keys)
@@ -240,9 +240,9 @@ semo create PROJECT_NAME --template
 ❯ ...
 ```
 
-这里可以选择一个想要选择的内置模板，也就是不用主动输入仓库地址了，这里默认只有一个插件模板，但是可以使用 `hook_create_project_template` 注入其他模板地址进去：
+Here you can choose an internal template, and do not need to input repo any URLs. there is a default plugin template, and you can add more templates by implementing `hook_create_project_template`
 
-钩子实现示例，更多关于钩子的用法，请参见钩子相关说明
+Here is a simple demo code. For more details about Semo hooks, please refer to relative docs.
 
 ```js
 export const hook_create_project_template = {
@@ -254,7 +254,7 @@ export const hook_create_project_template = {
 }
 ```
 
-如果在初始化的时候已经知道要使用的模板和标识，可以直接指定：
+If you already know the template identifier, you can use it in commands as follows:
 
 ```
 semo create PROJECT_NAME --template=demo
@@ -262,7 +262,7 @@ semo create PROJECT_NAME --template=demo_repo
 ```
 
 :::tip
-在创建业务项目或者插件时，不推荐从空项目开始，因为还要考虑很多工程化的问题，技术选型的问题，推荐归纳总结自己公司常用的脚手架项目，然后通过统一的方式进行初始化。比如内置的插件模板，初始化后，可以直接编写逻辑，然后代码上传到 `Github` 再执行 `npm version patch && npm publish` 即可发布到 npm 仓库了。关于如何开发一个插件并且发布到 `npm` 仓库，会单独写文档说明。另外，需要注意，这里的脚手架项目可以是任意语言实现的。
+When you create a business application or a plugin, it's not suggested to build from scratch. Because you need to think about many things like CICD, lint, test and so on. You can come up with your own code template and make the template better and create new project from it.
 :::
 
 剩余的其他几个选项也很好理解，`--yarn` 声明项目使用 `yarn` 来初始化和安装依赖，`--add` 和 `--add-dev` 用来在初始化时指定新的依赖包。`--merge` 是说不删除原来的项目，而是进入项目目录，然后应用 `--init`, `--add`, `--add-dev`。
