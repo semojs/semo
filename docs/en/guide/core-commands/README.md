@@ -265,13 +265,14 @@ semo create PROJECT_NAME --template=demo_repo
 When you create a business application or a plugin, it's not suggested to build from scratch. Because you need to think about many things like CICD, lint, test and so on. You can come up with your own code template and make the template better and create new project from it.
 :::
 
-剩余的其他几个选项也很好理解，`--yarn` 声明项目使用 `yarn` 来初始化和安装依赖，`--add` 和 `--add-dev` 用来在初始化时指定新的依赖包。`--merge` 是说不删除原来的项目，而是进入项目目录，然后应用 `--init`, `--add`, `--add-dev`。
+The rest of options are all easy to understand, `--yarn` means install deps by `yarn`, `--add` and `--add-dev` are to set new deps. `--merge` means it will not delete old project but init in project directory.
 
 ## `semo generate <component>`
 
 > alias: `generate`, `g`
 > 
-这个命令是一个组件代码生成命令，这里组件的意思是对开发目标进行抽象的后的分层分类概念，比如 `Semo` 核心就定义了插件，命令和脚本3个概念，所以这三个概念有对应的代码生成子命令，同样的，`semo` 插件或者集成的项目都可以创建自己的抽象概念，并提供配套的代码生成器，比如业务项目后端会有路由，控制器，模型，数据库迁移文件，单元测试等概念，这些概念由于项目的不同可能是不通用的，但是一个项目内部最好风格保持一致，通过自动生成样板代码可以更好的保持风格一致。
+
+This command is a code generator, `Semo` defines command, plugin, and script generator, and plugins of `Semo` can create their own generators under `generate` sub command. e.g. controller, model, migration, unit test and so on. It's best to keep same style in a team.
 
 ```
 $ semo generate help
@@ -286,8 +287,8 @@ Generate component sample code
   semo generate script <name>                              Generate a script file
 
 选项：
-  --version   显示版本号                                                                                          [布尔]
-  -h, --help  显示帮助信息                                                                                        [布尔]
+  --version   Show version                                                                                         [Boolean]
+  -h, --help  Show help                                                                                      [Boolean]
 ```
 
 ### 扩展 `generate` 命令添加子命令
