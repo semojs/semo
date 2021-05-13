@@ -38,5 +38,6 @@
     "type": "git",
     "url": "git@github.com:semojs/semo.git"
   },
-  "dependencies": {}
+  "dependencies": {},
+  "version": "0.0.0"
 }
