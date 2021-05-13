@@ -2,7 +2,7 @@
   "name": "semo-mono",
   "private": true,
   "devDependencies": {
-    "husky": "^4.3.6",
+    "husky": "^6.0.0",
     "lerna": "^3.22.1",
     "stmux": "^1.8.0",
     "vuepress": "^1.7.1"
@@ -27,12 +27,8 @@
     "watch:script": "cd packages/semo-plugin-script && yarn watch",
     "watch:shell": "cd packages/semo-plugin-shell && yarn watch",
     "watch:cli": "cd packages/cli && yarn watch",
-    "watch": "stmux -M -e Error -- [ [ -t core 'yarn watch:core' .. -t cli 'yarn watch:cli' ] : [ -t application 'yarn watch:application' .. -t plugin 'yarn watch:plugin' .. -t script 'yarn watch:script' .. -t shell 'yarn watch:shell' .. -t hook 'yarn watch:hook' ] ]"
-  },
-  "husky": {
-    "hooks": {
-      "pre-commit": "yarn test"
-    }
+    "watch": "stmux -M -e Error -- [ [ -t core 'yarn watch:core' .. -t cli 'yarn watch:cli' ] : [ -t application 'yarn watch:application' .. -t plugin 'yarn watch:plugin' .. -t script 'yarn watch:script' .. -t shell 'yarn watch:shell' .. -t hook 'yarn watch:hook' ] ]",
+    "prepare": "husky install"
   },
   "repository": {
     "type": "git",
