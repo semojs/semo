@@ -3,9 +3,9 @@
   "private": true,
   "devDependencies": {
     "husky": "^6.0.0",
-    "lerna": "^3.22.1",
-    "stmux": "^1.8.0",
-    "vuepress": "^1.7.1"
+    "lerna": "^4.0.0",
+    "stmux": "^1.8.1",
+    "vuepress": "^1.8.2"
   },
   "scripts": {
     "test": "exit 0",
