@@ -153,7 +153,7 @@ export const handler = async function(argv: any) {
       } else if (argv.empty || !argv.repo) {
         Utils.shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
         Utils.shell.cd(argv.name)
-        
+
         if (argv.yarn) {
           if (argv.yes) {
             Utils.exec('yarn init -y')
@@ -180,7 +180,7 @@ export const handler = async function(argv: any) {
         Utils.info(`Downloading from ${argv.repo}`)
         try {
           Utils.exec(`git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`)
-  
+
           Utils.success('Succeeded!')
           Utils.shell.cd(argv.name)
           const yarnFound = Utils.fileExistsSyncCache('yarn.lock')
@@ -195,7 +195,7 @@ export const handler = async function(argv: any) {
           } else {
             Utils.exec('npm install')
           }
-  
+
           if (argv.initGit) {
             Utils.exec('git init')
             Utils.success('New .git directory has been created!')
@@ -237,7 +237,7 @@ export const handler = async function(argv: any) {
     }
 
     // change package.json attributes
-    Utils.exec(`sed -ir 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
+    Utils.exec(`sed -r -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
 
   } catch(e) {
     Utils.error(e.stack)
