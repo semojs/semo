@@ -28,9 +28,10 @@ jobs:
           yarn test
           yarn run docs:build
           lerna run docs:typedoc --scope @semo/core --npm-client yarn
+          echo "registry=http://registry.npmjs.org/" >> .npmrc
           echo "//registry.npmjs.org/:_authToken=$NPM_TOKEN" >> $HOME/.npmrc 2> /dev/null
-          npm whoami
           cat "$HOME/.npmrc"
+          npm whoami
           yarn run lerna:publish
         env:
           NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
