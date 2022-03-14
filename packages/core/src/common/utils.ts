@@ -36,10 +36,10 @@ let cachedInstance: NodeCache;
  * Get Semo internal cache instance
  * @returns {NodeCache}
  */
-const getInternalCache = function (): NodeCache {
+const getInternalCache = function(): NodeCache {
   if (!cachedInstance) {
     cachedInstance = new NodeCache({
-      useClones: false,
+      useClones: false
     });
   }
   return cachedInstance;
@@ -55,7 +55,7 @@ interface CachedNamespaceInstance {
  * @param {string} namespace
  * @returns {NodeCache}
  */
-const getCache = function (namespace: string): NodeCache {
+const getCache = function(namespace: string): NodeCache {
   if (!namespace) {
     throw Error("Namespace is necessary.");
   }
@@ -69,7 +69,7 @@ const getCache = function (namespace: string): NodeCache {
 
   if (!cachedNamespaceInstances[namespace]) {
     cachedNamespaceInstances[namespace] = new NodeCache({
-      useClones: false,
+      useClones: false
     });
     cachedInstance.set("cachedNamespaceInstances", cachedNamespaceInstances);
   }
@@ -95,7 +95,7 @@ const useDotEnv = (expand: true, options: DotenvConfigOptions = {}) => {
 /**
  * debug core
  */
-const debugCore = function (...args) {
+const debugCore = function(...args) {
   let debugCache: any = getInternalCache().get("debug");
 
   if (!debugCache) {
@@ -111,7 +111,7 @@ const debugCore = function (...args) {
   return debugCache;
 };
 
-const fileExistsSyncCache = function (filePath) {
+const fileExistsSyncCache = function(filePath) {
   const fileCheckHistory: any = cachedInstance.get("fileCheckHistory") || {};
   if (fileCheckHistory[filePath]) {
     fileCheckHistory[filePath].count++;
@@ -147,7 +147,7 @@ interface IHookOption {
  * @param {array} options.exclude set plugins not to be used in invoking, same ones options.exclude take precedence
  * @param {boolean} options.reload If or not clear module cache before require
  */
-const invokeHook = async function <T>(
+const invokeHook = async function<T>(
   hook: any = null,
   options: IHookOption = { mode: "assign" },
   argv: any = null
@@ -163,7 +163,10 @@ const invokeHook = async function <T>(
     hook = splitHookName[1];
 
     originModuler = moduler;
-    moduler = moduler.replace("-", "__").replace("/", "__").replace("@", "");
+    moduler = moduler
+      .replace("-", "__")
+      .replace("/", "__")
+      .replace("@", "");
   } else {
     throw Error("Invalid hook name");
   }
@@ -179,7 +182,7 @@ const invokeHook = async function <T>(
       useCache: false,
       include: [],
       exclude: [],
-      opts: {},
+      opts: {}
     },
     options
   );
@@ -199,7 +202,7 @@ const invokeHook = async function <T>(
       ? Object.assign(
           {},
           {
-            [scriptName]: path.resolve(argv.coreDir),
+            [scriptName]: path.resolve(argv.coreDir)
           },
           getAllPluginsMapping(argv)
         )
@@ -371,7 +374,7 @@ const invokeHook = async function <T>(
  * @param {Object} yargs Yargs reference.
  * @param {String} basePath Often set to `__dirname`.
  */
-const extendSubCommand = function (
+const extendSubCommand = function(
   command: string,
   moduleName: string,
   yargs: any,
@@ -390,12 +393,12 @@ const extendSubCommand = function (
     extensions: ["ts", "js"],
     exclude: /.d.ts$/,
     // Give each command an ability to disable temporarily
-    visit: (command) => {
+    visit: command => {
       command.middlewares = command.middlewares
         ? _.castArray(command.middlewares)
         : [];
 
-      command.middlewares.unshift(async (argv) => {
+      command.middlewares.unshift(async argv => {
         if (!command.noblank) {
           // Insert a blank line to terminal
           console.log();
@@ -436,7 +439,7 @@ const extendSubCommand = function (
         command.middlewares = command.middlewares.concat(command.middleware);
       }
       return command.disabled === true ? false : command;
-    },
+    }
   };
 
   // load default commands
@@ -450,7 +453,7 @@ const extendSubCommand = function (
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin): void {
+    Object.keys(plugins).map(function(plugin): void {
       if (
         config.pluginConfigs[plugin] &&
         config.pluginConfigs[plugin].extendDir
@@ -506,7 +509,9 @@ const extendSubCommand = function (
  */
 let configPluginLoaded = false;
 let enablePluginAutoScan = true;
-const getAllPluginsMapping = function (argv: any = {}): {
+const getAllPluginsMapping = function(
+  argv: any = {}
+): {
   [propName: string]: string;
 } {
   argv = argv || cachedInstance.get("argv") || {};
@@ -518,7 +523,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
     if (!_.isEmpty(registerPlugins)) {
       enablePluginAutoScan = false;
     }
-    Object.keys(registerPlugins).forEach((plugin) => {
+    Object.keys(registerPlugins).forEach(plugin => {
       let pluginPath = registerPlugins[plugin];
       if (
         !plugin.startsWith(".") &&
@@ -560,14 +565,14 @@ const getAllPluginsMapping = function (argv: any = {}): {
 
   let topPluginPattern =
     pluginPrefix.length > 1
-      ? "{" + pluginPrefix.map((prefix) => `${prefix}-plugin-*`).join(",") + "}"
-      : pluginPrefix.map((prefix) => `${prefix}-plugin-*`).join(",");
+      ? "{" + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(",") + "}"
+      : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(",");
   let orgPluginPattern =
     pluginPrefix.length > 1
       ? "{" +
-        pluginPrefix.map((prefix) => `@*/${prefix}-plugin-*`).join(",") +
+        pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(",") +
         "}"
-      : pluginPrefix.map((prefix) => `@*/${prefix}-plugin-*`).join(",");
+      : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(",");
 
   if (_.isEmpty(plugins) && enablePluginAutoScan) {
     plugins = {};
@@ -576,9 +581,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
     glob
       .sync(topPluginPattern, {
         noext: true,
-        cwd: path.resolve(__dirname, "../plugins"),
+        cwd: path.resolve(__dirname, "../plugins")
       })
-      .map(function (plugin): void {
+      .map(function(plugin): void {
         plugins[plugin] = path.resolve(__dirname, "../plugins", plugin);
       });
 
@@ -588,9 +593,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
       glob
         .sync(topPluginPattern, {
           noext: true,
-          cwd: path.resolve(argv.coreDir, argv.orgMode ? "../../" : "../"),
+          cwd: path.resolve(argv.coreDir, argv.orgMode ? "../../" : "../")
         })
-        .map(function (plugin): void {
+        .map(function(plugin): void {
           plugins[plugin] = path.resolve(
             argv.coreDir,
             argv.orgMode ? "../../" : "../",
@@ -602,9 +607,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
       glob
         .sync(orgPluginPattern, {
           noext: true,
-          cwd: path.resolve(argv.coreDir, argv.orgMode ? "../../" : "../"),
+          cwd: path.resolve(argv.coreDir, argv.orgMode ? "../../" : "../")
         })
-        .map(function (plugin): void {
+        .map(function(plugin): void {
           plugins[plugin] = path.resolve(
             argv.coreDir,
             argv.orgMode ? "../../" : "../",
@@ -639,9 +644,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
             `.${scriptName}`,
             "home-plugin-cache",
             "node_modules"
-          ),
+          )
         })
-        .map(function (plugin): void {
+        .map(function(plugin): void {
           if (process.env.HOME) {
             plugins[plugin] = path.resolve(
               process.env.HOME,
@@ -657,9 +662,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
       glob
         .sync(orgPluginPattern, {
           noext: true,
-          cwd: path.resolve(process.env.HOME, `.${scriptName}`, "node_modules"),
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, "node_modules")
         })
-        .map(function (plugin): void {
+        .map(function(plugin): void {
           if (process.env.HOME) {
             plugins[plugin] = path.resolve(
               process.env.HOME,
@@ -675,9 +680,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
     glob
       .sync(topPluginPattern, {
         noext: true,
-        cwd: path.resolve(process.cwd(), "node_modules"),
+        cwd: path.resolve(process.cwd(), "node_modules")
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         plugins[plugin] = path.resolve(process.cwd(), "node_modules", plugin);
       });
 
@@ -685,23 +690,23 @@ const getAllPluginsMapping = function (argv: any = {}): {
     glob
       .sync(orgPluginPattern, {
         noext: true,
-        cwd: path.resolve(process.cwd(), "node_modules"),
+        cwd: path.resolve(process.cwd(), "node_modules")
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         plugins[plugin] = path.resolve(process.cwd(), "node_modules", plugin);
       });
 
     const config = getApplicationConfig();
     const pluginDirs = _.castArray(config.pluginDir);
-    pluginDirs.forEach((pluginDir) => {
+    pluginDirs.forEach(pluginDir => {
       if (fileExistsSyncCache(pluginDir)) {
         // process local plugins
         glob
           .sync(topPluginPattern, {
             noext: true,
-            cwd: path.resolve(process.cwd(), pluginDir),
+            cwd: path.resolve(process.cwd(), pluginDir)
           })
-          .map(function (plugin) {
+          .map(function(plugin) {
             plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin);
           });
 
@@ -709,9 +714,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
         glob
           .sync(orgPluginPattern, {
             noext: true,
-            cwd: path.resolve(process.cwd(), pluginDir),
+            cwd: path.resolve(process.cwd(), pluginDir)
           })
-          .map(function (plugin) {
+          .map(function(plugin) {
             plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin);
           });
       }
@@ -721,7 +726,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
     if (fileExistsSyncCache(path.resolve(process.cwd(), "package.json"))) {
       const pkgConfig = require(path.resolve(process.cwd(), "package.json"));
       const matchPluginProject = pluginPrefix
-        .map((prefix) => `${prefix}-plugin-`)
+        .map(prefix => `${prefix}-plugin-`)
         .join("|");
       const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`);
       if (pkgConfig.name && regExp.test(pkgConfig.name)) {
@@ -744,9 +749,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
     glob
       .sync(topPluginPattern, {
         noext: true,
-        cwd: path.resolve(envDir),
+        cwd: path.resolve(envDir)
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         plugins[plugin] = path.resolve(envDir, plugin);
       });
 
@@ -754,9 +759,9 @@ const getAllPluginsMapping = function (argv: any = {}): {
     glob
       .sync(orgPluginPattern, {
         noext: true,
-        cwd: path.resolve(envDir),
+        cwd: path.resolve(envDir)
       })
-      .map(function (plugin) {
+      .map(function(plugin) {
         plugins[plugin] = path.resolve(envDir, plugin);
       });
   }
@@ -795,7 +800,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
 /**
  * Get absolute path or dir, this func will not judge if exist
  */
-const getAbsolutePath = (filePath) => {
+const getAbsolutePath = filePath => {
   if (filePath[0] === "/") return filePath;
 
   if (filePath[0] === "~") return filePath.replace(/^~/, process.env.HOME);
@@ -810,7 +815,7 @@ const getAbsolutePath = (filePath) => {
  * @param opts
  *   opts.scriptName: set scriptName
  */
-const getApplicationConfig = function (opts: any = {}) {
+const getApplicationConfig = function(opts: any = {}) {
   let argv: any = cachedInstance.get("argv") || {};
 
   const cache = cachedInstance.get(`getApplicationConfig`);
@@ -828,12 +833,12 @@ const getApplicationConfig = function (opts: any = {}) {
   let applicationConfig;
 
   const configPath = findUp.sync([`.${scriptName}rc.yml`], {
-    cwd: opts.cwd,
+    cwd: opts.cwd
   });
 
   const nodeEnv = getNodeEnv(argv);
   const configEnvPath = findUp.sync([`.${scriptName}rc.${nodeEnv}.yml`], {
-    cwd: opts.cwd,
+    cwd: opts.cwd
   });
 
   // Load home config if exists
@@ -860,7 +865,7 @@ const getApplicationConfig = function (opts: any = {}) {
 
   // Inject some core config, hard coded
   applicationConfig = Object.assign({}, applicationConfig, opts, {
-    coreCommandDir: "lib/commands",
+    coreCommandDir: "lib/commands"
   });
 
   // Load application rc, if same dir with core, it's a dup process, rare case.
@@ -941,13 +946,13 @@ const getApplicationConfig = function (opts: any = {}) {
  *
  * Make compatible of param cases and camel cases
  */
-const formatRcOptions = (opts) => {
+const formatRcOptions = opts => {
   if (!_.isObject(opts)) {
     throw new Error("Not valid rc options!");
   }
   Object.keys(opts)
-    .filter((key) => key.indexOf("-") > -1 || key.indexOf(".") > -1)
-    .forEach((key) => {
+    .filter(key => key.indexOf("-") > -1 || key.indexOf(".") > -1)
+    .forEach(key => {
       const newKey = key
         .replace(/--+/g, "-")
         .replace(/^-/g, "")
@@ -959,7 +964,7 @@ const formatRcOptions = (opts) => {
   return opts;
 };
 
-const parseRcFile = function (plugin, pluginPath, argv: any = {}) {
+const parseRcFile = function(plugin, pluginPath, argv: any = {}) {
   argv = argv || cachedInstance.get("argv") || {};
   let scriptName = argv && argv.scriptName ? argv.scriptName : "semo";
 
@@ -999,7 +1004,9 @@ const parseRcFile = function (plugin, pluginPath, argv: any = {}) {
 /**
  * Get commbined config from whole environment.
  */
-const getCombinedConfig = function (argv: any = {}): {
+const getCombinedConfig = function(
+  argv: any = {}
+): {
   [propName: string]: any;
 } {
   let combinedConfig: { [propName: string]: any } =
@@ -1008,14 +1015,14 @@ const getCombinedConfig = function (argv: any = {}): {
 
   if (_.isEmpty(combinedConfig)) {
     const plugins = getAllPluginsMapping(argv);
-    Object.keys(plugins).map((plugin) => {
+    Object.keys(plugins).map(plugin => {
       let pluginConfig = parseRcFile(plugin, plugins[plugin], argv);
 
       let pluginConfigPick = _.pick(pluginConfig, [
         "commandDir",
         "extendDir",
         "hookDir",
-        plugin,
+        plugin
       ]);
       combinedConfig = _.merge(combinedConfig, pluginConfigPick);
       pluginConfigs[plugin] = pluginConfig;
@@ -1034,7 +1041,7 @@ const getCombinedConfig = function (argv: any = {}): {
  * Print message with format and color.
  * @param {mix} message Message to log
  */
-const log = function (message: any) {
+const log = function(message: any) {
   if (_.isArray(message) || _.isObject(message)) {
     console.log(colorize(stringify(message)));
   } else {
@@ -1048,7 +1055,7 @@ const log = function (message: any) {
  * @param {string} label Error log label
  * @param {integer} errorCode Error code
  */
-const error = function (message: any, exit = true, errorCode = 1) {
+const error = function(message: any, exit = true, errorCode = 1) {
   message = _.isString(message) ? { message } : message;
   console.log(chalk.red(message.message));
   if (exit) {
@@ -1060,7 +1067,7 @@ const error = function (message: any, exit = true, errorCode = 1) {
  * Print warn message with yellow color.
  * @param {mix} message Error message to log
  */
-const warn = function (message: any, exit = false, errorCode = 0) {
+const warn = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message;
   console.log(chalk.yellow(message.message));
   if (exit) {
@@ -1072,7 +1079,7 @@ const warn = function (message: any, exit = false, errorCode = 0) {
  * Print info message with green color.
  * @param {mix} message Error message to log
  */
-const info = function (message: any, exit = false, errorCode = 0) {
+const info = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message;
   console.log(chalk.cyan(message.message));
   if (exit) {
@@ -1084,7 +1091,7 @@ const info = function (message: any, exit = false, errorCode = 0) {
  * Print success message with green color.
  * @param {mix} message Error message to log
  */
-const success = function (message: any, exit = false, errorCode = 0) {
+const success = function(message: any, exit = false, errorCode = 0) {
   message = _.isString(message) ? { message } : message;
   console.log(chalk.green(message.message));
   if (exit) {
@@ -1096,8 +1103,11 @@ const success = function (message: any, exit = false, errorCode = 0) {
  * Compute md5.
  * @param {string} s
  */
-const md5 = function (s: string) {
-  return crypto.createHash("md5").update(s, "utf8").digest("hex");
+const md5 = function(s: string) {
+  return crypto
+    .createHash("md5")
+    .update(s, "utf8")
+    .digest("hex");
 };
 
 /**
@@ -1107,7 +1117,7 @@ const md5 = function (s: string) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitComma = function (input: string) {
+const splitComma = function(input: string) {
   return splitByChar(input, ",");
 };
 
@@ -1118,7 +1128,7 @@ const splitComma = function (input: string) {
  * @param {string} input
  * @returns {array} input separated by comma
  */
-const splitByChar = function (input: string, char: string) {
+const splitByChar = function(input: string, char: string) {
   const exp = new RegExp(char, "g");
   return input.replace(exp, " ").split(/\s+/);
 };
@@ -1130,7 +1140,7 @@ const splitByChar = function (input: string, char: string) {
  * @param {string} caption Table caption
  * @param {object} borderOptions Border options
  */
-const outputTable = function (
+const outputTable = function(
   columns: string[][],
   caption: string = "",
   borderOptions = {}
@@ -1142,13 +1152,13 @@ const outputTable = function (
     },
     columnDefault: {
       paddingLeft: 2,
-      paddingRight: 1,
+      paddingRight: 1
     },
     border: Object.assign(
       getBorderCharacters(`void`),
       { bodyJoin: `:` },
       borderOptions
-    ),
+    )
   };
 
   if (caption) {
@@ -1162,13 +1172,13 @@ const outputTable = function (
  * @param {*} input yarns option input, could be string or array
  * @returns {array} Package list
  */
-const parsePackageNames = function (input: string | string[]) {
+const parsePackageNames = function(input: string | string[]) {
   if (_.isString(input)) {
     return splitComma(input);
   }
 
   if (_.isArray(input)) {
-    return _.flatten(input.map((item) => splitComma(item)));
+    return _.flatten(input.map(item => splitComma(item)));
   }
 
   return [];
@@ -1179,12 +1189,12 @@ const parsePackageNames = function (input: string | string[]) {
  * @param {string} pkg package name
  * @param {array} paths search paths
  */
-const getPackagePath = function (
+const getPackagePath = function(
   pkg: string | undefined = undefined,
   paths: any = []
 ): any {
   const packagePath = findUp.sync("package.json", {
-    cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd(),
+    cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd()
   });
   return packagePath;
 };
@@ -1194,7 +1204,7 @@ const getPackagePath = function (
  * @param {string} pkg package name
  * @param {array} paths search paths
  */
-const loadPackageInfo = function (
+const loadPackageInfo = function(
   pkg: string | undefined = undefined,
   paths: any = []
 ): any {
@@ -1205,9 +1215,9 @@ const loadPackageInfo = function (
 /**
  * Load core package.json
  */
-const loadCorePackageInfo = function (): any {
+const loadCorePackageInfo = function(): any {
   const packagePath = findUp.sync("package.json", {
-    cwd: path.resolve("../../", __dirname),
+    cwd: path.resolve("../../", __dirname)
   });
   return packagePath ? require(packagePath) : {};
 };
@@ -1217,7 +1227,7 @@ const loadCorePackageInfo = function (): any {
  * @param {string} command Command to exec
  * @param {object} options Options stdio default is [0, 1, 2]
  */
-const exec = function (command: string, options: any = {}): any {
+const exec = function(command: string, options: any = {}): any {
   debugCore("Utils.exec", { command, options });
   if (!options.stdio) {
     options.stdio = [0, 1, 2];
@@ -1250,7 +1260,7 @@ const isDevelopment = () => getNodeEnv() === "development";
  * Sleep a while of ms
  * @param {integer} ms
  */
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
 const delay = sleep;
 
 /**
@@ -1258,23 +1268,26 @@ const delay = sleep;
  *
  * repl.history 0.1.4 not compatile with node v12, so find other solution.
  */
-const replHistory = function (repl, file) {
+const replHistory = function(repl, file) {
   try {
     fs.statSync(file);
-    repl.history = fs.readFileSync(file, "utf-8").split("\n").reverse();
+    repl.history = fs
+      .readFileSync(file, "utf-8")
+      .split("\n")
+      .reverse();
     repl.history.shift();
     repl.historyIndex = -1; // will be incremented before pop
   } catch (e) {}
 
   let fd = fs.openSync(file, "a");
   let wstream = fs.createWriteStream(file, {
-    fd: fd,
+    fd: fd
   });
-  wstream.on("error", function (err) {
+  wstream.on("error", function(err) {
     throw err;
   });
 
-  repl.addListener("line", function (code) {
+  repl.addListener("line", function(code) {
     if (code && code !== ".history") {
       wstream.write(code + "\n");
     } else {
@@ -1283,20 +1296,20 @@ const replHistory = function (repl, file) {
     }
   });
 
-  process.on("exit", function () {
+  process.on("exit", function() {
     fs.closeSync(fd);
   });
 
   repl.commands["history"] = {
     help: "Show the history",
-    action: function () {
+    action: function() {
       var out: any = [];
-      repl.history.forEach(function (v) {
+      repl.history.forEach(function(v) {
         out.push(v);
       });
       repl.outputStream.write(out.reverse().join("\n") + "\n");
       repl.displayPrompt();
-    },
+    }
   };
 };
 
@@ -1312,19 +1325,19 @@ const launchDispatcher = async (opts: any = {}) => {
   const pkg = loadCorePackageInfo();
   updateNotifier({ pkg, updateCheckInterval: 1000 * 60 * 60 * 24 * 7 }).notify({
     defer: false,
-    isGlobal: true,
+    isGlobal: true
   });
 
   const cache = getInternalCache();
   let parsedArgv = yParser(process.argv.slice(2), {
     "sort-commands": true,
-    "populate--": true,
+    "populate--": true
   });
   let parsedArgvOrigin = parsedArgv;
   cache.set(
     "argv",
     Object.assign(parsedArgv, {
-      scriptName: opts.scriptName || "semo",
+      scriptName: opts.scriptName || "semo"
     })
   ); // set argv first time
   let appConfig = getApplicationConfig();
@@ -1334,7 +1347,7 @@ const launchDispatcher = async (opts: any = {}) => {
     packageName: opts.packageName,
     coreDir: opts.coreDir,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
-    [`$${opts.scriptName || "semo"}`]: { Utils, VERSION: pkg.version },
+    [`$${opts.scriptName || "semo"}`]: { Utils, VERSION: pkg.version }
   });
 
   yargs.config(appConfig);
@@ -1350,7 +1363,7 @@ const launchDispatcher = async (opts: any = {}) => {
     yargs.hide("script-name").option("script-name", {
       default: "semo",
       describe: "Rename script name.",
-      type: "string",
+      type: "string"
     });
   } else {
     if (!_.isString(parsedArgv.scriptName)) {
@@ -1361,12 +1374,12 @@ const launchDispatcher = async (opts: any = {}) => {
 
   yargs.hide("plugin-prefix").option("plugin-prefix", {
     default: "semo",
-    describe: "Set plugin prefix.",
+    describe: "Set plugin prefix."
   });
 
   yargs.hide("enable-core-hook").option("enable-core-hook", {
     default: [],
-    describe: "Enable core default disabled hook",
+    describe: "Enable core default disabled hook"
   });
 
   let scriptName = parsedArgv.scriptName || "semo";
@@ -1380,7 +1393,7 @@ const launchDispatcher = async (opts: any = {}) => {
         ? _.castArray(command.middlewares)
         : [];
 
-      command.middlewares.unshift(async (argv) => {
+      command.middlewares.unshift(async argv => {
         if (!command.noblank) {
           // Insert a blank line to terminal
           console.log();
@@ -1424,7 +1437,7 @@ const launchDispatcher = async (opts: any = {}) => {
         command.middlewares = command.middlewares.concat(command.middleware);
       }
       return command.disabled === true ? false : command;
-    },
+    }
   };
   if (
     !parsedArgv.disableCoreCommand &&
@@ -1440,7 +1453,7 @@ const launchDispatcher = async (opts: any = {}) => {
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin) {
+    Object.keys(plugins).map(function(plugin) {
       if (
         config.pluginConfigs[plugin] &&
         config.pluginConfigs[plugin].commandDir &&
@@ -1474,43 +1487,43 @@ const launchDispatcher = async (opts: any = {}) => {
     try {
       // @ts-ignore
       // Register global middlewares
-      yargs.middleware((argv, yargs) => {
-        const commandPath = yargs
-          .getContext()
-          .fullCommands.slice()
-          .map((cmd) => cmd.split(" ")[0]);
-        let commandDefault;
+      yargs.middleware((argv, yargs: yargs.Argv) => {
+        // const commandPath = yargs
+        //   .getContext()
+        //   .fullCommands.slice()
+        //   .map(cmd => cmd.split(" ")[0]);
+        // let commandDefault;
 
-        if (argv.commandDefault && commandPath.length >= 1) {
-          while (commandPath.length >= 1) {
-            commandDefault = _.get(argv.commandDefault, commandPath);
-            if (!_.isObject(commandDefault) || _.isArray(commandDefault)) {
-              commandPath.pop();
-              continue;
-            }
-            break;
-          }
-        }
+        // if (argv.commandDefault && commandPath.length >= 1) {
+        //   while (commandPath.length >= 1) {
+        //     commandDefault = _.get(argv.commandDefault, commandPath);
+        //     if (!_.isObject(commandDefault) || _.isArray(commandDefault)) {
+        //       commandPath.pop();
+        //       continue;
+        //     }
+        //     break;
+        //   }
+        // }
 
         // Insert home rc command default options between default options and cli options
         // So the priority is: command default options < application rc options < home rc options < cli options
-        const overrideArgv = {};
-        const aliases = yargs.parsed.aliases;
-        Object.keys(parsedArgvOrigin)
-          .filter((key) => key !== "_")
-          .forEach((key) => {
-            if (aliases[key] && Array.isArray(aliases[key])) {
-              overrideArgv[key] = parsedArgvOrigin[key];
-              aliases[key].forEach((alias) => {
-                overrideArgv[alias] = parsedArgvOrigin[key];
-              });
-            }
-          });
+        // const overrideArgv = {};
+        // const aliases = yargs.parsed.aliases;
+        // Object.keys(parsedArgvOrigin)
+        //   .filter(key => key !== "_")
+        //   .forEach(key => {
+        //     if (aliases[key] && Array.isArray(aliases[key])) {
+        //       overrideArgv[key] = parsedArgvOrigin[key];
+        //       aliases[key].forEach(alias => {
+        //         overrideArgv[alias] = parsedArgvOrigin[key];
+        //       });
+        //     }
+        //   });
 
-        argv = commandDefault
-          ? _.merge(argv, formatRcOptions(commandDefault), overrideArgv)
-          : argv;
-        cache.set("argv", argv); // set argv third time
+        // argv = commandDefault
+        //   ? _.merge(argv, formatRcOptions(commandDefault), overrideArgv)
+        //   : argv;
+        // cache.set("argv", argv); // set argv third time
 
         return argv;
       });
@@ -1524,7 +1537,7 @@ const launchDispatcher = async (opts: any = {}) => {
         let beforeHooks = await invokeHook<Function[]>(
           `${scriptName}:before_command`
         );
-        Object.keys(beforeHooks).map(function (hook) {
+        Object.keys(beforeHooks).map(function(hook) {
           beforeHooks[hook](parsedArgv, yargs);
         });
       }
@@ -1532,7 +1545,7 @@ const launchDispatcher = async (opts: any = {}) => {
       if (!parsedArgv.disableCoreCommand && !parsedArgv.disableCore) {
         yargs.hide("disable-core-command").option("disable-core-command", {
           alias: "disable-core",
-          describe: "Disable core commands.",
+          describe: "Disable core commands."
         });
 
         if (
@@ -1543,7 +1556,7 @@ const launchDispatcher = async (opts: any = {}) => {
             .hide("disable-completion-command")
             .option("disable-completion-command", {
               alias: "disable-completion",
-              describe: "Disable completion command.",
+              describe: "Disable completion command."
             });
 
           if (!parsedArgv.hideCompletionCommand && !parsedArgv.hideCompletion) {
@@ -1551,7 +1564,7 @@ const launchDispatcher = async (opts: any = {}) => {
               .hide("hide-completion-command")
               .option("hide-completion-command", {
                 alias: "hide-completion",
-                describe: "Hide completion command.",
+                describe: "Hide completion command."
               });
             yargs.completion("completion", "Generate completion script");
           } else {
@@ -1564,24 +1577,24 @@ const launchDispatcher = async (opts: any = {}) => {
       if (!parsedArgv.disableGlobalPlugin && !parsedArgv.disableGlobalPlugins) {
         yargs.hide("disable-global-plugin").option("disable-global-plugin", {
           alias: "disable-global-plugins",
-          describe: "Disable global plugins.",
+          describe: "Disable global plugins."
         });
       }
 
       if (!parsedArgv.disableHomePlugin && !parsedArgv.disableHomePlugins) {
         yargs.hide("disable-home-plugin").option("disable-home-plugin", {
           alias: "disable-home-plugins",
-          describe: "Disable home plugins.",
+          describe: "Disable home plugins."
         });
       }
 
       if (!parsedArgv.hideEpilog) {
         yargs.hide("hide-epilog").option("hide-epilog", {
-          describe: "Hide epilog.",
+          describe: "Hide epilog."
         });
         yargs.hide("set-epilog").option("set-epilog", {
           default: false,
-          describe: "Set epilog.",
+          describe: "Set epilog."
         });
 
         yargs.epilog(
@@ -1602,7 +1615,7 @@ const launchDispatcher = async (opts: any = {}) => {
 
       if (!parsedArgv.setVersion) {
         yargs.hide("set-version").option("set-version", {
-          describe: "Set version.",
+          describe: "Set version."
         });
       } else {
         yargs.version(parsedArgv.setVersion);
@@ -1611,7 +1624,7 @@ const launchDispatcher = async (opts: any = {}) => {
       yargs.hide("node-env-key").option("node-env-key", {
         default: "NODE_ENV",
         alias: "node-env",
-        describe: "Set node env key",
+        describe: "Set node env key"
       });
 
       let defaultCommand: any = {
@@ -1622,7 +1635,7 @@ const launchDispatcher = async (opts: any = {}) => {
             "Semo default behavior is to execute a Semo style command file."
           );
         },
-        builder: () => {},
+        builder: () => {}
       };
 
       if (
@@ -1669,20 +1682,20 @@ const launchDispatcher = async (opts: any = {}) => {
         .recommendCommands()
         .parserConfiguration({
           "sort-commands": true,
-          "populate--": true,
+          "populate--": true
         })
         .example([
           ["$0 run hello-world", "Run a remote plugin command."],
           [
             "$0 run --with project-templates — create PROJECT_NAME -T",
-            "Clone project template as a starter.",
+            "Clone project template as a starter."
           ],
           [
             "$0 repl --require lodash:_",
-            "Start Semo repl and inject lodash object to _.",
+            "Start Semo repl and inject lodash object to _."
           ],
           ["$0 generate command test", "Generate command template."],
-          ["$0 clean all", "Clean all cache files and installed npm packages."],
+          ["$0 clean all", "Clean all cache files and installed npm packages."]
         ])
         .fail(false)
         // .onFinishCommand(async (hook) => {
@@ -1770,7 +1783,7 @@ const resolvePackage = (name, location = "", home = true) => {
   fs.ensureDirSync(downloadDirNodeModulesPath);
 
   const pkgPath = require.resolve(name, {
-    paths: [downloadDirNodeModulesPath],
+    paths: [downloadDirNodeModulesPath]
   });
   return pkgPath;
 };
@@ -1798,7 +1811,7 @@ const installPackage = (name, location = "", home = true, force = false) => {
     );
   }
 
-  nameArray.forEach((pkg) => {
+  nameArray.forEach(pkg => {
     try {
       require.resolve(pkg, { paths: [downloadDir] });
     } catch (err) {
@@ -1891,7 +1904,7 @@ const importPackage = (name, location = "", home = true, force = false) => {
  * convert pakcage.json to private, for internal use
  * @param packageJsonPath package.json file path
  */
-const convertToPrivate = (packageJsonPath) => {
+const convertToPrivate = packageJsonPath => {
   try {
     const pkg = require(packageJsonPath);
     pkg.private = true;
@@ -1937,7 +1950,7 @@ const config = (key: any = undefined, defaultValue: any = undefined) => {
  *
  * Copy from `is-promise` npm module
  */
-const isPromise = (obj) => {
+const isPromise = obj => {
   return (
     !!obj &&
     (typeof obj === "object" || typeof obj === "function") &&
@@ -2000,7 +2013,7 @@ const extendConfig = (
 
   const extendRcPathArray = _.castArray(extendRcPath);
 
-  extendRcPathArray.forEach((rcPath) => {
+  extendRcPathArray.forEach(rcPath => {
     rcPath = path.resolve(process.cwd(), rcPath);
     if (rcPath && fileExistsSyncCache(rcPath)) {
       try {
@@ -2190,7 +2203,7 @@ export const Utils = {
   resolvePackage,
   consoleReader,
   clearConsole,
-  useDotEnv,
+  useDotEnv
 };
 
 export type UtilsType = typeof Utils;
