@@ -1303,7 +1303,7 @@ const replHistory = function (repl, file) {
 /**
  * Launch dispatcher
  */
-const launchDispatcher = (opts: any = {}) => {
+const launchDispatcher = async (opts: any = {}) => {
   // process.on('warning', e => console.warn(e.stack));
   process.setMaxListeners(0);
 
@@ -1684,26 +1684,45 @@ const launchDispatcher = (opts: any = {}) => {
           ["$0 generate command test", "Generate command template."],
           ["$0 clean all", "Clean all cache files and installed npm packages."],
         ])
-        .onFinishCommand(async (hook) => {
-          if (hook !== false) {
-            console.log();
-            if (
-              !parsedArgv.getYargsCompletions &&
-              parsedArgv.enableCoreHook &&
-              parsedArgv.enableCoreHook.includes("after_command")
-            ) {
-              let afterHooks = await invokeHook<Function[]>(
-                `${scriptName}:after_command`
-              );
-              Object.keys(afterHooks).map(function (hook) {
-                afterHooks[hook](parsedArgv, yargs);
-              });
-              debugCore("Core hook after_command triggered");
-            }
-            process.exit(0);
-          }
-        })
+        .fail(false)
+        // .onFinishCommand(async (hook) => {
+        //   if (hook !== false) {
+        //     console.log();
+        //     if (
+        //       !parsedArgv.getYargsCompletions &&
+        //       parsedArgv.enableCoreHook &&
+        //       parsedArgv.enableCoreHook.includes("after_command")
+        //     ) {
+        //       let afterHooks = await invokeHook<Function[]>(
+        //         `${scriptName}:after_command`
+        //       );
+        //       Object.keys(afterHooks).map(function (hook) {
+        //         afterHooks[hook](parsedArgv, yargs);
+        //       });
+        //       debugCore("Core hook after_command triggered");
+        //     }
+        //     process.exit(0);
+        //   }
+        // })
         .wrap(Math.min(120, yargs.terminalWidth())).argv;
+
+      // if (hook !== false) {
+      //   console.log();
+      //   if (
+      //     !parsedArgv.getYargsCompletions &&
+      //     parsedArgv.enableCoreHook &&
+      //     parsedArgv.enableCoreHook.includes("after_command")
+      //   ) {
+      //     let afterHooks = await invokeHook<Function[]>(
+      //       `${scriptName}:after_command`
+      //     );
+      //     Object.keys(afterHooks).map(function (hook) {
+      //       afterHooks[hook](parsedArgv, yargs);
+      //     });
+      //     debugCore("Core hook after_command triggered");
+      //   }
+      //   process.exit(0);
+      // }
     } catch (e) {
       if (!e.name || e.name !== "YError") {
         error(e.stack);
