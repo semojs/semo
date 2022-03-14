@@ -70,6 +70,6 @@
     "build": "tsc",
     "clean": "rimraf lib",
     "prepare": "npm run build",
-    "docs:typedoc": "typedoc src/common"
+    "docs:typedoc": "typedoc src/common/*"
   }
 }
