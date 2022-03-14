@@ -5,12 +5,12 @@ on:
     # Sequence of patterns matched against refs/tags
     tags:
       - "*" # Push events to matching any tag format, i.e. 1.0, 20.15.10
-env:
-  NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
 jobs:
   build:
     runs-on: ubuntu-latest
-
+    env:
+      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
