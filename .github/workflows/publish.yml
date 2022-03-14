@@ -29,6 +29,7 @@ jobs:
           yarn run docs:build
           lerna run docs:typedoc --scope @semo/core --npm-client yarn
           echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> $HOME/.npmrc 2> /dev/null
+          cat "$HOME/.npmrc"
           yarn run lerna:publish
       - name: Create Release
         uses: ncipollo/release-action@v1
