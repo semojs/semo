@@ -9,8 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
     steps:
       - uses: actions/checkout@v2
       - name: Use Node.js
@@ -32,6 +30,8 @@ jobs:
           lerna run docs:typedoc --scope @semo/core --npm-client yarn
           npm whoami
           yarn run lerna:publish
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       - name: Create Release
         uses: ncipollo/release-action@v1
         id: create_release
