@@ -28,6 +28,9 @@ jobs:
           yarn test
           yarn run docs:build
           lerna run docs:typedoc --scope @semo/core --npm-client yarn
+      - name: Public
+        id: public
+        run: |
           npm whoami
           yarn run lerna:publish
         env:
