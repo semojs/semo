@@ -2091,7 +2091,7 @@ const clearConsole = () => {
  * @module Utils
  */
 export const Utils = {
-  test: 4,
+  test: 5,
   // npm packages
   /** [lodash](https://www.npmjs.com/package/lodash) reference, check [doc](https://lodash.com/docs). */
   _,
