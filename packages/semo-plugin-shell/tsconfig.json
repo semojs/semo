@@ -10,7 +10,7 @@
     "noImplicitAny": false,
     "strictNullChecks": true,
     "noImplicitThis": true,
-    "noUnusedLocals": true,
+    "noUnusedLocals": false,
     "noImplicitReturns": true,
     "moduleResolution": "node",
     "resolveJsonModule": true,

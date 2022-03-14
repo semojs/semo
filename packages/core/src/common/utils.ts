@@ -1333,7 +1333,7 @@ const launchDispatcher = async (opts: any = {}) => {
     "sort-commands": true,
     "populate--": true
   });
-  let parsedArgvOrigin = parsedArgv;
+  // let parsedArgvOrigin = parsedArgv;
   cache.set(
     "argv",
     Object.assign(parsedArgv, {
