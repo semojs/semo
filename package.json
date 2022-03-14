@@ -12,7 +12,7 @@
     "lerna": "lerna",
     "semo": "lerna exec  --scope @semo/cli -- yarn semo",
     "prepublish": "lerna run prepublish",
-    "lerna:publish": "lerna publish from-git --yes",
+    "lerna:publish": "lerna publish from-git --yes --no-verify-access",
     "docs:dev": "vuepress dev docs",
     "docs:build": "vuepress build docs",
     "upgrade:preview": "lerna exec -- ncu && ncu",
