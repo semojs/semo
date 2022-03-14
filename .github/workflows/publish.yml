@@ -1,0 +1,42 @@
+name: Semo publish
+
+on:
+  push:
+    # Sequence of patterns matched against refs/tags
+    tags:
+      - "*" # Push events to matching any tag format, i.e. 1.0, 20.15.10
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+      - name: Use Node.js
+        uses: actions/setup-node@v1
+        with:
+          node-version: "14.x" # You might need to adjust this value to your own version
+      - name: Build
+        id: build
+        run: |
+          curl -o- -L https://yarnpkg.com/install.sh | bash -s
+          export PATH="$HOME/.yarn/bin:$PATH"
+          yarn
+          lerna bootstrap --npm-client yarn
+          git reset --hard HEAD
+          yarn run lerna run prepublish
+          yarn test
+          yarn run docs:build
+          lerna run docs:typedoc --scope @semo/core --npm-client yarn
+          echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" >> $HOME/.npmrc 2> /dev/null
+          yarn run lerna:publish
+      - name: Create Release
+        uses: ncipollo/release-action@v1
+        id: create_release
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          VERSION: ${{ github.ref }}
+        with:
+          allowUpdates: true
+          draft: false
+          prerelease: false
