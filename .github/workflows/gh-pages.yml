@@ -1,4 +1,4 @@
-name: Build docs
+name: Semo docs
 on:
   push:
     branches:
@@ -16,6 +16,7 @@ jobs:
           curl -o- -L https://yarnpkg.com/install.sh | bash -s
           export PATH="$HOME/.yarn/bin:$PATH"
           yarn
+          lerna bootstrap --npm-client yarn
           yarn run docs:build
           lerna run docs:typedoc --scope @semo/core --npm-client yarn
 
