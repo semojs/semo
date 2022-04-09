@@ -65,6 +65,7 @@ Options:
 ```
 
 Here, `<configKey>`'s format is `a.b.c`, means hierarchical config. It also supports adding comments to the last level config.
+
 ## `semo hook`
 
 :::tip
@@ -74,14 +75,14 @@ This command has been migrated to `semo-plugin-hook`
 This command's output shows all available hooks in current environment, all implemented hooks can be invoked. You can see the hook name, description, and definition location.
 
 ```
-Hook                         :  Package :  Description                                     
-  hook_beforeCommand           :  semo    :  Hook triggered before command execution.        
-  hook_afterCommand            :  semo    :  Hook triggered after command execution.         
-  hook_component               :  semo    :  Hook triggered when needing to fetch component 
-  hook_hook                    :  semo    :  Hook triggered in hook command.                 
-  hook_repl                    :  semo    :  Hook triggered in repl command.                 
-  hook_status                  :  semo    :  Hook triggered in status command.               
-  hook_create_project_template :  semo    :  Hook triggered in create command.  
+Hook                         :  Package :  Description
+  hook_beforeCommand           :  semo    :  Hook triggered before command execution.
+  hook_afterCommand            :  semo    :  Hook triggered after command execution.
+  hook_component               :  semo    :  Hook triggered when needing to fetch component
+  hook_hook                    :  semo    :  Hook triggered in hook command.
+  hook_repl                    :  semo    :  Hook triggered in repl command.
+  hook_status                  :  semo    :  Hook triggered in status command.
+  hook_create_project_template :  semo    :  Hook triggered in create command.
 ```
 
 Here you can see a special hook `hook_hook`, using this hook to declare new hooks. Any plugin can declare its own hooks, and other plugins can hook them to influence plugin behaviors. Most of applications projects do not need to declare hooks, except it need to build their application level plugin system.
@@ -124,7 +125,7 @@ But in plugin project, we put all code into `src` directory.
 └── package.json
 ```
 
-This command is to save developers seconds to init a project. It's OK to create those files and directories manually. 
+This command is to save developers seconds to init a project. It's OK to create those files and directories manually.
 
 :::tip
 The structure and usage of `.semorc.yml` is located at `Configuration management` section.
@@ -172,6 +173,7 @@ The above are specific command descriptions, and next we describe the some senar
 ```
 semo create PROJECT_NAME PROJECT_REPO_URL master -f
 ```
+
 We use `create` command to download code from any git repo, that means any git repo can be our project template. `master` is the default branch name, so we can ignore it, `-f` means `--force`, it will override existed directory.
 
 ### Create an empty project, no project template
@@ -179,14 +181,13 @@ We use `create` command to download code from any git repo, that means any git r
 ```
 semo create PROJECT_NAME -yfie
 ```
+
 The `-yfie` means `-y -f -i -e`, it's a `yargs` feature.
 
 > `-i` is to run `semo init` automatically.
 > `-y` is to answer `yes` when creating `package.json`.
 > `-f` is to override exsited directories.
 > `-e` is to tell it's just an empty repo.
-
-
 
 The structure is as follows.
 
@@ -211,7 +212,6 @@ semo create semo-plugin-[PLUGIN_NAME] -yfie
 ```
 
 It's similar with the above case, except that project name has a `plugin` convention. If the project name starts with `semo-plugin-`, then `Semo` knows it's a plugin project intialization, and `semo init --plugin` executed automatically.
-
 
 The structure of this project is:
 
@@ -247,11 +247,11 @@ Here is a simple demo code. For more details about Semo hooks, please refer to r
 ```js
 export const hook_create_project_template = {
   demo_repo: {
-    repo: 'demo_repo.git',
-    branch: 'master',
-    alias: ['demo']
+    repo: "demo_repo.git",
+    branch: "master",
+    alias: ["demo"],
   },
-}
+};
 ```
 
 If you already know the template identifier, you can use it in commands as follows:
@@ -270,7 +270,6 @@ The rest of options are all easy to understand, `--yarn` means install deps by `
 ## `semo generate <component>`
 
 > alias: `generate`, `g`
-> 
 
 This command is a code generator, `Semo` defines command, plugin, and script generator, and plugins of `Semo` can create their own generators under `generate` sub command. e.g. controller, model, migration, unit test and so on. It's best to keep same style in a team.
 
@@ -291,9 +290,9 @@ Generate component sample code
   -h, --help  Show help                                                                                      [Boolean]
 ```
 
-### 扩展 `generate` 命令添加子命令
+### Extend `generate` command and add sub command
 
-和上面扩展 `application` 命令的方法是一样的：
+It's similar with extend `application` command above.
 
 ```bash
 semo generate command generate/test --extend=semo
@@ -341,7 +340,7 @@ REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言
 
 ### 对 `REPL` 的一些扩展
 
-在开发Semo 和这个脚手架时，Node 的 REPL 还不支持 `await`，这里是模拟实现了这个机制，目的是可以触发执行项目中的一些 promise 或 generator 方法。通过这个能力，再加上我们可以把一些业务代码注入到 `REPL` 我们就可以在接口控制器，脚本，单元测试之外多了一种执行方式，而这种执行方式还是交互式的。
+在开发 Semo 和这个脚手架时，Node 的 REPL 还不支持 `await`，这里是模拟实现了这个机制，目的是可以触发执行项目中的一些 promise 或 generator 方法。通过这个能力，再加上我们可以把一些业务代码注入到 `REPL` 我们就可以在接口控制器，脚本，单元测试之外多了一种执行方式，而这种执行方式还是交互式的。
 
 ### 为 `REPL` 注入新的对象
 
@@ -352,14 +351,13 @@ REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言
 export const hook_repl = () => {
   return {
     add: async (a, b) => {
-      return a + b
+      return a + b;
     },
     multiple: async (a, b) => {
-      return a * b
-    }
-  }
-}
-
+      return a * b;
+    },
+  };
+};
 ```
 
 然后在 REPL 环境，就可以使用了:
@@ -387,7 +385,7 @@ export const hook_repl = () => {
 
 ### 重新载入一遍钩子文件
 
-`.reload` 或者 `Semo.reload()` 可以重新执行一遍 `hook_repl` 钩子，然后把最新的结果注入 Semo。这个的用途是希望在不退出 REPL 环境的情况下能够调用最新的钩子结果，这里只能保证重新加载和执行钩子文件本身，如果钩子内部用了  `require` 还是会被缓存，这部分就需要用户自己来处理了，比如每次 `require` 之前先尝试删除 `require.cache`
+`.reload` 或者 `Semo.reload()` 可以重新执行一遍 `hook_repl` 钩子，然后把最新的结果注入 Semo。这个的用途是希望在不退出 REPL 环境的情况下能够调用最新的钩子结果，这里只能保证重新加载和执行钩子文件本身，如果钩子内部用了 `require` 还是会被缓存，这部分就需要用户自己来处理了，比如每次 `require` 之前先尝试删除 `require.cache`
 
 ### 临时试用 npm 包
 
@@ -401,7 +399,7 @@ export const hook_repl = () => {
 #### 使用内部命令的方式
 
 > v1.5.14 新增
-`.require` 和 `.import` 是等价的，可以快速导入一些常用包用于调试，例如：
+> `.require` 和 `.import` 是等价的，可以快速导入一些常用包用于调试，例如：
 
 ```
 >>> .import lodash:_ dayjs:day
@@ -438,13 +436,13 @@ $plugin:
 
 最早的时候本来打算核心和插件可以自由的注入到 REPL 环境，后来觉得不可控，所以决定核心和插件都只能注入到 `Semo` 对象。下面说一下 Semo 对象的结构
 
-* Semo.hooks 为了对各个插件的信息进行隔离，所有插件注入的信息按照插件名称注入到这里，各个插件不会相互干扰
-* Semo.argv 这个是进入命令的 `yargs` argv参数，有时可以用于看看配置合并是否生效，以及实验 yargs 的参数解析。
-* Semo.repl 当前 REPL 环境的对象实例
-* Semo.Utils 核心工具包，里面除了自定义的若干函数之外，会暴露出一些常用的第三方包，比如 `lodash`, `chalk` 等
-* Semo.reload 重新执行 `hook_repl` 钩子，使用最新的钩子文件
-* Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
-* Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
+- Semo.hooks 为了对各个插件的信息进行隔离，所有插件注入的信息按照插件名称注入到这里，各个插件不会相互干扰
+- Semo.argv 这个是进入命令的 `yargs` argv 参数，有时可以用于看看配置合并是否生效，以及实验 yargs 的参数解析。
+- Semo.repl 当前 REPL 环境的对象实例
+- Semo.Utils 核心工具包，里面除了自定义的若干函数之外，会暴露出一些常用的第三方包，比如 `lodash`, `chalk` 等
+- Semo.reload 重新执行 `hook_repl` 钩子，使用最新的钩子文件
+- Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
+- Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
 
 ### 默认注入到全局作用域的方法
 
@@ -470,21 +468,21 @@ CommandDefault:
     extract: Semo.hooks
 ```
 
-### 支持执行一个repl文件
+### 支持执行一个 repl 文件
 
-用途也是执行逻辑后将一些结果注入到REPL，文件也是Node模块，需要符合指定格式。
+用途也是执行逻辑后将一些结果注入到 REPL，文件也是 Node 模块，需要符合指定格式。
 
 ```js
-exports.handler = async (argv, context) => {}
+exports.handler = async (argv, context) => {};
 
 // 或者
 
-module.exports = async (argv, context) => {}
+module.exports = async (argv, context) => {};
 ```
 
-需要注意，只有通过 `context` 才能注入到 REPL，如果你的代码不放到函数当中，也是可以执行的，但是不能获取到之前其他逻辑注入到context中的内容，也不同获得 `argv` 对象，另外，必须通过 `global` 对象注入到REPL当中。
+需要注意，只有通过 `context` 才能注入到 REPL，如果你的代码不放到函数当中，也是可以执行的，但是不能获取到之前其他逻辑注入到 context 中的内容，也不同获得 `argv` 对象，另外，必须通过 `global` 对象注入到 REPL 当中。
 
-这个机制有什么作用呢？主要用途是在我们开发调试时，有一些想在REPL里进行的调试是有许多前置逻辑的，如果都在REPL里一行一行的输入太麻烦，所以通过这种方式就可以把调试逻辑固化下来。
+这个机制有什么作用呢？主要用途是在我们开发调试时，有一些想在 REPL 里进行的调试是有许多前置逻辑的，如果都在 REPL 里一行一行的输入太麻烦，所以通过这种方式就可以把调试逻辑固化下来。
 
 还有一个角度是: `semo repl --require` 这种方式，如果全局设置会比较固定，不宜太多，而通过命令行设置又需要每次都输入，不够方便，利用执行脚本的方式，我们可以灵活的组织逻辑，将我们想要注入的常用工具库注入，甚至在注入之前还可以做一番设置，部分可以取代之前的 `--require` 机制和 hook 机制。
 
@@ -576,13 +574,13 @@ semo generate script test
 
 ```js
 // src/bin/semo/scripts/20191025130716346_test.ts
-export const builder = function (yargs: any) {
+export const builder = function(yargs: any) {
   // yargs.option('option', {default, describe, alias})
-}
+};
 
-export const handler = async function (argv: any) {
-  console.log('Start to draw your dream code!')
-}
+export const handler = async function(argv: any) {
+  console.log("Start to draw your dream code!");
+};
 ```
 
 可以看到，作为一个脚本，不是一上来就写业务逻辑，也不需要声明 `shebang` 标识，只需要定义两个方法，一个是 `builder`，一个是 `handler`。其中 `builder` 用于声明脚本的参数，格式可以参考 `yargs`，如果脚本不需要参数，其实也可以不定义，由于是模板自动生成，放到那里即可，以备不时之需。`handler` 是具体的执行逻辑，传入的参数就是解析好的脚本参数，也包含了项目的 `.semorc.yml` 里的配置。可以看到 `handler` 支持 `async` 所以这里可以执行一些异步操作。

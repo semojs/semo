@@ -26,8 +26,6 @@ jobs:
           git reset --hard HEAD
           yarn run lerna run prepublish
           yarn test
-          yarn run docs:build
-          lerna run docs:typedoc --scope @semo/core --npm-client yarn
       - name: Public
         id: public
         run: |
