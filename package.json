@@ -2,10 +2,10 @@
   "name": "semo-mono",
   "private": true,
   "devDependencies": {
-    "husky": "^7.0.4",
-    "lerna": "^4.0.0",
-    "stmux": "^1.8.3",
-    "vuepress": "^1.8.3"
+    "husky": "^9.0.11",
+    "lerna": "^8.1.2",
+    "stmux": "^1.8.7",
+    "vuepress": "^1.9.10"
   },
   "scripts": {
     "test": "exit 0",

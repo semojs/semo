@@ -1,9 +1,13 @@
 import { Utils } from '@semo/core'
 import path from 'path'
+import fs from 'fs-extra'
+import yaml from 'yaml'
+import { createNode } from 'yaml/dist/util'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
-export const command = 'set <configKey> <configValue> [configComment] [configType]'
+export const command =
+  'set <configKey> <configValue> [configComment] [configType]'
 export const desc = 'Set config by key'
 // export const aliases = ''
 // export const middleware = (argv) => {}
@@ -11,7 +15,7 @@ export const desc = 'Set config by key'
 export const builder = function (yargs: any) {
   yargs.positional('configType', {
     default: 'string',
-    choices: ['string', 'number', 'int', 'integer', 'boolean', 'bool']
+    choices: ['string', 'number', 'int', 'integer', 'boolean', 'bool'],
   })
   // yargs.option('option', { default, describe, alias })
   // yargs.commandDir('get')
@@ -22,28 +26,35 @@ export const handler = async function (argv: any) {
     case 'bool':
     case 'boolean':
       argv.configValue = Boolean(argv.configValue)
-      break;
+      break
     case 'int':
     case 'integer':
     case 'number':
       argv.configValue = Number(argv.configValue)
   }
 
-
   if (Utils._.isString(argv.configKey)) {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
   let configPath
   if (argv.global) {
-    configPath = process.env.HOME ? path.resolve(process.env.HOME, '.' + scriptName, '.' + scriptName + 'rc.yml') : ''
+    configPath = process.env.HOME
+      ? path.resolve(
+          process.env.HOME,
+          '.' + scriptName,
+          '.' + scriptName + 'rc.yml'
+        )
+      : ''
   } else {
     configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
   }
 
-  if (!argv.global && !Utils.fs.existsSync(configPath)) {
-    Utils.error('Config file not found. you need to create config file manually to prove you know what you are doing.')
+  if (!argv.global && !fs.existsSync(configPath)) {
+    Utils.error(
+      'Config file not found. you need to create config file manually to prove you know what you are doing.'
+    )
     return
   }
 
@@ -52,22 +63,22 @@ export const handler = async function (argv: any) {
     return
   }
 
-  if (argv.global && configPath && !Utils.fs.existsSync(path.dirname(configPath))) {
-    Utils.fs.ensureDirSync(path.dirname(configPath))
+  if (argv.global && configPath && !fs.existsSync(path.dirname(configPath))) {
+    fs.ensureDirSync(path.dirname(configPath))
   }
 
   let config
-  if (Utils.fs.existsSync(configPath)) {
-    const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
-    config = Utils.yaml.parseDocument(rcFile)
+  if (fs.existsSync(configPath)) {
+    const rcFile = fs.readFileSync(configPath, 'utf8')
+    config = yaml.parseDocument(rcFile)
   } else {
-    config = Utils.yaml.parseDocument('')
+    config = yaml.parseDocument('')
 
     config.commentBefore = ` THIS IS SEMO(@semo/cli)'s RC FILE.
  YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
  RUN semo config help TO SEE RELATED COMMANDS.
 `
-    config.contents = Utils.yaml.createNode({})
+    // config.contents = createNode({}, undefined, )
   }
 
   const tmpConfigObject = Utils._.set({}, argv.configKey, argv.configValue)
@@ -75,9 +86,8 @@ export const handler = async function (argv: any) {
   // Recursively find and change
   walk(config.contents, tmpConfigObject, config, argv.configComment)
 
-  Utils.fs.writeFileSync(configPath, config.toString())
-  console.log(Utils.chalk.green(`${configPath} updated!`))
-  
+  fs.writeFileSync(configPath, config.toString())
+  console.log(Utils.color.green(`${configPath} updated!`))
 }
 
 const walk = (map: any, configKey, config, comment) => {
@@ -124,7 +134,6 @@ const walkComment = (map, configKey, comment) => {
           walkComment(pair.value, configKey[pair.key.value], comment)
         }
       }
-  
     }
   }
 }

@@ -1,5 +1,7 @@
 import { Utils } from '@semo/core'
 import path from 'path'
+import fs from 'fs-extra'
+import yaml from 'yaml'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
@@ -18,26 +20,32 @@ export const handler = async function (argv: any) {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
   let configPath
   if (argv.global) {
-    configPath = process.env.HOME ? path.resolve(process.env.HOME, '.' + scriptName, '.' + scriptName + 'rc.yml') : ''
+    configPath = process.env.HOME
+      ? path.resolve(
+          process.env.HOME,
+          '.' + scriptName,
+          '.' + scriptName + 'rc.yml'
+        )
+      : ''
   } else {
     configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
   }
 
-  if (!configPath || !Utils.fs.existsSync(configPath)) {
+  if (!configPath || !fs.existsSync(configPath)) {
     Utils.error('Config file not found.')
     return
   }
 
-  const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
-  const config = Utils.yaml.parse(rcFile)
+  const rcFile = fs.readFileSync(configPath, 'utf8')
+  const config = yaml.parse(rcFile)
   const found = Utils._.get(config, argv.configKey)
 
   if (found) {
     const tmpConfig = Utils._.set({}, argv.configKey, found)
-    console.log(Utils.yaml.stringify(tmpConfig))
+    console.log(yaml.stringify(tmpConfig))
   } else {
     Utils.warn('Config not found by key: ' + argv.configKey.join('.'))
   }

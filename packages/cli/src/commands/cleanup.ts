@@ -1,6 +1,9 @@
 import path from 'path'
+import fs from 'fs-extra'
 import { Utils, COMMON_OBJECT } from '@semo/core'
-import rimraf from 'rimraf'
+import { rimraf } from 'rimraf'
+import shell from 'shelljs'
+import inquirer from 'inquirer'
 
 export const disabled = false // Set to true to disable this command temporarily
 // export const plugin = '' // Set this for importing plugin config
@@ -22,16 +25,36 @@ export const handler = async function (argv: any) {
   let cleanupSteps = {}
   if (process.env.HOME) {
     coreCleanupSteps = {
-      'cache': path.resolve(process.env.HOME, '.' + scriptName, 'cache'),
-      'home-plugin-cache': path.resolve(process.env.HOME, '.' + scriptName, 'home-plugin-cache'),
-      'run-plugin-cache': path.resolve(process.env.HOME, '.' + scriptName, 'run-plugin-cache'),
-      'repl-package-cache': path.resolve(process.env.HOME, '.' + scriptName, 'repl-package-cache'),
-      'repl-history': path.resolve(process.env.HOME, '.' + scriptName, `.${scriptName}_repl_history`),
-      'shell-history': path.resolve(process.env.HOME, '.' + scriptName, `.${scriptName}_shell_history`),
+      cache: path.resolve(process.env.HOME, '.' + scriptName, 'cache'),
+      'home-plugin-cache': path.resolve(
+        process.env.HOME,
+        '.' + scriptName,
+        'home-plugin-cache'
+      ),
+      'run-plugin-cache': path.resolve(
+        process.env.HOME,
+        '.' + scriptName,
+        'run-plugin-cache'
+      ),
+      'repl-package-cache': path.resolve(
+        process.env.HOME,
+        '.' + scriptName,
+        'repl-package-cache'
+      ),
+      'repl-history': path.resolve(
+        process.env.HOME,
+        '.' + scriptName,
+        `.${scriptName}_repl_history`
+      ),
+      'shell-history': path.resolve(
+        process.env.HOME,
+        '.' + scriptName,
+        `.${scriptName}_shell_history`
+      ),
     }
 
     Object.keys(coreCleanupSteps).forEach(key => {
-      if (Utils.fs.existsSync(coreCleanupSteps[key])) {
+      if (fs.existsSync(coreCleanupSteps[key])) {
         cleanupSteps[key] = coreCleanupSteps[key]
       }
     })
@@ -40,31 +63,44 @@ export const handler = async function (argv: any) {
   }
 
   // Limit only application can hook cleanup
-  const hookAppCleanup = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:cleanup`, { include: ['application'] })
+  const hookAppCleanup = await Utils.invokeHook<COMMON_OBJECT>(
+    `${scriptName}:cleanup`,
+    { include: ['application'] }
+  )
   Object.keys(hookAppCleanup).forEach(key => {
     let cachePath = hookAppCleanup[key]
-    if (cachePath.indexOf(appConfig.applicationDir) > -1 && coreCleanupStepKeys.indexOf(key) === -1) {
+    if (
+      cachePath.indexOf(appConfig.applicationDir) > -1 &&
+      coreCleanupStepKeys.indexOf(key) === -1
+    ) {
       cleanupSteps[key] = hookAppCleanup[key]
     }
   })
 
   if (!argv.type) {
-    const choices = Object.keys(cleanupSteps).map(key => {
-      return { 
-        name: key + ' ' + Utils.shell.exec(`du -sh ${cleanupSteps[key]}`, { silent: true }).split("\t")[0],
-        value: key
-      }
-    }).concat([{ name: '** CLEANUP ALL ABOVE **', value: 'all'}])
-  
-    const answers: any = await Utils.inquirer.prompt([
+    const choices = Object.keys(cleanupSteps)
+      .map(key => {
+        return {
+          name:
+            key +
+            ' ' +
+            shell
+              .exec(`du -sh ${cleanupSteps[key]}`, { silent: true })
+              .split('\t')[0],
+          value: key,
+        }
+      })
+      .concat([{ name: '** CLEANUP ALL ABOVE **', value: 'all' }])
+
+    const answers: any = await inquirer.prompt([
       {
         type: 'list',
         name: 'selected',
         message: `Please choose a cache type to cleanup(remove):`,
-        choices: choices
-      }
+        choices: choices,
+      },
     ])
-  
+
     argv.type = answers.selected
   } else {
     let availableTypes = Object.keys(cleanupSteps).concat(['all'])
@@ -75,29 +111,29 @@ export const handler = async function (argv: any) {
   }
 
   if (!argv.yes) {
-    let confirm = await Utils.inquirer.prompt([
+    let confirm = await inquirer.prompt([
       {
         type: 'confirm',
         name: 'confirmed',
-        message: Utils.chalk.yellow(`Confirm cleanup ${argv.type}? The operation can not be reversed!`),
-        default: false
-      }
+        message: Utils.warn(
+          `Confirm cleanup ${argv.type}? The operation can not be reversed!`
+        ),
+        default: false,
+      },
     ])
 
     argv.yes = confirm.confirmed
   }
 
   if (argv.yes) {
-    Object.keys(cleanupSteps).forEach(key => {
+    for (let key of Object.keys(cleanupSteps)) {
       if (argv.type === key || argv.type === 'all') {
-        rimraf(cleanupSteps[key], {
-          disableGlob: true
-        }, () => {
-          Utils.success(`${key} has been cleanup!`)
+        await rimraf.sync(cleanupSteps[key], {
+          glob: false,
         })
+        Utils.success(`${key} has been cleanup!`)
       }
-    })
-    
+    }
   } else {
     Utils.info('Nothing has been cleanup!')
   }

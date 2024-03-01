@@ -1,5 +1,5 @@
 import repl from 'repl'
-
+import fs from 'fs-extra'
 import { Utils } from '@semo/core'
 
 let r: any // repl instance
@@ -24,7 +24,9 @@ function corepl(cli: repl.REPLServer) {
       prefix.shift()
       argv.prefix = prefix.join(' ').trim()
       Utils.success(
-        `Prefix has been changed to: ${argv.prefix || '[empty], so you can run any shell commands now.'}`
+        `Prefix has been changed to: ${
+          argv.prefix || '[empty], so you can run any shell commands now.'
+        }`
       )
 
       if (argv.prefix) {
@@ -35,10 +37,10 @@ function corepl(cli: repl.REPLServer) {
       return callback()
     }
 
-    const patternScriptShell = new RegExp(`^${argv.scriptName}\\s+(shell|sh)\\s+`)
-    if (
-      `${argv.prefix} ${cmd}`.match(patternScriptShell)
-    ) {
+    const patternScriptShell = new RegExp(
+      `^${argv.scriptName}\\s+(shell|sh)\\s+`
+    )
+    if (`${argv.prefix} ${cmd}`.match(patternScriptShell)) {
       Utils.warn('Recursive call shell not allowed!')
       return callback()
     }
@@ -72,16 +74,17 @@ async function openRepl(context: any): Promise<any> {
 
   r = repl.start({
     prompt: prefix ? `${prefix}:${argv.prompt}` : argv.prompt,
-    completer: (line) => {
-      const completions = '.break .clear .exit .save .load .editor prefix'.split(' ');
-      const hits = completions.filter((c) => c.startsWith(line));
+    completer: line => {
+      const completions =
+        '.break .clear .exit .save .load .editor prefix'.split(' ')
+      const hits = completions.filter(c => c.startsWith(line))
       // 如果没有匹配，则显示所有补全。
-      return [hits.length ? hits : completions, line];
-    }
+      return [hits.length ? hits : completions, line]
+    },
   })
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
-  Utils.fs.ensureDirSync(Home)
+  fs.ensureDirSync(Home)
   Utils.replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
 
   // @ts-ignore
@@ -93,15 +96,15 @@ async function openRepl(context: any): Promise<any> {
 
 export const builder = function (yargs: any) {
   yargs.option('prompt', {
-    describe: 'Prompt for input.'
+    describe: 'Prompt for input.',
   })
 
   yargs.option('prefix', {
-    describe: 'Make input command a little bit faster.'
+    describe: 'Make input command a little bit faster.',
   })
 
   yargs.option('debug', {
-    describe: 'Debug mode, show error stack'
+    describe: 'Debug mode, show error stack',
   })
 }
 

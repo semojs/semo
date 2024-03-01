@@ -15,26 +15,16 @@
   "types": "lib/index.d.ts",
   "license": "MIT",
   "devDependencies": {
-    "@types/node": "^17.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "eslint": "^8.11.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-standard": "^4.1.0",
-    "rimraf": "^3.0.2",
-    "typescript": "^4.6.2"
+    "rimraf": "^5.0.5"
   },
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
     "clean": "rimraf lib",
-    "prepare": "npm run clean && npm run build",
     "test": "exit 0"
   },
   "dependencies": {
-    "@semo/core": "^1.6.17"
+    "@semo/core": "workspace:^"
   },
   "publishConfig": {
     "access": "public"

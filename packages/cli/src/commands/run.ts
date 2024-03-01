@@ -1,5 +1,6 @@
 import { Utils } from '@semo/core'
 import path from 'path'
+import shell from 'shelljs'
 
 const debug = Utils.debug('semo:')
 
@@ -19,7 +20,7 @@ export const builder = function (yargs: any) {
 }
 
 export const handler = async function (argv: any) {
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
 
   // Populate command string
   let pluginShort
@@ -27,7 +28,7 @@ export const handler = async function (argv: any) {
     if (argv.plugin.indexOf(`${scriptName}-plugin-`) === -1) {
       argv.plugin = `${scriptName}-plugin-${argv.plugin}`
     }
-  
+
     if (argv.scope) {
       argv.plugin = `@${argv.scope}/${argv.plugin}`
     }
@@ -38,9 +39,11 @@ export const handler = async function (argv: any) {
       Utils.error(`Plugin ${argv.plugin} not found or entry not exist`)
     }
 
-    pluginShort = argv.plugin.substring(argv.plugin.indexOf(`${scriptName}-plugin-`) + `${scriptName}-plugin-`.length)
+    pluginShort = argv.plugin.substring(
+      argv.plugin.indexOf(`${scriptName}-plugin-`) +
+        `${scriptName}-plugin-`.length
+    )
   }
-  
 
   argv.with = argv.with ? Utils._.castArray(argv.with) : []
 
@@ -49,11 +52,11 @@ export const handler = async function (argv: any) {
       if (dep.indexOf(`${scriptName}-plugin-`) === -1) {
         dep = `${scriptName}-plugin-${dep}`
       }
-    
+
       if (argv.scope) {
         dep = `@${argv.scope}/${dep}`
       }
-  
+
       try {
         Utils.installPackage(dep, 'run-plugin-cache', true, argv.force)
       } catch (e) {
@@ -62,13 +65,15 @@ export const handler = async function (argv: any) {
     })
   }
 
- 
-
   // Pass SEMO_PLUGIN_DIR
   let extraPluginDirEnvName = Utils._.upperCase(scriptName) + '_PLUGIN_DIR'
-  let runPluginDir = path.resolve(String(process.env.HOME), `.${scriptName}`, 'run-plugin-cache', 'node_modules')
+  let runPluginDir = path.resolve(
+    String(process.env.HOME),
+    `.${scriptName}`,
+    'run-plugin-cache',
+    'node_modules'
+  )
 
-  
   let command = argv._
   command.shift()
   if (command.length === 0 && pluginShort) {
@@ -76,12 +81,25 @@ export const handler = async function (argv: any) {
   }
   command = command.concat(argv['--'] || [])
 
-  if (Utils.shell.which('semo')) {
-    debug(`Running: ${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
-    Utils.exec(`${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`)
+  if (shell.which('semo')) {
+    debug(
+      `Running: ${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(
+        ' '
+      )}`
+    )
+    Utils.exec(
+      `${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`
+    )
   } else {
-    debug(`Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(' ')}`)
-    Utils.exec(`${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(' ')}`)
+    debug(
+      `Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
+        ' '
+      )}`
+    )
+    Utils.exec(
+      `${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
+        ' '
+      )}`
+    )
   }
 }
-

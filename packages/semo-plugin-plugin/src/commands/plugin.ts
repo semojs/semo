@@ -1,4 +1,4 @@
-import { Utils } from "@semo/core"
+import { Utils } from '@semo/core'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const command = 'plugin'
@@ -12,7 +12,13 @@ export const builder = function (yargs: any) {
 
 export const handler = async function (argv: any) {
   if (argv._.length === 1) {
-    Utils.info(`The ${Utils.chalk.bold.green('plugin')} command is for managing semo plugins.`)
-    Utils.info(`Use ${Utils.chalk.green('plugin help')} to see it's sub commands`)
+    Utils.info(
+      `The ${Utils.color.bold(
+        Utils.color.green('plugin')
+      )} command is for managing semo plugins.`
+    )
+    Utils.info(
+      `Use ${Utils.color.green('plugin help')} to see it's sub commands`
+    )
   }
 }

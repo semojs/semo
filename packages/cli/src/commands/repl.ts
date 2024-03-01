@@ -1,6 +1,8 @@
 import repl from 'repl'
 import path from 'path'
 import { Utils, UtilsType, COMMON_OBJECT } from '@semo/core'
+import yParser from 'yargs-parser'
+import fs from 'fs-extra'
 
 let r // repl instance
 let v // yargs argv
@@ -15,14 +17,14 @@ const reload = async () => {
     `${scriptName}:repl`,
     Utils._.isBoolean(v.hook)
       ? {
-        reload: true,
-        mode: 'group'
-      }
+          reload: true,
+          mode: 'group',
+        }
       : {
-        mode: 'group',
-        include: Utils.splitComma(v.hook),
-        reload: true
-      }
+          mode: 'group',
+          include: Utils.splitComma(v.hook),
+          reload: true,
+        }
   )
 
   pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
@@ -30,18 +32,35 @@ const reload = async () => {
 
   if (v.extract && v.extract.length > 0) {
     v.extract.forEach(keyPath => {
-      r.context = Object.assign(r.context, Utils._.get(r.context, keyPath) || {})
+      r.context = Object.assign(
+        r.context,
+        Utils._.get(r.context, keyPath) || {}
+      )
     })
   }
 
-  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
-  Object.keys(hookReplCommands).filter(command => {
-    return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
-  }).forEach(command => {
-    r.defineCommand(command, hookReplCommands[command])
-  })
+  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>(
+    'semo:repl_command'
+  )
+  Object.keys(hookReplCommands)
+    .filter(command => {
+      return ![
+        'break',
+        'clear',
+        'editor',
+        'exit',
+        'help',
+        'history',
+        'load',
+        'reload',
+        'save',
+      ].includes(command)
+    })
+    .forEach(command => {
+      r.defineCommand(command, hookReplCommands[command])
+    })
 
-  console.log(Utils.chalk.green('Hooked files reloaded.'))
+  console.log(Utils.success('Hooked files reloaded.'))
 }
 
 const extract = (obj, keys: string[] | string = []) => {
@@ -58,14 +77,20 @@ const corepl = (cli: repl.REPLServer) => {
 
   // @ts-ignore
   cli.eval = function coEval(cmd, context, filename, callback) {
-    if (cmd.match(/^await\s+/) || cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/)) {
+    if (
+      cmd.match(/^await\s+/) ||
+      (cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/))
+    ) {
       if (cmd.match(/=/)) {
         cmd = '(async function() { (' + cmd + ') })()'
       } else {
         cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
       }
     } else if (cmd.match(/\W*await\s+/)) {
-      cmd = '(async function() { (' + cmd.replace(/^\s*(var|let|const)\s+/, '') + ') })()'
+      cmd =
+        '(async function() { (' +
+        cmd.replace(/^\s*(var|let|const)\s+/, '') +
+        ') })()'
     }
 
     function done(val: any) {
@@ -94,7 +119,7 @@ async function openRepl(context: any): Promise<any> {
   const argv = Semo.argv
   r = repl.start({
     prompt: argv.prompt,
-    ignoreUndefined: true
+    ignoreUndefined: true,
   })
 
   r.defineCommand('reload', {
@@ -107,25 +132,25 @@ async function openRepl(context: any): Promise<any> {
         Utils.error(e.message)
       }
       this.displayPrompt()
-    }
+    },
   })
 
   r.defineCommand('shell', {
     help: 'Execute shell commands',
     async action(cmd) {
-      this.clearBufferedCommand();
+      this.clearBufferedCommand()
       try {
         Utils.exec(cmd)
-      } catch (e) { }
-      this.displayPrompt();
-    }
+      } catch (e) {}
+      this.displayPrompt()
+    },
   })
 
   const requireAction = async function (input) {
     // @ts-ignore
-    this.clearBufferedCommand();
+    this.clearBufferedCommand()
     try {
-      let opts = Utils.yParser(input)
+      let opts = yParser(input)
 
       const packages = {}
       for (let part of opts._) {
@@ -141,32 +166,46 @@ async function openRepl(context: any): Promise<any> {
         let imported = importPackage(pack)
         Object.defineProperty(r.context, packages[pack], { value: imported })
       }
-    } catch (e) { }
+    } catch (e) {}
 
     // @ts-ignore
-    this.displayPrompt();
+    this.displayPrompt()
   }
 
   // Add require and import command
   r.defineCommand('require', {
     help: 'Require npm packages',
-    action: requireAction
+    action: requireAction,
   })
 
   r.defineCommand('import', {
     help: 'import npm packages',
-    action: requireAction
+    action: requireAction,
   })
 
-  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
-  Object.keys(hookReplCommands).filter(command => {
-    return !(['break', 'clear', 'editor', 'exit', 'help', 'history', 'load', 'reload', 'save'].includes(command))
-  }).forEach(command => {
-    r.defineCommand(command, hookReplCommands[command])
-  })
+  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>(
+    'semo:repl_command'
+  )
+  Object.keys(hookReplCommands)
+    .filter(command => {
+      return ![
+        'break',
+        'clear',
+        'editor',
+        'exit',
+        'help',
+        'history',
+        'load',
+        'reload',
+        'save',
+      ].includes(command)
+    })
+    .forEach(command => {
+      r.defineCommand(command, hookReplCommands[command])
+    })
 
   const Home = process.env.HOME + `/.${argv.scriptName}`
-  Utils.fs.ensureDirSync(Home)
+  fs.ensureDirSync(Home)
   if (!Utils.fileExistsSyncCache(Home)) {
     Utils.exec(`mkdir -p ${Home}`)
   }
@@ -182,24 +221,24 @@ async function openRepl(context: any): Promise<any> {
 
 export const builder = function (yargs) {
   yargs.option('hook', {
-    describe: 'If or not load all plugins repl hook'
+    describe: 'If or not load all plugins repl hook',
   })
 
   yargs.option('prompt', {
-    describe: 'Prompt for input. default is >>>'
+    describe: 'Prompt for input. default is >>>',
   })
 
   yargs.option('extract', {
-    describe: 'Auto extract k/v from Semo object by key path'
+    describe: 'Auto extract k/v from Semo object by key path',
   })
 
   yargs.option('import', {
-    describe: 'import package, same as require option, e.g. --import=lodash:_'
+    describe: 'import package, same as require option, e.g. --import=lodash:_',
   })
 
   yargs.option('require', {
     describe: 'require package, same as import option, e.g. --require=lodash:_',
-    alias: 'r'
+    alias: 'r',
   })
 }
 
@@ -209,14 +248,28 @@ export const handler = async function (argv: any) {
   const scriptName = argv.scriptName || 'semo'
 
   argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
-  argv.prompt = Utils.pluginConfig('repl.prompt', Utils.pluginConfig('prompt', '>>> '))
-  argv.extract = Utils.pluginConfig('repl.extract', Utils.pluginConfig('extract', ''))
-  argv.require = Utils.pluginConfig('repl.require', []).concat(Utils.pluginConfig('require', []))
-  argv.import = Utils.pluginConfig('repl.import', []).concat(Utils.pluginConfig('import', []))
+  argv.prompt = Utils.pluginConfig(
+    'repl.prompt',
+    Utils.pluginConfig('prompt', '>>> ')
+  )
+  argv.extract = Utils.pluginConfig(
+    'repl.extract',
+    Utils.pluginConfig('extract', '')
+  )
+  argv.require = Utils.pluginConfig('repl.require', []).concat(
+    Utils.pluginConfig('require', [])
+  )
+  argv.import = Utils.pluginConfig('repl.import', []).concat(
+    Utils.pluginConfig('import', [])
+  )
 
   const requiredPackages = Utils._.castArray(argv.require)
   const importedPackages = Utils._.castArray(argv.import)
-  let concatPackages = Utils._.chain(requiredPackages).concat(importedPackages).uniq().filter().value()
+  let concatPackages = Utils._.chain(requiredPackages)
+    .concat(importedPackages)
+    .uniq()
+    .filter()
+    .value()
   let packages = {}
   concatPackages.forEach(item => {
     let splited = item.split(':')
@@ -232,18 +285,21 @@ export const handler = async function (argv: any) {
   }
   v = argv
   try {
-    let context: any = Object.assign({ await: true }, {
-      Semo: {
-        VERSION,
-        Utils,
-        argv,
-        'import': importPackage,
-        'require': importPackage,
-        extract,
-        reload,
-        run: Utils.run,
+    let context: any = Object.assign(
+      { await: true },
+      {
+        Semo: {
+          VERSION,
+          Utils,
+          argv,
+          import: importPackage,
+          require: importPackage,
+          extract,
+          reload,
+          run: Utils.run,
+        },
       }
-    })
+    )
 
     for (let pack in packages) {
       context[packages[pack]] = importPackage(pack)
@@ -254,12 +310,12 @@ export const handler = async function (argv: any) {
         `${scriptName}:repl`,
         Utils._.isBoolean(argv.hook)
           ? {
-            mode: 'group'
-          }
+              mode: 'group',
+            }
           : {
-            include: Utils.splitComma(argv.hook),
-            mode: 'group'
-          }
+              include: Utils.splitComma(argv.hook),
+              mode: 'group',
+            }
       )
 
       pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
@@ -289,30 +345,34 @@ export const handler = async function (argv: any) {
         extractKeys.forEach(extractKey => {
           const splitExtractKey = extractKey.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
-          context[finalExtractKey] = Utils._.get(context, `${key}.${extractKey}`)
+          context[finalExtractKey] = Utils._.get(
+            context,
+            `${key}.${extractKey}`
+          )
         })
       })
     }
 
     if (argv.replFile) {
       const replFilePath = path.resolve(process.cwd(), argv.replFile)
-      if (argv.replFile && Utils.fs.existsSync(replFilePath)) {
+      if (argv.replFile && fs.existsSync(replFilePath)) {
         try {
           const replRequired = require(replFilePath)
-          if (replRequired.handler && Utils._.isFunction(replRequired.handler)) {
+          if (
+            replRequired.handler &&
+            Utils._.isFunction(replRequired.handler)
+          ) {
             await replRequired.handler(argv, context)
           } else if (Utils._.isFunction(replRequired)) {
             await replRequired(argv, context)
           }
-        } catch (e) { }
+        } catch (e) {}
       }
     }
-
 
     await openRepl(context)
 
     return false
-
   } catch (e) {
     Utils.error(e.stack)
   }

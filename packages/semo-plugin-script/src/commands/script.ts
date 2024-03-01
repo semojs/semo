@@ -1,12 +1,13 @@
 import path from 'path'
 import { Utils } from '@semo/core'
+import yParser from 'yargs-parser'
 
 export const command = 'script [file]'
 export const aliases = 'scr'
 export const desc = 'Execute a script'
 
-export const builder = function(yargs) {
-  const parsedArgv = Utils.yParser(process.argv.slice(2))
+export const builder = function (yargs) {
+  const parsedArgv = yParser(process.argv.slice(2))
   let filePath = parsedArgv._[1]
   if (!parsedArgv.help && !parsedArgv.h) {
     if (!Utils.fileExistsSyncCache(filePath)) {
@@ -22,7 +23,7 @@ export const builder = function(yargs) {
   }
 }
 
-export const handler = async function(argv) {
+export const handler = async function (argv) {
   try {
     let filePath = argv.file
     if (!Utils.fileExistsSyncCache(filePath)) {
@@ -36,7 +37,7 @@ export const handler = async function(argv) {
       throw new Error('Script handler not exist!')
     }
     await scriptModule.handler(argv)
-  } catch(e) {
+  } catch (e) {
     Utils.error(e.stack)
   }
 }

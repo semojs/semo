@@ -19,29 +19,26 @@
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "dependencies": {
-    "@semo/core": "^1.6.17",
-    "rimraf": "^3.0.2"
-  },
-  "devDependencies": {
-    "@types/node": "^17.0.21",
-    "@typescript-eslint/eslint-plugin": "^5.14.0",
-    "@typescript-eslint/parser": "^5.14.0",
-    "eslint": "^8.11.0",
-    "eslint-config-standard": "^16.0.3",
-    "eslint-plugin-import": "^2.25.4",
-    "eslint-plugin-node": "^11.1.0",
-    "eslint-plugin-promise": "^6.0.0",
-    "eslint-plugin-standard": "^4.1.0",
-    "typescript": "^4.6.2"
+    "@semo/core": "workspace:^",
+    "fs-extra": "^11.2.0",
+    "i": "^0.3.7",
+    "inquirer": "8.2.6",
+    "shelljs": "^0.8.5",
+    "yaml": "^2.4.0",
+    "yargs-parser": "^21.1.1"
   },
   "scripts": {
     "semo": "node lib/bin.js",
     "watch": "tsc -w",
     "build": "tsc",
-    "clean": "rimraf lib",
-    "prepare": "npm run build"
+    "clean": "rimraf lib"
   },
   "engines": {
     "node": ">=16.0.0"
+  },
+  "devDependencies": {
+    "@types/inquirer": "8.2.10",
+    "@types/shelljs": "^0.8.11",
+    "rimraf": "^5.0.5"
   }
 }

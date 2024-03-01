@@ -1,5 +1,7 @@
 import { Utils } from '@semo/core'
 import path from 'path'
+import fs from 'fs-extra'
+import yaml from 'yaml'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
@@ -18,30 +20,35 @@ export const handler = async function (argv: any) {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
   let configPath
   if (argv.global) {
-    configPath = process.env.HOME ? path.resolve(process.env.HOME, '.' + scriptName, '.' + scriptName + 'rc.yml') : ''
+    configPath = process.env.HOME
+      ? path.resolve(
+          process.env.HOME,
+          '.' + scriptName,
+          '.' + scriptName + 'rc.yml'
+        )
+      : ''
   } else {
     configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
   }
 
-  if (!configPath || !Utils.fs.existsSync(configPath)) {
+  if (!configPath || !fs.existsSync(configPath)) {
     Utils.error('Config file not found.')
     return
   }
 
-  const rcFile = Utils.fs.readFileSync(configPath, 'utf8')
-  const config = Utils.yaml.parseDocument(rcFile)
+  const rcFile = fs.readFileSync(configPath, 'utf8')
+  const config = yaml.parseDocument(rcFile)
   const tmpConfigObject = Utils._.set({}, argv.configKey, 1)
 
   // Recursively find and change
   walk(config.contents, tmpConfigObject)
 
-  Utils.fs.writeFileSync(configPath, config.toString())
-  console.log(Utils.chalk.green(`${configPath} updated!`))
+  fs.writeFileSync(configPath, config.toString())
+  console.log(Utils.color.green(`${configPath} updated!`))
 }
-
 
 const walk = (map: any, configKey) => {
   const currentKey = Object.keys(configKey)[0]
