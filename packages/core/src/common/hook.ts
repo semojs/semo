@@ -30,10 +30,12 @@ export class Hook {
   }
 
   private convertName(name) {
-    if (name !== this.scriptName && name.indexOf(`${this.scriptName}-plugin-`) === -1) {
+    if (
+      name !== this.scriptName &&
+      name.indexOf(`${this.scriptName}-plugin-`) === -1
+    ) {
       name = this.scriptName + '-plugin-' + name
     }
     return name
   }
-
 }

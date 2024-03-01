@@ -4,7 +4,7 @@ module.exports = {
   parser: '@typescript-eslint/parser',
   parserOptions: {
     project: './tsconfig.json',
-    tsconfigRootDir: './'
+    tsconfigRootDir: './',
   },
   rules: {
     '@typescript-eslint/no-use-before-define': 'warn',
@@ -12,9 +12,9 @@ module.exports = {
     '@typescript-eslint/indent': ['error', 2],
     '@typescript-eslint/no-var-requires': 'off',
     '@typescript-eslint/no-explicit-any': 'off',
-    '@typescript-eslint/interface-name-prefix': 'never'
+    '@typescript-eslint/interface-name-prefix': 'never',
   },
   globals: {
-    process: true
-  }
+    process: true,
+  },
 }

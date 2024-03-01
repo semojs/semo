@@ -5,15 +5,17 @@ export const command = 'status'
 export const aliases = 'st'
 export const desc = 'Show environment status info'
 
-export const builder = function(yargs) {
-}
+export const builder = function (yargs) {}
 
-export const handler = async function(argv: any) {
+export const handler = async function (argv: any) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookStatus = await Utils.invokeHook<COMMON_OBJECT>(`${scriptName}:status`, { mode: 'group' })
+    const hookStatus = await Utils.invokeHook<COMMON_OBJECT>(
+      `${scriptName}:status`,
+      { mode: 'group' },
+    )
 
-    Object.keys(hookStatus).forEach((key) => {
+    Object.keys(hookStatus).forEach(key => {
       const kvs = hookStatus[key] ? hookStatus[key] : {}
       const columns: string[][] = []
       if (Object.keys(kvs).length > 0) {
@@ -21,7 +23,7 @@ export const handler = async function(argv: any) {
         Utils.outputTable(columns, key === scriptName ? '' : key)
       }
     })
-  } catch(e) {
+  } catch (e) {
     Utils.error(e.stack)
   }
 }

@@ -27,7 +27,7 @@ export const handler = async function (argv: any) {
       ? path.resolve(
           process.env.HOME,
           '.' + scriptName,
-          '.' + scriptName + 'rc.yml'
+          '.' + scriptName + 'rc.yml',
         )
       : ''
   } else {

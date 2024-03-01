@@ -8,19 +8,23 @@ export const aliases = 'un'
 
 export const builder = function (yargs: any) {
   yargs.option('scope', { default: '', describe: 'Set plugin npm scope' })
-  yargs.option('local', { default: false, describe: 'Uninstall plugin from local directory, otherwise uninstall from global directory' })
+  yargs.option('local', {
+    default: false,
+    describe:
+      'Uninstall plugin from local directory, otherwise uninstall from global directory',
+  })
   // yargs.commandDir('install')
 }
 
 export const handler = async function (argv: any) {
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
 
   argv.plugin = Utils._.castArray(argv.plugin)
   argv.plugin = argv.plugin.map(plugin => {
     if (plugin.indexOf(`${scriptName}-plugin-`) === -1) {
       plugin = `${scriptName}-plugin-${plugin}`
     }
-  
+
     if (argv.scope) {
       plugin = `@${argv.scope}/${plugin}`
     }
@@ -30,4 +34,3 @@ export const handler = async function (argv: any) {
 
   Utils.uninstallPackage(argv.plugin, 'home-plugin-cache', true)
 }
-

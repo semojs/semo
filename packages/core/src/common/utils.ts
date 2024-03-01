@@ -11,7 +11,6 @@ import stringify from 'json-stringify-pretty-compact'
 import pc from 'picocolors'
 
 import debug from 'debug'
-import fuzzy from 'fuzzy'
 import { execSync } from 'child_process'
 import hash from 'object-hash'
 import getStdin from 'get-stdin'
@@ -845,6 +844,7 @@ const getApplicationConfig = function (opts: any = {}) {
     } catch (e) {
       debugCore('load rc:', e)
       warn(`Global ${homeSemoYamlRcPath} config load failed!`)
+      applicationConfig = {}
     }
   } else {
     applicationConfig = {}
@@ -1335,7 +1335,8 @@ const launchDispatcher = async (opts: any = {}) => {
     packageName: opts.packageName,
     packageDirectory: opts.packageDirectory,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
-    [`$${opts.scriptName || 'semo'}`]: { Utils, VERSION: pkg.version },
+    [`$${opts.scriptName || 'semo'}`]: { VERSION: pkg.version },
+    originalArgv: process.argv.slice(2),
   })
 
   yargs.config(appConfig)

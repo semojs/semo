@@ -29,27 +29,27 @@ export const handler = async function (argv: any) {
       'home-plugin-cache': path.resolve(
         process.env.HOME,
         '.' + scriptName,
-        'home-plugin-cache'
+        'home-plugin-cache',
       ),
       'run-plugin-cache': path.resolve(
         process.env.HOME,
         '.' + scriptName,
-        'run-plugin-cache'
+        'run-plugin-cache',
       ),
       'repl-package-cache': path.resolve(
         process.env.HOME,
         '.' + scriptName,
-        'repl-package-cache'
+        'repl-package-cache',
       ),
       'repl-history': path.resolve(
         process.env.HOME,
         '.' + scriptName,
-        `.${scriptName}_repl_history`
+        `.${scriptName}_repl_history`,
       ),
       'shell-history': path.resolve(
         process.env.HOME,
         '.' + scriptName,
-        `.${scriptName}_shell_history`
+        `.${scriptName}_shell_history`,
       ),
     }
 
@@ -65,7 +65,7 @@ export const handler = async function (argv: any) {
   // Limit only application can hook cleanup
   const hookAppCleanup = await Utils.invokeHook<COMMON_OBJECT>(
     `${scriptName}:cleanup`,
-    { include: ['application'] }
+    { include: ['application'] },
   )
   Object.keys(hookAppCleanup).forEach(key => {
     let cachePath = hookAppCleanup[key]
@@ -116,7 +116,7 @@ export const handler = async function (argv: any) {
         type: 'confirm',
         name: 'confirmed',
         message: Utils.warn(
-          `Confirm cleanup ${argv.type}? The operation can not be reversed!`
+          `Confirm cleanup ${argv.type}? The operation can not be reversed!`,
         ),
         default: false,
       },

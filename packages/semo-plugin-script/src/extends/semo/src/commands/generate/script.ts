@@ -18,8 +18,8 @@ export const handler = function (argv: any) {
   if (!scriptDir || !Utils.fileExistsSyncCache(scriptDir)) {
     console.log(
       Utils.color.red(
-        '"scriptDir" missing in config file or not exist in current directory!'
-      )
+        '"scriptDir" missing in config file or not exist in current directory!',
+      ),
     )
     return
   }
@@ -29,7 +29,7 @@ export const handler = function (argv: any) {
     scriptDir,
     `${filePrefix}_${Utils._.kebabCase(argv.name)}.${
       argv.typescript ? 'ts' : 'js'
-    }`
+    }`,
   )
   if (Utils.fileExistsSyncCache(scriptFile)) {
     console.log(Utils.color.red('Scritp file exist!'))

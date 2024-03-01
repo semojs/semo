@@ -10,15 +10,14 @@ export const aliases = 'cfg'
 export const builder = function (yargs: any) {
   yargs.option('global', {
     alias: 'g',
-    describe: 'For reading/writing configs from/to global yml rc file, default is false'
+    describe:
+      'For reading/writing configs from/to global yml rc file, default is false',
   })
 
   const argv: any = Utils.getInternalCache().get('argv') || {}
   const scriptName = argv.scriptName || 'semo'
 
-
   Utils.extendSubCommand('config', scriptName, yargs, __dirname)
 }
 
-export const handler = async function (argv: any) {
-}
+export const handler = async function (argv: any) {}

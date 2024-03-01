@@ -24,7 +24,7 @@ const reload = async () => {
           mode: 'group',
           include: Utils.splitComma(v.hook),
           reload: true,
-        }
+        },
   )
 
   pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
@@ -34,14 +34,13 @@ const reload = async () => {
     v.extract.forEach(keyPath => {
       r.context = Object.assign(
         r.context,
-        Utils._.get(r.context, keyPath) || {}
+        Utils._.get(r.context, keyPath) || {},
       )
     })
   }
 
-  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>(
-    'semo:repl_command'
-  )
+  const hookReplCommands =
+    await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
   Object.keys(hookReplCommands)
     .filter(command => {
       return ![
@@ -183,9 +182,8 @@ async function openRepl(context: any): Promise<any> {
     action: requireAction,
   })
 
-  const hookReplCommands = await Utils.invokeHook<COMMON_OBJECT>(
-    'semo:repl_command'
-  )
+  const hookReplCommands =
+    await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
   Object.keys(hookReplCommands)
     .filter(command => {
       return ![
@@ -244,23 +242,22 @@ export const builder = function (yargs) {
 
 export const handler = async function (argv: any) {
   const VERSION = argv.$semo.VERSION
-  const Utils: UtilsType = argv.$semo.Utils
   const scriptName = argv.scriptName || 'semo'
 
   argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
   argv.prompt = Utils.pluginConfig(
     'repl.prompt',
-    Utils.pluginConfig('prompt', '>>> ')
+    Utils.pluginConfig('prompt', '>>> '),
   )
   argv.extract = Utils.pluginConfig(
     'repl.extract',
-    Utils.pluginConfig('extract', '')
+    Utils.pluginConfig('extract', ''),
   )
   argv.require = Utils.pluginConfig('repl.require', []).concat(
-    Utils.pluginConfig('require', [])
+    Utils.pluginConfig('require', []),
   )
   argv.import = Utils.pluginConfig('repl.import', []).concat(
-    Utils.pluginConfig('import', [])
+    Utils.pluginConfig('import', []),
   )
 
   const requiredPackages = Utils._.castArray(argv.require)
@@ -298,7 +295,7 @@ export const handler = async function (argv: any) {
           reload,
           run: Utils.run,
         },
-      }
+      },
     )
 
     for (let pack in packages) {
@@ -315,7 +312,7 @@ export const handler = async function (argv: any) {
           : {
               include: Utils.splitComma(argv.hook),
               mode: 'group',
-            }
+            },
       )
 
       pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
@@ -347,7 +344,7 @@ export const handler = async function (argv: any) {
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
           context[finalExtractKey] = Utils._.get(
             context,
-            `${key}.${extractKey}`
+            `${key}.${extractKey}`,
           )
         })
       })

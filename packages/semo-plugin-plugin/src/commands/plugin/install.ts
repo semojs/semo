@@ -13,14 +13,14 @@ export const builder = function (yargs: any) {
 }
 
 export const handler = async function (argv: any) {
-  const scriptName= argv.scriptName || 'semo'
+  const scriptName = argv.scriptName || 'semo'
 
   argv.plugin = Utils._.castArray(argv.plugin)
   argv.plugin = argv.plugin.map(plugin => {
     if (plugin.indexOf(`${scriptName}-plugin-`) === -1) {
       plugin = `${scriptName}-plugin-${plugin}`
     }
-  
+
     if (argv.scope) {
       plugin = `@${argv.scope}/${plugin}`
     }
@@ -29,5 +29,4 @@ export const handler = async function (argv: any) {
   })
 
   Utils.installPackage(argv.plugin, 'home-plugin-cache', true, argv.force)
- 
 }

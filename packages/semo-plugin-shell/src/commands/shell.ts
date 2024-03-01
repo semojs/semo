@@ -26,7 +26,7 @@ function corepl(cli: repl.REPLServer) {
       Utils.success(
         `Prefix has been changed to: ${
           argv.prefix || '[empty], so you can run any shell commands now.'
-        }`
+        }`,
       )
 
       if (argv.prefix) {
@@ -38,7 +38,7 @@ function corepl(cli: repl.REPLServer) {
     }
 
     const patternScriptShell = new RegExp(
-      `^${argv.scriptName}\\s+(shell|sh)\\s+`
+      `^${argv.scriptName}\\s+(shell|sh)\\s+`,
     )
     if (`${argv.prefix} ${cmd}`.match(patternScriptShell)) {
       Utils.warn('Recursive call shell not allowed!')

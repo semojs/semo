@@ -41,7 +41,7 @@ export const handler = async function (argv: any) {
 
     pluginShort = argv.plugin.substring(
       argv.plugin.indexOf(`${scriptName}-plugin-`) +
-        `${scriptName}-plugin-`.length
+        `${scriptName}-plugin-`.length,
     )
   }
 
@@ -71,7 +71,7 @@ export const handler = async function (argv: any) {
     String(process.env.HOME),
     `.${scriptName}`,
     'run-plugin-cache',
-    'node_modules'
+    'node_modules',
   )
 
   let command = argv._
@@ -84,22 +84,22 @@ export const handler = async function (argv: any) {
   if (shell.which('semo')) {
     debug(
       `Running: ${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(
-        ' '
-      )}`
+        ' ',
+      )}`,
     )
     Utils.exec(
-      `${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`
+      `${extraPluginDirEnvName}=${runPluginDir} semo ${command.join(' ')}`,
     )
   } else {
     debug(
       `Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
-        ' '
-      )}`
+        ' ',
+      )}`,
     )
     Utils.exec(
       `${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
-        ' '
-      )}`
+        ' ',
+      )}`,
     )
   }
 }

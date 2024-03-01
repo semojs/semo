@@ -87,7 +87,7 @@ export const handler = async function (argv: any) {
       if (argv.template) {
         // Fetch repos from hook
         let repos = await Utils.invokeHook<COMMON_OBJECT>(
-          `${scriptName}:create_project_template`
+          `${scriptName}:create_project_template`,
         )
         // Combine repos with config
         Object.assign(repos, Utils.pluginConfig('create.template', {}))
@@ -130,7 +130,7 @@ export const handler = async function (argv: any) {
           ? argv.template
           : Object.keys(repos).find(
               key =>
-                repos[key].name && repos[key].name.indexOf(argv.template) > -1
+                repos[key].name && repos[key].name.indexOf(argv.template) > -1,
             )
         if (template && repos[template]) {
           argv.repo = repos[template].repo || Utils.error('Repo not found')
@@ -144,10 +144,10 @@ export const handler = async function (argv: any) {
               choices: Object.keys(repos).map(key => {
                 return {
                   name: `${Utils.color.green(
-                    Utils.color.underline(repos[key].name)
+                    Utils.color.underline(repos[key].name),
                   )} ${repos[key].tags
                     .map(tag =>
-                      Utils.color.white(Utils.color.bgGreen(` ${tag} `))
+                      Utils.color.white(Utils.color.bgGreen(` ${tag} `)),
                     )
                     .join(' ')}: ${Utils.color.white(repos[key].repo)}${
                     repos[key].description
@@ -194,7 +194,7 @@ export const handler = async function (argv: any) {
         Utils.info(`Downloading from ${argv.repo}`)
         try {
           Utils.exec(
-            `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`
+            `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`,
           )
 
           Utils.success('Succeeded!')
@@ -253,7 +253,7 @@ export const handler = async function (argv: any) {
       const initExtra = argv.yarn ? '--yarn' : ''
       if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
         Utils.exec(
-          `${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`
+          `${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`,
         )
       } else {
         Utils.exec(`${argv.scriptName} init --exec-mode --force  ${initExtra}`)
@@ -266,7 +266,7 @@ export const handler = async function (argv: any) {
     } else if (process.platform === 'darwin') {
       // change package.json attributes
       Utils.exec(
-        `sed -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`
+        `sed -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`,
       )
     } else {
       Utils.exec(`sed -i 's/"name": ".*"/"name": "${argv.name}"/' package.json`)

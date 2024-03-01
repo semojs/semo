@@ -42,8 +42,8 @@ export default (Utils: UtilsType) => {
           System: ['OS', 'Shell'],
           Binaries: ['Node', 'Yarn', 'npm'],
         },
-        { json: true }
-      )
+        { json: true },
+      ),
     )
 
     let kvs = {}
@@ -70,8 +70,8 @@ export default (Utils: UtilsType) => {
           home: process.env.HOME,
           shell: info.System.Shell.path,
         },
-        Utils._.identity
-      )
+        Utils._.identity,
+      ),
     )
 
     return kvs

@@ -2,8 +2,15 @@
   "name": "semo-mono",
   "private": true,
   "devDependencies": {
+    "eslint": "^8.57.0",
+    "eslint-config-standard": "^17.1.0",
+    "eslint-plugin-import": "^2.29.1",
+    "eslint-plugin-node": "^11.1.0",
+    "eslint-plugin-promise": "^6.1.1",
     "husky": "^9.0.11",
     "lerna": "^8.1.2",
+    "lint-staged": "^15.2.2",
+    "prettier": "^3.2.5",
     "stmux": "^1.8.7",
     "vuepress": "^1.9.10"
   },
@@ -34,5 +41,13 @@
     "type": "git",
     "url": "git@github.com:semojs/semo.git"
   },
-  "dependencies": {}
+  "lint-staged": {
+    "*.{js,json}": [
+      "prettier --write"
+    ],
+    "*.ts?(x)": [
+      "eslint --fix",
+      "prettier --parser=typescript --write"
+    ]
+  }
 }

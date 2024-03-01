@@ -14,11 +14,11 @@ export const handler = async function (argv: any) {
   if (argv._.length === 1) {
     Utils.info(
       `The ${Utils.color.bold(
-        Utils.color.green('plugin')
-      )} command is for managing semo plugins.`
+        Utils.color.green('plugin'),
+      )} command is for managing semo plugins.`,
     )
     Utils.info(
-      `Use ${Utils.color.green('plugin help')} to see it's sub commands`
+      `Use ${Utils.color.green('plugin help')} to see it's sub commands`,
     )
   }
 }

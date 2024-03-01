@@ -44,7 +44,7 @@ export const handler = async function (argv: any) {
       ? path.resolve(
           process.env.HOME,
           '.' + scriptName,
-          '.' + scriptName + 'rc.yml'
+          '.' + scriptName + 'rc.yml',
         )
       : ''
   } else {
@@ -53,7 +53,7 @@ export const handler = async function (argv: any) {
 
   if (!argv.global && !fs.existsSync(configPath)) {
     Utils.error(
-      'Config file not found. you need to create config file manually to prove you know what you are doing.'
+      'Config file not found. you need to create config file manually to prove you know what you are doing.',
     )
     return
   }
