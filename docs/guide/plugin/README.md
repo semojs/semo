@@ -226,6 +226,7 @@ semo help --plugin-dir=dir1 --plugin-dir=dir2
 
 ```
 SEMO_PLUGIN_DIR=dir3 semo help
+```
 
 ## 应用内部定义的插件在 Typescript 模式下失效的问题
 

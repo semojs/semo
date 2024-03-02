@@ -17,7 +17,7 @@ jobs:
         run: |
           pnpm install --frozen-lockfile
           pnpm run docs:build
-          npx lerna run docs:typedoc --scope @semo/core --npm-client pnpm
+          npx lerna run docs:typedoc --scope @semo/core
 
       - name: Deploy 🚀
         uses: JamesIves/github-pages-deploy-action@v4.3.0

@@ -30,7 +30,7 @@ semo generate command COMMAND_NAME COMMAND_DESCRIPTION
 这里以 ts 版命令为例
 
 ```bash
-semo generate command test 'test description' 
+semo generate command test 'test description'
 ```
 
 ```typescript
