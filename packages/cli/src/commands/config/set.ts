@@ -2,7 +2,6 @@ import { Utils } from '@semo/core'
 import path from 'path'
 import fs from 'fs-extra'
 import yaml from 'yaml'
-import { createNode } from 'yaml/dist/util'
 
 export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
@@ -44,7 +43,7 @@ export const handler = async function (argv: any) {
       ? path.resolve(
           process.env.HOME,
           '.' + scriptName,
-          '.' + scriptName + 'rc.yml',
+          '.' + scriptName + 'rc.yml'
         )
       : ''
   } else {
@@ -53,7 +52,7 @@ export const handler = async function (argv: any) {
 
   if (!argv.global && !fs.existsSync(configPath)) {
     Utils.error(
-      'Config file not found. you need to create config file manually to prove you know what you are doing.',
+      'Config file not found. you need to create config file manually to prove you know what you are doing.'
     )
     return
   }
@@ -78,7 +77,7 @@ export const handler = async function (argv: any) {
  YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
  RUN semo config help TO SEE RELATED COMMANDS.
 `
-    // config.contents = createNode({}, undefined, )
+    config.contents = config.createNode({}, undefined)
   }
 
   const tmpConfigObject = Utils._.set({}, argv.configKey, argv.configValue)
@@ -109,7 +108,7 @@ const walk = (map: any, configKey, config, comment) => {
   }
 
   if (!found) {
-    const pair = config.schema.createPair(currentKey, configKey[currentKey])
+    const pair = config.createPair(currentKey, configKey[currentKey])
     walkComment(pair.value, configKey[currentKey], comment)
 
     if (map && Utils._.isArray(map.items)) {

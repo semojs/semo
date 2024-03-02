@@ -10,6 +10,7 @@ import { Utils } from "@semo/core";
 
 ## For now still not support ESM, so some package should not be upgraded.
 
+- chalk
 - find-up
 - get-stdin
 - json-stringify-pretty-compact

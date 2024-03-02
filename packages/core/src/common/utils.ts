@@ -21,7 +21,10 @@ import envinfo from 'envinfo'
 import dotenv, { DotenvConfigOptions } from 'dotenv'
 import { expand as dotenvExpand } from 'dotenv-expand'
 
+import shell from 'shelljs'
+import chalk from 'chalk'
 import { Hook } from './hook'
+import day from 'dayjs'
 
 // @ts-ignore
 const yParser = yargsInternal.Parser
@@ -1335,7 +1338,7 @@ const launchDispatcher = async (opts: any = {}) => {
     packageName: opts.packageName,
     packageDirectory: opts.packageDirectory,
     orgMode: opts.orgMode, // Means my package publish under npm orgnization scope
-    [`$${opts.scriptName || 'semo'}`]: { VERSION: pkg.version },
+    [`$${opts.scriptName || 'semo'}`]: { Utils, VERSION: pkg.version },
     originalArgv: process.argv.slice(2),
   })
 
@@ -2133,6 +2136,19 @@ export const Utils = {
 
   /** [envinfo](https://www.npmjs.com/package/envinfo) reference */
   envinfo,
+
+  /** [shelljs](https://www.npmjs.com/package/shelljs) reference */
+  shell,
+
+  /** [chalk](https://www.npmjs.com/package/chalk) reference */
+  chalk,
+  /** [dayjs](https://www.npmjs.com/package/dayjs) reference */
+  day,
+
+  /** [fs-extra](https://www.npmjs.com/package/fs-extra) reference */
+  fs,
+
+  yargs,
 
   // custom functions
   log,

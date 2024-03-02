@@ -1,4 +1,5 @@
 reject:
+  - chalk
   - find-up
   - get-stdin
   - json-stringify-pretty-compact

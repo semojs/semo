@@ -31,6 +31,7 @@
     "semo": "node lib/bin.js",
     "watch": "tsc -w",
     "build": "tsc",
+    "prepare": "npm run clean && npm run build",
     "clean": "rimraf lib"
   },
   "engines": {

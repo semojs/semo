@@ -15,6 +15,8 @@
   "types": "lib/index.d.ts",
   "license": "MIT",
   "dependencies": {
+    "chalk": "^4.1.0",
+    "dayjs": "^1.10.8",
     "debug": "^4.3.4",
     "dotenv": "^16.4.5",
     "dotenv-expand": "^11.0.6",
@@ -29,6 +31,7 @@
     "node-cache": "^5.1.2",
     "object-hash": "^3.0.0",
     "picocolors": "^1.0.0",
+    "shelljs": "^0.8.5",
     "table": "^6.8.1",
     "update-notifier": "^7.0.0",
     "yaml": "^2.4.0",
@@ -47,6 +50,7 @@
   "scripts": {
     "watch": "tsc -w",
     "build": "tsc",
+    "prepare": "npm run clean && npm run build",
     "clean": "rimraf lib",
     "docs:typedoc": "typedoc src/common/*"
   }
