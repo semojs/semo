@@ -3,7 +3,7 @@ import { Utils } from '@semo/core'
 export const plugin = 'semo'
 export const command = 'generate <component>'
 export const desc = 'Generate component sample code'
-export const aliases = ['g']
+export const aliases = ['g', 'gen']
 
 export const builder = function (yargs) {
   const argv: any = Utils.getInternalCache().get('argv') || {}

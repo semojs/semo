@@ -1,51 +1,47 @@
-# Core commands
-
-:::tip
-Translating...
-:::
+# Core Commands
 
 ## `semo`
 
-Semo provides default behavior to run any `Semo` command style file.
+Please note that `Semo` provides a default mechanism to run any file that conforms to the `Semo` command line file syntax.
 
 ```
 semo command.js
 ```
 
-Normally our commands do not have `.js` extension, so if you pass an argument with `.js` you must want to execute the file. If you run a `.ts` file, you need to construct `ts` environment, please refer to our FAQ about how to do it.
+Typically, the commands we define don't include file extensions like `.js`, so the file is executed directly as a command. If you need to execute a `.ts` command file style, you'll need the `ts` environment, please refer to the FAQ section.
 
-What is this way used for? We can use this way to define scripts, then you combine the concepts of commands and scripts.You can define scripts first, then if they are used frequently, you can make a plugin with a proper name. We also have a plugin called `semo-plugin-script`, which is also used to define scripts, but it has a code template generator with will not be provided by `Semo` core.
+The significance of this mechanism is that you can use `Semo` to define and execute script files, which blurs the distinction between commands and scripts. They are interchangeable. Scripts come first, and if you find them frequently used, give them a good name and then encapsulate them into a plugin. In the early days, there was also a `semo-plugin-script` plugin that aimed to do this. Now with this default mechanism, support for script files can be built into `Semo`. However, the `semo-plugin-script` plugin still has a script template code generator feature, which the `Semo` core does not intend to provide. Because this is more inclined to be understood as a simplified way to develop command-line tools quickly.
 
 ## `semo application`
 
 > alias: `app`
 
 :::tip
-This command has been migrated to `semo-plugin-application`.
+This command has been moved to the `semo-plugin-application` plugin.
 :::
 
-By default this command does not have any functionalities. it's just a convention, suggest that you add your application commands under `semo application`. Your application need to add commands by using `semo` command extension feature.
+By default, this command has no functionality. Its purpose is to establish a convention with business projects, suggesting that commands added to the business project should be written as subcommands of this command. The reason why a business project can add subcommands to this command is that it utilizes the command extension mechanism of `Semo`.
 
 ```bash
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 ```
 
-In this way, it add an `test` command for `semo application`, and you can run it by `semo application test`
+This way, you can add a test command to the project, and this command needs to be called using `semo application test`.
 
-By running `semo application help`, you can see all top level commands in this project. Because you may have many commands in many levels, so you may need to run help command very often.
+By running `semo application help`, you can see all top-level subcommands defined by the current business project. Since it's difficult to remember all commands and parameters, especially when a project implements many commands and has multiple levels, the help command is something we often need to execute.
 
 ## `semo cleanup`
 
 > alias: clean
 
-This command is used to clean some `Semo` internal files, e.g. repl command history, shell command history, repl temp downloaded files, run command temp downloaded files, and global plugin directories and files.
+This command is used to clean up some files generated internally by Semo, including the history of the repl command, shell command history, temporarily downloaded packages in repl, temporarily downloaded packages in the run command, and the global plugin directory.
 
-For now, it only supports a limited extension, and only allows applications defining clean directories, but not support plugins adding clean directories for security reasons.
+Currently, only limited extensions are provided, allowing only the application directory to define cleanup directories. Support for plugins to add cleanup directories is not provided, mainly for security reasons.
 
 ## `semo config`
 
-We can use this command to view and modify config, including project config and global config.
+We can use this core built-in command to view and modify configuration files, operate on the configuration files of the current project, or operate on the global configuration file.
 
 ```
 semo config <op>
@@ -64,15 +60,15 @@ Options:
   --watch       Watch config change, maybe only work on Mac
 ```
 
-Here, `<configKey>`'s format is `a.b.c`, means hierarchical config. It also supports adding comments to the last level config.
+Note that the `<configKey>` here is in the format of `a.b.c`, representing multi-level configuration. In addition, it supports adding comments to the configuration set at the last level.
 
 ## `semo hook`
 
 :::tip
-This command has been migrated to `semo-plugin-hook`
+This command has been moved to the `semo-plugin-hook` plugin.
 :::
 
-This command's output shows all available hooks in current environment, all implemented hooks can be invoked. You can see the hook name, description, and definition location.
+The output of this command displays all available hooks in the current environment. All logic implementing these hooks can be executed. In the output, you can see the name, description, and module declaration of the hooks:
 
 ```
 Hook                         :  Package :  Description
@@ -85,21 +81,21 @@ Hook                         :  Package :  Description
   hook_create_project_template :  semo    :  Hook triggered in create command.
 ```
 
-Here you can see a special hook `hook_hook`, using this hook to declare new hooks. Any plugin can declare its own hooks, and other plugins can hook them to influence plugin behaviors. Most of applications projects do not need to declare hooks, except it need to build their application level plugin system.
+Here you can see that there is a special hook called `hook_hook`. Implementing this hook allows you to declare hooks, and any plugin can declare its own hooks for other commands to call, thereby affecting its own behavior. Generally, business projects do not need to declare their own hooks, unless the business project deeply uses this mechanism to constitute its own business plugin system.
 
-Another thing to note, it's not necessary to declare hooks before using, declaration code is just for clarification.
+It is also important to note that even if not declared, hooks can still be used as long as they are implemented. Declaring hooks here is just for transparency. Details on how to declare and implement hooks will be explained in the hooks-related section.
 
 ::: warning
-Maybe we do not allow to invoke non-declared hooks in the future.
+In the future, it may be possible to change the logic so that hooks that are not declared cannot be used.
 :::
 
 ## `semo init`
 
 > alias: `i`
 
-This command is for initialization for projects or plugins, these two scenarios have a little differences.
+This command is used for initialization and can implement two scenarios: initialization of a business project or initialization of a plugin. The difference between these two scenarios lies in the directory structure.
 
-In application projects, we put `Semo` directory into `bin` under the project root.
+In a business project, we default to placing the directory structure of `Semo` in the `bin` directory:
 
 ```
 ├── .semorc.yml
@@ -114,7 +110,7 @@ In application projects, we put `Semo` directory into `bin` under the project ro
 
 ```
 
-But in plugin project, we put all code into `src` directory.
+In a plugin project, we put all the code in the `src` directory:
 
 ```
 ├── .semorc.yml
@@ -125,25 +121,25 @@ But in plugin project, we put all code into `src` directory.
 └── package.json
 ```
 
-This command is to save developers seconds to init a project. It's OK to create those files and directories manually.
+The existence of this command is only to save a few seconds for engineers. In other words, if you don't use this command, manually creating these directories and files is also OK.
 
 :::tip
-The structure and usage of `.semorc.yml` is located at `Configuration management` section.
+The structure and usage of `.semorc.yml` will be explained in the configuration management section.
 :::
 
-If we want to build a new plugin, it is still not so easy to do, here we suggest using project template as follows.
+In addition, if we really want to create a plugin, it is too slow to do it through initialization. Here, it is recommended to use the plugin project template. The specific command is as follows:
 
 ```
 semo create semo-plugin-xxx --template=plugin
 ```
 
-Obviously, there are more templates. Please refer to the `create` command.
+Clearly, other project templates can also be used here. Regarding the `create` command, see below for an introduction to the `create` command.
 
 ## `semo create <name> [repo] [branch]`
 
-> alias: `c`
+> alias: `n`
 
-This command is different from `generate` and `init` command. It's used to create a new project directory. It can be application projects or plugin projects. It has some options to control.
+This command, unlike `generate` and `init`, is used to initialize a new project directory. This project can be a business project or a plugin. This command has many parameters and some conventions:
 
 ```
 $ semo create help
@@ -152,44 +148,41 @@ semo create <name> [repo] [branch]
 
 Create a create project from specific repo
 
-选项：
-  --version      显示版本号                                                                                       [布尔]
-  --yarn         use yarn command                                                                        [默认值: false]
-  --yes, -y      run npm/yarn init with --yes                                                             [默认值: true]
+Options:
+  --version      Show version number                                                                           [boolean]
+  --yarn         use yarn command                                                                        [default: false]
+  --yes, -y      run npm/yarn init with --yes                                                             [default: true]
   --force, -F    force download, existed folder will be deleted!
   --merge, -M    merge config with exist project folder!
   --empty, -E    force empty project, ignore repo
   --template, -T   select from default repos
-  --add, -A      add npm package to package.json dependencies                                            [默认值: false]
-  --add-dev, -D  add npm package to package.json devDependencies                                         [默认值: false]
+  --add, -A      add npm package to package.json dependencies                                            [default: false]
+  --add-dev, -D  add npm package to package.json devDependencies                                         [default: false]
   --init-semo, -i     init new project
-  -h, --help     显示帮助信息                                                                                     [布尔]
+  -h, --help     Show help                                                                                     [boolean]
 ```
 
-The above are specific command descriptions, and next we describe the some senarios.
+Single explanations have been provided above, below we'll explain with specific usage scenarios.
 
-### Initialize project from any repo
+### Initialize from Any Repository
 
 ```
 semo create PROJECT_NAME PROJECT_REPO_URL master -f
 ```
 
-We use `create` command to download code from any git repo, that means any git repo can be our project template. `master` is the default branch name, so we can ignore it, `-f` means `--force`, it will override existed directory.
+Here we can see that with the create command, we can download code from any git repository address, and any code repository can be our project template. Where `master` is the branch name, which defaults to `master` so it can be omitted, `-f` means if the directory already exists, it will first delete the original one and then recreate it.
 
-### Create an empty project, no project template
+In addition to downloading the code, the create command also removes the original `.git` directory and reinitializes an empty `.git` directory, then automatically downloads all project dependencies.
 
-```
+### Creating an Empty Project, Not Based on Any Project Template
+
+```bash
 semo create PROJECT_NAME -yfie
 ```
 
-The `-yfie` means `-y -f -i -e`, it's a `yargs` feature.
+Here we can see a feature of `yargs`, where short parameters can be chained together. Here, it's equivalent to `-y -f -i -e`, which means `-y` automatically answers `yes` when creating the `package.json`, `-f` forces the deletion of an existing directory, `-i` automatically executes `semo init` to initialize the project directory, and `-e` indicates that it's an empty project declaration, not based on any code repository or built-in template.
 
-> `-i` is to run `semo init` automatically.
-> `-y` is to answer `yes` when creating `package.json`.
-> `-f` is to override exsited directories.
-> `-e` is to tell it's just an empty repo.
-
-The structure is as follows.
+The directory structure of the project is as follows:
 
 ```
 ├── .semorc.yml
@@ -203,17 +196,17 @@ The structure is as follows.
 └── package.json
 ```
 
-### Create a `Semo` plugin directory
+### Creating a `Semo` Plugin Directory
 
-If we do not base on code template repo, we can create basic plugin structure manually.
+If not based on a plugin template, we can manually create a basic plugin structure:
 
-```
+```bash
 semo create semo-plugin-[PLUGIN_NAME] -yfie
 ```
 
-It's similar with the above case, except that project name has a `plugin` convention. If the project name starts with `semo-plugin-`, then `Semo` knows it's a plugin project intialization, and `semo init --plugin` executed automatically.
+Similar to the previous command, except for the project name. Here, there's a naming convention for the project name. If the project name starts with `semo-plugin-`, it's considered as initializing a `Semo` plugin, and `semo init --plugin` will be executed during initialization.
 
-The structure of this project is:
+The directory structure of the project is as follows:
 
 ```
 ├── .semorc.yml
@@ -224,15 +217,15 @@ The structure of this project is:
     └── hooks
 ```
 
-### 基于内置模板创建项目
+### Creating a Project Based on Built-in Templates
 
-If we create a project by running follow command:
+If we create a project using the following command:
 
-```
+```bash
 semo create PROJECT_NAME --template
 ```
 
-Then we'll see the output as follows:
+We'll see the following output:
 
 ```
 ? Please choose a pre-defined repo to continue: (Use arrow keys)
@@ -240,67 +233,66 @@ Then we'll see the output as follows:
 ❯ ...
 ```
 
-Here you can choose an internal template, and do not need to input repo any URLs. there is a default plugin template, and you can add more templates by implementing `hook_create_project_template`
+Here, we can choose from available built-in templates, eliminating the need to manually input repository addresses. Currently, there's only one plugin template by default, but additional templates can be injected using the `hook_create_project_template`:
 
-Here is a simple demo code. For more details about Semo hooks, please refer to relative docs.
+Example hook implementation for injecting templates:
 
 ```js
 export const hook_create_project_template = {
   demo_repo: {
-    repo: "demo_repo.git",
-    branch: "master",
-    alias: ["demo"],
+    repo: 'demo_repo.git',
+    branch: 'master',
+    alias: ['demo']
   },
-};
+}
 ```
 
-If you already know the template identifier, you can use it in commands as follows:
+If we already know which template and identifier to use during initialization, we can specify it directly:
 
-```
+```bash
 semo create PROJECT_NAME --template=demo
 semo create PROJECT_NAME --template=demo_repo
 ```
 
-:::tip
-When you create a business application or a plugin, it's not suggested to build from scratch. Because you need to think about many things like CICD, lint, test and so on. You can come up with your own code template and make the template better and create new project from it.
-:::
+### Tip
+When creating a business project or a plugin, it's not recommended to start from an empty project because many engineering and technology selection issues need to be considered. It's recommended to summarize commonly used scaffolding projects within the company and then initialize them using a unified method. For example, after initializing the built-in plugin template, you can directly write logic and then upload the code to `Github` and execute `npm version patch && npm publish` to publish it to the npm repository. Instructions on how to develop a plugin and publish it to the `npm` repository will be provided separately. Additionally, note that the scaffolding project here can be implemented in any language.
 
-The rest of options are all easy to understand, `--yarn` means install deps by `yarn`, `--add` and `--add-dev` are to set new deps. `--merge` means it will not delete old project but init in project directory.
+The remaining options are also straightforward. `--yarn` declares the use of `yarn` to initialize and install dependencies, `--add` and `--add-dev` are used to specify new dependencies during initialization. `--merge` means not to delete the original project, but to enter the project directory and then apply `--init`, `--add`, `--add-dev`.
 
 ## `semo generate <component>`
 
 > alias: `generate`, `g`
 
-This command is a code generator, `Semo` defines command, plugin, and script generator, and plugins of `Semo` can create their own generators under `generate` sub command. e.g. controller, model, migration, unit test and so on. It's best to keep same style in a team.
+This command is used for generating component code. Here, the term "component" refers to abstracted and categorized development targets. For example, the `Semo` core defines three concepts: plugins, commands, and scripts. Therefore, there are corresponding code generation subcommands for these three concepts. Similarly, `Semo` plugins or integrated projects can create their own abstract concepts and provide corresponding code generators. For instance, backend business projects may have concepts like routes, controllers, models, database migration files, unit tests, etc. These concepts may not be universal across projects but maintaining consistent style within a project is recommended. Generating boilerplate code automatically helps maintain consistency.
 
-```
+```bash
 $ semo generate help
 
 semo generate <component>
 
 Generate component sample code
 
-命令：
-  semo generate command <name> [description]               Generate a command template
-  semo generate plugin <name>                              Generate a plugin structure
-  semo generate script <name>                              Generate a script file
+Commands:
+  semo generate command <name> [description]    Generate a command template
+  semo generate plugin <name>                   Generate a plugin structure
+  semo generate script <name>                   Generate a script file
 
-选项：
-  --version   Show version                                                                                         [Boolean]
-  -h, --help  Show help                                                                                      [Boolean]
+Options:
+  --version   Show version number               [boolean]
+  -h, --help  Show help                         [boolean]
 ```
 
-### Extend `generate` command and add sub command
+### Extending the `generate` Command to Add Subcommands
 
-It's similar with extend `application` command above.
+Similar to extending the `application` command:
 
 ```bash
 semo generate command generate/test --extend=semo
 ```
 
-具体怎么实现这些代码生成命令，这里是没有做约束的，因为首先 es6 内置的模板字符串机制可以解决大多数问题，然后 `Semo` 还内置了 `lodash`，其 `_.template` 方法也比较灵活，最后只要把组装好的样板代码放到想放的位置即可。
+The implementation details of these code generation commands are not constrained here because firstly, the built-in template string mechanism in ES6 can solve most problems. Secondly, `Semo` also incorporates `lodash`, and its `_.template` method is quite flexible. Finally, once the template code is assembled, it can be placed wherever desired.
 
-因为这部分都是基于 `Semo` 的，所以相关的配置建议放到 `.semorc.yml` 文件，例如自动生成的配置里就有的：
+Since this part is based on `Semo`, related configurations are suggested to be placed in the `.semorc.yml` file. For example, the default configuration generated by `create` command includes:
 
 ```yml
 commandDir: src/commands
@@ -308,62 +300,62 @@ extendDir: src/extends
 hookDir: src/hooks
 ```
 
-可以看到，`create` 命令生成默认配置也仅仅是约定了一些代码自动生成的目录，同时也给出一种定义目录的配置风格，如果想保持配置的一致性，可以用同样的风格定义其他目录。
+As seen, the `create` command generates default configurations by merely specifying some directories for code auto-generation. It also provides a consistent style for defining other directories if maintaining configuration consistency is desired.
 
 ## `semo plugin`
 
 > alias: p
 
 :::tip
-这条命令已经转移到 `semo-plugin-plugin` 插件
+This command has been moved to the `semo-plugin-plugin` plugin.
 :::
 
-这个命令用于安装在家目录的全局插件，也可以用于优化当前项目的 semo 执行效率。
+This command is used for managing globally installed plugins in the home directory or for optimizing the execution efficiency of the current project's `semo`.
 
-```
+```bash
 $ semo plugin help
 semo plugin
 
 Plugin management tool
 
-命令：
-  semo p install <plugin>    Install plugin                                                                 [aliases: i]
-  semo p list                List all plugins                                                           [aliases: l, ls]
-  semo p uninstall <plugin>  Uninstall plugin                                                              [aliases: un]
+Commands:
+  semo p install <plugin>    Install plugin         [aliases: i]
+  semo p list                List all plugins       [aliases: l, ls]
+  semo p uninstall <plugin>  Uninstall plugin       [aliases: un]
 ```
 
 ## `semo repl [replFile]`
 
 > alias: `r`
 
-REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言大概都有这类交互环境，在里面我们可以写一些简单的代码，做为一个快速了解和学习语言特性的工具。但是当 REPL 可以和框架或者业务项目结合以后，可以发挥出更大的作用。
+REPL (read-eval-print-loop): an interactive evaluator, a tool available in most modern programming languages. It allows writing simple code snippets for quick understanding and learning of language features. When REPL is combined with frameworks or business projects, it can have greater utility.
 
-### 对 `REPL` 的一些扩展
+### Some Extensions to the `REPL`
 
-在开发 Semo 和这个脚手架时，Node 的 REPL 还不支持 `await`，这里是模拟实现了这个机制，目的是可以触发执行项目中的一些 promise 或 generator 方法。通过这个能力，再加上我们可以把一些业务代码注入到 `REPL` 我们就可以在接口控制器，脚本，单元测试之外多了一种执行方式，而这种执行方式还是交互式的。
+When developing Semo and this scaffolding, Node's REPL didn't support `await`. Here, it's simulated to enable triggering execution of promises or generator methods from the project. With this capability, combined with injecting some business logic into `REPL`, we gain an additional execution mode beyond controllers, scripts, and unit tests, and it's interactive.
 
-### 为 `REPL` 注入新的对象
+### Injecting New Objects into `REPL`
 
-这里需要实现内置的 `hook_repl` 钩子，并且在业务项目的声明的钩子目录配置： `hookDir`，下面代码仅供参考。
+Here, the internal `hook_repl` hook needs to be implemented, and configured in the business project's hook directory: `hookDir`. The following code is for reference only:
 
 ```js
 // src/hooks/index.ts
 export const hook_repl = () => {
   return {
     add: async (a, b) => {
-      return a + b;
+      return a + b
     },
     multiple: async (a, b) => {
-      return a * b;
-    },
-  };
-};
+      return a * b
+    }
+  }
+}
 ```
 
-然后在 REPL 环境，就可以使用了:
+Then, in the REPL environment, it can be used:
 
 :::tip
-`hook_repl` 返回的信息都注入到了 REPL 里的 Semo 对象。
+The information returned by `hook_repl` is injected into the `Semo` object in the REPL.
 :::
 
 ```
@@ -377,45 +369,45 @@ export const hook_repl = () => {
 12
 ```
 
-在实际的业务项目中，会把项目中的公共方法，工具函数等等都注入进去，这对开发以及后面的排查问题都是很有帮助的。默认 `Semo` 把自己的 `Utils` 工具对象注入进去了，里面有一些是 `Semo` 自定义的工具函数，更多的是把 `Semo` 引入的依赖包暴露出来，比如 `lodash`。
+In actual business projects, common methods, utility functions, etc., from the project are injected, which is helpful for development and later troubleshooting. By default, `Semo` injects its own `Utils` utility object, containing some custom utility functions of `Semo`, as well as exposing dependencies imported by `Semo`, such as `lodash`.
 
 :::tip
-在具体的实践中，我们把数据库，缓存，OSS，Consul, ElasticSearch 等等多种公司的基础设施注入了进来，写成插件，使得我们更容易的直接访问基础设施。
+In practical applications, we inject various company infrastructure such as databases, caches, OSS, Consul, ElasticSearch, etc., into the REPL, write them as plugins, and make it easier for us to directly access the infrastructure.
 :::
 
-### 重新载入一遍钩子文件
+### Reloading Hook Files
 
-`.reload` 或者 `Semo.reload()` 可以重新执行一遍 `hook_repl` 钩子，然后把最新的结果注入 Semo。这个的用途是希望在不退出 REPL 环境的情况下能够调用最新的钩子结果，这里只能保证重新加载和执行钩子文件本身，如果钩子内部用了 `require` 还是会被缓存，这部分就需要用户自己来处理了，比如每次 `require` 之前先尝试删除 `require.cache`
+`.reload` or `Semo.reload()` can re-execute the `hook_repl` hook and inject the latest results into Semo. This is useful when we want to call the latest hook results without exiting the REPL environment. It only guarantees the reloading and execution of hook files themselves. If `require` is used inside the hooks, it will still be cached, which users need to handle themselves, such as attempting to delete `require.cache` before each `require`.
 
-### 临时试用 npm 包
+### Temporarily Trying npm Packages
 
-在 REPL 下支持用 `Semo.import` 临时下载和调试一些包，这个调试包下载不会进入当前项目的 node_modules 目录。(还有一个等价方法是：Semo.require)
+In the REPL, support is provided to temporarily download and debug packages using `Semo.import`, without these downloaded debugging packages entering the current project's `node_modules` directory. (There's also an equivalent method: `Semo.require`)
 
 ```
 >>> let _ = Semo.import('lodash')
 >>> _.VERSION
 ```
 
-#### 使用内部命令的方式
+#### Using Internal Commands
 
-> v1.5.14 新增
-> `.require` 和 `.import` 是等价的，可以快速导入一些常用包用于调试，例如：
+> Added in v1.5.14
+`.require` and `.import` are equivalent and can be used to quickly import some commonly used packages for debugging. For example:
 
 ```
 >>> .import lodash:_ dayjs:day
 ```
 
-冒号后面的是别名，意思是导入后存成什么变量名。
+The part after the colon is the alias, meaning how the imported module will be stored as a variable.
 
-### 释放对象的属性到 REPL 环境
+### Releasing Object Properties to the REPL Environment
 
 ```
 >>> Semo.extract(Semo)
 ```
 
-这个操作的潜在风险就是会覆盖 REPL 环境里内置的对象，但是这个 API 的目的和作用是释放一些明确的对象，比如从 ORM 里释放一个数据库中所有的表模型。
+The potential risk of this operation is that it may overwrite built-in objects in the REPL environment. However, the purpose of this API is to release specific objects, such as releasing all table models from an ORM.
 
-这个操作也支持在配置中进行，比如要将 Semo 对象里的 `Utils` 注入进去，可以在配置文件中配置：
+This operation also supports configuration. For example, to inject the `Utils` from the Semo object, it can be configured in the configuration file:
 
 ```
 $plugin:
@@ -423,7 +415,7 @@ $plugin:
     extract: Semo
 ```
 
-这种方式会把 Semo 下的所有属性都注入进去，如果只想注入 `Utils`，支持这么写。
+This method injects all properties under Semo. If only `Utils` needs to be injected, it can be configured as follows:
 
 ```
 $plugin:
@@ -432,27 +424,27 @@ $plugin:
       Semo: [Utils]
 ```
 
-### Semo 对象简介
+### Introduction to the Semo Object
 
-最早的时候本来打算核心和插件可以自由的注入到 REPL 环境，后来觉得不可控，所以决定核心和插件都只能注入到 `Semo` 对象。下面说一下 Semo 对象的结构
+Initially, it was intended that the core and plugins could be freely injected into the REPL environment. However, due to concerns about control, it was decided that both the core and plugins can only be injected into the `Semo` object. Below is a brief overview of the structure of the Semo object:
 
-- Semo.hooks 为了对各个插件的信息进行隔离，所有插件注入的信息按照插件名称注入到这里，各个插件不会相互干扰
-- Semo.argv 这个是进入命令的 `yargs` argv 参数，有时可以用于看看配置合并是否生效，以及实验 yargs 的参数解析。
-- Semo.repl 当前 REPL 环境的对象实例
-- Semo.Utils 核心工具包，里面除了自定义的若干函数之外，会暴露出一些常用的第三方包，比如 `lodash`, `chalk` 等
-- Semo.reload 重新执行 `hook_repl` 钩子，使用最新的钩子文件
-- Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
-- Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
+- `Semo.hooks`: To isolate information injected by various plugins, all injected information from plugins is stored here, ensuring that plugins do not interfere with each other.
+- `Semo.argv`: Represents the `yargs` argv parameters entered into the command. Sometimes useful for checking if configuration merging is effective or for experimenting with yargs parameter parsing.
+- `Semo.repl`: The current object instance of the REPL environment.
+- `Semo.Utils`: Core utility package, containing several custom functions and exposing some commonly used third-party packages such as `lodash`, `chalk`, etc.
+- `Semo.reload`: Re-executes the `hook_repl` hook with the latest hook files.
+- `Semo.import`: Used for temporary experiments with npm packages. Can be cleaned up using `semo cleanup`.
+- `Semo.extract`: Releases key-value pairs of internal objects into the current scope, serving as a compensation for injecting all hooks into the `Semo` object.
 
-### 默认注入到全局作用域的方法
+### Methods Automatically Injected into the Global Scope
 
-如果觉得默认的对象层次比较深，可以通过配置或者参数使得默认注入到 REPL 的全局作用域。方式就是 `--extract`
+If you find that the default object hierarchy is too deep, you can inject it into the global scope of REPL by configuration or parameters. The method is `--extract`.
 
 ```
 semo repl --extract Semo.hooks
 ```
 
-配置的方式: 修改 `.semorc.yml`
+Configuration method: Modify `.semorc.yml`
 
 ```
 $plugin:
@@ -460,7 +452,7 @@ $plugin:
     extract: Semo.hooks
 ```
 
-或
+or
 
 ```
 CommandDefault:
@@ -468,134 +460,134 @@ CommandDefault:
     extract: Semo.hooks
 ```
 
-### 支持执行一个 repl 文件
+### Support for Executing a REPL File
 
-用途也是执行逻辑后将一些结果注入到 REPL，文件也是 Node 模块，需要符合指定格式。
+The purpose is also to execute logic and inject some results into the REPL. The file is also a Node module and needs to adhere to a specified format.
 
 ```js
-exports.handler = async (argv, context) => {};
+exports.handler = async (argv, context) => {}
 
-// 或者
+// Or
 
-module.exports = async (argv, context) => {};
+module.exports = async (argv, context) => {}
 ```
 
-需要注意，只有通过 `context` 才能注入到 REPL，如果你的代码不放到函数当中，也是可以执行的，但是不能获取到之前其他逻辑注入到 context 中的内容，也不同获得 `argv` 对象，另外，必须通过 `global` 对象注入到 REPL 当中。
+It's worth noting that only through `context` can injections be made into the REPL. If your code is not within a function, it can still be executed, but it cannot access the content injected into `context` by previous logic, nor can it obtain the `argv` object. Additionally, it must be injected into the REPL through the `global` object.
 
-这个机制有什么作用呢？主要用途是在我们开发调试时，有一些想在 REPL 里进行的调试是有许多前置逻辑的，如果都在 REPL 里一行一行的输入太麻烦，所以通过这种方式就可以把调试逻辑固化下来。
+What is the purpose of this mechanism? The main purpose is to simplify debugging during development. Some debugging tasks in the REPL may involve many preconditions. Typing them line by line in the REPL can be cumbersome. This approach allows us to solidify debugging logic.
 
-还有一个角度是: `semo repl --require` 这种方式，如果全局设置会比较固定，不宜太多，而通过命令行设置又需要每次都输入，不够方便，利用执行脚本的方式，我们可以灵活的组织逻辑，将我们想要注入的常用工具库注入，甚至在注入之前还可以做一番设置，部分可以取代之前的 `--require` 机制和 hook 机制。
+Another aspect is the `semo repl --require` mechanism. If set globally, it may be too fixed and not suitable for many cases. Setting via command line requires inputting every time, which is inconvenient. By executing scripts, we can flexibly organize logic, inject commonly used utility libraries, and even make settings before injection, partially replacing the previous `--require` mechanism and hook mechanism.
 
 ## `semo run <PLUGIN> [COMMAND]`
 
-这个命令可以像 yarn create 一样，实现直接执行远程插件包里的命令的效果
+This command functions similarly to `yarn create`, allowing for the direct execution of commands from remote plugin packages.
 
-例如：
+For example:
 
 ```
 semo run semo-plugin-serve serve
 ```
 
-这里是调用了 semo-plugin-serve 插件实现简单的 HTTP 服务，也许我们会觉得这样写起来还是不是很方便，那么我们可以简化一下。
+Here, the `semo-plugin-serve` plugin is invoked to create a simple HTTP server. However, to simplify this command, we can omit certain parts.
 
 ```
 semo run serve
 ```
 
-这样看是不是简洁多了，这里能把 `semo-plugin-` 省略的原因是这里只支持 semo 系列插件，而不是所有的 npm 包，所以可以内部帮着加上，而后面的 serve 命令去掉是因为插件为此实现了一个约定，插件就是一个普通的 node 包，可以对外暴露方法，这里暴露了一个 handler 方法，而这个 handler 方法又去掉了包里的 serve 命令，因为这个命令文件也是一个 Node 模块。如果插件里面包含多个命令，可以用这个机制对外暴露最常用的，其他的还是应该明确传参。另外，需要注意的是一些命令需要传递参数，这里需要把所有的参数和选项都改造成选项。
+This is much cleaner. The reason we can omit the `semo-plugin-` prefix is because this command only supports Semo series plugins, not all npm packages. Therefore, it can be internally appended. Additionally, the `serve` command is removed because the plugin follows a convention where it exposes a `handler` method that handles the execution of commands. If a plugin contains multiple commands, only the most commonly used ones are exposed using this mechanism, while others should be explicitly passed as arguments. Furthermore, it's essential to note that some commands require arguments, which should all be transformed into options.
 
-之前是命令的时候：
+Previously, for a command like:
 
 ```
 semo serve [publicDir]
 ```
 
-在用 `run` 命令调度时：注意，插件命令里的参数需要放到 `--` 后
+When dispatched using the `run` command, note that command arguments within plugin commands need to be placed after `--`.
 
 ```
 semo run serve -- --public-dir=.
 ```
 
-如果你在 npm 的 semo 插件包也是在 scope 下的，在用 run 时需要指定 scope
+If your npm Semo plugin package is scoped, you need to specify the scope when using `run`.
 
 ```
 semo run xxx --SCOPE yyy
 ```
 
-`run` 命令运行的插件肯定是缓存到本地了，只不过不在全局插件目录 `.semo/node_modules`, 而是在 `.semo/run_plugin_cache/node_modules` 目录，默认如果存在就会用缓存里的插件，如果想更新需要用参数 --upgrade
+Plugins run by the `run` command are cached locally, but not in the global plugin directory `.semo/node_modules`. Instead, they are cached in the `.semo/run_plugin_cache/node_modules` directory. By default, if the cache exists, the plugin will use it. To update, the `--upgrade` parameter is used.
 
 ```
 semo run serve --UPGRADE|--UP
 ```
 
-有些插件可能依赖于另一些插件，如果有这种情况，就需要手动指定依赖插件，实现一起下载，为什么不能基于 npm 的依赖关系呢，可以看一下下面这个例子：
+Some plugins may depend on others. In such cases, dependencies need to be manually specified to ensure they are downloaded together. Why not rely on npm's dependency mechanism? Consider the following example:
 
 :::tip
-此特性 v0.8.2 引入
+This feature was introduced in v0.8.2.
 :::
 
 ```
 semo run read READ_URL --format=editor --DEP=read-extend-format-editor
 ```
 
-editor 这个插件在开发时是依赖于 read 的，但是在运行时，read 指定的参数却是 editor 这个插件实现的，所以只能手动指定依赖了。
+The `editor` plugin depends on `read` during development. However, at runtime, the parameter specified for `read` is implemented by the `editor` plugin. Therefore, manual dependency specification is required.
 
-你可能已经发现这个命令的所有参数和选项都是大写的，这是为了减少与其他插件的冲突，我们最好约定所有的插件的参数和选项都用小写。
+You may have noticed that all parameters and options of this command are in uppercase. This is to reduce conflicts with other plugins. It's best to agree that all plugin parameters and options use lowercase.
 
 ## `semo script [file]`
 
 > alias: `scr`
 
 :::tip
-这条命令已经转移到 `semo-plugin-script` 插件
+This command has been moved to the `semo-plugin-script` plugin.
 :::
 
-很多时候我们都需要跑一些脚本，这些脚本是在项目服务之外的，需要我们主动触发，可能是做数据迁移，可能是数据导出，可能是数据批量修改，也可能是执行业务逻辑，比如发邮件，发短信，发通知等等。在遇到这样的需求的时候，我们都需要写脚本，但是我们会遇到几个问题：
+Often, we need to run scripts outside of project services, such as for data migration, exporting data, batch data modification, or executing business logic like sending emails, SMS, or notifications. When faced with such requirements, we need to write scripts, but encounter several issues:
 
-- 放哪里
-- 怎么写
-- 脚本参数怎么解析
+- Where to place them?
+- How to write them?
+- How to parse script arguments?
 
-很多时候这些需求都是一次性的，或者有前提的，不是很适合写成命令，不然命令就太多了，在这种场景下，`Semo` 通过这条命令给出了一个统一的方案。
+In many cases, these requirements are one-time or have preconditions, making them unsuitable for commands. Otherwise, there would be too many commands. In such scenarios, `Semo` provides a unified solution through this command.
 
-### 放哪里
+### Where to Place Scripts
 
-在配置中有一个 `scriptDir`，默认是 `src/scripts`，我们默认把脚本都放到这里，因为这些脚本不会被服务访问到，所以没必要和项目核心逻辑放的太近。
+There is a `scriptDir` configuration in which scripts are stored, defaulting to `src/scripts`. Since these scripts are not accessible to services, there's no need to keep them too close to the project's core logic.
 
-### 怎么写，怎么解析参数
+### How to Write and Parse Arguments
 
-当然可以手动建脚本，然后用这个命令来触发，但是因脚本还需要起名字，而且还有一定的格式要求，所以，推荐使用 `semo generate script` 命令来生成。
+Of course, you can manually create scripts and then trigger them using this command. However, scripts need to be named, and there are certain formatting requirements. Therefore, it's recommended to use the `semo generate script` command to generate them.
 
 ```
 semo generate script test
 ```
 
-自动生成的样板代码及文件名：
+Automatically generated boilerplate code and filename:
 
 ```js
 // src/bin/semo/scripts/20191025130716346_test.ts
-export const builder = function(yargs: any) {
+export const builder = function (yargs: any) {
   // yargs.option('option', {default, describe, alias})
-};
+}
 
-export const handler = async function(argv: any) {
-  console.log("Start to draw your dream code!");
-};
+export const handler = async function (argv: any) {
+  console.log('Start to draw your dream code!')
+}
 ```
 
-可以看到，作为一个脚本，不是一上来就写业务逻辑，也不需要声明 `shebang` 标识，只需要定义两个方法，一个是 `builder`，一个是 `handler`。其中 `builder` 用于声明脚本的参数，格式可以参考 `yargs`，如果脚本不需要参数，其实也可以不定义，由于是模板自动生成，放到那里即可，以备不时之需。`handler` 是具体的执行逻辑，传入的参数就是解析好的脚本参数，也包含了项目的 `.semorc.yml` 里的配置。可以看到 `handler` 支持 `async` 所以这里可以执行一些异步操作。
+As a script, instead of immediately writing business logic, or needing to declare a `shebang` identifier, you only need to define two methods: `builder` and `handler`. The `builder` method is used to declare script parameters, and the format can refer to `yargs`. If the script doesn't require parameters, it can be omitted. Since it's template-generated, it's placed there for future needs. The `handler` contains the specific execution logic, with the parsed script parameters passed as arguments, including the project's `.semorc.yml` configuration. Note that `handler` supports `async`, allowing for asynchronous operations here.
 
-所以，脚本和命令最大的区别其实就是使用的频率，以及业务的定位，我们经常做的分层是定义原子命令，然后在脚本中调度。
+Therefore, the most significant difference between scripts and commands lies in their frequency of use and business positioning. We often define atomic commands and then orchestrate them in scripts.
 
 ## `semo shell`
 
 > alias: `sh`
 
 :::tip
-这条命令已经转移到 `semo-plugin-shell` 插件
+This command has been moved to the `semo-plugin-shell` plugin.
 :::
 
-这个命令是个很简单的命令，目的是不用每次敲命令都输入前面的 `semo`，例如：
+This command is straightforward—it eliminates the need to type `semo` before every command. For example:
 
 ```
 semo shell
@@ -619,7 +611,7 @@ git: log
 
 > alias: `st`
 
-这个命令的作用很简单，就是看 `Semo` 当前所处的环境，例如：
+This command simply displays the environment in which `Semo` is currently operating. For example:
 
 ```
 $ semo st
@@ -634,12 +626,12 @@ $ semo st
   shell    :  [MY_SHELL]
 ```
 
-这里实现了一个 hook， `hook_status`，实现了这个 hook 的插件，可以在这里展示插件的相关信息，如果是业务项目实现了这个钩子，也可以在这里显示项目信息。
+This command implements a hook, `hook_status`. Plugins implementing this hook can display relevant plugin information here. If a business project implements this hook, it can also display project information.
 
 ## `semo completion`
 
-这个命令的作用是输出一段 `Shell` 脚本，放到 `.bashrc` 或者 `.zshrc` 里，就能够获得子命令的自动补全效果。
+This command outputs a shell script that, when placed in `.bashrc` or `.zshrc`, enables automatic completion of subcommands.
 
 :::warning
-由于 `Semo` 的性能有些差，所以这个自动补全虽然能用，但是体验极差，不建议使用。
+Due to Semo's poor performance, while this auto-completion can be used, it provides a poor user experience and is not recommended.
 :::

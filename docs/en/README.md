@@ -1,29 +1,29 @@
 ---
 home: true
-actionText: Get started →
-actionLink: /en/guide/quickstart/
+actionText: Quick Start →
+actionLink: /guide/quickstart/
 features:
-- title: Consistency
-  details: No matter what framework used and how structured, you can use this package to implement consistent command line scripts.
-- title: Flexibility
-  details: You can extend by plugins, you can override commands, config, and you can hook with core or other plugins.
-- title: Efficiency
-  details: The command rule is simple, so it easy to use, if you use it frequently, it can dramatically improve you performant.
-footer: Enterprise level Node CLI building rules
+- title: Consistent
+  details: Regardless of the framework used in the Node project or how abstraction is layered, this framework can be used to implement command-line scripts with a unified style.
+- title: Extensible
+  details: Plugins can be extended, commands can be overridden, configurations can be overwritten, and hook mechanisms can interact with hooks defined by built-in or third-party plugins.
+- title: Efficient
+  details: Due to its simple rules, development efficiency is high, and due to frequent use, work efficiency is high.
+footer: Standardized Command Line System Construction Specification for Enterprise-level Node Projects
 ---
 
 ```bash
-# Install globally to your local machine.
+# For local environment, global installation is generally recommended
 npm install -g @semo/cli
 semo help
 
-# Install to your project
+# First integration in the project
 cd YOUR_PROJECT
 npm install @semo/cli
 semo init
 semo generate command test
 
-# Use application convention to reduce first level commands
+# Using the application command line specification
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 ```

@@ -1,28 +1,28 @@
 # Introduction
 
-Semo is a CLI framework, based on excellent `yargs`. Semo do not want to do CLI parsing jobs, defining commands, but giving rules about how to use `yargs`, so it's easy to used in your Node.js projects, provide consitent CLI style and flexibility. 
+Semo is a command-line development framework, built on top of the excellent `yargs` package with encapsulation and extension. Semo aims not to solve problems such as parsing command-line options and parameters, defining commands, and triggering commands, but to standardize and specify how to implement them in business scenarios. This ensures a consistent command-line architecture for numerous Node microservice projects within a company, while also providing various extension features.
 
 ## Principles
 
-- **Consistency**: No matter what framework used and how structured, you can use this package to implement consistent command line scripts.
-- **Flexibility**: You can extend by plugins, you can override commands, config, and you can hook with core or other plugins.
-- **Efficiency**: The command rule is simple, so it easy to use, if you use it frequently, it can dramatically improve you performant.
+- **Consistency**: Regardless of the framework used in Node projects or how abstraction is layered, this framework can be used to implement command-line scripts with a unified style.
+- **Extensibility**: Plugins can be extended, commands can be overridden, configurations can be overwritten, and the hook mechanism can interact with hooks defined by built-in or third-party plugins.
+- **Efficiency**: Simple to get started with, high development efficiency, consistent style, high maintenance efficiency, frequent use, and high work efficiency.
 
 ## Features
 
-- Core concepts are less, just plugin, command, script, config, and hook.
-- Plugin, command, config all can be extended or overriden.
-- Provide a useful REPL environment, support `await`.
-- Add sub commands for other plugins's commands.
-- Provide a simple code generator rule, support plugin, command generator.
-- Plugin is by name convention.
+- Few but powerful core concepts, including plugins, commands, scripts, configurations, hooks, etc.
+- Plugins, commands, and configurations can be extended or overridden according to conventions.
+- Provides an extensible REPL environment and supports `await`.
+- Child commands can be added to commands defined by other plugins.
+- Provides a simple code generation mechanism; basic plugin, command, and script boilerplate code can be automatically generated, with support for extensions.
+- Supports plugins with npm organization package name format.
 
-## Name story
+## Origin of the Name
 
-Semo is from World language, the meaning is like `tinder` in English.
+As is well known, naming is hard. Semo is a concept born out of the spark in my mind, translated from various languages, meaning "seed" in Esperanto, symbolizing a starting point and hope.
 
-## About this doc
+## Conventions
 
-- Semo support `Typescript` and `Javascript`, but demo code in this doc mostly use `Typescript` style.
-- By default, suppose `semo` and `yarn` are installed already.
-- This is a personal project, only tested on `Mac` and `Linux`, but not `Windows`.
+- All example code is based on `Typescript`. Although the core of `Semo` is also written in `Typescript`, `Semo` supports projects written purely in `js`, as explained in the configuration management section.
+- The documentation assumes that `semo` and `yarn` are globally installed in the environment and does not explicitly mention them in specific chapters.
+- The development environment of this project is `Mac`, and the runtime environment is either the local machine or the container environment online. It has not been tested on `Windows` and may have compatibility issues.

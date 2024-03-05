@@ -149,7 +149,7 @@ interface IHookOption {
 const invokeHook = async function <T>(
   hook: any = null,
   options: IHookOption = { mode: 'assign' },
-  argv: any = null
+  argv: any = null,
 ): Promise<T> {
   const splitHookName = hook.split(':')
   let moduler, originModuler
@@ -180,7 +180,7 @@ const invokeHook = async function <T>(
       exclude: [],
       opts: {},
     },
-    options
+    options,
   )
 
   try {
@@ -200,7 +200,7 @@ const invokeHook = async function <T>(
           {
             [scriptName]: path.resolve(argv.packageDirectory),
           },
-          getAllPluginsMapping(argv)
+          getAllPluginsMapping(argv),
         )
       : getAllPluginsMapping(argv)
 
@@ -236,6 +236,7 @@ const invokeHook = async function <T>(
     for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
       let plugin = Object.keys(plugins)[i]
 
+      // Process include option
       if (
         _.isArray(options.include) &&
         options.include.length > 0 &&
@@ -244,6 +245,7 @@ const invokeHook = async function <T>(
         continue
       }
 
+      // Process exclude option
       if (
         _.isArray(options.exclude) &&
         options.exclude.length > 0 &&
@@ -277,7 +279,7 @@ const invokeHook = async function <T>(
         if (
           hookDir &&
           fileExistsSyncCache(
-            path.resolve(plugins[plugin], hookDir, 'index.js')
+            path.resolve(plugins[plugin], hookDir, 'index.js'),
           )
         ) {
           pluginEntryPath = path.resolve(plugins[plugin], hookDir, 'index.js')
@@ -373,7 +375,7 @@ const extendSubCommand = function (
   command: string,
   moduleName: string,
   yargs: any,
-  basePath: string
+  basePath: string,
 ): void {
   let argv: any = cachedInstance.get('argv') || {}
   if (_.isEmpty(argv)) {
@@ -403,7 +405,7 @@ const extendSubCommand = function (
         argv['$config'] = {}
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(
-            argv.scriptName + '-plugin-'
+            argv.scriptName + '-plugin-',
           )
             ? command.plugin.substring(argv.scriptName + '-plugin-'.length)
             : command.plugin
@@ -411,7 +413,7 @@ const extendSubCommand = function (
           if (command.plugin && argv['$plugin']) {
             if (argv['$plugin'][command.plugin]) {
               argv['$config'] = formatRcOptions(
-                argv['$plugin'][command.plugin] || {}
+                argv['$plugin'][command.plugin] || {},
               )
             } else if (
               argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]
@@ -419,7 +421,7 @@ const extendSubCommand = function (
               argv['$config'] = formatRcOptions(
                 argv['$plugin'][
                   argv.scriptName + '-plugin-' + command.plugin
-                ] || {}
+                ] || {},
               )
             }
           }
@@ -458,17 +460,17 @@ const extendSubCommand = function (
             path.resolve(
               plugins[plugin],
               `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`,
-              command
-            )
+              command,
+            ),
           )
         ) {
           yargs.commandDir(
             path.resolve(
               plugins[plugin],
               `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`,
-              command
+              command,
             ),
-            opts
+            opts,
           )
         }
       }
@@ -482,17 +484,17 @@ const extendSubCommand = function (
       path.resolve(
         process.cwd(),
         `${config.extendDir}/${moduleName}/src/commands`,
-        command
-      )
+        command,
+      ),
     )
   ) {
     yargs.commandDir(
       path.resolve(
         process.cwd(),
         `${config.extendDir}/${moduleName}/src/commands`,
-        command
+        command,
       ),
-      opts
+      opts,
     )
   }
 }
@@ -585,13 +587,13 @@ const getAllPluginsMapping = function (argv: any = {}): {
         noext: true,
         cwd: path.resolve(
           argv.packageDirectory,
-          argv.orgMode ? '../../' : '../'
+          argv.orgMode ? '../../' : '../',
         ),
       }).map(function (plugin): void {
         plugins[plugin] = path.resolve(
           argv.packageDirectory,
           argv.orgMode ? '../../' : '../',
-          plugin
+          plugin,
         )
       })
 
@@ -611,13 +613,13 @@ const getAllPluginsMapping = function (argv: any = {}): {
         noext: true,
         cwd: path.resolve(
           argv.packageDirectory,
-          argv.orgMode ? '../../' : '../'
+          argv.orgMode ? '../../' : '../',
         ),
       }).map(function (plugin): void {
         plugins[plugin] = path.resolve(
           argv.packageDirectory,
           argv.orgMode ? '../../' : '../',
-          plugin
+          plugin,
         )
       })
     }
@@ -629,14 +631,14 @@ const getAllPluginsMapping = function (argv: any = {}): {
           path.resolve(
             process.env.HOME,
             '.' + scriptName,
-            `.${scriptName}rc.yml`
-          )
+            `.${scriptName}rc.yml`,
+          ),
         )
       ) {
         // So home plugin directory will not be overridden by other places normally.
         plugins['.' + scriptName] = path.resolve(
           process.env.HOME,
-          '.' + scriptName
+          '.' + scriptName,
         )
       }
 
@@ -647,7 +649,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
           process.env.HOME,
           `.${scriptName}`,
           'home-plugin-cache',
-          'node_modules'
+          'node_modules',
         ),
       }).map(function (plugin): void {
         if (process.env.HOME) {
@@ -656,7 +658,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
             `.${scriptName}`,
             'home-plugin-cache',
             'node_modules',
-            plugin
+            plugin,
           )
         }
       })
@@ -671,7 +673,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
             process.env.HOME,
             `.${scriptName}`,
             'node_modules',
-            plugin
+            plugin,
           )
         }
       })
@@ -737,7 +739,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
     extraPluginDirEnvName &&
     process.env[extraPluginDirEnvName] &&
     fileExistsSyncCache(
-      getAbsolutePath(process.env[extraPluginDirEnvName] as string)
+      getAbsolutePath(process.env[extraPluginDirEnvName] as string),
     )
   ) {
     let envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
@@ -821,8 +823,8 @@ const getApplicationConfig = function (opts: any = {}) {
   let scriptName = opts.scriptName
     ? opts.scriptName
     : argv && argv.scriptName
-    ? argv.scriptName
-    : 'semo'
+      ? argv.scriptName
+      : 'semo'
   argv = Object.assign(argv, opts, { scriptName })
 
   let applicationConfig
@@ -855,8 +857,8 @@ const getApplicationConfig = function (opts: any = {}) {
   applicationConfig.applicationDir = opts.cwd
     ? opts.cwd
     : configPath
-    ? path.dirname(configPath)
-    : process.cwd()
+      ? path.dirname(configPath)
+      : process.cwd()
 
   // Inject some core config, hard coded
   applicationConfig = Object.assign({}, applicationConfig, opts, {
@@ -866,13 +868,12 @@ const getApplicationConfig = function (opts: any = {}) {
   // Load application rc, if same dir with core, it's a dup process, rare case.
   if (
     fileExistsSyncCache(
-      path.resolve(applicationConfig.applicationDir, 'package.json')
+      path.resolve(applicationConfig.applicationDir, 'package.json'),
     )
   ) {
-    let packageInfo = require(path.resolve(
-      applicationConfig.applicationDir,
-      'package.json'
-    ))
+    let packageInfo = require(
+      path.resolve(applicationConfig.applicationDir, 'package.json'),
+    )
 
     if (packageInfo.name) {
       applicationConfig.name = packageInfo.name
@@ -888,7 +889,7 @@ const getApplicationConfig = function (opts: any = {}) {
       applicationConfig = Object.assign(
         {},
         applicationConfig,
-        packageInfo[scriptName]
+        packageInfo[scriptName],
       )
     }
   }
@@ -1133,7 +1134,7 @@ const splitByChar = function (input: string, char: string) {
 const outputTable = function (
   columns: string[][],
   caption: string = '',
-  borderOptions = {}
+  borderOptions = {},
 ) {
   // table config
   const config = {
@@ -1147,7 +1148,7 @@ const outputTable = function (
     border: Object.assign(
       getBorderCharacters(`void`),
       { bodyJoin: `:` },
-      borderOptions
+      borderOptions,
     ),
   }
 
@@ -1181,7 +1182,7 @@ const parsePackageNames = function (input: string | string[]) {
  */
 const getPackagePath = function (
   pkg: string | undefined = undefined,
-  paths: any = []
+  paths: any = [],
 ): any {
   const packagePath = findUp.sync('package.json', {
     cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd(),
@@ -1196,7 +1197,7 @@ const getPackagePath = function (
  */
 const loadPackageInfo = function (
   pkg: string | undefined = undefined,
-  paths: any = []
+  paths: any = [],
 ): any {
   const packagePath = getPackagePath(pkg, paths)
   return packagePath ? require(packagePath) : {}
@@ -1329,7 +1330,7 @@ const launchDispatcher = async (opts: any = {}) => {
     'argv',
     Object.assign(parsedArgv, {
       scriptName: opts.scriptName || 'semo',
-    })
+    }),
   ) // set argv first time
   let appConfig = getApplicationConfig()
 
@@ -1395,7 +1396,7 @@ const launchDispatcher = async (opts: any = {}) => {
         // Give command a plugin level config
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(
-            appConfig.scriptName + '-plugin-'
+            appConfig.scriptName + '-plugin-',
           )
             ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length)
             : command.plugin
@@ -1403,7 +1404,7 @@ const launchDispatcher = async (opts: any = {}) => {
           if (command.plugin && argv['$plugin']) {
             if (argv['$plugin'][command.plugin]) {
               argv['$config'] = formatRcOptions(
-                argv['$plugin'][command.plugin] || {}
+                argv['$plugin'][command.plugin] || {},
               )
             } else if (
               argv['$plugin'][
@@ -1413,7 +1414,7 @@ const launchDispatcher = async (opts: any = {}) => {
               argv['$config'] = formatRcOptions(
                 argv['$plugin'][
                   appConfig.scriptName + '-plugin-' + command.plugin
-                ] || {}
+                ] || {},
               )
             }
           }
@@ -1431,15 +1432,16 @@ const launchDispatcher = async (opts: any = {}) => {
       return command.disabled === true ? false : command
     },
   }
+
   if (
     !parsedArgv.disableCoreCommand &&
     opts.packageDirectory &&
     packageConfig.name !== scriptName
   ) {
-    // Load local commands
+    // Load core commands
     yargs.commandDir(
       path.resolve(opts.packageDirectory, appConfig.coreCommandDir),
-      yargsOpts
+      yargsOpts,
     )
   }
 
@@ -1450,15 +1452,18 @@ const launchDispatcher = async (opts: any = {}) => {
         config.pluginConfigs[plugin] &&
         config.pluginConfigs[plugin].commandDir &&
         fileExistsSyncCache(
-          path.resolve(plugins[plugin], config.pluginConfigs[plugin].commandDir)
+          path.resolve(
+            plugins[plugin],
+            config.pluginConfigs[plugin].commandDir,
+          ),
         )
       ) {
         yargs.commandDir(
           path.resolve(
             plugins[plugin],
-            config.pluginConfigs[plugin].commandDir
+            config.pluginConfigs[plugin].commandDir,
           ),
-          yargsOpts
+          yargsOpts,
         )
       }
     })
@@ -1471,7 +1476,7 @@ const launchDispatcher = async (opts: any = {}) => {
   ) {
     yargs.commandDir(
       path.resolve(process.cwd(), appConfig.commandDir),
-      yargsOpts
+      yargsOpts,
     )
   }
 
@@ -1527,7 +1532,7 @@ const launchDispatcher = async (opts: any = {}) => {
       ) {
         debugCore('Core hook before_command triggered')
         let beforeHooks = await invokeHook<Function[]>(
-          `${scriptName}:before_command`
+          `${scriptName}:before_command`,
         )
         Object.keys(beforeHooks).map(function (hook) {
           beforeHooks[hook](parsedArgv, yargs)
@@ -1560,7 +1565,6 @@ const launchDispatcher = async (opts: any = {}) => {
               })
             yargs.completion('completion', 'Generate completion script')
           } else {
-            // @ts-ignore, @types/yargs type def not correct
             yargs.completion('completion', false)
           }
         }
@@ -1580,7 +1584,7 @@ const launchDispatcher = async (opts: any = {}) => {
         })
       }
 
-      if (!parsedArgv.hideEpilog) {
+      if (!parsedArgv.hideEpilog && !parsedArgv.disableCoreCommand) {
         yargs.hide('hide-epilog').option('hide-epilog', {
           describe: 'Hide epilog.',
         })
@@ -1601,7 +1605,7 @@ const launchDispatcher = async (opts: any = {}) => {
             }
 
             return 'Find more information at https://semo.js.org'
-          })(parsedArgv.setEpilog)
+          })(parsedArgv.setEpilog),
         )
       }
 
@@ -1650,18 +1654,20 @@ const launchDispatcher = async (opts: any = {}) => {
         } catch (e) {}
       }
 
-      if (parsedArgv._[0] !== 'completion') {
+      if (parsedArgv._[0] !== 'completion' && !parsedArgv.disableCoreCommand) {
         yargs.command(
           '$0',
           'Execute a Semo style command file',
           defaultCommand.builder,
-          defaultCommand.handler
+          defaultCommand.handler,
         )
       }
 
-      yargs.command('version', 'Show version number', () => {
-        console.log(pkg.version)
-      })
+      if (!parsedArgv.disableCoreCommand) {
+        yargs.command('version', 'Show version number', () => {
+          console.log(pkg.version)
+        })
+      }
 
       // eslint-disable-next-line
       yargs
@@ -1674,19 +1680,6 @@ const launchDispatcher = async (opts: any = {}) => {
           'sort-commands': true,
           'populate--': true,
         })
-        .example([
-          ['$0 run hello-world', 'Run a remote plugin command.'],
-          [
-            '$0 run --with project-templates — create PROJECT_NAME -T',
-            'Clone project template as a starter.',
-          ],
-          [
-            '$0 repl --require lodash:_',
-            'Start Semo repl and inject lodash object to _.',
-          ],
-          ['$0 generate command test', 'Generate command template.'],
-          ['$0 clean all', 'Clean all cache files and installed npm packages.'],
-        ])
         .fail(false)
         // .onFinishCommand(async (hook) => {
         //   if (hook !== false) {
@@ -1726,6 +1719,21 @@ const launchDispatcher = async (opts: any = {}) => {
       //   }
       //   process.exit(0);
       // }
+      if (!parsedArgv.disableCoreCommand) {
+        yargs.example([
+          ['$0 run hello-world', 'Run a remote plugin command.'],
+          [
+            '$0 run --with project-templates — create PROJECT_NAME -T',
+            'Clone project template as a starter.',
+          ],
+          [
+            '$0 repl --require lodash:_',
+            'Start Semo repl and inject lodash object to _.',
+          ],
+          ['$0 generate command test', 'Generate command template.'],
+          ['$0 clean all', 'Clean all cache files and installed npm packages.'],
+        ])
+      }
     } catch (e) {
       if (!e.name || e.name !== 'YError') {
         error(e.stack)
@@ -1796,8 +1804,8 @@ const installPackage = (name, location = '', home = true, force = false) => {
   if (force) {
     exec(
       `npm install ${nameArray.join(
-        ' '
-      )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+        ' ',
+      )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
     )
   }
 
@@ -1807,7 +1815,7 @@ const installPackage = (name, location = '', home = true, force = false) => {
     } catch (err) {
       if (err.code == 'MODULE_NOT_FOUND') {
         exec(
-          `npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+          `npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
         )
       }
     }
@@ -1831,8 +1839,8 @@ const uninstallPackage = (name, location = '', home = true) => {
 
   exec(
     `npm uninstall ${nameArray.join(
-      ' '
-    )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+      ' ',
+    )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
   )
 }
 
@@ -1866,7 +1874,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
 
   if (force) {
     exec(
-      `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+      `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
     )
   }
 
@@ -1876,7 +1884,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
   } catch (err) {
     if (err.code == 'MODULE_NOT_FOUND') {
       exec(
-        `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+        `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
       )
       try {
         pkgPath = require.resolve(name, { paths: [downloadDir] })
@@ -1917,8 +1925,8 @@ const pluginConfig = (key: string, defaultValue: any = undefined) => {
   return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
     ? argv[key]
     : !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key])
-    ? argv.$config[key]
-    : _.get(argv.$config, key, defaultValue)
+      ? argv.$config[key]
+      : _.get(argv.$config, key, defaultValue)
 }
 
 /**
@@ -1992,7 +2000,7 @@ const run = async (func, getPath = '', ...args) => {
  */
 const extendConfig = (
   extendRcPath: string[] | string,
-  prefix: any = undefined
+  prefix: any = undefined,
 ) => {
   let argv: any = getInternalCache().get('argv') || {}
 
@@ -2027,7 +2035,7 @@ const extendConfig = (
     const nodeEnv = getNodeEnv(argv)
     let extendRcEnvPath = path.resolve(
       path.dirname(rcPath),
-      `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`
+      `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`,
     )
     if (extendRcEnvPath && fileExistsSyncCache(extendRcEnvPath)) {
       try {
@@ -2063,7 +2071,7 @@ const extendConfig = (
  */
 const consoleReader = (
   content: string,
-  opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {}
+  opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {},
 ) => {
   const argv: any = getInternalCache().get('argv')
   const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
@@ -2076,7 +2084,7 @@ const consoleReader = (
       process.env.HOME,
       `.${scriptName}/cache`,
       <string>opts.plugin,
-      md5(opts.identifier)
+      md5(opts.identifier),
     )
     fs.ensureDirSync(path.dirname(tmpPath))
     fs.writeFileSync(tmpPath, content)
@@ -2104,7 +2112,7 @@ const consoleReader = (
 const clearConsole = () => {
   process.stdout.isTTY &&
     process.stdout.write(
-      process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H'
+      process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H',
     )
 }
 
