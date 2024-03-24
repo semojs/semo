@@ -2116,6 +2116,11 @@ const clearConsole = () => {
     )
 }
 
+const moveToTopConsole = () => {
+  process.stdout.isTTY &&
+    process.stdout.write(process.platform === 'win32' ? '\x1B[0f' : '\x1B[H')
+}
+
 const argParser = (argv: string) => {
   return yParser(argv)
 }

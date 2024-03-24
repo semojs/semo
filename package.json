@@ -12,7 +12,8 @@
     "lint-staged": "^15.2.2",
     "prettier": "^3.2.5",
     "stmux": "^1.8.7",
-    "vuepress": "^1.9.10"
+    "vitepress": "^1.0.1",
+    "vue": "^3.4.21"
   },
   "scripts": {
     "test": "exit 0",
@@ -20,8 +21,9 @@
     "semo": "lerna exec  --scope @semo/cli -- yarn semo",
     "prepublish": "lerna run prepublish",
     "lerna:publish": "lerna publish from-git --yes --no-verify-access",
-    "docs:dev": "NODE_OPTIONS=--openssl-legacy-provider vuepress dev docs",
-    "docs:build": "NODE_OPTIONS=--openssl-legacy-provider vuepress build docs",
+    "docs:dev": "vitepress dev",
+    "docs:build": "vitepress build",
+    "docs:preview": "vitepress preview",
     "upgrade:preview": "lerna exec -- ncu && ncu",
     "upgrade": "lerna exec -- ncu -u --timeout 30000 && lerna exec -- yarn && ncu -u --timeout 30000 && yarn",
     "deploy:major": "lerna version major",

@@ -63,3 +63,7 @@ typings/
 .vscode
 package-lock.json
 /lib
+
+# vitepress
+.vitepress/cache
+.vitepress/dist

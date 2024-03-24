@@ -61,7 +61,7 @@ Options:
   --watch       Watch config change, maybe only work on Mac
 ```
 
-注意，这里的 <configKey> 的格式是 `a.b.c` 的形式，代表多层级配置。另外，这里支持对设置的最后一个层级的配置添加注释。
+注意，这里的 `<configKey>` 的格式是 `a.b.c` 的形式，代表多层级配置。另外，这里支持对设置的最后一个层级的配置添加注释。
 
 ## `semo hook`
 
