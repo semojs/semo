@@ -1,7 +1,8 @@
 import { defineConfig } from 'vitepress'
 import { createRequire } from 'node:module'
 
-const host = process.env.NODE_ENV === 'development' ? 'localhost:5173' : '/'
+const host =
+  process.env.NODE_ENV === 'development' ? 'localhost:5173' : 'semo.js.org'
 
 const require = createRequire(import.meta.url)
 
