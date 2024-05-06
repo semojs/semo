@@ -11,11 +11,14 @@ export const desc = 'Create a new project from specific repo'
 export const builder = function (yargs) {
   yargs.option('yes', {
     default: true,
+    boolean: true,
     alias: 'y',
     describe: 'Run dep install with --yes',
   })
 
   yargs.option('force', {
+    boolean: true,
+    default: false,
     alias: 'F',
     describe: 'Force download, existed folder will be deleted!',
   })
