@@ -13,7 +13,12 @@ export const desc = 'Run any plugin command directly'
 // export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
-  yargs.option('force', { describe: 'Force upgrade plugin cache', alias: 'F' })
+  yargs.option('force', {
+    describe: 'Force upgrade plugin cache',
+    alias: 'F',
+    boolean: true,
+    default: false,
+  })
   yargs.option('scope', { default: '', describe: 'Set plugin npm scope' })
   yargs.option('with', { describe: 'Set plugin dependent plugins' })
   // yargs.commandDir('run')
