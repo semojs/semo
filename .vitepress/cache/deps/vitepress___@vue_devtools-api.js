@@ -1,8 +1,9 @@
 import {
-  isReactive,
-  isRef,
-  toRaw
-} from "./chunk-OOO2W3XR.js";
+  require_vue
+} from "./chunk-KLBYQMMP.js";
+import {
+  __toESM
+} from "./chunk-6MT7EBHR.js";
 
 // node_modules/.pnpm/@vue+devtools-shared@7.0.20/node_modules/@vue/devtools-shared/dist/index.js
 var __create = Object.create;
@@ -25,7 +26,7 @@ var __copyProps = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
+var __toESM2 = (mod, isNodeMode, target2) => (target2 = mod != null ? __create(__getProtoOf(mod)) : {}, __copyProps(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
@@ -253,7 +254,7 @@ var isInChromePanel = typeof target.chrome !== "undefined" && !!target.chrome.de
 var isInIframe = isBrowser && target.self !== target.top;
 var isInElectron = typeof navigator !== "undefined" && navigator.userAgent.toLowerCase().includes("electron");
 init_esm_shims();
-var import_rfdc = __toESM(require_rfdc(), 1);
+var import_rfdc = __toESM2(require_rfdc(), 1);
 var deepClone = (0, import_rfdc.default)({ circles: true });
 init_esm_shims();
 
@@ -520,6 +521,8 @@ async function _applyPromised(fn, _this, args) {
 }
 
 // node_modules/.pnpm/@vue+devtools-kit@7.0.20_vue@3.4.21/node_modules/@vue/devtools-kit/dist/index.js
+var import_vue = __toESM(require_vue());
+var import_vue2 = __toESM(require_vue());
 var __create2 = Object.create;
 var __defProp2 = Object.defineProperty;
 var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
@@ -540,7 +543,7 @@ var __copyProps2 = (to, from, except, desc) => {
   }
   return to;
 };
-var __toESM2 = (mod, isNodeMode, target9) => (target9 = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
+var __toESM3 = (mod, isNodeMode, target9) => (target9 = mod != null ? __create2(__getProtoOf2(mod)) : {}, __copyProps2(
   // If the importer is in node compatibility mode or this is not an ESM
   // file that has been converted to a CommonJS file using a Babel-
   // compatible transform (i.e. "__esModule" has not been set), then set
@@ -2133,7 +2136,7 @@ init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
-var import_speakingurl = __toESM2(require_speakingurl2(), 1);
+var import_speakingurl = __toESM3(require_speakingurl2(), 1);
 init_esm_shims2();
 init_esm_shims2();
 init_esm_shims2();
@@ -2268,9 +2271,9 @@ var StateEditor = class {
       if (state.remove || state.newKey) {
         if (Array.isArray(object))
           object.splice(field, 1);
-        else if (toRaw(object) instanceof Map)
+        else if ((0, import_vue2.toRaw)(object) instanceof Map)
           object.delete(field);
-        else if (toRaw(object) instanceof Set)
+        else if ((0, import_vue2.toRaw)(object) instanceof Set)
           object.delete(Array.from(object.values())[field]);
         else
           Reflect.deleteProperty(object, field);
@@ -2279,9 +2282,9 @@ var StateEditor = class {
         const target9 = object[state.newKey || field];
         if (this.refEditor.isRef(target9))
           this.refEditor.set(target9, value);
-        else if (toRaw(object) instanceof Map)
+        else if ((0, import_vue2.toRaw)(object) instanceof Map)
           object.set(state.newKey || field, value);
-        else if (toRaw(object) instanceof Set)
+        else if ((0, import_vue2.toRaw)(object) instanceof Set)
           object.add(value);
         else
           object[state.newKey || field] = value;
@@ -2291,7 +2294,7 @@ var StateEditor = class {
 };
 var RefStateEditor = class {
   set(ref, value) {
-    if (isRef(ref)) {
+    if ((0, import_vue2.isRef)(ref)) {
       ref.value = value;
     } else {
       if (ref instanceof Set && Array.isArray(value)) {
@@ -2318,10 +2321,10 @@ var RefStateEditor = class {
     }
   }
   get(ref) {
-    return isRef(ref) ? ref.value : ref;
+    return (0, import_vue2.isRef)(ref) ? ref.value : ref;
   }
   isRef(ref) {
-    return isRef(ref) || isReactive(ref);
+    return (0, import_vue2.isRef)(ref) || (0, import_vue2.isReactive)(ref);
   }
 };
 var stateEditor = new StateEditor();

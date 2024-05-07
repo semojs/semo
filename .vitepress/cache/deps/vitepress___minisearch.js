@@ -1,3 +1,5 @@
+import "./chunk-6MT7EBHR.js";
+
 // node_modules/.pnpm/minisearch@6.3.0/node_modules/minisearch/dist/es/index.js
 var __assign = function() {
   __assign = Object.assign || function __assign2(t) {

@@ -1,11 +1,10 @@
 import {
   tryOnScopeDispose,
-  unrefElement
-} from "./chunk-E4OZJX46.js";
-import {
-  ref,
-  watch
-} from "./chunk-OOO2W3XR.js";
+  unrefElement,
+  vue_demi_exports
+} from "./chunk-DZ2V7LZ2.js";
+import "./chunk-KLBYQMMP.js";
+import "./chunk-6MT7EBHR.js";
 
 // node_modules/.pnpm/tabbable@6.2.0/node_modules/tabbable/dist/index.esm.js
 var candidateSelectors = ["input:not([inert])", "select:not([inert])", "textarea:not([inert])", "a[href]:not([inert])", "button:not([inert])", "[tabindex]:not(slot):not([inert])", "audio[controls]:not([inert])", "video[controls]:not([inert])", '[contenteditable]:not([contenteditable="false"]):not([inert])', "details>summary:first-of-type:not([inert])", "details:not([inert])"];
@@ -1024,8 +1023,8 @@ var createFocusTrap = function createFocusTrap2(elements, userOptions) {
 function useFocusTrap(target, options = {}) {
   let trap;
   const { immediate, ...focusTrapOptions } = options;
-  const hasFocus = ref(false);
-  const isPaused = ref(false);
+  const hasFocus = (0, vue_demi_exports.ref)(false);
+  const isPaused = (0, vue_demi_exports.ref)(false);
   const activate = (opts) => trap && trap.activate(opts);
   const deactivate = (opts) => trap && trap.deactivate(opts);
   const pause = () => {
@@ -1040,7 +1039,7 @@ function useFocusTrap(target, options = {}) {
       isPaused.value = false;
     }
   };
-  watch(
+  (0, vue_demi_exports.watch)(
     () => unrefElement(target),
     (el) => {
       if (!el)

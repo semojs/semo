@@ -26,6 +26,9 @@ export default defineConfig({
       lang: 'zh',
       link: '/',
       themeConfig: {
+        footer: {
+          message: '企业级Node项目命令行体系建设规范',
+        },
         nav: [
           { text: '首页', link: '/' },
           { text: '指南', link: '/guide/' },
@@ -115,6 +118,9 @@ export default defineConfig({
       lang: 'en',
       link: '/en/',
       themeConfig: {
+        footer: {
+          message: 'Enterprise level CLI rules',
+        },
         nav: [
           { text: 'Home', link: '/en/' },
           { text: 'Guide', link: '/en/guide/' },

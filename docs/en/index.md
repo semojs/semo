@@ -1,7 +1,15 @@
 ---
-home: true
-actionText: Quick Start →
-actionLink: /guide/quickstart/
+layout: home
+
+hero:
+  name: Semo
+  text: Not just CLI scaffold
+  tagline: Unified style command line script solution
+  actions:
+    - theme: brand
+      text: Get Started →
+      link: /guide/quickstart/
+
 features:
 - title: Consistent
   details: Regardless of the framework used in the Node project or how abstraction is layered, this framework can be used to implement command-line scripts with a unified style.

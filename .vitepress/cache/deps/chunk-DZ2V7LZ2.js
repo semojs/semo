@@ -1,43 +1,30 @@
 import {
-  Fragment,
-  TransitionGroup,
-  computed,
-  customRef,
-  defineComponent,
-  effectScope,
-  getCurrentInstance,
-  getCurrentScope,
-  h,
-  inject,
-  isReactive,
-  isReadonly,
-  isRef,
-  markRaw,
-  nextTick,
-  onBeforeMount,
-  onBeforeUnmount,
-  onBeforeUpdate,
-  onMounted,
-  onScopeDispose,
-  onUnmounted,
-  onUpdated,
-  provide,
-  reactive,
-  readonly,
-  ref,
-  shallowReactive,
-  shallowRef,
-  toRef,
-  toRefs,
-  unref,
-  version,
-  watch,
-  watchEffect
-} from "./chunk-OOO2W3XR.js";
+  require_vue
+} from "./chunk-KLBYQMMP.js";
+import {
+  __export,
+  __reExport,
+  __toESM
+} from "./chunk-6MT7EBHR.js";
 
-// node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.22.1_search-insights@2.13.0_stylus@0.54.8/node_modules/vitepress/lib/vue-demi.mjs
+// node_modules/.pnpm/vitepress@1.0.1_@algolia+client-search@4.22.1_search-insights@2.13.0/node_modules/vitepress/lib/vue-demi.mjs
+var vue_demi_exports = {};
+__export(vue_demi_exports, {
+  Vue: () => Vue,
+  Vue2: () => Vue2,
+  del: () => del,
+  install: () => install,
+  isVue2: () => isVue2,
+  isVue3: () => isVue3,
+  set: () => set
+});
+var Vue = __toESM(require_vue(), 1);
+__reExport(vue_demi_exports, __toESM(require_vue(), 1));
 var isVue2 = false;
 var isVue3 = true;
+var Vue2 = void 0;
+function install() {
+}
 function set(target, key, val) {
   if (Array.isArray(target)) {
     target.length = Math.max(target.length, key);
@@ -58,28 +45,28 @@ function del(target, key) {
 // node_modules/.pnpm/@vueuse+shared@10.9.0_vue@3.4.21/node_modules/@vueuse/shared/index.mjs
 function computedEager(fn, options) {
   var _a;
-  const result = shallowRef();
-  watchEffect(() => {
+  const result = (0, vue_demi_exports.shallowRef)();
+  (0, vue_demi_exports.watchEffect)(() => {
     result.value = fn();
   }, {
     ...options,
     flush: (_a = options == null ? void 0 : options.flush) != null ? _a : "sync"
   });
-  return readonly(result);
+  return (0, vue_demi_exports.readonly)(result);
 }
 function computedWithControl(source, fn) {
   let v = void 0;
   let track;
   let trigger;
-  const dirty = ref(true);
+  const dirty = (0, vue_demi_exports.ref)(true);
   const update = () => {
     dirty.value = true;
     trigger();
   };
-  watch(source, update, { flush: "sync" });
+  (0, vue_demi_exports.watch)(source, update, { flush: "sync" });
   const get2 = typeof fn === "function" ? fn : fn.get;
   const set3 = typeof fn === "function" ? void 0 : fn.set;
-  const result = customRef((_track, _trigger) => {
+  const result = (0, vue_demi_exports.customRef)((_track, _trigger) => {
     track = _track;
     trigger = _trigger;
     return {
@@ -101,8 +88,8 @@ function computedWithControl(source, fn) {
   return result;
 }
 function tryOnScopeDispose(fn) {
-  if (getCurrentScope()) {
-    onScopeDispose(fn);
+  if ((0, vue_demi_exports.getCurrentScope)()) {
+    (0, vue_demi_exports.onScopeDispose)(fn);
     return true;
   }
   return false;
@@ -132,7 +119,7 @@ function createEventHook() {
 function createGlobalState(stateFactory) {
   let initialized = false;
   let state;
-  const scope = effectScope(true);
+  const scope = (0, vue_demi_exports.effectScope)(true);
   return (...args) => {
     if (!initialized) {
       state = scope.run(() => stateFactory(...args));
@@ -144,24 +131,24 @@ function createGlobalState(stateFactory) {
 var localProvidedStateMap = /* @__PURE__ */ new WeakMap();
 var provideLocal = (key, value) => {
   var _a;
-  const instance = (_a = getCurrentInstance()) == null ? void 0 : _a.proxy;
+  const instance = (_a = (0, vue_demi_exports.getCurrentInstance)()) == null ? void 0 : _a.proxy;
   if (instance == null)
     throw new Error("provideLocal must be called in setup");
   if (!localProvidedStateMap.has(instance))
     localProvidedStateMap.set(instance, /* @__PURE__ */ Object.create(null));
   const localProvidedState = localProvidedStateMap.get(instance);
   localProvidedState[key] = value;
-  provide(key, value);
+  (0, vue_demi_exports.provide)(key, value);
 };
 var injectLocal = (...args) => {
   var _a;
   const key = args[0];
-  const instance = (_a = getCurrentInstance()) == null ? void 0 : _a.proxy;
+  const instance = (_a = (0, vue_demi_exports.getCurrentInstance)()) == null ? void 0 : _a.proxy;
   if (instance == null)
     throw new Error("injectLocal must be called in setup");
   if (localProvidedStateMap.has(instance) && key in localProvidedStateMap.get(instance))
     return localProvidedStateMap.get(instance)[key];
-  return inject(...args);
+  return (0, vue_demi_exports.inject)(...args);
 };
 function createInjectionState(composable, options) {
   const key = (options == null ? void 0 : options.injectionKey) || Symbol(composable.name || "InjectionState");
@@ -188,15 +175,15 @@ function createSharedComposable(composable) {
   return (...args) => {
     subscribers += 1;
     if (!state) {
-      scope = effectScope(true);
+      scope = (0, vue_demi_exports.effectScope)(true);
       state = scope.run(() => composable(...args));
     }
     tryOnScopeDispose(dispose);
     return state;
   };
 }
-function extendRef(ref2, extend, { enumerable = false, unwrap = true } = {}) {
-  if (!isVue3 && !version.startsWith("2.7.")) {
+function extendRef(ref3, extend, { enumerable = false, unwrap = true } = {}) {
+  if (!isVue3 && !vue_demi_exports.version.startsWith("2.7.")) {
     if (true)
       throw new Error("[VueUse] extendRef only works in Vue 2.7 or above.");
     return;
@@ -204,8 +191,8 @@ function extendRef(ref2, extend, { enumerable = false, unwrap = true } = {}) {
   for (const [key, value] of Object.entries(extend)) {
     if (key === "value")
       continue;
-    if (isRef(value) && unwrap) {
-      Object.defineProperty(ref2, key, {
+    if ((0, vue_demi_exports.isRef)(value) && unwrap) {
+      Object.defineProperty(ref3, key, {
         get() {
           return value.value;
         },
@@ -215,18 +202,18 @@ function extendRef(ref2, extend, { enumerable = false, unwrap = true } = {}) {
         enumerable
       });
     } else {
-      Object.defineProperty(ref2, key, { value, enumerable });
+      Object.defineProperty(ref3, key, { value, enumerable });
     }
   }
-  return ref2;
+  return ref3;
 }
 function get(obj, key) {
   if (key == null)
-    return unref(obj);
-  return unref(obj)[key];
+    return (0, vue_demi_exports.unref)(obj);
+  return (0, vue_demi_exports.unref)(obj)[key];
 }
 function isDefined(v) {
-  return unref(v) != null;
+  return (0, vue_demi_exports.unref)(v) != null;
 }
 function makeDestructurable(obj, arr) {
   if (typeof Symbol !== "undefined") {
@@ -249,13 +236,13 @@ function makeDestructurable(obj, arr) {
   }
 }
 function toValue(r) {
-  return typeof r === "function" ? r() : unref(r);
+  return typeof r === "function" ? r() : (0, vue_demi_exports.unref)(r);
 }
 var resolveUnref = toValue;
 function reactify(fn, options) {
-  const unrefFn = (options == null ? void 0 : options.computedGetter) === false ? unref : toValue;
+  const unrefFn = (options == null ? void 0 : options.computedGetter) === false ? vue_demi_exports.unref : toValue;
   return function(...args) {
-    return computed(() => fn.apply(this, args.map((i) => unrefFn(i))));
+    return (0, vue_demi_exports.computed)(() => fn.apply(this, args.map((i) => unrefFn(i))));
   };
 }
 function reactifyObject(obj, optionsOrKeys = {}) {
@@ -281,14 +268,14 @@ function reactifyObject(obj, optionsOrKeys = {}) {
   );
 }
 function toReactive(objectRef) {
-  if (!isRef(objectRef))
-    return reactive(objectRef);
+  if (!(0, vue_demi_exports.isRef)(objectRef))
+    return (0, vue_demi_exports.reactive)(objectRef);
   const proxy = new Proxy({}, {
     get(_, p, receiver) {
-      return unref(Reflect.get(objectRef.value, p, receiver));
+      return (0, vue_demi_exports.unref)(Reflect.get(objectRef.value, p, receiver));
     },
     set(_, p, value) {
-      if (isRef(objectRef.value[p]) && !isRef(value))
+      if ((0, vue_demi_exports.isRef)(objectRef.value[p]) && !(0, vue_demi_exports.isRef)(value))
         objectRef.value[p].value = value;
       else
         objectRef.value[p] = value;
@@ -310,15 +297,15 @@ function toReactive(objectRef) {
       };
     }
   });
-  return reactive(proxy);
+  return (0, vue_demi_exports.reactive)(proxy);
 }
 function reactiveComputed(fn) {
-  return toReactive(computed(fn));
+  return toReactive((0, vue_demi_exports.computed)(fn));
 }
 function reactiveOmit(obj, ...keys2) {
   const flatKeys = keys2.flat();
   const predicate = flatKeys[0];
-  return reactiveComputed(() => typeof predicate === "function" ? Object.fromEntries(Object.entries(toRefs(obj)).filter(([k, v]) => !predicate(toValue(v), k))) : Object.fromEntries(Object.entries(toRefs(obj)).filter((e) => !flatKeys.includes(e[0]))));
+  return reactiveComputed(() => typeof predicate === "function" ? Object.fromEntries(Object.entries((0, vue_demi_exports.toRefs)(obj)).filter(([k, v]) => !predicate(toValue(v), k))) : Object.fromEntries(Object.entries((0, vue_demi_exports.toRefs)(obj)).filter((e) => !flatKeys.includes(e[0]))));
 }
 var isClient = typeof window !== "undefined" && typeof document !== "undefined";
 var isWorker = typeof WorkerGlobalScope !== "undefined" && globalThis instanceof WorkerGlobalScope;
@@ -408,7 +395,7 @@ function throttleFilter(...args) {
   let trailing;
   let leading;
   let rejectOnCancel;
-  if (!isRef(args[0]) && typeof args[0] === "object")
+  if (!(0, vue_demi_exports.isRef)(args[0]) && typeof args[0] === "object")
     ({ delay: ms, trailing = true, leading = true, rejectOnCancel = false } = args[0]);
   else
     [ms, trailing = true, leading = true, rejectOnCancel = false] = args;
@@ -453,7 +440,7 @@ function throttleFilter(...args) {
   return filter;
 }
 function pausableFilter(extendFilter = bypassFilter) {
-  const isActive = ref(true);
+  const isActive = (0, vue_demi_exports.ref)(true);
   function pause() {
     isActive.value = false;
   }
@@ -464,7 +451,7 @@ function pausableFilter(extendFilter = bypassFilter) {
     if (isActive.value)
       extendFilter(...args);
   };
-  return { isActive: readonly(isActive), pause, resume, eventFilter };
+  return { isActive: (0, vue_demi_exports.readonly)(isActive), pause, resume, eventFilter };
 }
 var directiveHooks = {
   mounted: isVue3 ? "mounted" : "inserted",
@@ -545,22 +532,22 @@ function objectEntries(obj) {
   return Object.entries(obj);
 }
 function getLifeCycleTarget(target) {
-  return target || getCurrentInstance();
+  return target || (0, vue_demi_exports.getCurrentInstance)();
 }
-function toRef2(...args) {
+function toRef(...args) {
   if (args.length !== 1)
-    return toRef(...args);
+    return (0, vue_demi_exports.toRef)(...args);
   const r = args[0];
-  return typeof r === "function" ? readonly(customRef(() => ({ get: r, set: noop }))) : ref(r);
+  return typeof r === "function" ? (0, vue_demi_exports.readonly)((0, vue_demi_exports.customRef)(() => ({ get: r, set: noop }))) : (0, vue_demi_exports.ref)(r);
 }
-var resolveRef = toRef2;
+var resolveRef = toRef;
 function reactivePick(obj, ...keys2) {
   const flatKeys = keys2.flat();
   const predicate = flatKeys[0];
-  return reactiveComputed(() => typeof predicate === "function" ? Object.fromEntries(Object.entries(toRefs(obj)).filter(([k, v]) => predicate(toValue(v), k))) : Object.fromEntries(flatKeys.map((k) => [k, toRef2(obj, k)])));
+  return reactiveComputed(() => typeof predicate === "function" ? Object.fromEntries(Object.entries((0, vue_demi_exports.toRefs)(obj)).filter(([k, v]) => predicate(toValue(v), k))) : Object.fromEntries(flatKeys.map((k) => [k, toRef(obj, k)])));
 }
 function refAutoReset(defaultValue, afterMs = 1e4) {
-  return customRef((track, trigger) => {
+  return (0, vue_demi_exports.customRef)((track, trigger) => {
     let value = toValue(defaultValue);
     let timer;
     const resetAfter = () => setTimeout(() => {
@@ -591,15 +578,15 @@ function useDebounceFn(fn, ms = 200, options = {}) {
   );
 }
 function refDebounced(value, ms = 200, options = {}) {
-  const debounced = ref(value.value);
+  const debounced = (0, vue_demi_exports.ref)(value.value);
   const updater = useDebounceFn(() => {
     debounced.value = value.value;
   }, ms, options);
-  watch(value, () => updater());
+  (0, vue_demi_exports.watch)(value, () => updater());
   return debounced;
 }
 function refDefault(source, defaultValue) {
-  return computed({
+  return (0, vue_demi_exports.computed)({
     get() {
       var _a;
       return (_a = source.value) != null ? _a : defaultValue;
@@ -618,18 +605,18 @@ function useThrottleFn(fn, ms = 200, trailing = false, leading = true, rejectOnC
 function refThrottled(value, delay = 200, trailing = true, leading = true) {
   if (delay <= 0)
     return value;
-  const throttled = ref(value.value);
+  const throttled = (0, vue_demi_exports.ref)(value.value);
   const updater = useThrottleFn(() => {
     throttled.value = value.value;
   }, delay, trailing, leading);
-  watch(value, () => updater());
+  (0, vue_demi_exports.watch)(value, () => updater());
   return throttled;
 }
 function refWithControl(initial, options = {}) {
   let source = initial;
   let track;
   let trigger;
-  const ref2 = customRef((_track, _trigger) => {
+  const ref3 = (0, vue_demi_exports.customRef)((_track, _trigger) => {
     track = _track;
     trigger = _trigger;
     return {
@@ -663,7 +650,7 @@ function refWithControl(initial, options = {}) {
   const peek = () => get2(false);
   const lay = (v) => set3(v, false);
   return extendRef(
-    ref2,
+    ref3,
     {
       get: get2,
       set: set3,
@@ -678,8 +665,8 @@ function refWithControl(initial, options = {}) {
 var controlledRef = refWithControl;
 function set2(...args) {
   if (args.length === 2) {
-    const [ref2, value] = args;
-    ref2.value = value;
+    const [ref3, value] = args;
+    ref3.value = value;
   }
   if (args.length === 3) {
     if (isVue2) {
@@ -695,7 +682,7 @@ function watchWithFilter(source, cb, options = {}) {
     eventFilter = bypassFilter,
     ...watchOptions
   } = options;
-  return watch(
+  return (0, vue_demi_exports.watch)(
     source,
     createFilterWrapper(
       eventFilter,
@@ -766,18 +753,18 @@ function syncRefs(source, targets, options = {}) {
   } = options;
   if (!Array.isArray(targets))
     targets = [targets];
-  return watch(
+  return (0, vue_demi_exports.watch)(
     source,
     (newValue) => targets.forEach((target) => target.value = newValue),
     { flush, deep, immediate }
   );
 }
-function toRefs2(objectRef, options = {}) {
-  if (!isRef(objectRef))
-    return toRefs(objectRef);
+function toRefs(objectRef, options = {}) {
+  if (!(0, vue_demi_exports.isRef)(objectRef))
+    return (0, vue_demi_exports.toRefs)(objectRef);
   const result = Array.isArray(objectRef.value) ? Array.from({ length: objectRef.value.length }) : {};
   for (const key in objectRef.value) {
-    result[key] = customRef(() => ({
+    result[key] = (0, vue_demi_exports.customRef)(() => ({
       get() {
         return objectRef.value[key];
       },
@@ -805,36 +792,36 @@ function toRefs2(objectRef, options = {}) {
 function tryOnBeforeMount(fn, sync = true, target) {
   const instance = getLifeCycleTarget(target);
   if (instance)
-    onBeforeMount(fn, target);
+    (0, vue_demi_exports.onBeforeMount)(fn, target);
   else if (sync)
     fn();
   else
-    nextTick(fn);
+    (0, vue_demi_exports.nextTick)(fn);
 }
 function tryOnBeforeUnmount(fn, target) {
   const instance = getLifeCycleTarget(target);
   if (instance)
-    onBeforeUnmount(fn, target);
+    (0, vue_demi_exports.onBeforeUnmount)(fn, target);
 }
 function tryOnMounted(fn, sync = true, target) {
   const instance = getLifeCycleTarget();
   if (instance)
-    onMounted(fn, target);
+    (0, vue_demi_exports.onMounted)(fn, target);
   else if (sync)
     fn();
   else
-    nextTick(fn);
+    (0, vue_demi_exports.nextTick)(fn);
 }
 function tryOnUnmounted(fn, target) {
   const instance = getLifeCycleTarget(target);
   if (instance)
-    onUnmounted(fn, target);
+    (0, vue_demi_exports.onUnmounted)(fn, target);
 }
 function createUntil(r, isNot = false) {
   function toMatch(condition, { flush = "sync", deep = false, timeout, throwOnTimeout } = {}) {
     let stop = null;
     const watcher = new Promise((resolve) => {
-      stop = watch(
+      stop = (0, vue_demi_exports.watch)(
         r,
         (v) => {
           if (condition(v) !== isNot) {
@@ -858,12 +845,12 @@ function createUntil(r, isNot = false) {
     return Promise.race(promises);
   }
   function toBe(value, options) {
-    if (!isRef(value))
+    if (!(0, vue_demi_exports.isRef)(value))
       return toMatch((v) => v === value, options);
     const { flush = "sync", deep = false, timeout, throwOnTimeout } = options != null ? options : {};
     let stop = null;
     const watcher = new Promise((resolve) => {
-      stop = watch(
+      stop = (0, vue_demi_exports.watch)(
         [r, value],
         ([v1, v2]) => {
           if (isNot !== (v1 === v2)) {
@@ -960,21 +947,21 @@ function useArrayDifference(...args) {
     const key = compareFn;
     compareFn = (value, othVal) => value[key] === othVal[key];
   }
-  return computed(() => toValue(list).filter((x) => toValue(values).findIndex((y) => compareFn(x, y)) === -1));
+  return (0, vue_demi_exports.computed)(() => toValue(list).filter((x) => toValue(values).findIndex((y) => compareFn(x, y)) === -1));
 }
 function useArrayEvery(list, fn) {
-  return computed(() => toValue(list).every((element, index, array) => fn(toValue(element), index, array)));
+  return (0, vue_demi_exports.computed)(() => toValue(list).every((element, index, array) => fn(toValue(element), index, array)));
 }
 function useArrayFilter(list, fn) {
-  return computed(() => toValue(list).map((i) => toValue(i)).filter(fn));
+  return (0, vue_demi_exports.computed)(() => toValue(list).map((i) => toValue(i)).filter(fn));
 }
 function useArrayFind(list, fn) {
-  return computed(() => toValue(
+  return (0, vue_demi_exports.computed)(() => toValue(
     toValue(list).find((element, index, array) => fn(toValue(element), index, array))
   ));
 }
 function useArrayFindIndex(list, fn) {
-  return computed(() => toValue(list).findIndex((element, index, array) => fn(toValue(element), index, array)));
+  return (0, vue_demi_exports.computed)(() => toValue(list).findIndex((element, index, array) => fn(toValue(element), index, array)));
 }
 function findLast(arr, cb) {
   let index = arr.length;
@@ -985,7 +972,7 @@ function findLast(arr, cb) {
   return void 0;
 }
 function useArrayFindLast(list, fn) {
-  return computed(() => toValue(
+  return (0, vue_demi_exports.computed)(() => toValue(
     !Array.prototype.findLast ? findLast(toValue(list), (element, index, array) => fn(toValue(element), index, array)) : toValue(list).findLast((element, index, array) => fn(toValue(element), index, array))
   ));
 }
@@ -1007,7 +994,7 @@ function useArrayIncludes(...args) {
     comparator = (element, value2) => element[key] === toValue(value2);
   }
   comparator = comparator != null ? comparator : (element, value2) => element === toValue(value2);
-  return computed(() => toValue(list).slice(formIndex).some((element, index, array) => comparator(
+  return (0, vue_demi_exports.computed)(() => toValue(list).slice(formIndex).some((element, index, array) => comparator(
     toValue(element),
     toValue(value),
     index,
@@ -1015,20 +1002,20 @@ function useArrayIncludes(...args) {
   )));
 }
 function useArrayJoin(list, separator) {
-  return computed(() => toValue(list).map((i) => toValue(i)).join(toValue(separator)));
+  return (0, vue_demi_exports.computed)(() => toValue(list).map((i) => toValue(i)).join(toValue(separator)));
 }
 function useArrayMap(list, fn) {
-  return computed(() => toValue(list).map((i) => toValue(i)).map(fn));
+  return (0, vue_demi_exports.computed)(() => toValue(list).map((i) => toValue(i)).map(fn));
 }
 function useArrayReduce(list, reducer, ...args) {
   const reduceCallback = (sum, value, index) => reducer(toValue(sum), toValue(value), index);
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     const resolved = toValue(list);
     return args.length ? resolved.reduce(reduceCallback, toValue(args[0])) : resolved.reduce(reduceCallback);
   });
 }
 function useArraySome(list, fn) {
-  return computed(() => toValue(list).some((element, index, array) => fn(toValue(element), index, array)));
+  return (0, vue_demi_exports.computed)(() => toValue(list).some((element, index, array) => fn(toValue(element), index, array)));
 }
 function uniq(array) {
   return Array.from(new Set(array));
@@ -1041,14 +1028,14 @@ function uniqueElementsBy(array, fn) {
   }, []);
 }
 function useArrayUnique(list, compareFn) {
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     const resolvedList = toValue(list).map((element) => toValue(element));
     return compareFn ? uniqueElementsBy(resolvedList, compareFn) : uniq(resolvedList);
   });
 }
 function useCounter(initialValue = 0, options = {}) {
-  let _initialValue = unref(initialValue);
-  const count = ref(initialValue);
+  let _initialValue = (0, vue_demi_exports.unref)(initialValue);
+  const count = (0, vue_demi_exports.ref)(initialValue);
   const {
     max = Number.POSITIVE_INFINITY,
     min = Number.NEGATIVE_INFINITY
@@ -1144,7 +1131,7 @@ function normalizeDate(date) {
   return new Date(date);
 }
 function useDateFormat(date, formatStr = "HH:mm:ss", options = {}) {
-  return computed(() => formatDate(normalizeDate(toValue(date)), toValue(formatStr), options));
+  return (0, vue_demi_exports.computed)(() => formatDate(normalizeDate(toValue(date)), toValue(formatStr), options));
 }
 function useIntervalFn(cb, interval = 1e3, options = {}) {
   const {
@@ -1152,7 +1139,7 @@ function useIntervalFn(cb, interval = 1e3, options = {}) {
     immediateCallback = false
   } = options;
   let timer = null;
-  const isActive = ref(false);
+  const isActive = (0, vue_demi_exports.ref)(false);
   function clean() {
     if (timer) {
       clearInterval(timer);
@@ -1175,8 +1162,8 @@ function useIntervalFn(cb, interval = 1e3, options = {}) {
   }
   if (immediate && isClient)
     resume();
-  if (isRef(interval) || typeof interval === "function") {
-    const stopWatch = watch(interval, () => {
+  if ((0, vue_demi_exports.isRef)(interval) || typeof interval === "function") {
+    const stopWatch = (0, vue_demi_exports.watch)(interval, () => {
       if (isActive.value && isClient)
         resume();
     });
@@ -1195,7 +1182,7 @@ function useInterval(interval = 1e3, options = {}) {
     immediate = true,
     callback
   } = options;
-  const counter = ref(0);
+  const counter = (0, vue_demi_exports.ref)(0);
   const update = () => counter.value += 1;
   const reset = () => {
     counter.value = 0;
@@ -1220,8 +1207,8 @@ function useInterval(interval = 1e3, options = {}) {
 }
 function useLastChanged(source, options = {}) {
   var _a;
-  const ms = ref((_a = options.initialValue) != null ? _a : null);
-  watch(
+  const ms = (0, vue_demi_exports.ref)((_a = options.initialValue) != null ? _a : null);
+  (0, vue_demi_exports.watch)(
     source,
     () => ms.value = timestamp(),
     options
@@ -1232,7 +1219,7 @@ function useTimeoutFn(cb, interval, options = {}) {
   const {
     immediate = true
   } = options;
-  const isPending = ref(false);
+  const isPending = (0, vue_demi_exports.ref)(false);
   let timer = null;
   function clear() {
     if (timer) {
@@ -1260,7 +1247,7 @@ function useTimeoutFn(cb, interval, options = {}) {
   }
   tryOnScopeDispose(stop);
   return {
-    isPending: readonly(isPending),
+    isPending: (0, vue_demi_exports.readonly)(isPending),
     start,
     stop
   };
@@ -1275,7 +1262,7 @@ function useTimeout(interval = 1e3, options = {}) {
     interval,
     options
   );
-  const ready = computed(() => !controls.isPending.value);
+  const ready = (0, vue_demi_exports.computed)(() => !controls.isPending.value);
   if (exposeControls) {
     return {
       ready,
@@ -1291,7 +1278,7 @@ function useToNumber(value, options = {}) {
     radix,
     nanToZero
   } = options;
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     let resolved = toValue(value);
     if (typeof resolved === "string")
       resolved = Number[method](resolved, radix);
@@ -1301,15 +1288,15 @@ function useToNumber(value, options = {}) {
   });
 }
 function useToString(value) {
-  return computed(() => `${toValue(value)}`);
+  return (0, vue_demi_exports.computed)(() => `${toValue(value)}`);
 }
 function useToggle(initialValue = false, options = {}) {
   const {
     truthyValue = true,
     falsyValue = false
   } = options;
-  const valueIsRef = isRef(initialValue);
-  const _value = ref(initialValue);
+  const valueIsRef = (0, vue_demi_exports.isRef)(initialValue);
+  const _value = (0, vue_demi_exports.ref)(initialValue);
   function toggle(value) {
     if (arguments.length) {
       _value.value = value;
@@ -1327,7 +1314,7 @@ function useToggle(initialValue = false, options = {}) {
 }
 function watchArray(source, cb, options) {
   let oldList = (options == null ? void 0 : options.immediate) ? [] : [...source instanceof Function ? source() : Array.isArray(source) ? source : toValue(source)];
-  return watch(source, (newList, _, onCleanup) => {
+  return (0, vue_demi_exports.watch)(source, (newList, _, onCleanup) => {
     const oldListRemains = Array.from({ length: oldList.length });
     const added = [];
     for (const obj of newList) {
@@ -1352,13 +1339,13 @@ function watchAtMost(source, cb, options) {
     count,
     ...watchOptions
   } = options;
-  const current = ref(0);
+  const current = (0, vue_demi_exports.ref)(0);
   const stop = watchWithFilter(
     source,
     (...args) => {
       current.value += 1;
       if (current.value >= toValue(count))
-        nextTick(() => stop());
+        (0, vue_demi_exports.nextTick)(() => stop());
       cb(...args);
     },
     watchOptions
@@ -1381,7 +1368,7 @@ function watchDebounced(source, cb, options = {}) {
   );
 }
 function watchDeep(source, cb, options) {
-  return watch(
+  return (0, vue_demi_exports.watch)(
     source,
     cb,
     {
@@ -1403,7 +1390,7 @@ function watchIgnorable(source, cb, options = {}) {
   let ignorePrevAsyncUpdates;
   let stop;
   if (watchOptions.flush === "sync") {
-    const ignore = ref(false);
+    const ignore = (0, vue_demi_exports.ref)(false);
     ignorePrevAsyncUpdates = () => {
     };
     ignoreUpdates = (updater) => {
@@ -1411,7 +1398,7 @@ function watchIgnorable(source, cb, options = {}) {
       updater();
       ignore.value = false;
     };
-    stop = watch(
+    stop = (0, vue_demi_exports.watch)(
       source,
       (...args) => {
         if (!ignore.value)
@@ -1421,13 +1408,13 @@ function watchIgnorable(source, cb, options = {}) {
     );
   } else {
     const disposables = [];
-    const ignoreCounter = ref(0);
-    const syncCounter = ref(0);
+    const ignoreCounter = (0, vue_demi_exports.ref)(0);
+    const syncCounter = (0, vue_demi_exports.ref)(0);
     ignorePrevAsyncUpdates = () => {
       ignoreCounter.value = syncCounter.value;
     };
     disposables.push(
-      watch(
+      (0, vue_demi_exports.watch)(
         source,
         () => {
           syncCounter.value++;
@@ -1441,7 +1428,7 @@ function watchIgnorable(source, cb, options = {}) {
       ignoreCounter.value += syncCounter.value - syncCounterPrev;
     };
     disposables.push(
-      watch(
+      (0, vue_demi_exports.watch)(
         source,
         (...args) => {
           const ignore = ignoreCounter.value > 0 && ignoreCounter.value === syncCounter.value;
@@ -1461,7 +1448,7 @@ function watchIgnorable(source, cb, options = {}) {
   return { stop, ignoreUpdates, ignorePrevAsyncUpdates };
 }
 function watchImmediate(source, cb, options) {
-  return watch(
+  return (0, vue_demi_exports.watch)(
     source,
     cb,
     {
@@ -1471,8 +1458,8 @@ function watchImmediate(source, cb, options) {
   );
 }
 function watchOnce(source, cb, options) {
-  const stop = watch(source, (...args) => {
-    nextTick(() => stop());
+  const stop = (0, vue_demi_exports.watch)(source, (...args) => {
+    (0, vue_demi_exports.nextTick)(() => stop());
     return cb(...args);
   }, options);
   return stop;
@@ -1524,7 +1511,7 @@ function watchTriggerable(source, cb, options = {}) {
   };
 }
 function getWatchSources(sources) {
-  if (isReactive(sources))
+  if ((0, vue_demi_exports.isReactive)(sources))
     return sources;
   if (Array.isArray(sources))
     return sources.map((item) => toValue(item));
@@ -1534,12 +1521,12 @@ function getOldValue(source) {
   return Array.isArray(source) ? source.map(() => void 0) : void 0;
 }
 function whenever(source, cb, options) {
-  const stop = watch(
+  const stop = (0, vue_demi_exports.watch)(
     source,
     (v, ov, onInvalidate) => {
       if (v) {
         if (options == null ? void 0 : options.once)
-          nextTick(() => stop());
+          (0, vue_demi_exports.nextTick)(() => stop());
         cb(v, ov, onInvalidate);
       }
     },
@@ -1554,7 +1541,7 @@ function whenever(source, cb, options) {
 // node_modules/.pnpm/@vueuse+core@10.9.0_vue@3.4.21/node_modules/@vueuse/core/index.mjs
 function computedAsync(evaluationCallback, initialState, optionsOrRef) {
   let options;
-  if (isRef(optionsOrRef)) {
+  if ((0, vue_demi_exports.isRef)(optionsOrRef)) {
     options = {
       evaluating: optionsOrRef
     };
@@ -1567,10 +1554,10 @@ function computedAsync(evaluationCallback, initialState, optionsOrRef) {
     shallow = true,
     onError = noop
   } = options;
-  const started = ref(!lazy);
-  const current = shallow ? shallowRef(initialState) : ref(initialState);
+  const started = (0, vue_demi_exports.ref)(!lazy);
+  const current = shallow ? (0, vue_demi_exports.shallowRef)(initialState) : (0, vue_demi_exports.ref)(initialState);
   let counter = 0;
-  watchEffect(async (onInvalidate) => {
+  (0, vue_demi_exports.watchEffect)(async (onInvalidate) => {
     if (!started.value)
       return;
     counter++;
@@ -1601,7 +1588,7 @@ function computedAsync(evaluationCallback, initialState, optionsOrRef) {
     }
   });
   if (lazy) {
-    return computed(() => {
+    return (0, vue_demi_exports.computed)(() => {
       started.value = true;
       return current.value;
     });
@@ -1610,22 +1597,22 @@ function computedAsync(evaluationCallback, initialState, optionsOrRef) {
   }
 }
 function computedInject(key, options, defaultSource, treatDefaultAsFactory) {
-  let source = inject(key);
+  let source = (0, vue_demi_exports.inject)(key);
   if (defaultSource)
-    source = inject(key, defaultSource);
+    source = (0, vue_demi_exports.inject)(key, defaultSource);
   if (treatDefaultAsFactory)
-    source = inject(key, defaultSource, treatDefaultAsFactory);
+    source = (0, vue_demi_exports.inject)(key, defaultSource, treatDefaultAsFactory);
   if (typeof options === "function") {
-    return computed((ctx) => options(source, ctx));
+    return (0, vue_demi_exports.computed)((ctx) => options(source, ctx));
   } else {
-    return computed({
+    return (0, vue_demi_exports.computed)({
       get: (ctx) => options.get(source, ctx),
       set: options.set
     });
   }
 }
 function createReusableTemplate(options = {}) {
-  if (!isVue3 && !version.startsWith("2.7.")) {
+  if (!isVue3 && !vue_demi_exports.version.startsWith("2.7.")) {
     if (true)
       throw new Error("[VueUse] createReusableTemplate only works in Vue 2.7 or above.");
     return;
@@ -1633,15 +1620,15 @@ function createReusableTemplate(options = {}) {
   const {
     inheritAttrs = true
   } = options;
-  const render = shallowRef();
-  const define = defineComponent({
+  const render = (0, vue_demi_exports.shallowRef)();
+  const define = (0, vue_demi_exports.defineComponent)({
     setup(_, { slots }) {
       return () => {
         render.value = slots.default;
       };
     }
   });
-  const reuse = defineComponent({
+  const reuse = (0, vue_demi_exports.defineComponent)({
     inheritAttrs,
     setup(_, { attrs, slots }) {
       return () => {
@@ -1671,9 +1658,9 @@ function createTemplatePromise(options = {}) {
     return;
   }
   let index = 0;
-  const instances = ref([]);
+  const instances = (0, vue_demi_exports.ref)([]);
   function create(...args) {
-    const props = shallowReactive({
+    const props = (0, vue_demi_exports.shallowReactive)({
       key: index++,
       args,
       promise: void 0,
@@ -1704,13 +1691,13 @@ function createTemplatePromise(options = {}) {
       return instances.value[0].promise;
     return create(...args);
   }
-  const component = defineComponent((_, { slots }) => {
+  const component = (0, vue_demi_exports.defineComponent)((_, { slots }) => {
     const renderList = () => instances.value.map((props) => {
       var _a;
-      return h(Fragment, { key: props.key }, (_a = slots.default) == null ? void 0 : _a.call(slots, props));
+      return (0, vue_demi_exports.h)(vue_demi_exports.Fragment, { key: props.key }, (_a = slots.default) == null ? void 0 : _a.call(slots, props));
     });
     if (options.transition)
-      return () => h(TransitionGroup, options.transition, renderList);
+      return () => (0, vue_demi_exports.h)(vue_demi_exports.TransitionGroup, options.transition, renderList);
     return renderList;
   });
   component.start = start;
@@ -1756,7 +1743,7 @@ function useEventListener(...args) {
     el.addEventListener(event, listener, options2);
     return () => el.removeEventListener(event, listener, options2);
   };
-  const stopWatch = watch(
+  const stopWatch = (0, vue_demi_exports.watch)(
     () => [unrefElement(target), toValue(options)],
     ([el, options2]) => {
       cleanup();
@@ -1887,7 +1874,7 @@ var DEFAULT_DELAY = 500;
 var DEFAULT_THRESHOLD = 10;
 function onLongPress(target, handler, options) {
   var _a, _b;
-  const elementRef = computed(() => unrefElement(target));
+  const elementRef = (0, vue_demi_exports.computed)(() => unrefElement(target));
   let timeout;
   let posStart;
   function clear() {
@@ -1981,10 +1968,10 @@ function onStartTyping(callback, options = {}) {
     useEventListener(document2, "keydown", keydown, { passive: true });
 }
 function templateRef(key, initialValue = null) {
-  const instance = getCurrentInstance();
+  const instance = (0, vue_demi_exports.getCurrentInstance)();
   let _trigger = () => {
   };
-  const element = customRef((track, trigger) => {
+  const element = (0, vue_demi_exports.customRef)((track, trigger) => {
     _trigger = trigger;
     return {
       get() {
@@ -1997,7 +1984,7 @@ function templateRef(key, initialValue = null) {
     };
   });
   tryOnMounted(_trigger);
-  onUpdated(_trigger);
+  (0, vue_demi_exports.onUpdated)(_trigger);
   return element;
 }
 function useActiveElement(options = {}) {
@@ -2016,7 +2003,7 @@ function useActiveElement(options = {}) {
     }
     return element;
   };
-  const activeElement = ref();
+  const activeElement = (0, vue_demi_exports.ref)();
   const trigger = () => {
     activeElement.value = getDeepActiveElement();
   };
@@ -2032,10 +2019,10 @@ function useActiveElement(options = {}) {
   return activeElement;
 }
 function useMounted() {
-  const isMounted = ref(false);
-  const instance = getCurrentInstance();
+  const isMounted = (0, vue_demi_exports.ref)(false);
+  const instance = (0, vue_demi_exports.getCurrentInstance)();
   if (instance) {
-    onMounted(() => {
+    (0, vue_demi_exports.onMounted)(() => {
       isMounted.value = true;
     }, isVue2 ? null : instance);
   }
@@ -2043,7 +2030,7 @@ function useMounted() {
 }
 function useSupported(callback) {
   const isMounted = useMounted();
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     isMounted.value;
     return Boolean(callback());
   });
@@ -2054,7 +2041,7 @@ function useRafFn(fn, options = {}) {
     fpsLimit = void 0,
     window: window2 = defaultWindow
   } = options;
-  const isActive = ref(false);
+  const isActive = (0, vue_demi_exports.ref)(false);
   const intervalLimit = fpsLimit ? 1e3 / fpsLimit : null;
   let previousFrameTimestamp = 0;
   let rafId = null;
@@ -2090,7 +2077,7 @@ function useRafFn(fn, options = {}) {
     resume();
   tryOnScopeDispose(pause);
   return {
-    isActive: readonly(isActive),
+    isActive: (0, vue_demi_exports.readonly)(isActive),
     pause,
     resume
   };
@@ -2117,8 +2104,8 @@ function useAnimate(target, keyframes, options) {
     }
   } = config;
   const isSupported = useSupported(() => window2 && HTMLElement && "animate" in HTMLElement.prototype);
-  const animate = shallowRef(void 0);
-  const store = shallowReactive({
+  const animate = (0, vue_demi_exports.shallowRef)(void 0);
+  const store = (0, vue_demi_exports.shallowReactive)({
     startTime: null,
     currentTime: null,
     timeline: null,
@@ -2127,10 +2114,10 @@ function useAnimate(target, keyframes, options) {
     playState: immediate ? "idle" : "paused",
     replaceState: "active"
   });
-  const pending = computed(() => store.pending);
-  const playState = computed(() => store.playState);
-  const replaceState = computed(() => store.replaceState);
-  const startTime = computed({
+  const pending = (0, vue_demi_exports.computed)(() => store.pending);
+  const playState = (0, vue_demi_exports.computed)(() => store.playState);
+  const replaceState = (0, vue_demi_exports.computed)(() => store.replaceState);
+  const startTime = (0, vue_demi_exports.computed)({
     get() {
       return store.startTime;
     },
@@ -2140,7 +2127,7 @@ function useAnimate(target, keyframes, options) {
         animate.value.startTime = value;
     }
   });
-  const currentTime = computed({
+  const currentTime = (0, vue_demi_exports.computed)({
     get() {
       return store.currentTime;
     },
@@ -2152,7 +2139,7 @@ function useAnimate(target, keyframes, options) {
       }
     }
   });
-  const timeline = computed({
+  const timeline = (0, vue_demi_exports.computed)({
     get() {
       return store.timeline;
     },
@@ -2162,7 +2149,7 @@ function useAnimate(target, keyframes, options) {
         animate.value.timeline = value;
     }
   });
-  const playbackRate = computed({
+  const playbackRate = (0, vue_demi_exports.computed)({
     get() {
       return store.playbackRate;
     },
@@ -2223,10 +2210,10 @@ function useAnimate(target, keyframes, options) {
       onError(e);
     }
   };
-  watch(() => unrefElement(target), (el) => {
+  (0, vue_demi_exports.watch)(() => unrefElement(target), (el) => {
     el && update();
   });
-  watch(() => keyframes, (value) => {
+  (0, vue_demi_exports.watch)(() => keyframes, (value) => {
     !animate.value && update();
     if (!unrefElement(target) && animate.value) {
       animate.value.effect = new KeyframeEffect(
@@ -2237,7 +2224,7 @@ function useAnimate(target, keyframes, options) {
     }
   }, { deep: true });
   tryOnMounted(() => {
-    nextTick(() => update(true));
+    (0, vue_demi_exports.nextTick)(() => update(true));
   });
   tryOnScopeDispose(cancel);
   function update(init) {
@@ -2311,8 +2298,8 @@ function useAsyncQueue(tasks, options) {
     rejected: "rejected"
   };
   const initialResult = Array.from(Array.from({ length: tasks.length }), () => ({ state: promiseState.pending, data: null }));
-  const result = reactive(initialResult);
-  const activeIndex = ref(-1);
+  const result = (0, vue_demi_exports.reactive)(initialResult);
+  const activeIndex = (0, vue_demi_exports.ref)(-1);
   if (!tasks || tasks.length === 0) {
     onFinished();
     return {
@@ -2378,10 +2365,10 @@ function useAsyncState(promise, initialState, options) {
     shallow = true,
     throwError
   } = options != null ? options : {};
-  const state = shallow ? shallowRef(initialState) : ref(initialState);
-  const isReady = ref(false);
-  const isLoading = ref(false);
-  const error = shallowRef(void 0);
+  const state = shallow ? (0, vue_demi_exports.shallowRef)(initialState) : (0, vue_demi_exports.ref)(initialState);
+  const isReady = (0, vue_demi_exports.ref)(false);
+  const isLoading = (0, vue_demi_exports.ref)(false);
+  const error = (0, vue_demi_exports.shallowRef)(void 0);
   async function execute(delay2 = 0, ...args) {
     if (resetOnExecute)
       state.value = initialState;
@@ -2447,8 +2434,8 @@ function getDefaultSerialization(target) {
     return defaults.object;
 }
 function useBase64(target, options) {
-  const base64 = ref("");
-  const promise = ref();
+  const base64 = (0, vue_demi_exports.ref)("");
+  const promise = (0, vue_demi_exports.ref)();
   function execute() {
     if (!isClient)
       return;
@@ -2490,8 +2477,8 @@ function useBase64(target, options) {
     promise.value.then((res) => base64.value = res);
     return promise.value;
   }
-  if (isRef(target) || typeof target === "function")
-    watch(target, execute, { immediate: true });
+  if ((0, vue_demi_exports.isRef)(target) || typeof target === "function")
+    (0, vue_demi_exports.watch)(target, execute, { immediate: true });
   else
     execute();
   return {
@@ -2526,10 +2513,10 @@ function useBattery(options = {}) {
   const { navigator = defaultNavigator } = options;
   const events2 = ["chargingchange", "chargingtimechange", "dischargingtimechange", "levelchange"];
   const isSupported = useSupported(() => navigator && "getBattery" in navigator && typeof navigator.getBattery === "function");
-  const charging = ref(false);
-  const chargingTime = ref(0);
-  const dischargingTime = ref(0);
-  const level = ref(1);
+  const charging = (0, vue_demi_exports.ref)(false);
+  const chargingTime = (0, vue_demi_exports.ref)(0);
+  const dischargingTime = (0, vue_demi_exports.ref)(0);
+  const level = (0, vue_demi_exports.ref)(1);
   let battery;
   function updateBatteryInfo() {
     charging.value = this.charging;
@@ -2562,9 +2549,9 @@ function useBluetooth(options) {
     navigator = defaultNavigator
   } = options || {};
   const isSupported = useSupported(() => navigator && "bluetooth" in navigator);
-  const device = shallowRef(void 0);
-  const error = shallowRef(null);
-  watch(device, () => {
+  const device = (0, vue_demi_exports.shallowRef)(void 0);
+  const error = (0, vue_demi_exports.shallowRef)(null);
+  (0, vue_demi_exports.watch)(device, () => {
     connectToBluetoothGATTServer();
   });
   async function requestDevice() {
@@ -2583,8 +2570,8 @@ function useBluetooth(options) {
       error.value = err;
     }
   }
-  const server = ref();
-  const isConnected = computed(() => {
+  const server = (0, vue_demi_exports.ref)();
+  const isConnected = (0, vue_demi_exports.computed)(() => {
     var _a;
     return ((_a = server.value) == null ? void 0 : _a.connected) || false;
   });
@@ -2626,7 +2613,7 @@ function useMediaQuery(query, options = {}) {
   const { window: window2 = defaultWindow } = options;
   const isSupported = useSupported(() => window2 && "matchMedia" in window2 && typeof window2.matchMedia === "function");
   let mediaQuery;
-  const matches = ref(false);
+  const matches = (0, vue_demi_exports.ref)(false);
   const handler = (event) => {
     matches.value = event.matches;
   };
@@ -2638,7 +2625,7 @@ function useMediaQuery(query, options = {}) {
     else
       mediaQuery.removeListener(handler);
   };
-  const stopWatch = watchEffect(() => {
+  const stopWatch = (0, vue_demi_exports.watchEffect)(() => {
     if (!isSupported.value)
       return;
     cleanup();
@@ -2760,7 +2747,7 @@ function useBreakpoints(breakpoints, options = {}) {
   }, {});
   function current() {
     const points = Object.keys(breakpoints).map((i) => [i, greaterOrEqual(i)]);
-    return computed(() => points.filter(([, v]) => v.value).map(([k]) => k));
+    return (0, vue_demi_exports.computed)(() => points.filter(([, v]) => v.value).map(([k]) => k));
   }
   return Object.assign(shortcutMethods, {
     greaterOrEqual,
@@ -2792,7 +2779,7 @@ function useBreakpoints(breakpoints, options = {}) {
     current,
     active() {
       const bps = current();
-      return computed(() => bps.value.length === 0 ? "" : bps.value.at(-1));
+      return (0, vue_demi_exports.computed)(() => bps.value.length === 0 ? "" : bps.value.at(-1));
     }
   });
 }
@@ -2802,10 +2789,10 @@ function useBroadcastChannel(options) {
     window: window2 = defaultWindow
   } = options;
   const isSupported = useSupported(() => window2 && "BroadcastChannel" in window2);
-  const isClosed = ref(false);
-  const channel = ref();
-  const data = ref();
-  const error = shallowRef(null);
+  const isClosed = (0, vue_demi_exports.ref)(false);
+  const channel = (0, vue_demi_exports.ref)();
+  const data = (0, vue_demi_exports.ref)();
+  const error = (0, vue_demi_exports.shallowRef)(null);
   const post = (data2) => {
     if (channel.value)
       channel.value.postMessage(data2);
@@ -2856,10 +2843,10 @@ var WRITABLE_PROPERTIES = [
 function useBrowserLocation(options = {}) {
   const { window: window2 = defaultWindow } = options;
   const refs = Object.fromEntries(
-    WRITABLE_PROPERTIES.map((key) => [key, ref()])
+    WRITABLE_PROPERTIES.map((key) => [key, (0, vue_demi_exports.ref)()])
   );
-  for (const [key, ref2] of objectEntries(refs)) {
-    watch(ref2, (value) => {
+  for (const [key, ref22] of objectEntries(refs)) {
+    (0, vue_demi_exports.watch)(ref22, (value) => {
       if (!(window2 == null ? void 0 : window2.location) || window2.location[key] === value)
         return;
       window2.location[key] = value;
@@ -2871,7 +2858,7 @@ function useBrowserLocation(options = {}) {
     const { origin } = (window2 == null ? void 0 : window2.location) || {};
     for (const key of WRITABLE_PROPERTIES)
       refs[key].value = (_a = window2 == null ? void 0 : window2.location) == null ? void 0 : _a[key];
-    return reactive({
+    return (0, vue_demi_exports.reactive)({
       trigger,
       state: state2,
       length,
@@ -2879,7 +2866,7 @@ function useBrowserLocation(options = {}) {
       ...refs
     });
   };
-  const state = ref(buildState("load"));
+  const state = (0, vue_demi_exports.ref)(buildState("load"));
   if (window2) {
     useEventListener(window2, "popstate", () => state.value = buildState("popstate"), { passive: true });
     useEventListener(window2, "hashchange", () => state.value = buildState("hashchange"), { passive: true });
@@ -2887,8 +2874,8 @@ function useBrowserLocation(options = {}) {
   return state;
 }
 function useCached(refValue, comparator = (a, b) => a === b, watchOptions) {
-  const cachedValue = ref(refValue.value);
-  watch(() => refValue.value, (value) => {
+  const cachedValue = (0, vue_demi_exports.ref)(refValue.value);
+  (0, vue_demi_exports.watch)(() => refValue.value, (value) => {
     if (!comparator(value, cachedValue.value))
       cachedValue.value = value;
   }, watchOptions);
@@ -2902,7 +2889,7 @@ function usePermission(permissionDesc, options = {}) {
   const isSupported = useSupported(() => navigator && "permissions" in navigator);
   let permissionStatus;
   const desc = typeof permissionDesc === "string" ? { name: permissionDesc } : permissionDesc;
-  const state = ref();
+  const state = (0, vue_demi_exports.ref)();
   const onChange = () => {
     if (permissionStatus)
       state.value = permissionStatus.state;
@@ -2943,9 +2930,9 @@ function useClipboard(options = {}) {
   const isClipboardApiSupported = useSupported(() => navigator && "clipboard" in navigator);
   const permissionRead = usePermission("clipboard-read");
   const permissionWrite = usePermission("clipboard-write");
-  const isSupported = computed(() => isClipboardApiSupported.value || legacy);
-  const text = ref("");
-  const copied = ref(false);
+  const isSupported = (0, vue_demi_exports.computed)(() => isClipboardApiSupported.value || legacy);
+  const text = (0, vue_demi_exports.ref)("");
+  const copied = (0, vue_demi_exports.ref)(false);
   const timeout = useTimeoutFn(() => copied.value = false, copiedDuring);
   function updateText() {
     if (isClipboardApiSupported.value && isAllowed(permissionRead.value)) {
@@ -3001,8 +2988,8 @@ function useClipboardItems(options = {}) {
     copiedDuring = 1500
   } = options;
   const isSupported = useSupported(() => navigator && "clipboard" in navigator);
-  const content = ref([]);
-  const copied = ref(false);
+  const content = (0, vue_demi_exports.ref)([]);
+  const copied = (0, vue_demi_exports.ref)(false);
   const timeout = useTimeoutFn(() => copied.value = false, copiedDuring);
   function updateContent() {
     if (isSupported.value) {
@@ -3032,7 +3019,7 @@ function cloneFnJSON(source) {
   return JSON.parse(JSON.stringify(source));
 }
 function useCloned(source, options = {}) {
-  const cloned = ref({});
+  const cloned = (0, vue_demi_exports.ref)({});
   const {
     manual,
     clone = cloneFnJSON,
@@ -3043,8 +3030,8 @@ function useCloned(source, options = {}) {
   function sync() {
     cloned.value = clone(toValue(source));
   }
-  if (!manual && (isRef(source) || typeof source === "function")) {
-    watch(source, sync, {
+  if (!manual && ((0, vue_demi_exports.isRef)(source) || typeof source === "function")) {
+    (0, vue_demi_exports.watch)(source, sync, {
       ...options,
       deep,
       immediate
@@ -3122,7 +3109,7 @@ function useStorage(key, defaults2, storage, options = {}) {
     },
     initOnMounted
   } = options;
-  const data = (shallow ? shallowRef : ref)(typeof defaults2 === "function" ? defaults2() : defaults2);
+  const data = (shallow ? vue_demi_exports.shallowRef : vue_demi_exports.ref)(typeof defaults2 === "function" ? defaults2() : defaults2);
   if (!storage) {
     try {
       storage = getSSRHandler("getDefaultStorage", () => {
@@ -3218,7 +3205,7 @@ function useStorage(key, defaults2, storage, options = {}) {
       onError(e);
     } finally {
       if (event)
-        nextTick(resumeWatch);
+        (0, vue_demi_exports.nextTick)(resumeWatch);
       else
         resumeWatch();
     }
@@ -3251,9 +3238,9 @@ function useColorMode(options = {}) {
     ...options.modes || {}
   };
   const preferredDark = usePreferredDark({ window: window2 });
-  const system = computed(() => preferredDark.value ? "dark" : "light");
-  const store = storageRef || (storageKey == null ? toRef2(initialValue) : useStorage(storageKey, initialValue, storage, { window: window2, listenToStorageChanges }));
-  const state = computed(() => store.value === "auto" ? system.value : store.value);
+  const system = (0, vue_demi_exports.computed)(() => preferredDark.value ? "dark" : "light");
+  const store = storageRef || (storageKey == null ? toRef(initialValue) : useStorage(storageKey, initialValue, storage, { window: window2, listenToStorageChanges }));
+  const state = (0, vue_demi_exports.computed)(() => store.value === "auto" ? system.value : store.value);
   const updateHTMLAttrs = getSSRHandler(
     "updateHTMLAttrs",
     (selector2, attribute2, value) => {
@@ -3294,9 +3281,9 @@ function useColorMode(options = {}) {
     else
       defaultOnChanged(mode);
   }
-  watch(state, onChanged, { flush: "post", immediate: true });
+  (0, vue_demi_exports.watch)(state, onChanged, { flush: "post", immediate: true });
   tryOnMounted(() => onChanged(state.value));
-  const auto = computed({
+  const auto = (0, vue_demi_exports.computed)({
     get() {
       return emitAuto ? store.value : state.value;
     },
@@ -3310,7 +3297,7 @@ function useColorMode(options = {}) {
     return auto;
   }
 }
-function useConfirmDialog(revealed = ref(false)) {
+function useConfirmDialog(revealed = (0, vue_demi_exports.ref)(false)) {
   const confirmHook = createEventHook();
   const cancelHook = createEventHook();
   const revealHook = createEventHook();
@@ -3333,7 +3320,7 @@ function useConfirmDialog(revealed = ref(false)) {
     _resolve({ data, isCanceled: true });
   };
   return {
-    isRevealed: computed(() => revealed.value),
+    isRevealed: (0, vue_demi_exports.computed)(() => revealed.value),
     reveal,
     confirm,
     cancel,
@@ -3352,12 +3339,12 @@ function useMutationObserver(target, callback, options = {}) {
       observer = void 0;
     }
   };
-  const targets = computed(() => {
+  const targets = (0, vue_demi_exports.computed)(() => {
     const value = toValue(target);
     const items = (Array.isArray(value) ? value : [value]).map(unrefElement).filter(notNullish);
     return new Set(items);
   });
-  const stopWatch = watch(
+  const stopWatch = (0, vue_demi_exports.watch)(
     () => targets.value,
     (targets2) => {
       cleanup();
@@ -3384,8 +3371,8 @@ function useMutationObserver(target, callback, options = {}) {
 }
 function useCssVar(prop, target, options = {}) {
   const { window: window2 = defaultWindow, initialValue = "", observe = false } = options;
-  const variable = ref(initialValue);
-  const elRef = computed(() => {
+  const variable = (0, vue_demi_exports.ref)(initialValue);
+  const elRef = (0, vue_demi_exports.computed)(() => {
     var _a;
     return unrefElement(target) || ((_a = window2 == null ? void 0 : window2.document) == null ? void 0 : _a.documentElement);
   });
@@ -3404,12 +3391,12 @@ function useCssVar(prop, target, options = {}) {
       window: window2
     });
   }
-  watch(
+  (0, vue_demi_exports.watch)(
     [elRef, () => toValue(prop)],
     updateCssVar,
     { immediate: true }
   );
-  watch(
+  (0, vue_demi_exports.watch)(
     variable,
     (val) => {
       var _a;
@@ -3420,19 +3407,19 @@ function useCssVar(prop, target, options = {}) {
   return variable;
 }
 function useCurrentElement(rootComponent) {
-  const vm = getCurrentInstance();
+  const vm = (0, vue_demi_exports.getCurrentInstance)();
   const currentElement = computedWithControl(
     () => null,
     () => rootComponent ? unrefElement(rootComponent) : vm.proxy.$el
   );
-  onUpdated(currentElement.trigger);
-  onMounted(currentElement.trigger);
+  (0, vue_demi_exports.onUpdated)(currentElement.trigger);
+  (0, vue_demi_exports.onMounted)(currentElement.trigger);
   return currentElement;
 }
 function useCycleList(list, options) {
-  const state = shallowRef(getInitialValue());
-  const listRef = toRef2(list);
-  const index = computed({
+  const state = (0, vue_demi_exports.shallowRef)(getInitialValue());
+  const listRef = toRef(list);
+  const index = (0, vue_demi_exports.computed)({
     get() {
       var _a;
       const targetList = listRef.value;
@@ -3466,7 +3453,7 @@ function useCycleList(list, options) {
     var _a, _b;
     return (_b = toValue((_a = options == null ? void 0 : options.initialValue) != null ? _a : toValue(list)[0])) != null ? _b : void 0;
   }
-  watch(listRef, () => set3(index.value));
+  (0, vue_demi_exports.watch)(listRef, () => set3(index.value));
   return {
     state,
     index,
@@ -3495,7 +3482,7 @@ function useDark(options = {}) {
       light: valueLight
     }
   });
-  const system = computed(() => {
+  const system = (0, vue_demi_exports.computed)(() => {
     if (mode.system) {
       return mode.system.value;
     } else {
@@ -3503,7 +3490,7 @@ function useDark(options = {}) {
       return preferredDark.value ? "dark" : "light";
     }
   });
-  const isDark = computed({
+  const isDark = (0, vue_demi_exports.computed)({
     get() {
       return mode.value === "dark";
     },
@@ -3537,14 +3524,14 @@ function useManualRefHistory(source, options = {}) {
     setSource = fnSetSource
   } = options;
   function _createHistoryRecord() {
-    return markRaw({
+    return (0, vue_demi_exports.markRaw)({
       snapshot: dump(source.value),
       timestamp: timestamp()
     });
   }
-  const last = ref(_createHistoryRecord());
-  const undoStack = ref([]);
-  const redoStack = ref([]);
+  const last = (0, vue_demi_exports.ref)(_createHistoryRecord());
+  const undoStack = (0, vue_demi_exports.ref)([]);
+  const redoStack = (0, vue_demi_exports.ref)([]);
   const _setSource = (record) => {
     setSource(source, parse(record.snapshot));
     last.value = record;
@@ -3578,9 +3565,9 @@ function useManualRefHistory(source, options = {}) {
   const reset = () => {
     _setSource(last.value);
   };
-  const history = computed(() => [last.value, ...undoStack.value]);
-  const canUndo = computed(() => undoStack.value.length > 0);
-  const canRedo = computed(() => redoStack.value.length > 0);
+  const history = (0, vue_demi_exports.computed)(() => [last.value, ...undoStack.value]);
+  const canUndo = (0, vue_demi_exports.computed)(() => undoStack.value.length > 0);
+  const canRedo = (0, vue_demi_exports.computed)(() => redoStack.value.length > 0);
   return {
     source,
     undoStack,
@@ -3669,10 +3656,10 @@ function useDeviceMotion(options = {}) {
     window: window2 = defaultWindow,
     eventFilter = bypassFilter
   } = options;
-  const acceleration = ref({ x: null, y: null, z: null });
-  const rotationRate = ref({ alpha: null, beta: null, gamma: null });
-  const interval = ref(0);
-  const accelerationIncludingGravity = ref({
+  const acceleration = (0, vue_demi_exports.ref)({ x: null, y: null, z: null });
+  const rotationRate = (0, vue_demi_exports.ref)({ alpha: null, beta: null, gamma: null });
+  const interval = (0, vue_demi_exports.ref)(0);
+  const accelerationIncludingGravity = (0, vue_demi_exports.ref)({
     x: null,
     y: null,
     z: null
@@ -3699,10 +3686,10 @@ function useDeviceMotion(options = {}) {
 function useDeviceOrientation(options = {}) {
   const { window: window2 = defaultWindow } = options;
   const isSupported = useSupported(() => window2 && "DeviceOrientationEvent" in window2);
-  const isAbsolute = ref(false);
-  const alpha = ref(null);
-  const beta = ref(null);
-  const gamma = ref(null);
+  const isAbsolute = (0, vue_demi_exports.ref)(false);
+  const alpha = (0, vue_demi_exports.ref)(null);
+  const beta = (0, vue_demi_exports.ref)(null);
+  const gamma = (0, vue_demi_exports.ref)(null);
   if (window2 && isSupported.value) {
     useEventListener(window2, "deviceorientation", (event) => {
       isAbsolute.value = event.absolute;
@@ -3723,7 +3710,7 @@ function useDevicePixelRatio(options = {}) {
   const {
     window: window2 = defaultWindow
   } = options;
-  const pixelRatio = ref(1);
+  const pixelRatio = (0, vue_demi_exports.ref)(1);
   if (window2) {
     let observe2 = function() {
       pixelRatio.value = window2.devicePixelRatio;
@@ -3746,12 +3733,12 @@ function useDevicesList(options = {}) {
     constraints = { audio: true, video: true },
     onUpdated: onUpdated2
   } = options;
-  const devices = ref([]);
-  const videoInputs = computed(() => devices.value.filter((i) => i.kind === "videoinput"));
-  const audioInputs = computed(() => devices.value.filter((i) => i.kind === "audioinput"));
-  const audioOutputs = computed(() => devices.value.filter((i) => i.kind === "audiooutput"));
+  const devices = (0, vue_demi_exports.ref)([]);
+  const videoInputs = (0, vue_demi_exports.computed)(() => devices.value.filter((i) => i.kind === "videoinput"));
+  const audioInputs = (0, vue_demi_exports.computed)(() => devices.value.filter((i) => i.kind === "audioinput"));
+  const audioOutputs = (0, vue_demi_exports.computed)(() => devices.value.filter((i) => i.kind === "audiooutput"));
   const isSupported = useSupported(() => navigator && navigator.mediaDevices && navigator.mediaDevices.enumerateDevices);
-  const permissionGranted = ref(false);
+  const permissionGranted = (0, vue_demi_exports.ref)(false);
   let stream;
   async function update() {
     if (!isSupported.value)
@@ -3797,7 +3784,7 @@ function useDevicesList(options = {}) {
 }
 function useDisplayMedia(options = {}) {
   var _a;
-  const enabled = ref((_a = options.enabled) != null ? _a : false);
+  const enabled = (0, vue_demi_exports.ref)((_a = options.enabled) != null ? _a : false);
   const video = options.video;
   const audio = options.audio;
   const { navigator = defaultNavigator } = options;
@@ -3806,7 +3793,7 @@ function useDisplayMedia(options = {}) {
     return (_a2 = navigator == null ? void 0 : navigator.mediaDevices) == null ? void 0 : _a2.getDisplayMedia;
   });
   const constraint = { audio, video };
-  const stream = shallowRef();
+  const stream = (0, vue_demi_exports.shallowRef)();
   async function _start() {
     if (!isSupported.value || stream.value)
       return;
@@ -3828,7 +3815,7 @@ function useDisplayMedia(options = {}) {
       enabled.value = true;
     return stream.value;
   }
-  watch(
+  (0, vue_demi_exports.watch)(
     enabled,
     (v) => {
       if (v)
@@ -3849,8 +3836,8 @@ function useDisplayMedia(options = {}) {
 function useDocumentVisibility(options = {}) {
   const { document: document2 = defaultDocument } = options;
   if (!document2)
-    return ref("visible");
-  const visibility = ref(document2.visibilityState);
+    return (0, vue_demi_exports.ref)("visible");
+  const visibility = (0, vue_demi_exports.ref)(document2.visibilityState);
   useEventListener(document2, "visibilitychange", () => {
     visibility.value = document2.visibilityState;
   });
@@ -3872,10 +3859,10 @@ function useDraggable(target, options = {}) {
     containerElement,
     handle: draggingHandle = target
   } = options;
-  const position = ref(
+  const position = (0, vue_demi_exports.ref)(
     (_a = toValue(initialValue)) != null ? _a : { x: 0, y: 0 }
   );
-  const pressedDelta = ref();
+  const pressedDelta = (0, vue_demi_exports.ref)();
   const filterEvent = (e) => {
     if (pointerTypes)
       return pointerTypes.includes(e.pointerType);
@@ -3946,17 +3933,17 @@ function useDraggable(target, options = {}) {
     useEventListener(draggingElement, "pointerup", end, config);
   }
   return {
-    ...toRefs2(position),
+    ...toRefs(position),
     position,
-    isDragging: computed(() => !!pressedDelta.value),
-    style: computed(
+    isDragging: (0, vue_demi_exports.computed)(() => !!pressedDelta.value),
+    style: (0, vue_demi_exports.computed)(
       () => `left:${position.value.x}px;top:${position.value.y}px;`
     )
   };
 }
 function useDropZone(target, options = {}) {
-  const isOverDropZone = ref(false);
-  const files = shallowRef(null);
+  const isOverDropZone = (0, vue_demi_exports.ref)(false);
+  const files = (0, vue_demi_exports.shallowRef)(null);
   let counter = 0;
   let isDataTypeIncluded = true;
   if (isClient) {
@@ -3970,7 +3957,7 @@ function useDropZone(target, options = {}) {
       var _a, _b;
       const types = Array.from(((_a = event == null ? void 0 : event.dataTransfer) == null ? void 0 : _a.items) || []).map((i) => i.kind === "file" ? i.type : null).filter(notNullish);
       if (_options.dataTypes && event.dataTransfer) {
-        const dataTypes = unref(_options.dataTypes);
+        const dataTypes = (0, vue_demi_exports.unref)(_options.dataTypes);
         isDataTypeIncluded = typeof dataTypes === "function" ? dataTypes(types) : dataTypes ? dataTypes.some((item) => types.includes(item)) : true;
         if (!isDataTypeIncluded)
           return;
@@ -4020,8 +4007,8 @@ function useResizeObserver(target, callback, options = {}) {
       observer = void 0;
     }
   };
-  const targets = computed(() => Array.isArray(target) ? target.map((el) => unrefElement(el)) : [unrefElement(target)]);
-  const stopWatch = watch(
+  const targets = (0, vue_demi_exports.computed)(() => Array.isArray(target) ? target.map((el) => unrefElement(el)) : [unrefElement(target)]);
+  const stopWatch = (0, vue_demi_exports.watch)(
     targets,
     (els) => {
       cleanup();
@@ -4050,14 +4037,14 @@ function useElementBounding(target, options = {}) {
     windowScroll = true,
     immediate = true
   } = options;
-  const height = ref(0);
-  const bottom = ref(0);
-  const left = ref(0);
-  const right = ref(0);
-  const top = ref(0);
-  const width = ref(0);
-  const x = ref(0);
-  const y = ref(0);
+  const height = (0, vue_demi_exports.ref)(0);
+  const bottom = (0, vue_demi_exports.ref)(0);
+  const left = (0, vue_demi_exports.ref)(0);
+  const right = (0, vue_demi_exports.ref)(0);
+  const top = (0, vue_demi_exports.ref)(0);
+  const width = (0, vue_demi_exports.ref)(0);
+  const x = (0, vue_demi_exports.ref)(0);
+  const y = (0, vue_demi_exports.ref)(0);
   function update() {
     const el = unrefElement(target);
     if (!el) {
@@ -4084,7 +4071,7 @@ function useElementBounding(target, options = {}) {
     y.value = rect.y;
   }
   useResizeObserver(target, update);
-  watch(() => unrefElement(target), (ele) => !ele && update());
+  (0, vue_demi_exports.watch)(() => unrefElement(target), (ele) => !ele && update());
   useMutationObserver(target, update, {
     attributeFilter: ["style", "class"]
   });
@@ -4122,7 +4109,7 @@ function useElementByPoint(options) {
       return document2 && "elementsFromPoint" in document2;
     return document2 && "elementFromPoint" in document2;
   });
-  const element = ref(null);
+  const element = (0, vue_demi_exports.ref)(null);
   const cb = () => {
     var _a, _b;
     element.value = toValue(multiple) ? (_a = document2 == null ? void 0 : document2.elementsFromPoint(toValue(x), toValue(y))) != null ? _a : [] : (_b = document2 == null ? void 0 : document2.elementFromPoint(toValue(x), toValue(y))) != null ? _b : null;
@@ -4140,7 +4127,7 @@ function useElementHover(el, options = {}) {
     delayLeave = 0,
     window: window2 = defaultWindow
   } = options;
-  const isHovered = ref(false);
+  const isHovered = (0, vue_demi_exports.ref)(false);
   let timer;
   const toggle = (entering) => {
     const delay = entering ? delayEnter : delayLeave;
@@ -4161,12 +4148,12 @@ function useElementHover(el, options = {}) {
 }
 function useElementSize(target, initialSize = { width: 0, height: 0 }, options = {}) {
   const { window: window2 = defaultWindow, box = "content-box" } = options;
-  const isSVG = computed(() => {
+  const isSVG = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = unrefElement(target)) == null ? void 0 : _a.namespaceURI) == null ? void 0 : _b.includes("svg");
   });
-  const width = ref(initialSize.width);
-  const height = ref(initialSize.height);
+  const width = (0, vue_demi_exports.ref)(initialSize.width);
+  const height = (0, vue_demi_exports.ref)(initialSize.height);
   const { stop: stop1 } = useResizeObserver(
     target,
     ([entry]) => {
@@ -4198,7 +4185,7 @@ function useElementSize(target, initialSize = { width: 0, height: 0 }, options =
       height.value = "offsetHeight" in ele ? ele.offsetHeight : initialSize.height;
     }
   });
-  const stop2 = watch(
+  const stop2 = (0, vue_demi_exports.watch)(
     () => unrefElement(target),
     (ele) => {
       width.value = ele ? initialSize.width : 0;
@@ -4224,13 +4211,13 @@ function useIntersectionObserver(target, callback, options = {}) {
     immediate = true
   } = options;
   const isSupported = useSupported(() => window2 && "IntersectionObserver" in window2);
-  const targets = computed(() => {
+  const targets = (0, vue_demi_exports.computed)(() => {
     const _target = toValue(target);
     return (Array.isArray(_target) ? _target : [_target]).map(unrefElement).filter(notNullish);
   });
   let cleanup = noop;
-  const isActive = ref(immediate);
-  const stopWatch = isSupported.value ? watch(
+  const isActive = (0, vue_demi_exports.ref)(immediate);
+  const stopWatch = isSupported.value ? (0, vue_demi_exports.watch)(
     () => [targets.value, unrefElement(root), isActive.value],
     ([targets2, root2]) => {
       cleanup();
@@ -4275,7 +4262,7 @@ function useIntersectionObserver(target, callback, options = {}) {
 }
 function useElementVisibility(element, options = {}) {
   const { window: window2 = defaultWindow, scrollTarget, threshold = 0 } = options;
-  const elementIsVisible = ref(false);
+  const elementIsVisible = (0, vue_demi_exports.ref)(false);
   useIntersectionObserver(
     element,
     (intersectionObserverEntries) => {
@@ -4299,7 +4286,7 @@ function useElementVisibility(element, options = {}) {
 }
 var events = /* @__PURE__ */ new Map();
 function useEventBus(key) {
-  const scope = getCurrentScope();
+  const scope = (0, vue_demi_exports.getCurrentScope)();
   function on(listener) {
     var _a;
     const listeners = events.get(key) || /* @__PURE__ */ new Set();
@@ -4339,12 +4326,12 @@ function resolveNestedOptions$1(options) {
   return options;
 }
 function useEventSource(url, events2 = [], options = {}) {
-  const event = ref(null);
-  const data = ref(null);
-  const status = ref("CONNECTING");
-  const eventSource = ref(null);
-  const error = shallowRef(null);
-  const urlRef = toRef2(url);
+  const event = (0, vue_demi_exports.ref)(null);
+  const data = (0, vue_demi_exports.ref)(null);
+  const status = (0, vue_demi_exports.ref)("CONNECTING");
+  const eventSource = (0, vue_demi_exports.ref)(null);
+  const error = (0, vue_demi_exports.shallowRef)(null);
+  const urlRef = toRef(url);
   let explicitlyClosed = false;
   let retried = 0;
   const {
@@ -4408,7 +4395,7 @@ function useEventSource(url, events2 = [], options = {}) {
     _init();
   };
   if (immediate)
-    watch(urlRef, open, { immediate: true });
+    (0, vue_demi_exports.watch)(urlRef, open, { immediate: true });
   tryOnScopeDispose(close);
   return {
     eventSource,
@@ -4423,7 +4410,7 @@ function useEventSource(url, events2 = [], options = {}) {
 function useEyeDropper(options = {}) {
   const { initialValue = "" } = options;
   const isSupported = useSupported(() => typeof window !== "undefined" && "EyeDropper" in window);
-  const sRGBHex = ref(initialValue);
+  const sRGBHex = (0, vue_demi_exports.ref)(initialValue);
   async function open(openOptions) {
     if (!isSupported.value)
       return;
@@ -4440,7 +4427,7 @@ function useFavicon(newIcon = null, options = {}) {
     rel = "icon",
     document: document2 = defaultDocument
   } = options;
-  const favicon = toRef2(newIcon);
+  const favicon = toRef(newIcon);
   const applyIcon = (icon) => {
     const elements = document2 == null ? void 0 : document2.head.querySelectorAll(`link[rel*="${rel}"]`);
     if (!elements || elements.length === 0) {
@@ -4455,7 +4442,7 @@ function useFavicon(newIcon = null, options = {}) {
     }
     elements == null ? void 0 : elements.forEach((el) => el.href = `${baseUrl}${icon}`);
   };
-  watch(
+  (0, vue_demi_exports.watch)(
     favicon,
     (i, o) => {
       if (typeof i === "string" && i !== o)
@@ -4503,7 +4490,7 @@ function createFetch(config = {}) {
   const _options = config.options || {};
   const _fetchOptions = config.fetchOptions || {};
   function useFactoryFetch(url, ...args) {
-    const computedUrl = computed(() => {
+    const computedUrl = (0, vue_demi_exports.computed)(() => {
       const baseUrl = toValue(config.baseUrl);
       const targetUrl = toValue(url);
       return baseUrl && !isAbsoluteURL(targetUrl) ? joinPaths(baseUrl, targetUrl) : targetUrl;
@@ -4576,14 +4563,14 @@ function useFetch(url, ...args) {
   const responseEvent = createEventHook();
   const errorEvent = createEventHook();
   const finallyEvent = createEventHook();
-  const isFinished = ref(false);
-  const isFetching = ref(false);
-  const aborted = ref(false);
-  const statusCode = ref(null);
-  const response = shallowRef(null);
-  const error = shallowRef(null);
-  const data = shallowRef(initialData || null);
-  const canAbort = computed(() => supportsAbort && isFetching.value);
+  const isFinished = (0, vue_demi_exports.ref)(false);
+  const isFetching = (0, vue_demi_exports.ref)(false);
+  const aborted = (0, vue_demi_exports.ref)(false);
+  const statusCode = (0, vue_demi_exports.ref)(null);
+  const response = (0, vue_demi_exports.shallowRef)(null);
+  const error = (0, vue_demi_exports.shallowRef)(null);
+  const data = (0, vue_demi_exports.shallowRef)(initialData || null);
+  const canAbort = (0, vue_demi_exports.computed)(() => supportsAbort && isFetching.value);
   let controller;
   let timer;
   const abort = () => {
@@ -4697,18 +4684,18 @@ function useFetch(url, ...args) {
       finallyEvent.trigger(null);
     });
   };
-  const refetch = toRef2(options.refetch);
-  watch(
+  const refetch = toRef(options.refetch);
+  (0, vue_demi_exports.watch)(
     [
       refetch,
-      toRef2(url)
+      toRef(url)
     ],
     ([refetch2]) => refetch2 && execute(),
     { deep: true }
   );
   const shell = {
-    isFinished: readonly(isFinished),
-    isFetching: readonly(isFetching),
+    isFinished: (0, vue_demi_exports.readonly)(isFinished),
+    isFetching: (0, vue_demi_exports.readonly)(isFetching),
     statusCode,
     response,
     error,
@@ -4741,11 +4728,11 @@ function useFetch(url, ...args) {
         config.method = method;
         config.payload = payload;
         config.payloadType = payloadType;
-        if (isRef(config.payload)) {
-          watch(
+        if ((0, vue_demi_exports.isRef)(config.payload)) {
+          (0, vue_demi_exports.watch)(
             [
               refetch,
-              toRef2(config.payload)
+              toRef(config.payload)
             ],
             ([refetch2]) => refetch2 && execute(),
             { deep: true }
@@ -4804,7 +4791,7 @@ function useFileDialog(options = {}) {
   const {
     document: document2 = defaultDocument
   } = options;
-  const files = ref(null);
+  const files = (0, vue_demi_exports.ref)(null);
   const { on: onChange, trigger } = createEventHook();
   let input;
   if (document2) {
@@ -4841,7 +4828,7 @@ function useFileDialog(options = {}) {
     input.click();
   };
   return {
-    files: readonly(files),
+    files: (0, vue_demi_exports.readonly)(files),
     open,
     reset,
     onChange
@@ -4854,22 +4841,22 @@ function useFileSystemAccess(options = {}) {
   } = options;
   const window2 = _window;
   const isSupported = useSupported(() => window2 && "showSaveFilePicker" in window2 && "showOpenFilePicker" in window2);
-  const fileHandle = ref();
-  const data = ref();
-  const file = ref();
-  const fileName = computed(() => {
+  const fileHandle = (0, vue_demi_exports.ref)();
+  const data = (0, vue_demi_exports.ref)();
+  const file = (0, vue_demi_exports.ref)();
+  const fileName = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = file.value) == null ? void 0 : _a.name) != null ? _b : "";
   });
-  const fileMIME = computed(() => {
+  const fileMIME = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = file.value) == null ? void 0 : _a.type) != null ? _b : "";
   });
-  const fileSize = computed(() => {
+  const fileSize = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = file.value) == null ? void 0 : _a.size) != null ? _b : 0;
   });
-  const fileLastModified = computed(() => {
+  const fileLastModified = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = file.value) == null ? void 0 : _a.lastModified) != null ? _b : 0;
   });
@@ -4925,7 +4912,7 @@ function useFileSystemAccess(options = {}) {
     else if (type === "Blob")
       data.value = file.value;
   }
-  watch(() => toValue(dataType), updateData);
+  (0, vue_demi_exports.watch)(() => toValue(dataType), updateData);
   return {
     isSupported,
     data,
@@ -4943,15 +4930,15 @@ function useFileSystemAccess(options = {}) {
 }
 function useFocus(target, options = {}) {
   const { initialValue = false, focusVisible = false } = options;
-  const innerFocused = ref(false);
-  const targetElement = computed(() => unrefElement(target));
+  const innerFocused = (0, vue_demi_exports.ref)(false);
+  const targetElement = (0, vue_demi_exports.computed)(() => unrefElement(target));
   useEventListener(targetElement, "focus", (event) => {
     var _a, _b;
     if (!focusVisible || ((_b = (_a = event.target).matches) == null ? void 0 : _b.call(_a, ":focus-visible")))
       innerFocused.value = true;
   });
   useEventListener(targetElement, "blur", () => innerFocused.value = false);
-  const focused = computed({
+  const focused = (0, vue_demi_exports.computed)({
     get: () => innerFocused.value,
     set(value) {
       var _a, _b;
@@ -4961,7 +4948,7 @@ function useFocus(target, options = {}) {
         (_b = targetElement.value) == null ? void 0 : _b.focus();
     }
   });
-  watch(
+  (0, vue_demi_exports.watch)(
     targetElement,
     () => {
       focused.value = initialValue;
@@ -4972,13 +4959,13 @@ function useFocus(target, options = {}) {
 }
 function useFocusWithin(target, options = {}) {
   const activeElement = useActiveElement(options);
-  const targetElement = computed(() => unrefElement(target));
-  const focused = computed(() => targetElement.value && activeElement.value ? targetElement.value.contains(activeElement.value) : false);
+  const targetElement = (0, vue_demi_exports.computed)(() => unrefElement(target));
+  const focused = (0, vue_demi_exports.computed)(() => targetElement.value && activeElement.value ? targetElement.value.contains(activeElement.value) : false);
   return { focused };
 }
 function useFps(options) {
   var _a;
-  const fps = ref(0);
+  const fps = (0, vue_demi_exports.ref)(0);
   if (typeof performance === "undefined")
     return fps;
   const every = (_a = options == null ? void 0 : options.every) != null ? _a : 10;
@@ -5008,12 +4995,12 @@ function useFullscreen(target, options = {}) {
     document: document2 = defaultDocument,
     autoExit = false
   } = options;
-  const targetRef = computed(() => {
+  const targetRef = (0, vue_demi_exports.computed)(() => {
     var _a;
     return (_a = unrefElement(target)) != null ? _a : document2 == null ? void 0 : document2.querySelector("html");
   });
-  const isFullscreen = ref(false);
-  const requestMethod = computed(() => {
+  const isFullscreen = (0, vue_demi_exports.ref)(false);
+  const requestMethod = (0, vue_demi_exports.computed)(() => {
     return [
       "requestFullscreen",
       "webkitRequestFullscreen",
@@ -5024,7 +5011,7 @@ function useFullscreen(target, options = {}) {
       "msRequestFullscreen"
     ].find((m) => document2 && m in document2 || targetRef.value && m in targetRef.value);
   });
-  const exitMethod = computed(() => {
+  const exitMethod = (0, vue_demi_exports.computed)(() => {
     return [
       "exitFullscreen",
       "webkitExitFullscreen",
@@ -5034,7 +5021,7 @@ function useFullscreen(target, options = {}) {
       "msExitFullscreen"
     ].find((m) => document2 && m in document2 || targetRef.value && m in targetRef.value);
   });
-  const fullscreenEnabled = computed(() => {
+  const fullscreenEnabled = (0, vue_demi_exports.computed)(() => {
     return [
       "fullScreen",
       "webkitIsFullScreen",
@@ -5114,7 +5101,7 @@ function useFullscreen(target, options = {}) {
   };
 }
 function mapGamepadToXbox360Controller(gamepad) {
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     if (gamepad.value) {
       return {
         buttons: {
@@ -5161,7 +5148,7 @@ function useGamepad(options = {}) {
     navigator = defaultNavigator
   } = options;
   const isSupported = useSupported(() => navigator && "getGamepads" in navigator);
-  const gamepads = ref([]);
+  const gamepads = (0, vue_demi_exports.ref)([]);
   const onConnectedHook = createEventHook();
   const onDisconnectedHook = createEventHook();
   const stateFromGamepad = (gamepad) => {
@@ -5228,9 +5215,9 @@ function useGeolocation(options = {}) {
     immediate = true
   } = options;
   const isSupported = useSupported(() => navigator && "geolocation" in navigator);
-  const locatedAt = ref(null);
-  const error = shallowRef(null);
-  const coords = ref({
+  const locatedAt = (0, vue_demi_exports.ref)(null);
+  const error = (0, vue_demi_exports.shallowRef)(null);
+  const coords = (0, vue_demi_exports.ref)({
     accuracy: 0,
     latitude: Number.POSITIVE_INFINITY,
     longitude: Number.POSITIVE_INFINITY,
@@ -5286,8 +5273,8 @@ function useIdle(timeout = oneMinute, options = {}) {
     window: window2 = defaultWindow,
     eventFilter = throttleFilter(50)
   } = options;
-  const idle = ref(initialState);
-  const lastActive = ref(timestamp());
+  const idle = (0, vue_demi_exports.ref)(initialState);
+  const lastActive = (0, vue_demi_exports.ref)(timestamp());
   let timer;
   const reset = () => {
     idle.value = false;
@@ -5349,7 +5336,7 @@ function useImage(options, asyncStateOptions = {}) {
       ...asyncStateOptions
     }
   );
-  watch(
+  (0, vue_demi_exports.watch)(
     () => toValue(options),
     () => state.execute(asyncStateOptions.delay),
     { deep: true }
@@ -5379,9 +5366,9 @@ function useScroll(element, options = {}) {
       console.error(e);
     }
   } = options;
-  const internalX = ref(0);
-  const internalY = ref(0);
-  const x = computed({
+  const internalX = (0, vue_demi_exports.ref)(0);
+  const internalY = (0, vue_demi_exports.ref)(0);
+  const x = (0, vue_demi_exports.computed)({
     get() {
       return internalX.value;
     },
@@ -5389,7 +5376,7 @@ function useScroll(element, options = {}) {
       scrollTo2(x2, void 0);
     }
   });
-  const y = computed({
+  const y = (0, vue_demi_exports.computed)({
     get() {
       return internalY.value;
     },
@@ -5410,14 +5397,14 @@ function useScroll(element, options = {}) {
       behavior: toValue(behavior)
     });
   }
-  const isScrolling = ref(false);
-  const arrivedState = reactive({
+  const isScrolling = (0, vue_demi_exports.ref)(false);
+  const arrivedState = (0, vue_demi_exports.reactive)({
     left: true,
     right: false,
     top: true,
     bottom: false
   });
-  const directions = reactive({
+  const directions = (0, vue_demi_exports.reactive)({
     left: false,
     right: false,
     top: false,
@@ -5528,7 +5515,7 @@ function useInfiniteScroll(element, onLoadMore, options = {}) {
     interval = 100,
     canLoadMore = () => true
   } = options;
-  const state = reactive(useScroll(
+  const state = (0, vue_demi_exports.reactive)(useScroll(
     element,
     {
       ...options,
@@ -5538,9 +5525,9 @@ function useInfiniteScroll(element, onLoadMore, options = {}) {
       }
     }
   ));
-  const promise = ref();
-  const isLoading = computed(() => !!promise.value);
-  const observedElement = computed(() => {
+  const promise = (0, vue_demi_exports.ref)();
+  const isLoading = (0, vue_demi_exports.computed)(() => !!promise.value);
+  const observedElement = (0, vue_demi_exports.computed)(() => {
     return resolveElement(toValue(element));
   });
   const isElementVisible = useElementVisibility(observedElement);
@@ -5557,12 +5544,12 @@ function useInfiniteScroll(element, onLoadMore, options = {}) {
           new Promise((resolve) => setTimeout(resolve, interval))
         ]).finally(() => {
           promise.value = null;
-          nextTick(() => checkAndLoad());
+          (0, vue_demi_exports.nextTick)(() => checkAndLoad());
         });
       }
     }
   }
-  watch(
+  (0, vue_demi_exports.watch)(
     () => [state.arrivedState[direction], isElementVisible.value],
     checkAndLoad,
     { immediate: true }
@@ -5578,7 +5565,7 @@ function useKeyModifier(modifier, options = {}) {
     document: document2 = defaultDocument,
     initial = null
   } = options;
-  const state = ref(initial);
+  const state = (0, vue_demi_exports.ref)(initial);
   if (document2) {
     events2.forEach((listenerEvent) => {
       useEventListener(document2, listenerEvent, (evt) => {
@@ -5611,14 +5598,14 @@ function useMagicKeys(options = {}) {
     passive = true,
     onEventFired = noop
   } = options;
-  const current = reactive(/* @__PURE__ */ new Set());
+  const current = (0, vue_demi_exports.reactive)(/* @__PURE__ */ new Set());
   const obj = {
     toJSON() {
       return {};
     },
     current
   };
-  const refs = useReactive ? reactive(obj) : obj;
+  const refs = useReactive ? (0, vue_demi_exports.reactive)(obj) : obj;
   const metaDeps = /* @__PURE__ */ new Set();
   const usedKeys = /* @__PURE__ */ new Set();
   function setRefs(key, value) {
@@ -5681,9 +5668,9 @@ function useMagicKeys(options = {}) {
         if (!(prop in refs)) {
           if (/[+_-]/.test(prop)) {
             const keys2 = prop.split(/[+_-]/g).map((i) => i.trim());
-            refs[prop] = computed(() => keys2.every((key) => toValue(proxy[key])));
+            refs[prop] = (0, vue_demi_exports.computed)(() => keys2.every((key) => toValue(proxy[key])));
           } else {
-            refs[prop] = ref(false);
+            refs[prop] = (0, vue_demi_exports.ref)(false);
           }
         }
         const r = Reflect.get(target2, prop, rec);
@@ -5718,20 +5705,20 @@ function useMediaControls(target, options = {}) {
   const {
     document: document2 = defaultDocument
   } = options;
-  const currentTime = ref(0);
-  const duration = ref(0);
-  const seeking = ref(false);
-  const volume = ref(1);
-  const waiting = ref(false);
-  const ended = ref(false);
-  const playing = ref(false);
-  const rate = ref(1);
-  const stalled = ref(false);
-  const buffered = ref([]);
-  const tracks = ref([]);
-  const selectedTrack = ref(-1);
-  const isPictureInPicture = ref(false);
-  const muted = ref(false);
+  const currentTime = (0, vue_demi_exports.ref)(0);
+  const duration = (0, vue_demi_exports.ref)(0);
+  const seeking = (0, vue_demi_exports.ref)(false);
+  const volume = (0, vue_demi_exports.ref)(1);
+  const waiting = (0, vue_demi_exports.ref)(false);
+  const ended = (0, vue_demi_exports.ref)(false);
+  const playing = (0, vue_demi_exports.ref)(false);
+  const rate = (0, vue_demi_exports.ref)(1);
+  const stalled = (0, vue_demi_exports.ref)(false);
+  const buffered = (0, vue_demi_exports.ref)([]);
+  const tracks = (0, vue_demi_exports.ref)([]);
+  const selectedTrack = (0, vue_demi_exports.ref)(-1);
+  const isPictureInPicture = (0, vue_demi_exports.ref)(false);
+  const muted = (0, vue_demi_exports.ref)(false);
   const supportsPictureInPicture = document2 && "pictureInPictureEnabled" in document2;
   const sourceErrorEvent = createEventHook();
   const disableTrack = (track) => {
@@ -5768,7 +5755,7 @@ function useMediaControls(target, options = {}) {
       });
     });
   };
-  watchEffect(() => {
+  (0, vue_demi_exports.watchEffect)(() => {
     if (!document2)
       return;
     const el = toValue(target);
@@ -5803,25 +5790,25 @@ function useMediaControls(target, options = {}) {
       return;
     el.querySelectorAll("source").forEach((e) => e.removeEventListener("error", sourceErrorEvent.trigger));
   });
-  watch([target, volume], () => {
+  (0, vue_demi_exports.watch)([target, volume], () => {
     const el = toValue(target);
     if (!el)
       return;
     el.volume = volume.value;
   });
-  watch([target, muted], () => {
+  (0, vue_demi_exports.watch)([target, muted], () => {
     const el = toValue(target);
     if (!el)
       return;
     el.muted = muted.value;
   });
-  watch([target, rate], () => {
+  (0, vue_demi_exports.watch)([target, rate], () => {
     const el = toValue(target);
     if (!el)
       return;
     el.playbackRate = rate.value;
   });
-  watchEffect(() => {
+  (0, vue_demi_exports.watchEffect)(() => {
     if (!document2)
       return;
     const textTracks = toValue(options.tracks);
@@ -5883,7 +5870,7 @@ function useMediaControls(target, options = {}) {
     muted.value = el.muted;
   });
   const listeners = [];
-  const stop = watch([target], () => {
+  const stop = (0, vue_demi_exports.watch)([target], () => {
     const el = toValue(target);
     if (!el)
       return;
@@ -5920,7 +5907,7 @@ function useMediaControls(target, options = {}) {
   };
 }
 function getMapVue2Compat() {
-  const data = shallowReactive({});
+  const data = (0, vue_demi_exports.shallowReactive)({});
   return {
     get: (key) => data[key],
     set: (key, value) => set(data, key, value),
@@ -5936,10 +5923,10 @@ function getMapVue2Compat() {
 function useMemoize(resolver, options) {
   const initCache = () => {
     if (options == null ? void 0 : options.cache)
-      return shallowReactive(options.cache);
+      return (0, vue_demi_exports.shallowReactive)(options.cache);
     if (isVue2)
       return getMapVue2Compat();
-    return shallowReactive(/* @__PURE__ */ new Map());
+    return (0, vue_demi_exports.shallowReactive)(/* @__PURE__ */ new Map());
   };
   const cache = initCache();
   const generateKey = (...args) => (options == null ? void 0 : options.getKey) ? options.getKey(...args) : JSON.stringify(args);
@@ -5968,7 +5955,7 @@ function useMemoize(resolver, options) {
   return memoized;
 }
 function useMemory(options = {}) {
-  const memory = ref();
+  const memory = (0, vue_demi_exports.ref)();
   const isSupported = useSupported(() => typeof performance !== "undefined" && "memory" in performance);
   if (isSupported.value) {
     const { interval = 1e3 } = options;
@@ -5996,9 +5983,9 @@ function useMouse(options = {}) {
     eventFilter
   } = options;
   let _prevMouseEvent = null;
-  const x = ref(initialValue.x);
-  const y = ref(initialValue.y);
-  const sourceType = ref(null);
+  const x = (0, vue_demi_exports.ref)(initialValue.x);
+  const y = (0, vue_demi_exports.ref)(initialValue.y);
+  const sourceType = (0, vue_demi_exports.ref)(null);
   const extractor = typeof type === "function" ? type : UseMouseBuiltinExtractors[type];
   const mouseHandler = (event) => {
     const result = extractor(event);
@@ -6057,18 +6044,18 @@ function useMouseInElement(target, options = {}) {
   } = options;
   const type = options.type || "page";
   const { x, y, sourceType } = useMouse(options);
-  const targetRef = ref(target != null ? target : window2 == null ? void 0 : window2.document.body);
-  const elementX = ref(0);
-  const elementY = ref(0);
-  const elementPositionX = ref(0);
-  const elementPositionY = ref(0);
-  const elementHeight = ref(0);
-  const elementWidth = ref(0);
-  const isOutside = ref(true);
+  const targetRef = (0, vue_demi_exports.ref)(target != null ? target : window2 == null ? void 0 : window2.document.body);
+  const elementX = (0, vue_demi_exports.ref)(0);
+  const elementY = (0, vue_demi_exports.ref)(0);
+  const elementPositionX = (0, vue_demi_exports.ref)(0);
+  const elementPositionY = (0, vue_demi_exports.ref)(0);
+  const elementHeight = (0, vue_demi_exports.ref)(0);
+  const elementWidth = (0, vue_demi_exports.ref)(0);
+  const isOutside = (0, vue_demi_exports.ref)(true);
   let stop = () => {
   };
   if (window2) {
-    stop = watch(
+    stop = (0, vue_demi_exports.watch)(
       [targetRef, x, y],
       () => {
         const el = unrefElement(targetRef);
@@ -6120,8 +6107,8 @@ function useMousePressed(options = {}) {
     initialValue = false,
     window: window2 = defaultWindow
   } = options;
-  const pressed = ref(initialValue);
-  const sourceType = ref(null);
+  const pressed = (0, vue_demi_exports.ref)(initialValue);
+  const sourceType = (0, vue_demi_exports.ref)(null);
   if (!window2) {
     return {
       pressed,
@@ -6136,7 +6123,7 @@ function useMousePressed(options = {}) {
     pressed.value = false;
     sourceType.value = null;
   };
-  const target = computed(() => unrefElement(options.target) || window2);
+  const target = (0, vue_demi_exports.computed)(() => unrefElement(options.target) || window2);
   useEventListener(target, "mousedown", onPressed("mouse"), { passive: true, capture });
   useEventListener(window2, "mouseleave", onReleased, { passive: true, capture });
   useEventListener(window2, "mouseup", onReleased, { passive: true, capture });
@@ -6159,7 +6146,7 @@ function useNavigatorLanguage(options = {}) {
   const { window: window2 = defaultWindow } = options;
   const navigator = window2 == null ? void 0 : window2.navigator;
   const isSupported = useSupported(() => navigator && "language" in navigator);
-  const language = ref(navigator == null ? void 0 : navigator.language);
+  const language = (0, vue_demi_exports.ref)(navigator == null ? void 0 : navigator.language);
   useEventListener(window2, "languagechange", () => {
     if (navigator)
       language.value = navigator.language;
@@ -6173,15 +6160,15 @@ function useNetwork(options = {}) {
   const { window: window2 = defaultWindow } = options;
   const navigator = window2 == null ? void 0 : window2.navigator;
   const isSupported = useSupported(() => navigator && "connection" in navigator);
-  const isOnline = ref(true);
-  const saveData = ref(false);
-  const offlineAt = ref(void 0);
-  const onlineAt = ref(void 0);
-  const downlink = ref(void 0);
-  const downlinkMax = ref(void 0);
-  const rtt = ref(void 0);
-  const effectiveType = ref(void 0);
-  const type = ref("unknown");
+  const isOnline = (0, vue_demi_exports.ref)(true);
+  const saveData = (0, vue_demi_exports.ref)(false);
+  const offlineAt = (0, vue_demi_exports.ref)(void 0);
+  const onlineAt = (0, vue_demi_exports.ref)(void 0);
+  const downlink = (0, vue_demi_exports.ref)(void 0);
+  const downlinkMax = (0, vue_demi_exports.ref)(void 0);
+  const rtt = (0, vue_demi_exports.ref)(void 0);
+  const effectiveType = (0, vue_demi_exports.ref)(void 0);
+  const type = (0, vue_demi_exports.ref)("unknown");
   const connection = isSupported.value && navigator.connection;
   function updateNetworkInformation() {
     if (!navigator)
@@ -6229,7 +6216,7 @@ function useNow(options = {}) {
     controls: exposeControls = false,
     interval = "requestAnimationFrame"
   } = options;
-  const now2 = ref(/* @__PURE__ */ new Date());
+  const now2 = (0, vue_demi_exports.ref)(/* @__PURE__ */ new Date());
   const update = () => now2.value = /* @__PURE__ */ new Date();
   const controls = interval === "requestAnimationFrame" ? useRafFn(update, { immediate: true }) : useIntervalFn(update, interval, { immediate: true });
   if (exposeControls) {
@@ -6242,13 +6229,13 @@ function useNow(options = {}) {
   }
 }
 function useObjectUrl(object) {
-  const url = ref();
+  const url = (0, vue_demi_exports.ref)();
   const release = () => {
     if (url.value)
       URL.revokeObjectURL(url.value);
     url.value = void 0;
   };
-  watch(
+  (0, vue_demi_exports.watch)(
     () => toValue(object),
     (newObject) => {
       release();
@@ -6258,13 +6245,13 @@ function useObjectUrl(object) {
     { immediate: true }
   );
   tryOnScopeDispose(release);
-  return readonly(url);
+  return (0, vue_demi_exports.readonly)(url);
 }
 function useClamp(value, min, max) {
-  if (typeof value === "function" || isReadonly(value))
-    return computed(() => clamp(toValue(value), toValue(min), toValue(max)));
-  const _value = ref(value);
-  return computed({
+  if (typeof value === "function" || (0, vue_demi_exports.isReadonly)(value))
+    return (0, vue_demi_exports.computed)(() => clamp(toValue(value), toValue(min), toValue(max)));
+  const _value = (0, vue_demi_exports.ref)(value);
+  return (0, vue_demi_exports.computed)({
     get() {
       return _value.value = clamp(_value.value, toValue(min), toValue(max));
     },
@@ -6283,21 +6270,21 @@ function useOffsetPagination(options) {
     onPageCountChange = noop
   } = options;
   const currentPageSize = useClamp(pageSize, 1, Number.POSITIVE_INFINITY);
-  const pageCount = computed(() => Math.max(
+  const pageCount = (0, vue_demi_exports.computed)(() => Math.max(
     1,
     Math.ceil(toValue(total) / toValue(currentPageSize))
   ));
   const currentPage = useClamp(page, 1, pageCount);
-  const isFirstPage = computed(() => currentPage.value === 1);
-  const isLastPage = computed(() => currentPage.value === pageCount.value);
-  if (isRef(page)) {
+  const isFirstPage = (0, vue_demi_exports.computed)(() => currentPage.value === 1);
+  const isLastPage = (0, vue_demi_exports.computed)(() => currentPage.value === pageCount.value);
+  if ((0, vue_demi_exports.isRef)(page)) {
     syncRef(page, currentPage, {
-      direction: isReadonly(page) ? "ltr" : "both"
+      direction: (0, vue_demi_exports.isReadonly)(page) ? "ltr" : "both"
     });
   }
-  if (isRef(pageSize)) {
+  if ((0, vue_demi_exports.isRef)(pageSize)) {
     syncRef(pageSize, currentPageSize, {
-      direction: isReadonly(pageSize) ? "ltr" : "both"
+      direction: (0, vue_demi_exports.isReadonly)(pageSize) ? "ltr" : "both"
     });
   }
   function prev() {
@@ -6315,14 +6302,14 @@ function useOffsetPagination(options) {
     prev,
     next
   };
-  watch(currentPage, () => {
-    onPageChange(reactive(returnValue));
+  (0, vue_demi_exports.watch)(currentPage, () => {
+    onPageChange((0, vue_demi_exports.reactive)(returnValue));
   });
-  watch(currentPageSize, () => {
-    onPageSizeChange(reactive(returnValue));
+  (0, vue_demi_exports.watch)(currentPageSize, () => {
+    onPageSizeChange((0, vue_demi_exports.reactive)(returnValue));
   });
-  watch(pageCount, () => {
-    onPageCountChange(reactive(returnValue));
+  (0, vue_demi_exports.watch)(pageCount, () => {
+    onPageCountChange((0, vue_demi_exports.reactive)(returnValue));
   });
   return returnValue;
 }
@@ -6332,7 +6319,7 @@ function useOnline(options = {}) {
 }
 function usePageLeave(options = {}) {
   const { window: window2 = defaultWindow } = options;
-  const isLeft = ref(false);
+  const isLeft = (0, vue_demi_exports.ref)(false);
   const handler = (event) => {
     if (!window2)
       return;
@@ -6353,8 +6340,8 @@ function useScreenOrientation(options = {}) {
   } = options;
   const isSupported = useSupported(() => window2 && "screen" in window2 && "orientation" in window2.screen);
   const screenOrientation = isSupported.value ? window2.screen.orientation : {};
-  const orientation = ref(screenOrientation.type);
-  const angle = ref(screenOrientation.angle || 0);
+  const orientation = (0, vue_demi_exports.ref)(screenOrientation.type);
+  const angle = (0, vue_demi_exports.ref)(screenOrientation.angle || 0);
   if (isSupported.value) {
     useEventListener(window2, "orientationchange", () => {
       orientation.value = screenOrientation.type;
@@ -6386,20 +6373,20 @@ function useParallax(target, options = {}) {
     mouseRollAdjust = (i) => i,
     window: window2 = defaultWindow
   } = options;
-  const orientation = reactive(useDeviceOrientation({ window: window2 }));
-  const screenOrientation = reactive(useScreenOrientation({ window: window2 }));
+  const orientation = (0, vue_demi_exports.reactive)(useDeviceOrientation({ window: window2 }));
+  const screenOrientation = (0, vue_demi_exports.reactive)(useScreenOrientation({ window: window2 }));
   const {
     elementX: x,
     elementY: y,
     elementWidth: width,
     elementHeight: height
   } = useMouseInElement(target, { handleOutside: false, window: window2 });
-  const source = computed(() => {
+  const source = (0, vue_demi_exports.computed)(() => {
     if (orientation.isSupported && (orientation.alpha != null && orientation.alpha !== 0 || orientation.gamma != null && orientation.gamma !== 0))
       return "deviceOrientation";
     return "mouse";
   });
-  const roll = computed(() => {
+  const roll = (0, vue_demi_exports.computed)(() => {
     if (source.value === "deviceOrientation") {
       let value;
       switch (screenOrientation.orientation) {
@@ -6424,7 +6411,7 @@ function useParallax(target, options = {}) {
       return mouseRollAdjust(value);
     }
   });
-  const tilt = computed(() => {
+  const tilt = (0, vue_demi_exports.computed)(() => {
     if (source.value === "deviceOrientation") {
       let value;
       switch (screenOrientation.orientation) {
@@ -6452,14 +6439,14 @@ function useParallax(target, options = {}) {
   return { roll, tilt, source };
 }
 function useParentElement(element = useCurrentElement()) {
-  const parentElement = shallowRef();
+  const parentElement = (0, vue_demi_exports.shallowRef)();
   const update = () => {
     const el = unrefElement(element);
     if (el)
       parentElement.value = el.parentElement;
   };
   tryOnMounted(update);
-  watch(() => toValue(element), update);
+  (0, vue_demi_exports.watch)(() => toValue(element), update);
   return parentElement;
 }
 function usePerformanceObserver(options, callback) {
@@ -6506,8 +6493,8 @@ function usePointer(options = {}) {
   const {
     target = defaultWindow
   } = options;
-  const isInside = ref(false);
-  const state = ref(options.initialValue || {});
+  const isInside = (0, vue_demi_exports.ref)(false);
+  const state = (0, vue_demi_exports.ref)(options.initialValue || {});
   Object.assign(state.value, defaultState, state.value);
   const handler = (event) => {
     isInside.value = true;
@@ -6521,15 +6508,15 @@ function usePointer(options = {}) {
     useEventListener(target, "pointerleave", () => isInside.value = false, listenerOptions);
   }
   return {
-    ...toRefs2(state),
+    ...toRefs(state),
     isInside
   };
 }
 function usePointerLock(target, options = {}) {
   const { document: document2 = defaultDocument } = options;
   const isSupported = useSupported(() => document2 && "pointerLockElement" in document2);
-  const element = ref();
-  const triggerElement = ref();
+  const element = (0, vue_demi_exports.ref)();
+  const triggerElement = (0, vue_demi_exports.ref)();
   let targetElement;
   if (isSupported.value) {
     useEventListener(document2, "pointerlockchange", () => {
@@ -6577,7 +6564,7 @@ function usePointerLock(target, options = {}) {
   };
 }
 function usePointerSwipe(target, options = {}) {
-  const targetRef = toRef2(target);
+  const targetRef = toRef(target);
   const {
     threshold = 50,
     onSwipe,
@@ -6585,23 +6572,23 @@ function usePointerSwipe(target, options = {}) {
     onSwipeStart,
     disableTextSelect = false
   } = options;
-  const posStart = reactive({ x: 0, y: 0 });
+  const posStart = (0, vue_demi_exports.reactive)({ x: 0, y: 0 });
   const updatePosStart = (x, y) => {
     posStart.x = x;
     posStart.y = y;
   };
-  const posEnd = reactive({ x: 0, y: 0 });
+  const posEnd = (0, vue_demi_exports.reactive)({ x: 0, y: 0 });
   const updatePosEnd = (x, y) => {
     posEnd.x = x;
     posEnd.y = y;
   };
-  const distanceX = computed(() => posStart.x - posEnd.x);
-  const distanceY = computed(() => posStart.y - posEnd.y);
+  const distanceX = (0, vue_demi_exports.computed)(() => posStart.x - posEnd.x);
+  const distanceY = (0, vue_demi_exports.computed)(() => posStart.y - posEnd.y);
   const { max, abs } = Math;
-  const isThresholdExceeded = computed(() => max(abs(distanceX.value), abs(distanceY.value)) >= threshold);
-  const isSwiping = ref(false);
-  const isPointerDown = ref(false);
-  const direction = computed(() => {
+  const isThresholdExceeded = (0, vue_demi_exports.computed)(() => max(abs(distanceX.value), abs(distanceY.value)) >= threshold);
+  const isSwiping = (0, vue_demi_exports.ref)(false);
+  const isPointerDown = (0, vue_demi_exports.ref)(false);
+  const direction = (0, vue_demi_exports.computed)(() => {
     if (!isThresholdExceeded.value)
       return "none";
     if (abs(distanceX.value) > abs(distanceY.value)) {
@@ -6660,10 +6647,10 @@ function usePointerSwipe(target, options = {}) {
   });
   const stop = () => stops.forEach((s) => s());
   return {
-    isSwiping: readonly(isSwiping),
-    direction: readonly(direction),
-    posStart: readonly(posStart),
-    posEnd: readonly(posEnd),
+    isSwiping: (0, vue_demi_exports.readonly)(isSwiping),
+    direction: (0, vue_demi_exports.readonly)(direction),
+    posStart: (0, vue_demi_exports.readonly)(posStart),
+    posEnd: (0, vue_demi_exports.readonly)(posEnd),
     distanceX,
     distanceY,
     stop
@@ -6672,7 +6659,7 @@ function usePointerSwipe(target, options = {}) {
 function usePreferredColorScheme(options) {
   const isLight = useMediaQuery("(prefers-color-scheme: light)", options);
   const isDark = useMediaQuery("(prefers-color-scheme: dark)", options);
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     if (isDark.value)
       return "dark";
     if (isLight.value)
@@ -6684,7 +6671,7 @@ function usePreferredContrast(options) {
   const isMore = useMediaQuery("(prefers-contrast: more)", options);
   const isLess = useMediaQuery("(prefers-contrast: less)", options);
   const isCustom = useMediaQuery("(prefers-contrast: custom)", options);
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     if (isMore.value)
       return "more";
     if (isLess.value)
@@ -6697,9 +6684,9 @@ function usePreferredContrast(options) {
 function usePreferredLanguages(options = {}) {
   const { window: window2 = defaultWindow } = options;
   if (!window2)
-    return ref(["en"]);
+    return (0, vue_demi_exports.ref)(["en"]);
   const navigator = window2.navigator;
-  const value = ref(navigator.languages);
+  const value = (0, vue_demi_exports.ref)(navigator.languages);
   useEventListener(window2, "languagechange", () => {
     value.value = navigator.languages;
   });
@@ -6707,32 +6694,32 @@ function usePreferredLanguages(options = {}) {
 }
 function usePreferredReducedMotion(options) {
   const isReduced = useMediaQuery("(prefers-reduced-motion: reduce)", options);
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     if (isReduced.value)
       return "reduce";
     return "no-preference";
   });
 }
 function usePrevious(value, initialValue) {
-  const previous = shallowRef(initialValue);
-  watch(
-    toRef2(value),
+  const previous = (0, vue_demi_exports.shallowRef)(initialValue);
+  (0, vue_demi_exports.watch)(
+    toRef(value),
     (_, oldValue) => {
       previous.value = oldValue;
     },
     { flush: "sync" }
   );
-  return readonly(previous);
+  return (0, vue_demi_exports.readonly)(previous);
 }
 var topVarName = "--vueuse-safe-area-top";
 var rightVarName = "--vueuse-safe-area-right";
 var bottomVarName = "--vueuse-safe-area-bottom";
 var leftVarName = "--vueuse-safe-area-left";
 function useScreenSafeArea() {
-  const top = ref("");
-  const right = ref("");
-  const bottom = ref("");
-  const left = ref("");
+  const top = (0, vue_demi_exports.ref)("");
+  const right = (0, vue_demi_exports.ref)("");
+  const bottom = (0, vue_demi_exports.ref)("");
+  const left = (0, vue_demi_exports.ref)("");
   if (isClient) {
     const topCssVar = useCssVar(topVarName);
     const rightCssVar = useCssVar(rightVarName);
@@ -6775,7 +6762,7 @@ function useScriptTag(src, onLoaded = noop, options = {}) {
     document: document2 = defaultDocument,
     attrs = {}
   } = options;
-  const scriptTag = ref(null);
+  const scriptTag = (0, vue_demi_exports.ref)(null);
   let _promise = null;
   const loadScript = (waitForScriptLoad) => new Promise((resolve, reject) => {
     const resolveWithElement = (el2) => {
@@ -6864,9 +6851,9 @@ function preventDefault(rawEvent) {
 }
 var elInitialOverflow = /* @__PURE__ */ new WeakMap();
 function useScrollLock(element, initialState = false) {
-  const isLocked = ref(initialState);
+  const isLocked = (0, vue_demi_exports.ref)(initialState);
   let stopTouchMoveListener = null;
-  watch(toRef2(element), (el) => {
+  (0, vue_demi_exports.watch)(toRef(element), (el) => {
     const target = resolveElement(toValue(el));
     if (target) {
       const ele = target;
@@ -6906,7 +6893,7 @@ function useScrollLock(element, initialState = false) {
     isLocked.value = false;
   };
   tryOnScopeDispose(unlock);
-  return computed({
+  return (0, vue_demi_exports.computed)({
     get() {
       return isLocked.value;
     },
@@ -6967,10 +6954,10 @@ function useSorted(...args) {
     sortFn = defaultSortFn
   } = options;
   if (!dirty)
-    return computed(() => sortFn([...toValue(source)], compareFn));
-  watchEffect(() => {
+    return (0, vue_demi_exports.computed)(() => sortFn([...toValue(source)], compareFn));
+  (0, vue_demi_exports.watchEffect)(() => {
     const result = sortFn(toValue(source), compareFn);
-    if (isRef(source))
+    if ((0, vue_demi_exports.isRef)(source))
       source.value = result;
     else
       source.splice(0, source.length, ...result);
@@ -6983,11 +6970,11 @@ function useSpeechRecognition(options = {}) {
     continuous = true,
     window: window2 = defaultWindow
   } = options;
-  const lang = toRef2(options.lang || "en-US");
-  const isListening = ref(false);
-  const isFinal = ref(false);
-  const result = ref("");
-  const error = shallowRef(void 0);
+  const lang = toRef(options.lang || "en-US");
+  const isListening = (0, vue_demi_exports.ref)(false);
+  const isFinal = (0, vue_demi_exports.ref)(false);
+  const result = (0, vue_demi_exports.ref)("");
+  const error = (0, vue_demi_exports.shallowRef)(void 0);
   const toggle = (value = !isListening.value) => {
     isListening.value = value;
   };
@@ -7008,7 +6995,7 @@ function useSpeechRecognition(options = {}) {
     recognition.onstart = () => {
       isFinal.value = false;
     };
-    watch(lang, (lang2) => {
+    (0, vue_demi_exports.watch)(lang, (lang2) => {
       if (recognition && !isListening.value)
         recognition.lang = lang2;
     });
@@ -7027,7 +7014,7 @@ function useSpeechRecognition(options = {}) {
       isListening.value = false;
       recognition.lang = toValue(lang);
     };
-    watch(isListening, () => {
+    (0, vue_demi_exports.watch)(isListening, () => {
       if (isListening.value)
         recognition.start();
       else
@@ -7058,11 +7045,11 @@ function useSpeechSynthesis(text, options = {}) {
   } = options;
   const synth = window2 && window2.speechSynthesis;
   const isSupported = useSupported(() => synth);
-  const isPlaying = ref(false);
-  const status = ref("init");
-  const spokenText = toRef2(text || "");
-  const lang = toRef2(options.lang || "en-US");
-  const error = shallowRef(void 0);
+  const isPlaying = (0, vue_demi_exports.ref)(false);
+  const status = (0, vue_demi_exports.ref)("init");
+  const spokenText = toRef(text || "");
+  const lang = toRef(options.lang || "en-US");
+  const error = (0, vue_demi_exports.shallowRef)(void 0);
   const toggle = (value = !isPlaying.value) => {
     isPlaying.value = value;
   };
@@ -7092,7 +7079,7 @@ function useSpeechSynthesis(text, options = {}) {
       error.value = event;
     };
   };
-  const utterance = computed(() => {
+  const utterance = (0, vue_demi_exports.computed)(() => {
     isPlaying.value = false;
     status.value = "init";
     const newUtterance = new SpeechSynthesisUtterance(spokenText.value);
@@ -7109,16 +7096,16 @@ function useSpeechSynthesis(text, options = {}) {
   };
   if (isSupported.value) {
     bindEventsForUtterance(utterance.value);
-    watch(lang, (lang2) => {
+    (0, vue_demi_exports.watch)(lang, (lang2) => {
       if (utterance.value && !isPlaying.value)
         utterance.value.lang = lang2;
     });
     if (options.voice) {
-      watch(options.voice, () => {
+      (0, vue_demi_exports.watch)(options.voice, () => {
         synth.cancel();
       });
     }
-    watch(isPlaying, () => {
+    (0, vue_demi_exports.watch)(isPlaying, () => {
       if (isPlaying.value)
         synth.resume();
       else
@@ -7140,14 +7127,14 @@ function useSpeechSynthesis(text, options = {}) {
   };
 }
 function useStepper(steps, initialStep) {
-  const stepsRef = ref(steps);
-  const stepNames = computed(() => Array.isArray(stepsRef.value) ? stepsRef.value : Object.keys(stepsRef.value));
-  const index = ref(stepNames.value.indexOf(initialStep != null ? initialStep : stepNames.value[0]));
-  const current = computed(() => at(index.value));
-  const isFirst = computed(() => index.value === 0);
-  const isLast = computed(() => index.value === stepNames.value.length - 1);
-  const next = computed(() => stepNames.value[index.value + 1]);
-  const previous = computed(() => stepNames.value[index.value - 1]);
+  const stepsRef = (0, vue_demi_exports.ref)(steps);
+  const stepNames = (0, vue_demi_exports.computed)(() => Array.isArray(stepsRef.value) ? stepsRef.value : Object.keys(stepsRef.value));
+  const index = (0, vue_demi_exports.ref)(stepNames.value.indexOf(initialStep != null ? initialStep : stepNames.value[0]));
+  const current = (0, vue_demi_exports.computed)(() => at(index.value));
+  const isFirst = (0, vue_demi_exports.computed)(() => index.value === 0);
+  const isLast = (0, vue_demi_exports.computed)(() => index.value === stepNames.value.length - 1);
+  const next = (0, vue_demi_exports.computed)(() => stepNames.value[index.value + 1]);
+  const previous = (0, vue_demi_exports.computed)(() => stepNames.value[index.value - 1]);
   function at(index2) {
     if (Array.isArray(stepsRef.value))
       return stepsRef.value[index2];
@@ -7230,7 +7217,7 @@ function useStorageAsync(key, initialValue, storage, options = {}) {
   } = options;
   const rawInit = toValue(initialValue);
   const type = guessSerializerType(rawInit);
-  const data = (shallow ? shallowRef : ref)(initialValue);
+  const data = (shallow ? vue_demi_exports.shallowRef : vue_demi_exports.ref)(initialValue);
   const serializer = (_a = options.serializer) != null ? _a : StorageSerializers[type];
   if (!storage) {
     try {
@@ -7293,14 +7280,14 @@ function useStorageAsync(key, initialValue, storage, options = {}) {
 }
 var _id = 0;
 function useStyleTag(css, options = {}) {
-  const isLoaded = ref(false);
+  const isLoaded = (0, vue_demi_exports.ref)(false);
   const {
     document: document2 = defaultDocument,
     immediate = true,
     manual = false,
     id = `vueuse_styletag_${++_id}`
   } = options;
-  const cssRef = ref(css);
+  const cssRef = (0, vue_demi_exports.ref)(css);
   let stop = () => {
   };
   const load = () => {
@@ -7315,7 +7302,7 @@ function useStyleTag(css, options = {}) {
     }
     if (isLoaded.value)
       return;
-    stop = watch(
+    stop = (0, vue_demi_exports.watch)(
       cssRef,
       (value) => {
         el.textContent = value;
@@ -7340,7 +7327,7 @@ function useStyleTag(css, options = {}) {
     css: cssRef,
     unload,
     load,
-    isLoaded: readonly(isLoaded)
+    isLoaded: (0, vue_demi_exports.readonly)(isLoaded)
   };
 }
 function useSwipe(target, options = {}) {
@@ -7352,14 +7339,14 @@ function useSwipe(target, options = {}) {
     passive = true,
     window: window2 = defaultWindow
   } = options;
-  const coordsStart = reactive({ x: 0, y: 0 });
-  const coordsEnd = reactive({ x: 0, y: 0 });
-  const diffX = computed(() => coordsStart.x - coordsEnd.x);
-  const diffY = computed(() => coordsStart.y - coordsEnd.y);
+  const coordsStart = (0, vue_demi_exports.reactive)({ x: 0, y: 0 });
+  const coordsEnd = (0, vue_demi_exports.reactive)({ x: 0, y: 0 });
+  const diffX = (0, vue_demi_exports.computed)(() => coordsStart.x - coordsEnd.x);
+  const diffY = (0, vue_demi_exports.computed)(() => coordsStart.y - coordsEnd.y);
   const { max, abs } = Math;
-  const isThresholdExceeded = computed(() => max(abs(diffX.value), abs(diffY.value)) >= threshold);
-  const isSwiping = ref(false);
-  const direction = computed(() => {
+  const isThresholdExceeded = (0, vue_demi_exports.computed)(() => max(abs(diffX.value), abs(diffY.value)) >= threshold);
+  const isSwiping = (0, vue_demi_exports.ref)(false);
+  const direction = (0, vue_demi_exports.computed)(() => {
     if (!isThresholdExceeded.value)
       return "none";
     if (abs(diffX.value) > abs(diffY.value)) {
@@ -7438,12 +7425,12 @@ function checkPassiveEventSupport(document2) {
   return supportsPassive;
 }
 function useTemplateRefsList() {
-  const refs = ref([]);
+  const refs = (0, vue_demi_exports.ref)([]);
   refs.value.set = (el) => {
     if (el)
       refs.value.push(el);
   };
-  onBeforeUpdate(() => {
+  (0, vue_demi_exports.onBeforeUpdate)(() => {
     refs.value.length = 0;
   });
   return refs;
@@ -7459,7 +7446,7 @@ function useTextDirection(options = {}) {
     var _a, _b;
     return (_b = (_a = document2 == null ? void 0 : document2.querySelector(selector)) == null ? void 0 : _a.getAttribute("dir")) != null ? _b : initialValue;
   }
-  const dir = ref(getValue2());
+  const dir = (0, vue_demi_exports.ref)(getValue2());
   tryOnMounted(() => dir.value = getValue2());
   if (observe && document2) {
     useMutationObserver(
@@ -7468,7 +7455,7 @@ function useTextDirection(options = {}) {
       { attributes: true }
     );
   }
-  return computed({
+  return (0, vue_demi_exports.computed)({
     get() {
       return dir.value;
     },
@@ -7493,13 +7480,13 @@ function useTextSelection(options = {}) {
   const {
     window: window2 = defaultWindow
   } = options;
-  const selection = ref(null);
-  const text = computed(() => {
+  const selection = (0, vue_demi_exports.ref)(null);
+  const text = (0, vue_demi_exports.computed)(() => {
     var _a, _b;
     return (_b = (_a = selection.value) == null ? void 0 : _a.toString()) != null ? _b : "";
   });
-  const ranges = computed(() => selection.value ? getRangesFromSelection(selection.value) : []);
-  const rects = computed(() => ranges.value.map((range) => range.getBoundingClientRect()));
+  const ranges = (0, vue_demi_exports.computed)(() => selection.value ? getRangesFromSelection(selection.value) : []);
+  const rects = (0, vue_demi_exports.computed)(() => ranges.value.map((range) => range.getBoundingClientRect()));
   function onSelectionChange() {
     selection.value = null;
     if (window2)
@@ -7516,10 +7503,10 @@ function useTextSelection(options = {}) {
 }
 function useTextareaAutosize(options) {
   var _a;
-  const textarea = ref(options == null ? void 0 : options.element);
-  const input = ref(options == null ? void 0 : options.input);
+  const textarea = (0, vue_demi_exports.ref)(options == null ? void 0 : options.element);
+  const input = (0, vue_demi_exports.ref)(options == null ? void 0 : options.input);
   const styleProp = (_a = options == null ? void 0 : options.styleProp) != null ? _a : "height";
-  const textareaScrollHeight = ref(1);
+  const textareaScrollHeight = (0, vue_demi_exports.ref)(1);
   function triggerResize() {
     var _a2, _b;
     if (!textarea.value)
@@ -7534,10 +7521,10 @@ function useTextareaAutosize(options) {
     textarea.value.style[styleProp] = height;
     (_b = options == null ? void 0 : options.onResize) == null ? void 0 : _b.call(options);
   }
-  watch([input, textarea], () => nextTick(triggerResize), { immediate: true });
+  (0, vue_demi_exports.watch)([input, textarea], () => (0, vue_demi_exports.nextTick)(triggerResize), { immediate: true });
   useResizeObserver(textarea, () => triggerResize());
   if (options == null ? void 0 : options.watch)
-    watch(options.watch, triggerResize, { immediate: true, deep: true });
+    (0, vue_demi_exports.watch)(options.watch, triggerResize, { immediate: true, deep: true });
   return {
     textarea,
     input,
@@ -7583,7 +7570,7 @@ function useTimeAgo(time, options = {}) {
     updateInterval = 3e4
   } = options;
   const { now: now2, ...controls } = useNow({ interval: updateInterval, controls: true });
-  const timeAgo = computed(() => formatTimeAgo(new Date(toValue(time)), options, toValue(now2)));
+  const timeAgo = (0, vue_demi_exports.computed)(() => formatTimeAgo(new Date(toValue(time)), options, toValue(now2)));
   if (exposeControls) {
     return {
       timeAgo,
@@ -7641,7 +7628,7 @@ function formatTimeAgo(from, options = {}, now2 = Date.now()) {
 }
 function useTimeoutPoll(fn, interval, timeoutPollOptions) {
   const { start } = useTimeoutFn(loop, interval, { immediate: false });
-  const isActive = ref(false);
+  const isActive = (0, vue_demi_exports.ref)(false);
   async function loop() {
     if (!isActive.value)
       return;
@@ -7674,7 +7661,7 @@ function useTimestamp(options = {}) {
     interval = "requestAnimationFrame",
     callback
   } = options;
-  const ts = ref(timestamp() + offset);
+  const ts = (0, vue_demi_exports.ref)(timestamp() + offset);
   const update = () => ts.value = timestamp() + offset;
   const cb = callback ? () => {
     update();
@@ -7697,7 +7684,7 @@ function useTitle(newTitle = null, options = {}) {
     restoreOnUnmount = (t) => t
   } = options;
   const originalTitle = (_a = document2 == null ? void 0 : document2.title) != null ? _a : "";
-  const title = toRef2((_b = newTitle != null ? newTitle : document2 == null ? void 0 : document2.title) != null ? _b : null);
+  const title = toRef((_b = newTitle != null ? newTitle : document2 == null ? void 0 : document2.title) != null ? _b : null);
   const isReadonly2 = newTitle && typeof newTitle === "function";
   function format(t) {
     if (!("titleTemplate" in options))
@@ -7705,7 +7692,7 @@ function useTitle(newTitle = null, options = {}) {
     const template = options.titleTemplate || "%s";
     return typeof template === "function" ? template(t) : toValue(template).replace(/%s/g, t);
   }
-  watch(
+  (0, vue_demi_exports.watch)(
     title,
     (t, o) => {
       if (t !== o && document2)
@@ -7829,8 +7816,8 @@ function useTransition(source, options = {}) {
     const v = toValue(source);
     return typeof v === "number" ? v : v.map(toValue);
   };
-  const outputRef = ref(sourceVal());
-  watch(sourceVal, async (to) => {
+  const outputRef = (0, vue_demi_exports.ref)(sourceVal());
+  (0, vue_demi_exports.watch)(sourceVal, async (to) => {
     var _a, _b;
     if (toValue(options.disabled))
       return;
@@ -7850,7 +7837,7 @@ function useTransition(source, options = {}) {
     });
     (_b = options.onFinished) == null ? void 0 : _b.call(options);
   }, { deep: true });
-  watch(() => toValue(options.disabled), (disabled) => {
+  (0, vue_demi_exports.watch)(() => toValue(options.disabled), (disabled) => {
     if (disabled) {
       currentId++;
       outputRef.value = sourceVal();
@@ -7859,7 +7846,7 @@ function useTransition(source, options = {}) {
   tryOnScopeDispose(() => {
     currentId++;
   });
-  return computed(() => toValue(options.disabled) ? sourceVal() : outputRef.value);
+  return (0, vue_demi_exports.computed)(() => toValue(options.disabled) ? sourceVal() : outputRef.value);
 }
 function useUrlSearchParams(mode = "history", options = {}) {
   const {
@@ -7870,8 +7857,8 @@ function useUrlSearchParams(mode = "history", options = {}) {
     window: window2 = defaultWindow
   } = options;
   if (!window2)
-    return reactive(initialValue);
-  const state = reactive({});
+    return (0, vue_demi_exports.reactive)(initialValue);
+  const state = (0, vue_demi_exports.reactive)({});
   function getRawParams() {
     if (mode === "history") {
       return window2.location.search || "";
@@ -7954,15 +7941,15 @@ function useUrlSearchParams(mode = "history", options = {}) {
 }
 function useUserMedia(options = {}) {
   var _a, _b;
-  const enabled = ref((_a = options.enabled) != null ? _a : false);
-  const autoSwitch = ref((_b = options.autoSwitch) != null ? _b : true);
-  const constraints = ref(options.constraints);
+  const enabled = (0, vue_demi_exports.ref)((_a = options.enabled) != null ? _a : false);
+  const autoSwitch = (0, vue_demi_exports.ref)((_b = options.autoSwitch) != null ? _b : true);
+  const constraints = (0, vue_demi_exports.ref)(options.constraints);
   const { navigator = defaultNavigator } = options;
   const isSupported = useSupported(() => {
     var _a2;
     return (_a2 = navigator == null ? void 0 : navigator.mediaDevices) == null ? void 0 : _a2.getUserMedia;
   });
-  const stream = shallowRef();
+  const stream = (0, vue_demi_exports.shallowRef)();
   function getDeviceOptions(type) {
     switch (type) {
       case "video": {
@@ -8005,7 +7992,7 @@ function useUserMedia(options = {}) {
     _stop();
     return await start();
   }
-  watch(
+  (0, vue_demi_exports.watch)(
     enabled,
     (v) => {
       if (v)
@@ -8015,7 +8002,7 @@ function useUserMedia(options = {}) {
     },
     { immediate: true }
   );
-  watch(
+  (0, vue_demi_exports.watch)(
     constraints,
     () => {
       if (autoSwitch.value && stream.value)
@@ -8047,7 +8034,7 @@ function useVModel(props, key, emit, options = {}) {
     defaultValue,
     shouldEmit
   } = options;
-  const vm = getCurrentInstance();
+  const vm = (0, vue_demi_exports.getCurrentInstance)();
   const _emit = emit || (vm == null ? void 0 : vm.emit) || ((_a = vm == null ? void 0 : vm.$emit) == null ? void 0 : _a.bind(vm)) || ((_c = (_b = vm == null ? void 0 : vm.proxy) == null ? void 0 : _b.$emit) == null ? void 0 : _c.bind(vm == null ? void 0 : vm.proxy));
   let event = eventName;
   if (!key) {
@@ -8073,19 +8060,19 @@ function useVModel(props, key, emit, options = {}) {
   };
   if (passive) {
     const initialValue = getValue2();
-    const proxy = ref(initialValue);
+    const proxy = (0, vue_demi_exports.ref)(initialValue);
     let isUpdating = false;
-    watch(
+    (0, vue_demi_exports.watch)(
       () => props[key],
       (v) => {
         if (!isUpdating) {
           isUpdating = true;
           proxy.value = cloneFn(v);
-          nextTick(() => isUpdating = false);
+          (0, vue_demi_exports.nextTick)(() => isUpdating = false);
         }
       }
     );
-    watch(
+    (0, vue_demi_exports.watch)(
       proxy,
       (v) => {
         if (!isUpdating && (v !== props[key] || deep))
@@ -8095,7 +8082,7 @@ function useVModel(props, key, emit, options = {}) {
     );
     return proxy;
   } else {
-    return computed({
+    return (0, vue_demi_exports.computed)({
       get() {
         return getValue2();
       },
@@ -8124,7 +8111,7 @@ function useVibrate(options) {
     navigator = defaultNavigator
   } = options || {};
   const isSupported = useSupported(() => typeof navigator !== "undefined" && "vibrate" in navigator);
-  const patternRef = toRef2(pattern);
+  const patternRef = toRef(pattern);
   let intervalControls;
   const vibrate = (pattern2 = patternRef.value) => {
     if (isSupported.value)
@@ -8169,11 +8156,11 @@ function useVirtualList(list, options) {
   };
 }
 function useVirtualListResources(list) {
-  const containerRef = ref(null);
+  const containerRef = (0, vue_demi_exports.ref)(null);
   const size = useElementSize(containerRef);
-  const currentList = ref([]);
-  const source = shallowRef(list);
-  const state = ref({ start: 0, end: 10 });
+  const currentList = (0, vue_demi_exports.ref)([]);
+  const source = (0, vue_demi_exports.shallowRef)(list);
+  const state = (0, vue_demi_exports.ref)({ start: 0, end: 10 });
   return { state, source, currentList, size, containerRef };
 }
 function createGetViewCapacity(state, source, itemSize) {
@@ -8240,12 +8227,12 @@ function createGetDistance(itemSize, source) {
   };
 }
 function useWatchForSizes(size, list, calculateRange) {
-  watch([size.width, size.height, list], () => {
+  (0, vue_demi_exports.watch)([size.width, size.height, list], () => {
     calculateRange();
   });
 }
 function createComputedTotalSize(itemSize, source) {
-  return computed(() => {
+  return (0, vue_demi_exports.computed)(() => {
     if (typeof itemSize === "number")
       return source.value.length * itemSize;
     return source.value.reduce((sum, _, index) => sum + itemSize(index), 0);
@@ -8272,11 +8259,11 @@ function useHorizontalVirtualList(options, list) {
   const getOffset = createGetOffset(source, itemWidth);
   const calculateRange = createCalculateRange("horizontal", overscan, getOffset, getViewCapacity, resources);
   const getDistanceLeft = createGetDistance(itemWidth, source);
-  const offsetLeft = computed(() => getDistanceLeft(state.value.start));
+  const offsetLeft = (0, vue_demi_exports.computed)(() => getDistanceLeft(state.value.start));
   const totalWidth = createComputedTotalSize(itemWidth, source);
   useWatchForSizes(size, list, calculateRange);
   const scrollTo2 = createScrollTo("horizontal", calculateRange, getDistanceLeft, containerRef);
-  const wrapperProps = computed(() => {
+  const wrapperProps = (0, vue_demi_exports.computed)(() => {
     return {
       style: {
         height: "100%",
@@ -8304,11 +8291,11 @@ function useVerticalVirtualList(options, list) {
   const getOffset = createGetOffset(source, itemHeight);
   const calculateRange = createCalculateRange("vertical", overscan, getOffset, getViewCapacity, resources);
   const getDistanceTop = createGetDistance(itemHeight, source);
-  const offsetTop = computed(() => getDistanceTop(state.value.start));
+  const offsetTop = (0, vue_demi_exports.computed)(() => getDistanceTop(state.value.start));
   const totalHeight = createComputedTotalSize(itemHeight, source);
   useWatchForSizes(size, list, calculateRange);
   const scrollTo2 = createScrollTo("vertical", calculateRange, getDistanceTop, containerRef);
-  const wrapperProps = computed(() => {
+  const wrapperProps = (0, vue_demi_exports.computed)(() => {
     return {
       style: {
         width: "100%",
@@ -8333,7 +8320,7 @@ function useWakeLock(options = {}) {
   } = options;
   let wakeLock;
   const isSupported = useSupported(() => navigator && "wakeLock" in navigator);
-  const isActive = ref(false);
+  const isActive = (0, vue_demi_exports.ref)(false);
   async function onVisibilityChange() {
     if (!isSupported.value || !wakeLock)
       return;
@@ -8370,8 +8357,8 @@ function useWebNotification(options = {}) {
   } = options;
   const defaultWebNotificationOptions = options;
   const isSupported = useSupported(() => !!window2 && "Notification" in window2);
-  const permissionGranted = ref(isSupported.value && "permission" in Notification && Notification.permission === "granted");
-  const notification = ref(null);
+  const permissionGranted = (0, vue_demi_exports.ref)(isSupported.value && "permission" in Notification && Notification.permission === "granted");
+  const notification = (0, vue_demi_exports.ref)(null);
   const ensurePermissions = async () => {
     if (!isSupported.value)
       return;
@@ -8443,10 +8430,10 @@ function useWebSocket(url, options = {}) {
     autoClose = true,
     protocols = []
   } = options;
-  const data = ref(null);
-  const status = ref("CLOSED");
-  const wsRef = ref();
-  const urlRef = toRef2(url);
+  const data = (0, vue_demi_exports.ref)(null);
+  const status = (0, vue_demi_exports.ref)("CLOSED");
+  const wsRef = (0, vue_demi_exports.ref)();
+  const urlRef = toRef(url);
   let heartbeatPause;
   let heartbeatResume;
   let explicitlyClosed = false;
@@ -8579,8 +8566,8 @@ function useWebWorker(arg0, workerOptions, options) {
   const {
     window: window2 = defaultWindow
   } = options != null ? options : {};
-  const data = ref(null);
-  const worker = shallowRef();
+  const data = (0, vue_demi_exports.ref)(null);
+  const worker = (0, vue_demi_exports.shallowRef)();
   const post = (...args) => {
     if (!worker.value)
       return;
@@ -8641,10 +8628,10 @@ function useWebWorkerFn(fn, options = {}) {
     timeout,
     window: window2 = defaultWindow
   } = options;
-  const worker = ref();
-  const workerStatus = ref("PENDING");
-  const promise = ref({});
-  const timeoutId = ref();
+  const worker = (0, vue_demi_exports.ref)();
+  const workerStatus = (0, vue_demi_exports.ref)("PENDING");
+  const promise = (0, vue_demi_exports.ref)({});
+  const timeoutId = (0, vue_demi_exports.ref)();
   const workerTerminate = (status = "PENDING") => {
     if (worker.value && worker.value._url && window2) {
       worker.value.terminate();
@@ -8719,8 +8706,8 @@ function useWebWorkerFn(fn, options = {}) {
 function useWindowFocus(options = {}) {
   const { window: window2 = defaultWindow } = options;
   if (!window2)
-    return ref(false);
-  const focused = ref(window2.document.hasFocus());
+    return (0, vue_demi_exports.ref)(false);
+  const focused = (0, vue_demi_exports.ref)(window2.document.hasFocus());
   useEventListener(window2, "blur", () => {
     focused.value = false;
   });
@@ -8733,13 +8720,13 @@ function useWindowScroll(options = {}) {
   const { window: window2 = defaultWindow, behavior = "auto" } = options;
   if (!window2) {
     return {
-      x: ref(0),
-      y: ref(0)
+      x: (0, vue_demi_exports.ref)(0),
+      y: (0, vue_demi_exports.ref)(0)
     };
   }
-  const internalX = ref(window2.scrollX);
-  const internalY = ref(window2.scrollY);
-  const x = computed({
+  const internalX = (0, vue_demi_exports.ref)(window2.scrollX);
+  const internalY = (0, vue_demi_exports.ref)(window2.scrollY);
+  const x = (0, vue_demi_exports.computed)({
     get() {
       return internalX.value;
     },
@@ -8747,7 +8734,7 @@ function useWindowScroll(options = {}) {
       scrollTo({ left: x2, behavior });
     }
   });
-  const y = computed({
+  const y = (0, vue_demi_exports.computed)({
     get() {
       return internalY.value;
     },
@@ -8777,8 +8764,8 @@ function useWindowSize(options = {}) {
     listenOrientation = true,
     includeScrollbar = true
   } = options;
-  const width = ref(initialWidth);
-  const height = ref(initialHeight);
+  const width = (0, vue_demi_exports.ref)(initialWidth);
+  const height = (0, vue_demi_exports.ref)(initialHeight);
   const update = () => {
     if (window2) {
       if (includeScrollbar) {
@@ -8795,12 +8782,13 @@ function useWindowSize(options = {}) {
   useEventListener("resize", update, { passive: true });
   if (listenOrientation) {
     const matches = useMediaQuery("(orientation: portrait)");
-    watch(matches, () => update());
+    (0, vue_demi_exports.watch)(matches, () => update());
   }
   return { width, height };
 }
 
 export {
+  vue_demi_exports,
   computedEager,
   computedWithControl,
   tryOnScopeDispose,
@@ -8852,7 +8840,7 @@ export {
   objectOmit,
   objectEntries,
   getLifeCycleTarget,
-  toRef2 as toRef,
+  toRef,
   resolveRef,
   reactivePick,
   refAutoReset,
@@ -8868,7 +8856,7 @@ export {
   watchPausable,
   syncRef,
   syncRefs,
-  toRefs2 as toRefs,
+  toRefs,
   tryOnBeforeMount,
   tryOnBeforeUnmount,
   tryOnMounted,
@@ -9085,4 +9073,4 @@ vitepress/lib/vue-demi.mjs:
    * @license MIT
    *)
 */
-//# sourceMappingURL=chunk-E4OZJX46.js.map
+//# sourceMappingURL=chunk-DZ2V7LZ2.js.map
