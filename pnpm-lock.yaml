@@ -53,12 +53,12 @@ importers:
       fs-extra:
         specifier: ^11.2.0
         version: 11.2.0
-      i:
-        specifier: ^0.3.7
-        version: 0.3.7
       inquirer:
         specifier: 8.2.6
         version: 8.2.6
+      rimraf:
+        specifier: ^5.0.5
+        version: 5.0.5
       shelljs:
         specifier: ^0.8.5
         version: 0.8.5
@@ -75,9 +75,6 @@ importers:
       '@types/shelljs':
         specifier: ^0.8.11
         version: 0.8.15
-      rimraf:
-        specifier: ^5.0.5
-        version: 5.0.5
 
   packages/core:
     dependencies:
@@ -4178,11 +4175,6 @@ packages:
     hasBin: true
     dev: true
 
-  /i@0.3.7:
-    resolution: {integrity: sha512-FYz4wlXgkQwIPqhzC5TdNMLSE5+GS1IIDJZY/1ZiEPCT2S3COUVZeT5OW4BmW4r5LHLQuOosSwsvnroG9GR59Q==}
-    engines: {node: '>=0.4'}
-    dev: false
-
   /iconv-lite@0.4.24:
     resolution: {integrity: sha512-v3MXnZAcvnywkTUEZomIActle7RXXeedOR31wwl7VlyoXO4Qi9arvSenNQWne1TcRwhCL1HwLI21bEqdpj8/rA==}
     engines: {node: '>=0.10.0'}
@@ -6548,7 +6540,6 @@ packages:
     hasBin: true
     dependencies:
       glob: 10.3.10
-    dev: true
 
   /rollup@4.13.0:
     resolution: {integrity: sha512-3YegKemjoQnYKmsBlOHfMLVPPA5xLkQ8MHLLSw/fBrFaVkEayL51DilPpNNLq1exr98F2B1TzrV0FUlN3gWRPg==}
