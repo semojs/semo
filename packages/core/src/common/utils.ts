@@ -510,286 +510,317 @@ const getAllPluginsMapping = function (argv: any = {}): {
   [propName: string]: string
 } {
   argv = argv || cachedInstance.get('argv') || {}
-  let plugins: { [propName: string]: any } = cachedInstance.get('plugins') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-  if (_.isEmpty(plugins) && !configPluginLoaded) {
-    const registerPlugins = Utils.config('$plugins.register') || {}
-    if (!_.isEmpty(registerPlugins)) {
-      enablePluginAutoScan = false
-    }
-    Object.keys(registerPlugins).forEach(plugin => {
-      let pluginPath = registerPlugins[plugin]
-      if (
-        !plugin.startsWith('.') &&
-        plugin.indexOf(scriptName + '-plugin-') === -1
-      ) {
-        plugin = scriptName + '-plugin-' + plugin
-      }
+  let pluginsRegistryCachePath
+  const nodeModulesDir = findUp.sync('node_modules', {
+    cwd: process.cwd(),
+    type: 'directory',
+  })
+  if (nodeModulesDir) {
+    const pluginsRegistryCacheDir = path.resolve(nodeModulesDir, '.cache/semo')
+    fs.ensureDirSync(pluginsRegistryCacheDir)
+    pluginsRegistryCachePath = path.resolve(
+      pluginsRegistryCacheDir,
+      '.semo-plugins.json',
+    )
+  }
 
-      if (_.isBoolean(pluginPath) && pluginPath) {
-        try {
-          pluginPath = path.dirname(getPackagePath(plugin, [process.cwd()]))
-          plugins[plugin] = pluginPath
-        } catch (e) {
-          warn(e.message)
+  if (
+    !pluginsRegistryCachePath ||
+    !fileExistsSyncCache(pluginsRegistryCachePath) ||
+    !argv.cachePlugins
+  ) {
+    let plugins: { [propName: string]: any } =
+      cachedInstance.get('plugins') || {}
+    let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+    if (_.isEmpty(plugins) && !configPluginLoaded) {
+      const registerPlugins = Utils.config('$plugins.register') || {}
+      if (!_.isEmpty(registerPlugins)) {
+        enablePluginAutoScan = false
+      }
+      Object.keys(registerPlugins).forEach(plugin => {
+        let pluginPath = registerPlugins[plugin]
+        if (
+          !plugin.startsWith('.') &&
+          plugin.indexOf(scriptName + '-plugin-') === -1
+        ) {
+          plugin = scriptName + '-plugin-' + plugin
         }
-      } else if (
-        (_.isString(pluginPath) && pluginPath.startsWith('/')) ||
-        pluginPath.startsWith('.') ||
-        pluginPath.startsWith('~')
-      ) {
-        pluginPath = getAbsolutePath(pluginPath)
-        plugins[plugin] = pluginPath
-      } else {
-        // Means not register for now
-      }
-    })
-    cachedInstance.set('plugins', plugins)
-    configPluginLoaded = true
-  }
 
-  let pluginPrefix = argv.pluginPrefix || 'semo'
-  if (_.isString(pluginPrefix)) {
-    pluginPrefix = [pluginPrefix]
-  }
+        if (_.isBoolean(pluginPath) && pluginPath) {
+          try {
+            pluginPath = path.dirname(getPackagePath(plugin, [process.cwd()]))
+            plugins[plugin] = pluginPath
+          } catch (e) {
+            warn(e.message)
+          }
+        } else if (
+          (_.isString(pluginPath) && pluginPath.startsWith('/')) ||
+          pluginPath.startsWith('.') ||
+          pluginPath.startsWith('~')
+        ) {
+          pluginPath = getAbsolutePath(pluginPath)
+          plugins[plugin] = pluginPath
+        } else {
+          // Means not register for now
+        }
+      })
+      cachedInstance.set('plugins', plugins)
+      configPluginLoaded = true
+    }
 
-  if (!_.isArray(pluginPrefix)) {
-    error('invalid --plugin-prefix')
-  }
+    let pluginPrefix = argv.pluginPrefix || 'semo'
+    if (_.isString(pluginPrefix)) {
+      pluginPrefix = [pluginPrefix]
+    }
 
-  let topPluginPattern =
-    pluginPrefix.length > 1
-      ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
-      : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
-  let orgPluginPattern =
-    pluginPrefix.length > 1
-      ? '{' +
-        pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') +
-        '}'
-      : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
+    if (!_.isArray(pluginPrefix)) {
+      error('invalid --plugin-prefix')
+    }
 
-  if (_.isEmpty(plugins) && enablePluginAutoScan) {
-    plugins = {}
+    let topPluginPattern =
+      pluginPrefix.length > 1
+        ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
+        : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
+    let orgPluginPattern =
+      pluginPrefix.length > 1
+        ? '{' +
+          pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') +
+          '}'
+        : pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',')
 
-    // Process core plugins if needed
-    // Maybe core need to interact with some other plugins
-    globSync(topPluginPattern, {
-      noext: true,
-      cwd: path.resolve(__dirname, '../plugins'),
-    }).map(function (plugin): void {
-      plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
-    })
+    if (_.isEmpty(plugins) && enablePluginAutoScan) {
+      plugins = {}
 
-    // argv.packageDirectory not always exists, if not, plugins list will not include npm global plugins
-    if (!argv.disableGlobalPlugin && argv.packageDirectory) {
-      // process core same directory top level plugins
+      // Process core plugins if needed
+      // Maybe core need to interact with some other plugins
       globSync(topPluginPattern, {
         noext: true,
-        cwd: path.resolve(
-          argv.packageDirectory,
-          argv.orgMode ? '../../' : '../',
-        ),
+        cwd: path.resolve(__dirname, '../plugins'),
       }).map(function (plugin): void {
-        plugins[plugin] = path.resolve(
-          argv.packageDirectory,
-          argv.orgMode ? '../../' : '../',
-          plugin,
-        )
+        plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
-      // Only local dev needed: load sibling plugins in packageDirectory parent directory
-      // Only for orgMode = true, if orgMode = false, the result would be same as above search
-      if (argv.orgMode) {
+      // argv.packageDirectory not always exists, if not, plugins list will not include npm global plugins
+      if (!argv.disableGlobalPlugin && argv.packageDirectory) {
+        // process core same directory top level plugins
         globSync(topPluginPattern, {
           noext: true,
-          cwd: path.resolve(argv.packageDirectory, '../'),
+          cwd: path.resolve(
+            argv.packageDirectory,
+            argv.orgMode ? '../../' : '../',
+          ),
         }).map(function (plugin): void {
-          plugins[plugin] = path.resolve(argv.packageDirectory, '../', plugin)
+          plugins[plugin] = path.resolve(
+            argv.packageDirectory,
+            argv.orgMode ? '../../' : '../',
+            plugin,
+          )
+        })
+
+        // Only local dev needed: load sibling plugins in packageDirectory parent directory
+        // Only for orgMode = true, if orgMode = false, the result would be same as above search
+        if (argv.orgMode) {
+          globSync(topPluginPattern, {
+            noext: true,
+            cwd: path.resolve(argv.packageDirectory, '../'),
+          }).map(function (plugin): void {
+            plugins[plugin] = path.resolve(argv.packageDirectory, '../', plugin)
+          })
+        }
+
+        // Process core same directory org npm plugins
+        globSync(orgPluginPattern, {
+          noext: true,
+          cwd: path.resolve(
+            argv.packageDirectory,
+            argv.orgMode ? '../../' : '../',
+          ),
+        }).map(function (plugin): void {
+          plugins[plugin] = path.resolve(
+            argv.packageDirectory,
+            argv.orgMode ? '../../' : '../',
+            plugin,
+          )
         })
       }
 
-      // Process core same directory org npm plugins
-      globSync(orgPluginPattern, {
-        noext: true,
-        cwd: path.resolve(
-          argv.packageDirectory,
-          argv.orgMode ? '../../' : '../',
-        ),
-      }).map(function (plugin): void {
-        plugins[plugin] = path.resolve(
-          argv.packageDirectory,
-          argv.orgMode ? '../../' : '../',
-          plugin,
-        )
-      })
-    }
-
-    if (process.env.HOME && !argv.disableHomePlugin) {
-      // Semo home is a special directory
-      if (
-        fileExistsSyncCache(
-          path.resolve(
+      if (process.env.HOME && !argv.disableHomePlugin) {
+        // Semo home is a special directory
+        if (
+          fileExistsSyncCache(
+            path.resolve(
+              process.env.HOME,
+              '.' + scriptName,
+              `.${scriptName}rc.yml`,
+            ),
+          )
+        ) {
+          // So home plugin directory will not be overridden by other places normally.
+          plugins['.' + scriptName] = path.resolve(
             process.env.HOME,
             '.' + scriptName,
-            `.${scriptName}rc.yml`,
-          ),
-        )
-      ) {
-        // So home plugin directory will not be overridden by other places normally.
-        plugins['.' + scriptName] = path.resolve(
-          process.env.HOME,
-          '.' + scriptName,
-        )
-      }
+          )
+        }
 
-      // process home npm plugins
-      globSync(topPluginPattern, {
-        noext: true,
-        cwd: path.resolve(
-          process.env.HOME,
-          `.${scriptName}`,
-          'home-plugin-cache',
-          'node_modules',
-        ),
-      }).map(function (plugin): void {
-        if (process.env.HOME) {
-          plugins[plugin] = path.resolve(
+        // process home npm plugins
+        globSync(topPluginPattern, {
+          noext: true,
+          cwd: path.resolve(
             process.env.HOME,
             `.${scriptName}`,
             'home-plugin-cache',
             'node_modules',
-            plugin,
-          )
-        }
-      })
-
-      // process home npm scope plugins
-      globSync(orgPluginPattern, {
-        noext: true,
-        cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules'),
-      }).map(function (plugin): void {
-        if (process.env.HOME) {
-          plugins[plugin] = path.resolve(
-            process.env.HOME,
-            `.${scriptName}`,
-            'node_modules',
-            plugin,
-          )
-        }
-      })
-    }
-
-    // process cwd(current directory) npm plugins
-    globSync(topPluginPattern, {
-      noext: true,
-      cwd: path.resolve(process.cwd(), 'node_modules'),
-    }).map(function (plugin) {
-      plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-    })
-
-    // process cwd(current directory) npm scope plugins
-    globSync(orgPluginPattern, {
-      noext: true,
-      cwd: path.resolve(process.cwd(), 'node_modules'),
-    }).map(function (plugin) {
-      plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-    })
-
-    const config = getApplicationConfig()
-    const pluginDirs = _.castArray(config.pluginDir)
-    pluginDirs.forEach(pluginDir => {
-      if (fileExistsSyncCache(pluginDir)) {
-        // process local plugins
-        globSync(topPluginPattern, {
-          noext: true,
-          cwd: path.resolve(process.cwd(), pluginDir),
-        }).map(function (plugin) {
-          plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          ),
+        }).map(function (plugin): void {
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(
+              process.env.HOME,
+              `.${scriptName}`,
+              'home-plugin-cache',
+              'node_modules',
+              plugin,
+            )
+          }
         })
 
-        // process local npm scope plugins
+        // process home npm scope plugins
         globSync(orgPluginPattern, {
           noext: true,
-          cwd: path.resolve(process.cwd(), pluginDir),
-        }).map(function (plugin) {
-          plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules'),
+        }).map(function (plugin): void {
+          if (process.env.HOME) {
+            plugins[plugin] = path.resolve(
+              process.env.HOME,
+              `.${scriptName}`,
+              'node_modules',
+              plugin,
+            )
+          }
         })
       }
-    })
 
-    // Process plugin project
-    // If project name contains `-plugin-`, then current directory should be plugin too.
-    if (fileExistsSyncCache(path.resolve(process.cwd(), 'package.json'))) {
-      const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
-      const matchPluginProject = pluginPrefix
-        .map(prefix => `${prefix}-plugin-`)
-        .join('|')
-      const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
-      if (pkgConfig.name && regExp.test(pkgConfig.name)) {
-        plugins[pkgConfig.name] = path.resolve(process.cwd())
+      // process cwd(current directory) npm plugins
+      globSync(topPluginPattern, {
+        noext: true,
+        cwd: path.resolve(process.cwd(), 'node_modules'),
+      }).map(function (plugin) {
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+      })
+
+      // process cwd(current directory) npm scope plugins
+      globSync(orgPluginPattern, {
+        noext: true,
+        cwd: path.resolve(process.cwd(), 'node_modules'),
+      }).map(function (plugin) {
+        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+      })
+
+      const config = getApplicationConfig()
+      const pluginDirs = _.castArray(config.pluginDir)
+      pluginDirs.forEach(pluginDir => {
+        if (fileExistsSyncCache(pluginDir)) {
+          // process local plugins
+          globSync(topPluginPattern, {
+            noext: true,
+            cwd: path.resolve(process.cwd(), pluginDir),
+          }).map(function (plugin) {
+            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          })
+
+          // process local npm scope plugins
+          globSync(orgPluginPattern, {
+            noext: true,
+            cwd: path.resolve(process.cwd(), pluginDir),
+          }).map(function (plugin) {
+            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          })
+        }
+      })
+
+      // Process plugin project
+      // If project name contains `-plugin-`, then current directory should be plugin too.
+      if (fileExistsSyncCache(path.resolve(process.cwd(), 'package.json'))) {
+        const pkgConfig = require(path.resolve(process.cwd(), 'package.json'))
+        const matchPluginProject = pluginPrefix
+          .map(prefix => `${prefix}-plugin-`)
+          .join('|')
+        const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
+        if (pkgConfig.name && regExp.test(pkgConfig.name)) {
+          plugins[pkgConfig.name] = path.resolve(process.cwd())
+        }
       }
+
+      cachedInstance.set('plugins', plugins)
     }
 
-    cachedInstance.set('plugins', plugins)
-  }
-
-  // extraPluginDir plugins would not be in cache
-  let extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
-  if (
-    extraPluginDirEnvName &&
-    process.env[extraPluginDirEnvName] &&
-    fileExistsSyncCache(
-      getAbsolutePath(process.env[extraPluginDirEnvName] as string),
-    )
-  ) {
-    let envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
-
-    // process cwd npm plugins
-    globSync(topPluginPattern, {
-      noext: true,
-      cwd: path.resolve(envDir),
-    }).map(function (plugin) {
-      plugins[plugin] = path.resolve(envDir, plugin)
-    })
-
-    // process cwd npm scope plugins
-    globSync(orgPluginPattern, {
-      noext: true,
-      cwd: path.resolve(envDir),
-    }).map(function (plugin) {
-      plugins[plugin] = path.resolve(envDir, plugin)
-    })
-  }
-
-  // Second filter for registered or scanned plugins
-  const includePlugins = Utils.config('$plugins.include') || []
-  const excludePlugins = Utils.config('$plugins.exclude') || []
-
-  if (_.isArray(includePlugins) && includePlugins.length > 0) {
-    plugins = _.pickBy(plugins, (pluginPath, plugin) => {
-      if (plugin.indexOf(scriptName + '-plugin-') === 0) {
-        plugin = plugin.substring((scriptName + '-plugin-').length)
-      }
-      return (
-        includePlugins.includes(plugin) ||
-        includePlugins.includes(scriptName + '-plugin-' + plugin)
+    // extraPluginDir plugins would not be in cache
+    let extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
+    if (
+      extraPluginDirEnvName &&
+      process.env[extraPluginDirEnvName] &&
+      fileExistsSyncCache(
+        getAbsolutePath(process.env[extraPluginDirEnvName] as string),
       )
-    })
-  }
+    ) {
+      let envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
 
-  if (_.isArray(excludePlugins) && excludePlugins.length > 0) {
-    plugins = _.omitBy(plugins, (pluginPath, plugin) => {
-      if (plugin.indexOf(scriptName + '-plugin-') === 0) {
-        plugin = plugin.substring((scriptName + '-plugin-').length)
-      }
-      return (
-        excludePlugins.includes(plugin) ||
-        excludePlugins.includes(scriptName + '-plugin-' + plugin)
-      )
-    })
-  }
+      // process cwd npm plugins
+      globSync(topPluginPattern, {
+        noext: true,
+        cwd: path.resolve(envDir),
+      }).map(function (plugin) {
+        plugins[plugin] = path.resolve(envDir, plugin)
+      })
 
-  return plugins
+      // process cwd npm scope plugins
+      globSync(orgPluginPattern, {
+        noext: true,
+        cwd: path.resolve(envDir),
+      }).map(function (plugin) {
+        plugins[plugin] = path.resolve(envDir, plugin)
+      })
+    }
+
+    // Second filter for registered or scanned plugins
+    const includePlugins = Utils.config('$plugins.include') || []
+    const excludePlugins = Utils.config('$plugins.exclude') || []
+
+    if (_.isArray(includePlugins) && includePlugins.length > 0) {
+      plugins = _.pickBy(plugins, (pluginPath, plugin) => {
+        if (plugin.indexOf(scriptName + '-plugin-') === 0) {
+          plugin = plugin.substring((scriptName + '-plugin-').length)
+        }
+        return (
+          includePlugins.includes(plugin) ||
+          includePlugins.includes(scriptName + '-plugin-' + plugin)
+        )
+      })
+    }
+
+    if (_.isArray(excludePlugins) && excludePlugins.length > 0) {
+      plugins = _.omitBy(plugins, (pluginPath, plugin) => {
+        if (plugin.indexOf(scriptName + '-plugin-') === 0) {
+          plugin = plugin.substring((scriptName + '-plugin-').length)
+        }
+        return (
+          excludePlugins.includes(plugin) ||
+          excludePlugins.includes(scriptName + '-plugin-' + plugin)
+        )
+      })
+    }
+
+    // Write plugins to  pluginsRegistryCachePath
+
+    if (pluginsRegistryCachePath && argv.cachePlugins) {
+      fs.writeFileSync(pluginsRegistryCachePath, JSON.stringify(plugins))
+    }
+
+    return plugins
+  } else {
+    console.log('use cache')
+    const plugins = require(pluginsRegistryCachePath)
+    return plugins
+  }
 }
 
 /**
@@ -1639,15 +1670,17 @@ const launchDispatcher = async (opts: any = {}) => {
         // if command exist but process.arg[2] also exist, but not a command js module
         // here will throw an exception, so ignore this error to make existed command can run
         try {
-          let command = require(path.resolve(process.cwd(), process.argv[2]))
+          let command =
+            require(path.resolve(process.cwd(), process.argv[2])) || {}
           if (command.default) {
             command = command.default
           }
 
           if (command.handler) {
             defaultCommand.handler = command.handler
+          } else if (typeof command === 'function') {
+            defaultCommand.handler = command
           }
-
           if (command.builder) {
             defaultCommand.builder = command.builder
           }
