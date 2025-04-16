@@ -89,7 +89,7 @@ export const handler = async function (argv: any) {
     } else {
       if (argv.template) {
         // Fetch repos from hook
-        let repos = await Utils.invokeHook<COMMON_OBJECT>(
+        let repos = await Utils.invokeHook<COMMON_OBJECT<COMMON_OBJECT>>(
           `${scriptName}:create_project_template`,
         )
         // Combine repos with config
