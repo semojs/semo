@@ -18,7 +18,7 @@ jobs:
           registry-url: 'https://registry.npmjs.org'
       - name: Install pnpm
         run: curl -L https://unpkg.com/@pnpm/self-installer | node
-      - run: pnpm install --frozen-lockfile
+      - run: pnpm install --no-frozen-lockfile
       - name: Publish
         run: |
           npm whoami
