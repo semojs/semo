@@ -212,7 +212,7 @@ const invokeHook = async function <T>(
       appConfig.applicationDir &&
       appConfig.applicationDir !== argv.packageDirectory
     ) {
-      plugins['application'] = appConfig.applicationDir
+      plugins.application = appConfig.applicationDir
     }
 
     let pluginsReturn
@@ -234,7 +234,7 @@ const invokeHook = async function <T>(
     const hookCollected: any[] = []
     const hookIndex: any[] = []
     for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
-      let plugin = Object.keys(plugins)[i]
+      const plugin = Object.keys(plugins)[i]
 
       // Process include option
       if (
@@ -260,7 +260,7 @@ const invokeHook = async function <T>(
 
         switch (plugin) {
           case scriptName:
-            let coreRcInfo = parseRcFile(plugin, plugins[plugin])
+            const coreRcInfo = parseRcFile(plugin, plugins[plugin])
             hookDir = coreRcInfo && coreRcInfo.hookDir ? coreRcInfo.hookDir : ''
             break
 
@@ -306,7 +306,7 @@ const invokeHook = async function <T>(
           loadedPlugin[hook].getHook &&
           _.isFunction(loadedPlugin[hook].getHook)
         ) {
-          let loadedPluginHook = loadedPlugin[hook].getHook(originModuler)
+          const loadedPluginHook = loadedPlugin[hook].getHook(originModuler)
           if (_.isFunction(loadedPluginHook)) {
             hookCollected.push(loadedPluginHook(options))
           } else {
@@ -328,7 +328,7 @@ const invokeHook = async function <T>(
       switch (options.mode) {
         case 'group':
           pluginReturn = pluginReturn || {}
-          let plugin = hookIndex[index]
+          const plugin = hookIndex[index]
           pluginsReturn[plugin] = pluginReturn
           break
         case 'push':
@@ -402,7 +402,7 @@ const extendSubCommand = function (
         }
 
         // Give command a plugin level config
-        argv['$config'] = {}
+        argv.$config = {}
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(
             argv.scriptName + '-plugin-',
@@ -410,18 +410,15 @@ const extendSubCommand = function (
             ? command.plugin.substring(argv.scriptName + '-plugin-'.length)
             : command.plugin
 
-          if (command.plugin && argv['$plugin']) {
-            if (argv['$plugin'][command.plugin]) {
-              argv['$config'] = formatRcOptions(
-                argv['$plugin'][command.plugin] || {},
-              )
+          if (command.plugin && argv.$plugin) {
+            if (argv.$plugin[command.plugin]) {
+              argv.$config = formatRcOptions(argv.$plugin[command.plugin] || {})
             } else if (
-              argv['$plugin'][argv.scriptName + '-plugin-' + command.plugin]
+              argv.$plugin[argv.scriptName + '-plugin-' + command.plugin]
             ) {
-              argv['$config'] = formatRcOptions(
-                argv['$plugin'][
-                  argv.scriptName + '-plugin-' + command.plugin
-                ] || {},
+              argv.$config = formatRcOptions(
+                argv.$plugin[argv.scriptName + '-plugin-' + command.plugin] ||
+                  {},
               )
             }
           }
@@ -450,7 +447,7 @@ const extendSubCommand = function (
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin): void {
+    Object.keys(plugins).forEach(function (plugin): void {
       if (
         config.pluginConfigs[plugin] &&
         config.pluginConfigs[plugin].extendDir
@@ -531,7 +528,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
   ) {
     let plugins: { [propName: string]: any } =
       cachedInstance.get('plugins') || {}
-    let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     if (_.isEmpty(plugins) && !configPluginLoaded) {
       const registerPlugins = Utils.config('$plugins.register') || {}
       if (!_.isEmpty(registerPlugins)) {
@@ -577,11 +574,11 @@ const getAllPluginsMapping = function (argv: any = {}): {
       error('invalid --plugin-prefix')
     }
 
-    let topPluginPattern =
+    const topPluginPattern =
       pluginPrefix.length > 1
         ? '{' + pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',') + '}'
         : pluginPrefix.map(prefix => `${prefix}-plugin-*`).join(',')
-    let orgPluginPattern =
+    const orgPluginPattern =
       pluginPrefix.length > 1
         ? '{' +
           pluginPrefix.map(prefix => `@*/${prefix}-plugin-*`).join(',') +
@@ -596,7 +593,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
       globSync(topPluginPattern, {
         noext: true,
         cwd: path.resolve(__dirname, '../plugins'),
-      }).map(function (plugin): void {
+      }).forEach(function (plugin): void {
         plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
       })
 
@@ -609,7 +606,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
             argv.packageDirectory,
             argv.orgMode ? '../../' : '../',
           ),
-        }).map(function (plugin): void {
+        }).forEach(function (plugin): void {
           plugins[plugin] = path.resolve(
             argv.packageDirectory,
             argv.orgMode ? '../../' : '../',
@@ -623,7 +620,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
           globSync(topPluginPattern, {
             noext: true,
             cwd: path.resolve(argv.packageDirectory, '../'),
-          }).map(function (plugin): void {
+          }).forEach(function (plugin): void {
             plugins[plugin] = path.resolve(argv.packageDirectory, '../', plugin)
           })
         }
@@ -635,7 +632,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
             argv.packageDirectory,
             argv.orgMode ? '../../' : '../',
           ),
-        }).map(function (plugin): void {
+        }).forEach(function (plugin): void {
           plugins[plugin] = path.resolve(
             argv.packageDirectory,
             argv.orgMode ? '../../' : '../',
@@ -671,7 +668,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
             'home-plugin-cache',
             'node_modules',
           ),
-        }).map(function (plugin): void {
+        }).forEach(function (plugin): void {
           if (process.env.HOME) {
             plugins[plugin] = path.resolve(
               process.env.HOME,
@@ -687,7 +684,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
         globSync(orgPluginPattern, {
           noext: true,
           cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules'),
-        }).map(function (plugin): void {
+        }).forEach(function (plugin): void {
           if (process.env.HOME) {
             plugins[plugin] = path.resolve(
               process.env.HOME,
@@ -703,7 +700,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
       globSync(topPluginPattern, {
         noext: true,
         cwd: path.resolve(process.cwd(), 'node_modules'),
-      }).map(function (plugin) {
+      }).forEach(function (plugin) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
@@ -711,7 +708,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
       globSync(orgPluginPattern, {
         noext: true,
         cwd: path.resolve(process.cwd(), 'node_modules'),
-      }).map(function (plugin) {
+      }).forEach(function (plugin) {
         plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
       })
 
@@ -723,7 +720,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
           globSync(topPluginPattern, {
             noext: true,
             cwd: path.resolve(process.cwd(), pluginDir),
-          }).map(function (plugin) {
+          }).forEach(function (plugin) {
             plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
           })
 
@@ -731,7 +728,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
           globSync(orgPluginPattern, {
             noext: true,
             cwd: path.resolve(process.cwd(), pluginDir),
-          }).map(function (plugin) {
+          }).forEach(function (plugin) {
             plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
           })
         }
@@ -754,7 +751,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
     }
 
     // extraPluginDir plugins would not be in cache
-    let extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
+    const extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
     if (
       extraPluginDirEnvName &&
       process.env[extraPluginDirEnvName] &&
@@ -762,13 +759,13 @@ const getAllPluginsMapping = function (argv: any = {}): {
         getAbsolutePath(process.env[extraPluginDirEnvName] as string),
       )
     ) {
-      let envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
+      const envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
 
       // process cwd npm plugins
       globSync(topPluginPattern, {
         noext: true,
         cwd: path.resolve(envDir),
-      }).map(function (plugin) {
+      }).forEach(function (plugin) {
         plugins[plugin] = path.resolve(envDir, plugin)
       })
 
@@ -776,7 +773,7 @@ const getAllPluginsMapping = function (argv: any = {}): {
       globSync(orgPluginPattern, {
         noext: true,
         cwd: path.resolve(envDir),
-      }).map(function (plugin) {
+      }).forEach(function (plugin) {
         plugins[plugin] = path.resolve(envDir, plugin)
       })
     }
@@ -846,12 +843,12 @@ const getAbsolutePath = (filePath: string): string => {
 const getApplicationConfig = function (opts: any = {}) {
   let argv: any = cachedInstance.get('argv') || {}
 
-  const cache = cachedInstance.get(`getApplicationConfig`)
+  const cache = cachedInstance.get('getApplicationConfig')
   if (!_.isEmpty(cache)) {
     return cache
   }
 
-  let scriptName = opts.scriptName
+  const scriptName = opts.scriptName
     ? opts.scriptName
     : argv && argv.scriptName
       ? argv.scriptName
@@ -902,7 +899,7 @@ const getApplicationConfig = function (opts: any = {}) {
       path.resolve(applicationConfig.applicationDir, 'package.json'),
     )
   ) {
-    let packageInfo = require(
+    const packageInfo = require(
       path.resolve(applicationConfig.applicationDir, 'package.json'),
     )
 
@@ -940,7 +937,7 @@ const getApplicationConfig = function (opts: any = {}) {
       applicationConfig = _.merge(applicationConfig, semoRcInfo)
     } catch (e) {
       debugCore('load rc:', e)
-      warn(`application rc config load failed!`)
+      warn('application rc config load failed!')
     }
   }
 
@@ -959,11 +956,11 @@ const getApplicationConfig = function (opts: any = {}) {
       applicationConfig = _.merge(applicationConfig, semoEnvRcInfo)
     } catch (e) {
       debugCore('load rc:', e)
-      warn(`application env rc config load failed!`)
+      warn('application env rc config load failed!')
     }
   }
 
-  cachedInstance.set(`getApplicationConfig`, applicationConfig)
+  cachedInstance.set('getApplicationConfig', applicationConfig)
 
   return applicationConfig
 }
@@ -993,7 +990,7 @@ const formatRcOptions = opts => {
 
 const parseRcFile = function (plugin, pluginPath, argv: any = {}) {
   argv = argv || cachedInstance.get('argv') || {}
-  let scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
 
   const cacheKey = `parseRcFile:${plugin}:${pluginPath}`
   const cache = cachedInstance.get(cacheKey)
@@ -1003,7 +1000,7 @@ const parseRcFile = function (plugin, pluginPath, argv: any = {}) {
   }
 
   const pluginSemoYamlRcPath = path.resolve(pluginPath, `.${scriptName}rc.yml`)
-  const pluginPackagePath = path.resolve(pluginPath, `package.json`)
+  const pluginPackagePath = path.resolve(pluginPath, 'package.json')
   let pluginConfig
   if (fileExistsSyncCache(pluginSemoYamlRcPath)) {
     try {
@@ -1036,14 +1033,14 @@ const getCombinedConfig = function (argv: any = {}): {
 } {
   let combinedConfig: { [propName: string]: any } =
     cachedInstance.get('combinedConfig') || {}
-  let pluginConfigs: { [propName: string]: any } = {}
+  const pluginConfigs: { [propName: string]: any } = {}
 
   if (_.isEmpty(combinedConfig)) {
     const plugins = getAllPluginsMapping(argv)
-    Object.keys(plugins).map(plugin => {
-      let pluginConfig = parseRcFile(plugin, plugins[plugin], argv)
+    Object.keys(plugins).forEach(plugin => {
+      const pluginConfig = parseRcFile(plugin, plugins[plugin], argv)
 
-      let pluginConfigPick = _.pick(pluginConfig, [
+      const pluginConfigPick = _.pick(pluginConfig, [
         'commandDir',
         'extendDir',
         'hookDir',
@@ -1177,8 +1174,8 @@ const outputTable = function (
       paddingRight: 1,
     },
     border: Object.assign(
-      getBorderCharacters(`void`),
-      { bodyJoin: `:` },
+      getBorderCharacters('void'),
+      { bodyJoin: ':' },
       borderOptions,
     ),
   }
@@ -1298,9 +1295,9 @@ const replHistory = function (repl, file) {
     repl.historyIndex = -1 // will be incremented before pop
   } catch (e) {}
 
-  let fd = fs.openSync(file, 'a')
-  let wstream = fs.createWriteStream(file, {
-    fd: fd,
+  const fd = fs.openSync(file, 'a')
+  const wstream = fs.createWriteStream(file, {
+    fd,
   })
   wstream.on('error', function (err) {
     throw err
@@ -1319,10 +1316,10 @@ const replHistory = function (repl, file) {
     fs.closeSync(fd)
   })
 
-  repl.commands['history'] = {
+  repl.commands.history = {
     help: 'Show the history',
     action: function () {
-      var out: any = []
+      const out: any = []
       repl.history.forEach(function (v) {
         out.push(v)
       })
@@ -1406,7 +1403,7 @@ const launchDispatcher = async (opts: any = {}) => {
     describe: 'Enable core default disabled hook',
   })
 
-  let scriptName = parsedArgv.scriptName || 'semo'
+  const scriptName = parsedArgv.scriptName || 'semo'
   const yargsOpts = {
     // try to use ts command with ts-node/register
     extensions: ['ts', 'js'],
@@ -1423,7 +1420,7 @@ const launchDispatcher = async (opts: any = {}) => {
           console.log()
         }
 
-        argv['$config'] = {}
+        argv.$config = {}
         // Give command a plugin level config
         if (command.plugin) {
           command.plugin = command.plugin.startsWith(
@@ -1432,18 +1429,14 @@ const launchDispatcher = async (opts: any = {}) => {
             ? command.plugin.substring(appConfig.scriptName + '-plugin-'.length)
             : command.plugin
 
-          if (command.plugin && argv['$plugin']) {
-            if (argv['$plugin'][command.plugin]) {
-              argv['$config'] = formatRcOptions(
-                argv['$plugin'][command.plugin] || {},
-              )
+          if (command.plugin && argv.$plugin) {
+            if (argv.$plugin[command.plugin]) {
+              argv.$config = formatRcOptions(argv.$plugin[command.plugin] || {})
             } else if (
-              argv['$plugin'][
-                appConfig.scriptName + '-plugin-' + command.plugin
-              ]
+              argv.$plugin[appConfig.scriptName + '-plugin-' + command.plugin]
             ) {
-              argv['$config'] = formatRcOptions(
-                argv['$plugin'][
+              argv.$config = formatRcOptions(
+                argv.$plugin[
                   appConfig.scriptName + '-plugin-' + command.plugin
                 ] || {},
               )
@@ -1478,7 +1471,7 @@ const launchDispatcher = async (opts: any = {}) => {
 
   // Load plugin commands
   if (plugins) {
-    Object.keys(plugins).map(function (plugin) {
+    Object.keys(plugins).forEach(function (plugin) {
       if (
         config.pluginConfigs[plugin] &&
         config.pluginConfigs[plugin].commandDir &&
@@ -1562,10 +1555,10 @@ const launchDispatcher = async (opts: any = {}) => {
         parsedArgv.enableCoreHook.includes('before_command')
       ) {
         debugCore('Core hook before_command triggered')
-        let beforeHooks = await invokeHook<Function[]>(
+        const beforeHooks = await invokeHook<Function[]>(
           `${scriptName}:before_command`,
         )
-        Object.keys(beforeHooks).map(function (hook) {
+        Object.keys(beforeHooks).forEach(function (hook) {
           beforeHooks[hook](parsedArgv, yargs)
         })
       }
@@ -1629,7 +1622,7 @@ const launchDispatcher = async (opts: any = {}) => {
             if (epilog && _.isString(epilog)) {
               return epilog
             } else if (_.isArray(epilog)) {
-              let pop = epilog.pop()
+              const pop = epilog.pop()
               if (pop) {
                 return pop
               }
@@ -1654,7 +1647,7 @@ const launchDispatcher = async (opts: any = {}) => {
         describe: 'Set node env key',
       })
 
-      let defaultCommand: any = {
+      const defaultCommand: any = {
         handler: () => {
           yargs.showHelp()
           warn('Semo command file is required.')
@@ -1690,7 +1683,7 @@ const launchDispatcher = async (opts: any = {}) => {
       if (parsedArgv._[0] !== 'completion' && !parsedArgv.disableCoreCommand) {
         yargs.command(
           '$0',
-          'Execute a Semo style command file',
+          'Execute a Semo command style file',
           defaultCommand.builder,
           defaultCommand.handler,
         )
@@ -1796,7 +1789,7 @@ const loadPluginRc = (name, location = '', home = true) => {
   const packagePath = getPackagePath(name, [downloadDirNodeModulesPath])
   const packageDirectory = path.dirname(packagePath)
 
-  let pluginConfig = parseRcFile(name, packageDirectory, argv)
+  const pluginConfig = parseRcFile(name, packageDirectory, argv)
   pluginConfig.dirname = packageDirectory
 
   return pluginConfig
@@ -1846,7 +1839,7 @@ const installPackage = (name, location = '', home = true, force = false) => {
     try {
       require.resolve(pkg, { paths: [downloadDir] })
     } catch (err) {
-      if (err.code == 'MODULE_NOT_FOUND') {
+      if (err.code === 'MODULE_NOT_FOUND') {
         exec(
           `npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
         )
@@ -1915,7 +1908,7 @@ const importPackage = (name, location = '', home = true, force = false) => {
     pkgPath = require.resolve(name, { paths: [downloadDir] })
     pkg = require(pkgPath)
   } catch (err) {
-    if (err.code == 'MODULE_NOT_FOUND') {
+    if (err.code === 'MODULE_NOT_FOUND') {
       exec(
         `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`,
       )
@@ -2050,10 +2043,10 @@ const extendConfig = (
       try {
         const rcFile = fs.readFileSync(rcPath, 'utf8')
         const parsedRc = yaml.parse(rcFile)
-        let extendRc = formatRcOptions(parsedRc)
+        const extendRc = formatRcOptions(parsedRc)
         if (prefix) {
-          let prefixPart = _.get(argv, prefix)
-          let mergePart = _.merge(prefixPart, extendRc)
+          const prefixPart = _.get(argv, prefix)
+          const mergePart = _.merge(prefixPart, extendRc)
           argv = _.set(argv, prefix, mergePart)
         } else {
           argv = _.merge(argv, extendRc)
@@ -2066,7 +2059,7 @@ const extendConfig = (
     }
 
     const nodeEnv = getNodeEnv(argv)
-    let extendRcEnvPath = path.resolve(
+    const extendRcEnvPath = path.resolve(
       path.dirname(rcPath),
       `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`,
     )
@@ -2074,10 +2067,10 @@ const extendConfig = (
       try {
         const rcFile = fs.readFileSync(extendRcEnvPath, 'utf8')
         const parsedRc = yaml.parse(rcFile)
-        let extendRc = formatRcOptions(parsedRc)
+        const extendRc = formatRcOptions(parsedRc)
         if (prefix) {
-          let prefixPart = _.get(argv, prefix)
-          let mergePart = _.merge(prefixPart, extendRc)
+          const prefixPart = _.get(argv, prefix)
+          const mergePart = _.merge(prefixPart, extendRc)
           argv = _.set(argv, prefix, mergePart)
         } else {
           argv = _.merge(argv, extendRc)
