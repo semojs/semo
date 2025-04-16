@@ -1,5 +1,5 @@
 import path from 'path'
-import { UtilsType, COMMON_OBJECT } from '@semo/core'
+import { UtilsType } from '@semo/core'
 import shell from 'shelljs'
 import inquirer from 'inquirer'
 
@@ -7,6 +7,10 @@ export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
 export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'
+
+export type COMMON_OBJECT<T = any> = {
+  [key: string]: T
+}
 
 export const builder = function (yargs) {
   yargs.option('yes', {
