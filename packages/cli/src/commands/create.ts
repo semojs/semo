@@ -8,10 +8,6 @@ export const command = 'create <name> [repo] [branch]'
 export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'
 
-export type COMMON_OBJECT<T = any> = {
-  [key: string]: T
-}
-
 export const builder = function (yargs) {
   yargs.option('yes', {
     default: true,
@@ -93,7 +89,7 @@ export const handler = async function (argv: any) {
     } else {
       if (argv.template) {
         // Fetch repos from hook
-        let repos = await Utils.invokeHook<COMMON_OBJECT<COMMON_OBJECT>>(
+        let repos = await Utils.invokeHook<Record<string, Record<string, any>>>(
           `${scriptName}:create_project_template`,
         )
         // Combine repos with config
