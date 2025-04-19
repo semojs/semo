@@ -8,7 +8,7 @@ export class Hook {
   private mappings: HookItem = {}
   private scriptName = 'semo'
 
-  constructor(name: string | HookItem[], handler: any) {
+  constructor(name: string | HookItem[], handler: any = null) {
     if (lodash.isString(name)) {
       name = this.convertName(name)
       this.mappings[<string>name] = handler

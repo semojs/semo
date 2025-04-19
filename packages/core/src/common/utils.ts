@@ -303,6 +303,14 @@ const invokeHook = async function <T>(
 
         if (
           loadedPlugin[hook] &&
+          (!loadedPlugin[hook].getHook ||
+            !_.isFunction(loadedPlugin[hook].getHook))
+        ) {
+          loadedPlugin[hook] = new Hook(loadedPlugin[hook])
+        }
+
+        if (
+          loadedPlugin[hook] &&
           loadedPlugin[hook].getHook &&
           _.isFunction(loadedPlugin[hook].getHook)
         ) {
