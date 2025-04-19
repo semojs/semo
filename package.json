@@ -53,5 +53,6 @@
       "eslint --fix --no-cache",
       "prettier --parser=typescript --write"
     ]
-  }
+  },
+  "version": "0.0.1"
 }
