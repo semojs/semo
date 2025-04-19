@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-plugin",
-  "version": "1.6.27",
+  "version": "1.6.28",
   "description": "A semo plugin to provide plugin management.",
   "keywords": [
     "cli",
