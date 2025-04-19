@@ -301,20 +301,20 @@ const invokeHook = async function <T>(
           loadedPlugin = await loadedPlugin.default(Utils, argv)
         }
 
-        if (
-          loadedPlugin[hook] &&
-          (!loadedPlugin[hook].getHook ||
-            !_.isFunction(loadedPlugin[hook].getHook))
-        ) {
-          loadedPlugin[hook] = new Hook(loadedPlugin[hook])
+        let forHookCollected: Hook | null = null
+        if (loadedPlugin[hook]) {
+          if (
+            !loadedPlugin[hook].getHook ||
+            !_.isFunction(loadedPlugin[hook].getHook)
+          ) {
+            forHookCollected = new Hook(loadedPlugin[hook])
+          } else {
+            forHookCollected = loadedPlugin[hook]
+          }
         }
 
-        if (
-          loadedPlugin[hook] &&
-          loadedPlugin[hook].getHook &&
-          _.isFunction(loadedPlugin[hook].getHook)
-        ) {
-          const loadedPluginHook = loadedPlugin[hook].getHook(originModuler)
+        if (forHookCollected) {
+          const loadedPluginHook = forHookCollected.getHook(originModuler)
           if (_.isFunction(loadedPluginHook)) {
             hookCollected.push(loadedPluginHook(options))
           } else {
