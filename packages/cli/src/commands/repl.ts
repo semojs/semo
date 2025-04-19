@@ -72,7 +72,7 @@ const extract = (obj, keys: string[] | string = []) => {
 }
 
 const corepl = (cli: repl.REPLServer) => {
-  var originalEval = cli.eval
+  const originalEval = cli.eval
 
   // @ts-ignore
   cli.eval = function coEval(cmd, context, filename, callback) {
@@ -149,20 +149,20 @@ async function openRepl(context: any): Promise<any> {
     // @ts-ignore
     this.clearBufferedCommand()
     try {
-      let opts = yParser(input)
+      const opts = yParser(input)
 
       const packages = {}
-      for (let part of opts._) {
-        let split = part.split(':')
-        if (split.length == 1) {
+      for (const part of opts._) {
+        const split = part.split(':')
+        if (split.length === 1) {
           packages[part] = part
         } else if (split.length > 1) {
           packages[split[0]] = split[1]
         }
       }
 
-      for (let pack in packages) {
-        let imported = importPackage(pack)
+      for (const pack in packages) {
+        const imported = importPackage(pack)
         Object.defineProperty(r.context, packages[pack], { value: imported })
       }
     } catch (e) {}
@@ -262,14 +262,14 @@ export const handler = async function (argv: any) {
 
   const requiredPackages = Utils._.castArray(argv.require)
   const importedPackages = Utils._.castArray(argv.import)
-  let concatPackages = Utils._.chain(requiredPackages)
+  const concatPackages = Utils._.chain(requiredPackages)
     .concat(importedPackages)
     .uniq()
     .filter()
     .value()
-  let packages = {}
+  const packages = {}
   concatPackages.forEach(item => {
-    let splited = item.split(':')
+    const splited = item.split(':')
     if (splited.length === 1) {
       packages[item] = item
     } else {
@@ -298,7 +298,7 @@ export const handler = async function (argv: any) {
       },
     )
 
-    for (let pack in packages) {
+    for (const pack in packages) {
       context[packages[pack]] = importPackage(pack)
     }
 
@@ -327,13 +327,16 @@ export const handler = async function (argv: any) {
         shortenKeysPluginsReturn[newKey] = pluginsReturn[plugin]
       })
 
-      context.Semo.hooks = Utils.formatRcOptions(shortenKeysPluginsReturn)
+      context.Semo.hooks = Utils.formatRcOptions(shortenKeysPluginsReturn) || {}
     }
 
     if (Utils._.isArray(argv.extract)) {
       if (argv.extract && argv.extract.length > 0) {
         argv.extract.forEach(keyPath => {
-          context = Object.assign(context, Utils._.get(context, keyPath) || {})
+          context = Object.assign(
+            context,
+            Utils._.get(context.Semo.hooks, keyPath) || {},
+          )
         })
       }
     } else {
@@ -343,7 +346,7 @@ export const handler = async function (argv: any) {
           const splitExtractKey = extractKey.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
           context[finalExtractKey] = Utils._.get(
-            context,
+            context.Semo.hooks,
             `${key}.${extractKey}`,
           )
         })
