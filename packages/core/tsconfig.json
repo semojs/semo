@@ -1,8 +1,8 @@
 {
   "compilerOptions": {
-    "target": "es6",
-    "module": "commonjs",
-    "lib": ["es6"],
+    "target": "ES2022",
+    "module": "Node16",
+    "lib": ["ES2022"],
     "declaration": true,
     "sourceMap": true,
     "skipLibCheck": true,
@@ -12,10 +12,11 @@
     "noImplicitThis": true,
     "noUnusedLocals": false,
     "noImplicitReturns": true,
-    "moduleResolution": "node",
+    "moduleResolution": "node16",
     "resolveJsonModule": true,
     "typeRoots": ["src/@types", "./node_modules/@types/"],
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "allowSyntheticDefaultImports": true
   },
   "include": ["./src/**/*", "./src/**/.*.json", "./src/**/*.json"],
   "exclude": ["node_modules"]
