@@ -31,12 +31,21 @@ const yParser = yargsInternal.Parser
 
 let cachedInstance: NodeCache
 
+/**
+ * Determines if the current Node.js process is using a TypeScript runner.
+ *
+ * This function checks the `process.execArgv` array for arguments that indicate
+ * the use of TypeScript-related tools such as `--loader`, `--require`, `ts-node`, or `tsx`.
+ *
+ * @returns {boolean} `true` if a TypeScript runner is detected, otherwise `false`.
+ */
 export const isUsingTsRunner = () => {
-  return !!(
-    process.env.TS_NODE_DEV || // ts-node-dev
-    process.env.TS_NODE_ENV || // ts-node environment
-    process.versions['ts-node'] || // ts-node
-    process.env.TSX // tsx
+  return process.execArgv.some(
+    arg =>
+      arg.startsWith('--loader') ||
+      arg.startsWith('--require') ||
+      arg.includes('ts-node') ||
+      arg.includes('tsx'),
   )
 }
 
