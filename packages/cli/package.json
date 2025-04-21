@@ -1,6 +1,6 @@
 {
   "name": "@semo/cli",
-  "version": "1.6.35",
+  "version": "1.6.36",
   "description": "A command line tools dispatcher ",
   "keywords": [
     "cli",
