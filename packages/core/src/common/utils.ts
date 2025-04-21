@@ -31,6 +31,15 @@ const yParser = yargsInternal.Parser
 
 let cachedInstance: NodeCache
 
+export const isUsingTsRunner = () => {
+  return !!(
+    process.env.TS_NODE_DEV || // ts-node-dev
+    process.env.TS_NODE_ENV || // ts-node environment
+    process.versions['ts-node'] || // ts-node
+    process.env.TSX // tsx
+  )
+}
+
 /**
  * Get Semo internal cache instance
  * @returns {NodeCache}
@@ -276,13 +285,23 @@ const invokeHook = async function <T>(
             }
             break
         }
+
+        let entryFileName = 'index.js'
+        if (isUsingTsRunner()) {
+          entryFileName = 'index.ts'
+        }
+
         if (
           hookDir &&
           fileExistsSyncCache(
-            path.resolve(plugins[plugin], hookDir, 'index.js'),
+            path.resolve(plugins[plugin], hookDir, entryFileName),
           )
         ) {
-          pluginEntryPath = path.resolve(plugins[plugin], hookDir, 'index.js')
+          pluginEntryPath = path.resolve(
+            plugins[plugin],
+            hookDir,
+            entryFileName,
+          )
         }
 
         // pluginEntryPath resolve failed, means this plugin do not hook anything

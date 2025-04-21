@@ -30,6 +30,7 @@
   "scripts": {
     "semo": "node lib/bin.js",
     "watch": "tsc -w",
+    "dev": "tsc --build --watch",
     "build": "tsc",
     "prepare": "npm run clean && npm run build",
     "clean": "rimraf lib"

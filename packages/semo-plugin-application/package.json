@@ -19,6 +19,7 @@
   },
   "scripts": {
     "watch": "tsc -w",
+    "dev": "tsc --build --watch",
     "build": "tsc",
     "clean": "rimraf lib",
     "prepare": "npm run clean && npm run build",
