@@ -34,9 +34,6 @@ let cachedInstance: NodeCache
 /**
  * Determines if the current Node.js process is using a TypeScript runner.
  *
- * This function checks the `process.execArgv` array for arguments that indicate
- * the use of TypeScript-related tools such as `--loader`, `--require`, `ts-node`, or `tsx`.
- *
  * @returns {boolean} `true` if a TypeScript runner is detected, otherwise `false`.
  */
 export const isUsingTsRunner = () => {
@@ -45,6 +42,7 @@ export const isUsingTsRunner = () => {
       arg.startsWith('--loader') ||
       arg.startsWith('--require') ||
       arg.includes('ts-node') ||
+      arg.includes('jiti') ||
       arg.includes('tsx'),
   )
 }
@@ -322,7 +320,13 @@ const invokeHook = async function <T>(
         if (options.reload && require.cache[pluginEntryPath]) {
           delete require.cache[pluginEntryPath]
         }
-        let loadedPlugin = require(pluginEntryPath)
+
+        let loadedPlugin
+        if (isUsingTsRunner()) {
+          loadedPlugin = await import(pluginEntryPath)
+        } else {
+          loadedPlugin = require(pluginEntryPath)
+        }
         if (_.isFunction(loadedPlugin)) {
           loadedPlugin = await loadedPlugin(Utils, argv)
         } else if (_.isFunction(loadedPlugin.default)) {
