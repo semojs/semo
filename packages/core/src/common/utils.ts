@@ -336,12 +336,7 @@ const invokeHook = async function <T>(
           delete require.cache[pluginEntryPath]
         }
 
-        let loadedPlugin
-        if (isUsingTsRunner()) {
-          loadedPlugin = await import(pluginEntryPath)
-        } else {
-          loadedPlugin = require(pluginEntryPath)
-        }
+        let loadedPlugin = require(pluginEntryPath)
         if (_.isFunction(loadedPlugin)) {
           loadedPlugin = await loadedPlugin(Utils, argv)
         } else if (_.isFunction(loadedPlugin.default)) {
