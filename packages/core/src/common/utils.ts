@@ -2262,6 +2262,8 @@ export const Utils = {
   consoleReader,
   clearConsole,
   useDotEnv,
+
+  isUsingTsRunner,
 }
 
 export type UtilsType = typeof Utils
