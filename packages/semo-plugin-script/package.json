@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-script",
-  "version": "1.6.28",
+  "version": "1.6.30",
   "description": "A semo plugin to provide project scripts convension.",
   "keywords": [
     "cli",
