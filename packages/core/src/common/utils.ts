@@ -31,19 +31,34 @@ const yParser = yargsInternal.Parser
 
 let cachedInstance: NodeCache
 
+export const getNodeRuntime = () => {
+  const script = process.env.npm_lifecycle_script || ''
+
+  if (script.startsWith('tsx ')) {
+    return 'tsx'
+  }
+
+  if (script.startsWith('jiti ')) {
+    return 'jiti'
+  }
+
+  if (script.includes('ts-node')) {
+    return 'ts-node'
+  }
+
+  return 'node'
+}
+
 /**
  * Determines if the current Node.js process is using a TypeScript runner.
  *
  * @returns {boolean} `true` if a TypeScript runner is detected, otherwise `false`.
  */
 export const isUsingTsRunner = () => {
-  return process.execArgv.some(
-    arg =>
-      arg.startsWith('--loader') ||
-      arg.startsWith('--require') ||
-      arg.includes('ts-node') ||
-      arg.includes('jiti') ||
-      arg.includes('tsx'),
+  return (
+    getNodeRuntime() === 'ts-node' ||
+    getNodeRuntime() === 'jiti' ||
+    getNodeRuntime() === 'tsx'
   )
 }
 
