@@ -1,7 +1,7 @@
 {
   "name": "semo-plugin-application",
   "version": "1.6.37",
-  "description": "A semo plugin to provide project commands convension.",
+  "description": "A semo plugin to provide project level commands convension.",
   "keywords": [
     "cli",
     "command",
@@ -11,6 +11,7 @@
     "type": "git",
     "url": "https://github.com/semojs/semo"
   },
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
@@ -18,12 +19,11 @@
     "rimraf": "^5.0.5"
   },
   "scripts": {
-    "watch": "tsc -w",
+    "clean": "rimraf lib *.tsbuildinfo",
+    "build": "tsc --build",
     "dev": "tsc --build --watch",
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "prepare": "npm run clean && npm run build",
-    "test": "exit 0"
+    "prepublishOnly": "pnpm run build",
+    "prepare": "npm run clean && npm run build"
   },
   "dependencies": {
     "@semo/core": "workspace:^"

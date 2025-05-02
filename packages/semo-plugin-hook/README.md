@@ -1,5 +1,4 @@
-semo-plugin-hook
-------------------------
+## semo-plugin-hook
 
 This is a plugin related Semo hooks
 

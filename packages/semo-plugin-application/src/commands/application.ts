@@ -1,34 +1,37 @@
-import { Utils } from '@semo/core'
+import { Argv, ArgvExtraOptions, colorize, info } from '@semo/core'
+import path from 'node:path'
+import { fileURLToPath } from 'node:url'
+
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = path.dirname(__filename)
 
 export const command = 'application'
 export const desc = 'Application command namespace'
 export const aliases = 'app'
 
-export const builder = function (yargs) {
-  Utils.extendSubCommand(
+export const builder = async function (yargs: Argv) {
+  const argv = (await yargs.argv) as ArgvExtraOptions
+  argv.$core.extendSubCommand(
     'application',
     'semo-plugin-application',
     yargs,
-    __dirname,
+    __dirname
   )
 }
 
 export const handler = function (argv) {
   if (argv._.length === 1) {
-    Utils.info(
-      `The ${Utils.color.bold(
-        Utils.color.green('application'),
-      )} command is where your project level commands are located.`,
+    info(
+      `The ${colorize('green', 'application')} command is where your project level commands are located.`
     )
-    Utils.info(
-      `Use ${Utils.color.green(
-        'semo generate application/COMMAND --extend=semo-plugin-application',
-      )} to add your application command.`,
+    info(
+      `Use ${colorize(
+        'green',
+        'semo generate application/COMMAND --extend=semo-plugin-application'
+      )} to add your application command.`
     )
-    Utils.info(
-      `Then ${Utils.color.green(
-        'semo application COMMAND',
-      )} to run your command.`,
+    info(
+      `Then ${colorize('green', 'semo application COMMAND')} to run your command.`
     )
   }
 }

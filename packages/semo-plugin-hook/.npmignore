@@ -1,8 +1,5 @@
-docs
-.vscode
-.travis.yml
+tsconfig.tsbuildinfo
 /src
-.editorconfig
-.eslintignore
-.eslintrc.js
 tsconfig.json
+lib/**/*.map
+lib/**/*.d.ts

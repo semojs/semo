@@ -51,7 +51,7 @@ Please refer to the documentation to learn how to use Semo, because you need to 
 
 # Requirements
 
-- Node > v8.0
+- Node > v22.0+
 
 # License
 

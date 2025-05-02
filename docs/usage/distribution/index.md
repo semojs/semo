@@ -1,5 +1,5 @@
-# 发行版
+# Distribution
 
-`Semo` 发行版的含义是基于 `Semo` 构建了整个产品，比如前后端分离的项目，前端基于 `Semo` 前端脚手架，后端基于 `Semo` 后端脚手架，并且有底层的命令行基础设施整合，完成度很高，可以直接交付生产环境。其可以是 SaaS 级别的产品，销售演示或者私有部署等不同的使用场景，也涉及到相关的技术，比如容器编排，代码加密等等。
+The concept of the `Semo` distribution is based on building the entire product using `Semo`. For example, in projects with frontend and backend separation, the frontend is based on the `Semo` frontend scaffolding, the backend is based on the `Semo` backend scaffolding, and there is integration of underlying command-line infrastructure. This results in a high degree of completeness, suitable for direct deployment in production environments. It can be a SaaS-level product, used for sales demonstrations, private deployments, and other scenarios. It also involves related technologies such as container orchestration and code encryption.
 
-很遗憾的是截止目前还没有 `Semo` 发行版出来，还仅仅是设想，希望以后会有。
+Unfortunately, as of now, there has not been any `Semo` distribution available. It is still in the conceptual stage, and we hope it will become available in the future.

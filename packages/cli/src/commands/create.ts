@@ -1,14 +1,29 @@
+import {
+  ArgvExtraOptions,
+  colorize,
+  error,
+  info,
+  parsePackageNames,
+  success,
+  warn,
+} from '@semo/core'
 import path from 'path'
-import { UtilsType } from '@semo/core'
 import shell from 'shelljs'
-import inquirer from 'inquirer'
+import { Argv } from 'yargs'
+import _ from 'lodash'
+import { existsSync } from 'node:fs'
 
 export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
 export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'
 
-export const builder = function (yargs) {
+export const builder = function (yargs: Argv) {
+  yargs.positional('name', {
+    type: 'string',
+    describe: 'Project name',
+    demandOption: true,
+  })
   yargs.option('yes', {
     default: true,
     boolean: true,
@@ -66,20 +81,21 @@ export const builder = function (yargs) {
   })
 }
 
-export const handler = async function (argv: any) {
-  const Utils: UtilsType = argv.$semo.Utils
+export const handler = async function (
+  argv: ArgvExtraOptions & { [key: string]: any }
+) {
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'master'
-  argv.tag = argv.tag ? Utils._.castArray(argv.tag) : []
+  argv.tag = argv.tag ? _.castArray(argv.tag) : []
 
   try {
-    if (Utils.fileExistsSyncCache(path.resolve(process.cwd(), argv.name))) {
+    if (existsSync(path.resolve(process.cwd(), argv.name))) {
       if (argv.force) {
         shell.rm('-rf', path.resolve(process.cwd(), argv.name))
-        Utils.warn(`Existed ${argv.name} is deleted before creating a new one!`)
+        warn(`Existed ${argv.name} is deleted before creating a new one!`)
       } else if (!argv.merge) {
-        Utils.error(`Destination existed, command abort!`)
+        error(`Destination existed, command abort!`)
       }
     }
 
@@ -89,25 +105,28 @@ export const handler = async function (argv: any) {
     } else {
       if (argv.template) {
         // Fetch repos from hook
-        let repos = await Utils.invokeHook<Record<string, Record<string, any>>>(
-          `${scriptName}:create_project_template`,
+        let repos: any = await argv.$core.invokeHook(
+          `${scriptName}:create_project_template`
         )
         // Combine repos with config
-        Object.assign(repos, Utils.pluginConfig('create.template', {}))
+        Object.assign(
+          repos,
+          argv.$core.pluginConfig(argv, 'create.template', {})
+        )
 
         if (Object.keys(repos).length === 0) {
-          Utils.error('No pre-defined repos available.')
+          error('No pre-defined repos available.')
         }
 
-        Object.keys(repos).forEach(key => {
-          if (Utils._.isObject(repos[key])) {
+        Object.keys(repos).forEach((key) => {
+          if (_.isObject(repos[key] as any)) {
             repos[key].tags = repos[key].tags
-              ? Utils._.castArray(repos[key].tags)
+              ? _.castArray(repos[key].tags)
               : []
             if (!repos[key].name) {
               repos[key].name = key.replace(/_/g, '-')
             }
-          } else if (Utils._.isString(repos[key])) {
+          } else if (_.isString(repos[key])) {
             repos[key] = {
               repo: repos[key],
               name: key.replace(/_/g, '-'),
@@ -119,10 +138,10 @@ export const handler = async function (argv: any) {
         })
 
         if (argv.tag && argv.tag.length > 0) {
-          repos = Utils._.pickBy(repos, (repo, key) => {
+          repos = _.pickBy(repos, (repo) => {
             if (repo.tags) {
-              repo.tags = Utils._.castArray(repo.tags)
-              return Utils._.intersection(repo.tags, argv.tag).length > 0
+              repo.tags = _.castArray(repo.tags)
+              return _.intersection(repo.tags, argv.tag).length > 0
             } else {
               return false
             }
@@ -132,40 +151,29 @@ export const handler = async function (argv: any) {
         const template = repos[argv.template]
           ? argv.template
           : Object.keys(repos).find(
-              key =>
-                repos[key].name && repos[key].name.indexOf(argv.template) > -1,
+              (key) =>
+                repos[key].name && repos[key].name.indexOf(argv.template) > -1
             )
         if (template && repos[template]) {
-          argv.repo = repos[template].repo || Utils.error('Repo not found')
+          argv.repo = repos[template].repo || error('Repo not found')
           argv.branch = repos[template].branch || 'master'
         } else {
-          const answers: any = await inquirer.prompt([
-            {
-              type: 'list',
-              name: 'selected',
-              message: `Please choose a pre-defined repo to continue:`,
-              choices: Object.keys(repos).map(key => {
-                return {
-                  name: `${Utils.color.green(
-                    Utils.color.underline(repos[key].name),
-                  )} ${repos[key].tags
-                    .map(tag =>
-                      Utils.color.white(Utils.color.bgGreen(` ${tag} `)),
-                    )
-                    .join(' ')}: ${Utils.color.white(repos[key].repo)}${
-                    repos[key].description
-                      ? '\n  ' + repos[key].description
-                      : ''
-                  }`,
-                  value: key,
-                }
-              }),
-            },
-          ])
+          const answer: any = await argv.$prompt.select({
+            message: `Please choose a pre-defined repo to continue:`,
+            choices: Object.keys(repos).map((key) => {
+              return {
+                name: `${colorize('green', repos[key].name)} ${repos[key].tags
+                  .map((tag) => colorize('white.bgGreen', ` ${tag} `))
+                  .join(' ')}: ${colorize('white', repos[key].repo)}${
+                  repos[key].description ? '\n  ' + repos[key].description : ''
+                }`,
+                value: key,
+              }
+            }),
+          })
 
-          argv.repo =
-            repos[answers.selected].repo || Utils.error('Repo not found')
-          argv.branch = repos[answers.selected].branch || 'master'
+          argv.repo = repos[answer].repo || error('Repo not found')
+          argv.branch = repos[answer].branch || 'master'
         }
       } else if (argv.empty || !argv.repo) {
         shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
@@ -173,81 +181,101 @@ export const handler = async function (argv: any) {
 
         if (argv.yarn) {
           if (argv.yes) {
-            Utils.exec('yarn init -y')
+            shell.exec('yarn init -y')
           } else {
-            Utils.exec('yarn init')
+            shell.exec('yarn init')
           }
         } else {
           if (argv.yes) {
-            Utils.exec('npm init -y')
+            shell.exec('npm init -y')
           } else {
-            Utils.exec('npm init')
+            shell.exec('npm init')
           }
         }
 
-        Utils.exec(`echo "node_modules" > .gitignore`)
+        shell.exec(`echo "node_modules" > .gitignore`)
 
         if (argv.initGit) {
-          Utils.exec('git init')
-          Utils.success('New .git directory has been created!')
+          shell.exec('git init')
+          success('New .git directory has been created!')
         }
       }
 
       if (argv.repo && argv.name) {
-        Utils.info(`Downloading from ${argv.repo}`)
+        info(`Downloading from ${argv.repo}`)
         try {
-          Utils.exec(
-            `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`,
+          shell.exec(
+            `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`
           )
 
-          Utils.success('Succeeded!')
+          success('Succeeded!')
           shell.cd(argv.name)
-          const yarnFound = Utils.fileExistsSyncCache('yarn.lock')
-          const pnpmFound = Utils.fileExistsSyncCache('pnpm-lock.yaml')
-          const npmFound = Utils.fileExistsSyncCache('package-lock.json')
+          const packageFound = existsSync('package.json')
+          const yarnFound = existsSync('yarn.lock')
+          const pnpmFound = existsSync('pnpm-lock.yaml')
+          const npmFound = existsSync('package-lock.json')
           shell.rm('-rf', path.resolve(process.cwd(), `.git`))
-          Utils.success('.git directory removed!')
-          if (yarnFound) {
-            Utils.exec('yarn')
-          } else if (pnpmFound) {
-            Utils.exec('pnpm install')
-          } else if (npmFound) {
-            Utils.exec('npm install')
+          success('.git directory removed!')
+
+          if (packageFound) {
+            if (yarnFound) {
+              if (shell.which('yarn')) {
+                shell.exec('yarn')
+              } else {
+                warn('yarn not found, use npm instead')
+                shell.exec('npm install')
+              }
+            } else if (pnpmFound) {
+              if (shell.which('pnpm')) {
+                shell.exec('pnpm install')
+              } else {
+                warn('pnpm not found, use npm instead')
+                shell.exec('npm install')
+              }
+            } else if (npmFound) {
+              shell.exec('npm install')
+            } else {
+              shell.exec('npm install')
+            }
           }
 
           if (argv.initGit) {
-            Utils.exec('git init')
-            Utils.success('New .git directory has been created!')
+            shell.exec('git init')
+            success('New .git directory has been created!')
           }
         } catch (e) {
-          Utils.error(e.message)
+          if (argv.verbose) {
+            error(e)
+          } else {
+            error(e.message)
+          }
         }
       }
     }
 
     // add packages
-    const addPackage = Utils.parsePackageNames(argv.add)
-    const addPackageDev = Utils.parsePackageNames(argv.addDev)
-    const yarnFound = Utils.fileExistsSyncCache('yarn.lock')
-    const pnpmFound = Utils.fileExistsSyncCache('pnpm-lock.yaml')
-    const npmFound = Utils.fileExistsSyncCache('package-lock.json')
+    const addPackage = parsePackageNames(argv.add)
+    const addPackageDev = parsePackageNames(argv.addDev)
+    const yarnFound = existsSync('yarn.lock')
+    const pnpmFound = existsSync('pnpm-lock.yaml')
+    const npmFound = existsSync('package-lock.json')
     if (addPackage.length > 0) {
       if (yarnFound) {
-        Utils.exec(`yarn add ${addPackage.join(' ')}`)
+        shell.exec(`yarn add ${addPackage.join(' ')}`)
       } else if (pnpmFound) {
-        Utils.exec(`pnpm install ${addPackage.join(' ')}`)
+        shell.exec(`pnpm install ${addPackage.join(' ')}`)
       } else if (npmFound) {
-        Utils.exec(`npm install ${addPackage.join(' ')}`)
+        shell.exec(`npm install ${addPackage.join(' ')}`)
       }
     }
 
     if (addPackageDev.length > 0) {
       if (yarnFound) {
-        Utils.exec(`yarn add ${addPackageDev.join(' ')} -D`)
+        shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
       } else if (pnpmFound) {
-        Utils.exec(`pnpm install ${addPackageDev.join(' ')} --save-dev`)
+        shell.exec(`pnpm install ${addPackageDev.join(' ')} --save-dev`)
       } else if (npmFound) {
-        Utils.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+        shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
       }
     }
 
@@ -255,26 +283,30 @@ export const handler = async function (argv: any) {
     if (argv.initSemo) {
       const initExtra = argv.yarn ? '--yarn' : ''
       if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
-        Utils.exec(
-          `${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`,
+        shell.exec(
+          `${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`
         )
       } else {
-        Utils.exec(`${argv.scriptName} init --exec-mode --force  ${initExtra}`)
+        shell.exec(`${argv.scriptName} init --exec-mode --force  ${initExtra}`)
       }
-      Utils.success('Initial basic structure complete!')
+      success('Initial basic structure complete!')
     }
 
     if (process.platform === 'win32') {
       // TODO: fix this
     } else if (process.platform === 'darwin') {
       // change package.json attributes
-      Utils.exec(
-        `sed -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`,
+      shell.exec(
+        `sed -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`
       )
     } else {
-      Utils.exec(`sed -i 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
+      shell.exec(`sed -i 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
     }
   } catch (e) {
-    Utils.error(e.stack)
+    if (argv.verbose) {
+      error(e)
+    } else {
+      error(e.message)
+    }
   }
 }

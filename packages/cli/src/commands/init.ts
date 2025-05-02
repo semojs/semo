@@ -1,15 +1,24 @@
-import fs from 'fs'
+import {
+  Argv,
+  ArgvExtraOptions,
+  error,
+  exec,
+  info,
+  parsePackageNames,
+  warn,
+} from '@semo/core'
+import _ from 'lodash'
+import { existsSync, writeFileSync } from 'node:fs'
 import path from 'path'
+import shell from 'shelljs'
 import yaml from 'yaml'
-import inquirer from 'inquirer'
-import { Utils } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'init'
 export const desc = 'Init basic config file and directories'
 export const aliases = 'i'
 
-export const builder = function (yargs) {
+export const builder = function (yargs: Argv) {
   yargs.option('plugin', {
     alias: 'P',
     describe: 'Plugin mode',
@@ -21,13 +30,11 @@ export const builder = function (yargs) {
   })
 
   yargs.option('add', {
-    default: false,
     alias: 'A',
     describe: 'Add npm package to package.json dependencies',
   })
 
   yargs.option('add-dev', {
-    default: false,
     alias: 'D',
     describe: 'Add npm package to package.json devDependencies',
   })
@@ -36,80 +43,138 @@ export const builder = function (yargs) {
     alias: 'ts',
     describe: 'Generate typescript style code',
   })
+
+  yargs.option('pm', {
+    default: '',
+    alias: 'p',
+    choices: ['npm', 'yarn', 'pnpm', 'bun', ''],
+    describe: 'Package manger',
+  })
 }
 
-export const handler = async function (argv: any) {
-  argv.yarn = Utils.fileExistsSyncCache('yarn.lock')
-  if (argv.yarn) {
-    Utils.info('yarn.lock found, use yarn for package management.')
-  }
-
-  let defaultRc: any = argv.plugin
-    ? Utils._.pickBy({
-        typescript: argv.typescript ? true : null,
-        commandDir: 'src/commands',
-        extendDir: 'src/extends',
-        hookDir: 'src/hooks',
-      })
-    : Utils._.pickBy({
-        typescript: argv.typescript ? true : null,
-        commandDir: `bin/${argv.scriptName}/commands`,
-        pluginDir: `bin/${argv.scriptName}/plugins`,
-        extendDir: `bin/${argv.scriptName}/extends`,
-        scriptDir: `bin/${argv.scriptName}/scripts`,
-        hookDir: `bin/${argv.scriptName}/hooks`,
-      })
-
-  let currentPath = path.resolve(process.cwd())
-
+export const handler = async function (argv: ArgvExtraOptions) {
   try {
+    const defaultRc: any = argv.plugin
+      ? _.pickBy({
+          typescript: argv.typescript ? true : null,
+          commandDir: argv.typescript ? 'lib/commands' : 'src/commands',
+          extendDir: argv.typescript ? 'lib/extends' : 'src/extends',
+          hookDir: argv.typescript ? 'lib/hooks' : 'src/hooks',
+          commandMakeDir: argv.typescript ? 'src/commands' : null,
+          extendMakeDir: argv.typescript ? 'src/extends' : null,
+          hookMakeDir: argv.typescript ? 'src/hooks' : null,
+        })
+      : _.pickBy({
+          typescript: argv.typescript ? true : null,
+          commandDir: `bin/${argv.scriptName}/commands`,
+          pluginDir: `bin/${argv.scriptName}/plugins`,
+          extendDir: `bin/${argv.scriptName}/extends`,
+          scriptDir: `bin/${argv.scriptName}/scripts`,
+          hookDir: `bin/${argv.scriptName}/hooks`,
+        })
+
+    const currentPath = path.resolve(process.cwd())
     const configPath = `${currentPath}/.${argv.scriptName}rc.yml`
-    const { override } =
-      Utils.fileExistsSyncCache(configPath) && !argv.force
-        ? await inquirer.prompt([
-            {
-              type: 'confirm',
-              name: 'override',
-              message: `.${argv.scriptName}rc.yml exists, override?`,
-              default: false,
-            },
-          ])
-        : { override: true }
-    if (override === false) {
-      console.log(Utils.warn('User aborted!'))
+    const confirmed =
+      existsSync(configPath) && !argv.force
+        ? await argv.$prompt.confirm({
+            message: `.${argv.scriptName}rc.yml exists, override?`,
+            default: false,
+          })
+        : true
+    if (confirmed === false) {
+      warn('User aborted!')
       return
     }
 
-    fs.writeFileSync(configPath, yaml.stringify(defaultRc, {}))
+    writeFileSync(configPath, yaml.stringify(defaultRc, {}))
+    info(`Default .${argv.scriptName}rc created!`)
 
-    console.log(Utils.info(`Default .${argv.scriptName}rc created!`))
-    const dirs = Object.keys(defaultRc).filter(item => item.indexOf('Dir') > -1)
-    dirs.forEach(dir => {
-      // @ts-ignore
+    const dirs = Object.keys(defaultRc).filter(
+      (item) => item.indexOf('Dir') > -1
+    )
+    dirs.forEach((dir) => {
       const loc = defaultRc[dir]
-      if (!Utils.fileExistsSyncCache(`${currentPath}/${loc}`)) {
-        Utils.exec(`mkdir -p ${currentPath}/${loc}`)
-        console.log(Utils.info(`${currentPath}/${loc} created!`))
+      if (!existsSync(`${currentPath}/${loc}`)) {
+        exec(`mkdir -p ${currentPath}/${loc}`)
+        info(`${currentPath}/${loc} created!`)
       }
     })
     // add packages
-    const addPackage = Utils.parsePackageNames(argv.add)
-    const addPackageDev = Utils.parsePackageNames(argv.addDev)
-    if (addPackage.length > 0) {
-      if (argv.yarn) {
-        Utils.exec(`yarn add ${addPackage.join(' ')}`)
-      } else {
-        Utils.exec(`npm install ${addPackage.join(' ')}`)
+    // choose package manager
+    const packageJsonExists = existsSync(
+      path.join(process.cwd(), 'package.json')
+    )
+    let pm = argv.pm
+    let operation = 'add'
+    if (argv.add || argv.addDev || !packageJsonExists) {
+      if (!pm) {
+        const lockFiles = [
+          { name: 'package-lock.json', pm: 'npm' },
+          { name: 'yarn.lock', pm: 'yarn' },
+          { name: 'pnpm-lock.yaml', pm: 'pnpm' },
+          { name: 'bun.lockb', pm: 'bun' },
+        ]
+        let detectedPm = ''
+        for (const lf of lockFiles) {
+          if (existsSync(path.join(process.cwd(), lf.name))) {
+            detectedPm = lf.pm
+            break
+          }
+        }
+        if (detectedPm) {
+          pm = argv.pm = detectedPm
+          info(`Detected package manager: ${detectedPm}`)
+        } else {
+          const choices = lockFiles.map((lf) => lf.pm)
+          const confirmedPm = await argv.$prompt.select({
+            message:
+              'Choose your prefered package manager（npm/yarn/pnpm/bun):',
+            choices,
+            default: 'npm',
+          })
+          if (confirmedPm) {
+            pm = argv.pm = confirmedPm
+          } else {
+            warn('No package manager specified, operation aborted.')
+            return
+          }
+        }
+      }
+      if (!pm) {
+        return error('No package manager specified, operation aborted.')
+      }
+
+      if (!shell.which(`${pm}`)) {
+        error(`${pm} package manager not found.`)
+        return
+      }
+
+      if (pm === 'npm') {
+        operation = 'install'
       }
     }
-    if (addPackageDev.length > 0) {
-      if (argv.yarn) {
-        Utils.exec(`yarn add ${addPackageDev.join(' ')} -D`)
-      } else {
-        Utils.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
+
+    if (!packageJsonExists) {
+      exec(`${pm} init ${pm === 'pnpm' ? '' : '--yes'}`)
+    }
+
+    // add packages
+    if (argv.add) {
+      const add = _.castArray(argv.add) as string[]
+      const addPackage = parsePackageNames(add as string[])
+      if (addPackage.length > 0) {
+        exec(`${pm} ${operation} ${addPackage.join(' ')}`)
+      }
+    }
+    if (argv.addDev) {
+      const addDev = _.castArray(argv.addDev) as string[]
+      const addPackageDev = parsePackageNames(addDev as string[])
+      if (addPackageDev.length > 0) {
+        exec(`${pm} ${operation} ${addPackageDev.join(' ')} -D`)
       }
     }
   } catch (e) {
-    return Utils.error(e.stack)
+    return error(e.stack)
   }
 }

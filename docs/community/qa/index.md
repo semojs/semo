@@ -1,81 +1,80 @@
 ---
 sidebar: auto
 ---
-# 常见问题
 
-## `Semo` 怎么这么慢，怎么优化？
+# Frequently Asked Questions
 
-相对于一些逻辑比较简单纯粹的脚本，Semo 考虑了很多灵活性的设置，包括但不限于插件的多层扫描，配置的覆盖规则，钩子机制等等，其中影响最大的是插件扫描的 IO负担，目前经过一些优化（引入内部缓存）已经有一些效果，后面如果把插件扫描结果彻底持久化，是可以进一步提升性能的，但是是双刃剑，还需要考虑更新机制，后面会持续优化。
+## Why is `Semo` so slow and how can it be optimized?
 
-另外，到目前为止，都在探索 `Semo` 在业务开发中的各种可能性，暂时性能问题影响并没有那么大，所以更倾向于投入在探索和兼容各种可能性上。
+Compared to some scripts with relatively simple and pure logic, Semo considers many flexible settings, including but not limited to multi-layer scanning of plugins, configuration override rules, hook mechanisms, and so on. Among them, the most significant impact comes from the IO burden of plugin scanning. Currently, some optimizations have been made (such as introducing internal caching), which have had some effects. If the scanning results of plugins are thoroughly persisted, further performance improvements can be achieved, but this is a double-edged sword and requires consideration of update mechanisms. Continuous optimization will be carried out in the future.
 
-通过缩小插件扫描范围可以进一步提速：
+Furthermore, up to now, various possibilities of `Semo` in business development are being explored, and the temporary performance issues have not had a significant impact. Therefore, more emphasis is placed on exploring and compatibility with various possibilities.
 
-```
+Speed can be further improved by narrowing down the scope of plugin scanning:
+
+```bash
 semo status --disable-global-plugin --disable-home-plugin
 ```
 
-如果不想每次都输入，可以放到 `.semorc.yml` 文件当中：
+If you don't want to enter it every time, you can put it in the `.semorc.yml` file:
 
-```yml
---disable-global-plugin: true,
+```yaml
+--disable-global-plugin: true
 --disable-home-plugin: true
 ```
 
-或
+or
 
-```yml
-disableGlobalPlugin: true,
+```yaml
+disableGlobalPlugin: true
 disableHomePlugin: true
 ```
 
-## `Semo` 可以直接运行 `Typescript` 命令么？
+## Can `Semo` directly run `Typescript` commands?
 
-简单来说，不可以，如果可以的话，岂不是就成 `Deno` 啦，但是，在特殊的条件下是可以的，以下是步骤：
+Simply put, no, if it could, wouldn't it be `Deno`? However, it is possible under special conditions. Here are the steps:
 
+**1. There should be `typescript` and `ts-node` packages in the project**
 
-**1、项目中应该有 `typescript` 和 `ts-node` 两个包**
-
-```
+```bash
 yarn add typescript ts-node -D
 ```
 
-**2、初始化 tsconfig.json**
+**2. Initialize tsconfig.json**
 
-```
+```bash
 npx tsc --init
 ```
 
-**可以根据需要进行配置，这里最少要修改的配置如下:**
+**Configuration should be modified according to needs. The minimum required configuration here is:**
 
+```json
+"target": "es6"
 ```
-"target": "es6",
-```
 
-原因是，转换的代码里有 `async/await`
+The reason is that the converted code contains `async/await`.
 
-**3、package.json 里配置一个 scripts 命令**
+**3. Configure a scripts command in package.json**
 
-```
+```json
 "scripts": {
-    "semo": "node --require ts-node/register ./node_modules/@semo/cli/lib/bin.js",
+    "semo": "node --require ts-node/register ./node_modules/@semo/cli/lib/bin.js"
 }
 ```
 
-**4、修改 `.semorc.yml`**
+**4. Modify `.semorc.yml`**
 
-添加对 typescript 的支持
+Add support for Typescript
 
-```
+```yaml
 typescript: true
 ```
 
-**5、最后创建一个ts的命令行脚本吧**
+**5. Finally, create a TypeScript command line script**
 
-```
+```bash
 semo g command test
 yarn semo test
 ```
 
-最后，这种方式比较适合于定义本地命令，性能要比执行编译之后的代码要慢一些，但是开发体验较好，一般常用的方式还是让 Semo 去执行编译之后的命令。
-
+This approach is more suitable for defining local commands. The performance is slower than executing compiled code, but the development experience is better. Generally, the most commonly used method is to let Semo execute the compiled commands.

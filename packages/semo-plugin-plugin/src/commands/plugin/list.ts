@@ -1,4 +1,17 @@
+import {
+  Argv,
+  ArgvExtraOptions,
+  colorize,
+  info,
+  outputTable,
+  warn,
+} from '@semo/core'
+import { existsSync } from 'fs'
 import path from 'path'
+import shell from 'shelljs'
+import { createRequire } from 'node:module'
+
+const require = createRequire(import.meta.url)
 
 export const disabled = false // Set to true to disable this command temporarily
 export const command = ['list', '$0']
@@ -6,7 +19,7 @@ export const desc = 'List all plugins'
 export const aliases = ['l', 'ls']
 // export const middleware = (argv) => {}
 
-export const builder = function (yargs: any) {
+export const builder = function (yargs: Argv) {
   yargs.option('remote', { describe: 'List remote plugins' })
 }
 
@@ -16,7 +29,7 @@ function cutstr(str, len) {
   let str_cut = new String()
   str_len = str.length
   for (let i = 0; i < str_len; i++) {
-    let a = str.charAt(i)
+    const a = str.charAt(i)
     str_length++
     if (escape(a).length > 4) {
       //中文字符的长度经编码之后大于4
@@ -34,33 +47,30 @@ function cutstr(str, len) {
   }
 }
 
-export const handler = async function (argv: any) {
-  const { Utils } = argv.$semo
-  const plugins = Utils.getAllPluginsMapping(argv)
-  const config = Utils.getCombinedConfig(argv)
+export const handler = async function (argv: ArgvExtraOptions) {
+  const plugins = argv.$core.allPlugins
+  const config = argv.$core.combinedConfig
 
   if (!argv.remote) {
     if (Object.keys(plugins).length === 0) {
-      Utils.warn('No plugins found.')
-      Utils.info(
-        `Use ${Utils.chalk.bold.green('plugin install')} sub command to install plugins.`,
+      warn('No plugins found.')
+      info(
+        `Use ${colorize('green', 'plugin install')} sub command to install plugins.`
       )
       // Utils.info(`Use ${Utils.chalk.bold.green('plugin list --remote')} to see available plugins.`)
 
       return
     }
 
-    const headers = ['Plugin', 'Version', 'Location', 'Status'].map(item =>
-      Utils.chalk.green(item),
+    const headers = ['Plugin', 'Version', 'Location', 'Status'].map((item) =>
+      colorize('green', item)
     )
     const rows = [headers]
-    Object.keys(plugins).forEach(plugin => {
+    Object.keys(plugins).forEach((plugin) => {
       let pluginVersion
-      if (
-        Utils.fileExistsSyncCache(path.resolve(plugins[plugin], 'package.json'))
-      ) {
+      if (existsSync(path.resolve(plugins[plugin], 'package.json'))) {
         const pkgConfig: any = require(
-          path.resolve(plugins[plugin], 'package.json'),
+          path.resolve(plugins[plugin], 'package.json')
         )
         pluginVersion = pkgConfig.version || 'Unknown'
       }
@@ -72,31 +82,36 @@ export const handler = async function (argv: any) {
         pluginLocation = plugins[plugin]
       }
 
-      rows.push([plugin, pluginVersion, pluginLocation, 'Installed'])
+      rows.push([
+        plugin,
+        pluginVersion || 'Unknown',
+        pluginLocation,
+        'Installed',
+      ])
     })
-    Utils.outputTable(rows)
+    outputTable(rows)
   } else {
-    const headers = ['Plugin', 'Version', 'Description', 'Status'].map(item =>
-      Utils.chalk.green(item),
+    const headers = ['Plugin', 'Version', 'Description', 'Status'].map((item) =>
+      colorize('green', item)
     )
     const rows = [headers]
 
-    let searched = await Utils.shell.exec(
+    const searched = shell.exec(
       'curl -s "https://api.npms.io/v2/search?from=0&q=semo-plugin&size=100"',
-      { silent: true },
+      { silent: true }
     )
 
     let { results } = JSON.parse(searched.stdout ? searched.stdout : '')
     results = [
       ...results
-        .filter(item => Boolean(plugins[item.package.name]))
+        .filter((item) => Boolean(plugins[item.package.name]))
         .sort((a, b) => a.package.name.localeCompare(b.package.name)),
       ...results
-        .filter(item => !Boolean(plugins[item.package.name]))
+        .filter((item) => !Boolean(plugins[item.package.name]))
         .sort((a, b) => a.package.name.localeCompare(b.package.name)),
     ]
 
-    for (let item of results) {
+    for (const item of results) {
       const hasUpdate = config.pluginConfigs[item.package.name]
         ? item.package.version !==
           config.pluginConfigs[item.package.name].version
@@ -106,10 +121,10 @@ export const handler = async function (argv: any) {
         item.package.version,
         cutstr(item.package.description, 50),
         plugins[item.package.name]
-          ? 'Installed' + (hasUpdate ? Utils.chalk.yellow('(update)') : '')
+          ? 'Installed' + (hasUpdate ? colorize('yellow', '(update)') : '')
           : 'Not installed',
       ])
     }
-    Utils.outputTable(rows)
+    outputTable(rows)
   }
 }

@@ -1,43 +1,50 @@
-import { Utils, COMMON_OBJECT } from "@semo/core"
+import {
+  ArgvExtraOptions,
+  colorize,
+  error,
+  Hook,
+  outputTable,
+} from '@semo/core'
+import _ from 'lodash'
 
 export const plugin = 'hook'
 export const command = ['list', '$0']
 export const desc = 'Show hook list'
 export const aliases = ['ls']
 
-export const builder = function (yargs) {}
+export const builder = function (_yargs) {}
 
-export const handler = async function (argv: any) {
+export const handler = async function (argv: ArgvExtraOptions) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookInfo = await Utils.invokeHook<COMMON_OBJECT>(
+    const hookInfo = await argv.$core.invokeHook(
       `${scriptName}:hook`,
       {
         mode: 'group',
       },
-      argv,
+      argv
     )
 
     const columns = [
-      ['Hook', 'Package', 'Description'].map(item => Utils.color.green(item)),
+      ['Hook', 'Package', 'Description'].map((item) => colorize('green', item)),
     ]
-    Object.keys(hookInfo).map(k => {
-      let hookHandler
+    Object.keys(hookInfo).map((k) => {
+      let hookHandler: any
       if (
-        hookInfo[k] instanceof Utils.Hook ||
-        (hookInfo[k].getHook && Utils._.isFunction(hookInfo[k].getHook))
+        hookInfo[k] instanceof Hook ||
+        (hookInfo[k].getHook && _.isFunction(hookInfo[k].getHook))
       ) {
         hookHandler = hookInfo[k].getHook(k)
       } else {
         hookHandler = hookInfo[k]
       }
 
-      Object.keys(hookHandler).map(hook => {
+      Object.keys(hookHandler).map((hook) => {
         columns.push([`hook_${hook}`, k, hookHandler[hook]])
       })
     })
-    Utils.outputTable(columns)
+    outputTable(columns)
   } catch (e) {
-    Utils.error(e.stack)
+    error(e.stack)
   }
 }

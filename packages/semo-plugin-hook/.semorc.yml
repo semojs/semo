@@ -1,9 +1,7 @@
-
 typescript: true
-
 commandDir: lib/commands
-commandMakeDir: src/commands
 extendDir: lib/extends
-extendMakeDir: src/extends
 hookDir: lib/hooks
+commandMakeDir: src/commands
+extendMakeDir: src/extends
 hookMakeDir: src/hooks

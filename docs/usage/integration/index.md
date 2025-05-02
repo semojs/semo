@@ -1,49 +1,49 @@
-# 项目整合
+# Project Integration
 
-跟现有业务项目整合是 `Semo` 开发的初衷，如果一个项目已经有了自定义的用着还不错的命令行工具，那么要慎重考虑要不要换成 `Semo` 风格的，好在 `Semo` 整合比较简单，如果项目中之前没有命令行的基础设施，那么推荐尝试 `Semo`。
+Integrating with existing business projects was the original intention behind `Semo` development. If a project already has a custom and functional command-line tool, it should be carefully considered whether to switch to the `Semo` style. Fortunately, integrating with `Semo` is relatively simple. If the project lacks command-line infrastructure, it's recommended to give `Semo` a try.
 
-## 为什么要整合
+## Why Integrate
 
-- 获得命令行基础设施，一个项目总有一些操作不适合或者来不及做到后台里，通过一个命令行工具，可以更简单的和系统和数据进行交互。
-- 获得脚本基础设施，总有一些脚本需要执行，脚本起什么名字，放什么位置，以及如何跟业务或者数据进行交互都是常见的需求。
-- 可以使用相关的 `Semo` 插件，并且通过配置影响和改变插件的行为。
-- 获得一个业务相关的 `REPL` 环境，可以任意调用项目中封装的方法，或者跟一些封装的基础设施进行交互。
+- **Access to Command-line Infrastructure:** Every project has operations that are not suitable or feasible to perform in the backend. Through a command-line tool, interactions with the system and data become simpler.
+- **Access to Scripting Infrastructure:** Some scripts need to be executed, and common requirements include naming, location, and how to interact with business or data.
+- **Ability to Use Related Semo Plugins:** Configure and influence plugin behavior.
+- **Access to a Business-related REPL Environment:** Invoke methods encapsulated in the project or interact with encapsulated infrastructure.
 
-## 项目整合方式
+## Project Integration Methods
 
-不一定所有的特性都需要，按需使用即可。
+Not all features are necessarily needed; use them as needed.
 
-### 1. 将 `Semo` 添加为项目依赖
+### 1. Add `Semo` as a Project Dependency
 
-这里以 `yarn` 为例：
+Using `yarn` as an example:
 
 ```
 yarn add @semo/cli
 ```
 
-### 2. 在项目根目录进行初始化
+### 2. Initialize in the Project Root Directory
 
 ```
 semo init [--typescript]
 ```
 
-这里看项目是否是基于 Typescript 搭建的，如果是就带上 `--typescript` 参数。初始化过程会在项目根目录新建一个配置文件 `.semorc.yml`，并且新增了一个 `bin/semo` 目录，理论上不会和现有的项目有冲突。
+Determine whether the project is based on TypeScript. If so, include the `--typescript` parameter. The initialization process creates a configuration file `.semorc.yml` in the project's root directory and adds a `bin/semo` directory. In theory, this should not conflict with existing projects.
 
-### 3. 添加一些命令或脚本
+### 3. Add Some Commands or Scripts
 
 ```
 semo generate command xxx
 semo generate script yyy
 ```
 
-### 4. 定义项目自己的插件
+### 4. Define Project-specific Plugins
 
-类似于渐进式开发的理念，一个插件如果只是自己的项目中使用，可以将插件作为项目代码的一部分，等优化成熟了，也很容易转成 npm 包的形式与其他项目分享。
+Following the progressive development concept, if a plugin is only intended for use within the project, it can be considered part of the project code. Once it matures, it can easily be converted into an npm package for sharing with other projects.
 
 ```
 semo generate plugin zzz
 ```
 
-### 5. 将业务代码注入到 REPL 环境
+### 5. Inject Business Code into the REPL Environment
 
-参见 `插件开发->例子2：实现 hook_repl`，可以看到是如何将方法注入到 `REPL` 的。注意所有的方法都只能注入到 REPL 的 Semo 对象，这是对 REPL 变量空间的保护。如果是业务方法，只要引入，然后按照 `hook_repl` 的格式要求返回即可。如果要让方法生效，还需要自己去处理方法对环境的依赖，比如连接数据库等。
+Refer to "Plugin Development->Example 2: Implement hook_repl" to see how methods are injected into the REPL. Note that all methods can only be injected into the Semo object in the REPL variable space, which protects the REPL variable space. For business methods, import them and return them according to the format requirements of `hook_repl`. To make the methods effective, you need to handle the dependencies of the methods on the environment, such as database connections.

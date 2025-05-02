@@ -1,41 +1,41 @@
-# 钩子机制
+# Hook Mechanism
 
-作为一个偏底层的命令行开发框架，是一定要有插件系统的，尤其是像 `Semo` 这种本身其实并不提供直接的业务价值的框架，而插件系统除了要为用户提供插件扫描机制，命令扩展机制，配置管理机制之外，钩子机制也是一种极大的提升灵活性和扩展性的机制，属于 `Semo` 插件系统的一部分。
+As a command-line development framework that leans toward the lower level, having a plugin system is essential. This is especially true for frameworks like `Semo`, which don't inherently provide direct business value. Besides providing users with plugin scanning, command extension, and configuration management mechanisms, the hook mechanism is also a significant enhancement for flexibility and extensibility, forming part of the `Semo` plugin system.
 
-钩子这种思想其实很好理解，也随处可见，比如 Windows 的开机自启动，在开机进行到某个阶段的时候，需要看一下是否有其他应用程序需要在这个时间节点一起启动。而实现这个效果肯定是需要配置的，像 Windows 这种可以配置到注册表或者配置文件。
+The concept of hooks is quite understandable and ubiquitous. For instance, consider Windows startup programs. At certain stages during startup, Windows checks if any other applications need to start concurrently. Implementing this functionality certainly requires configuration, such as in the Windows registry or a configuration file.
 
-`Semo` 的钩子机制是通过约定动态识别的，每个插件的钩子在命令执行期间确定要不要触发，因此会有磁盘 IO 和遍历方面的性能损耗，不过考虑到一般命令行执行逻辑不会特别复杂，目前认为这样也是够用的，后续如果出现复杂的钩子调用链时可以考虑优化，优化无非就是动态转静态或者通过缓存来提速。
+The hook mechanism in `Semo` is convention-based and dynamically recognized. Each plugin's hooks are determined during command execution, causing some performance overhead in terms of disk I/O and traversal. However, considering that command execution logic is generally not overly complex, this approach is deemed sufficient for now. If complex hook invocation chains arise in the future, optimization may be considered, which typically involves transitioning from dynamic to static or utilizing caching for speed enhancement.
 
-## 钩子的定义
+## Hook Definition
 
 ```js
-// 定义一个 hook_bar 钩子
+// Define a hook named 'hook_bar'
 const hookData = Utils.invokeHook('semo-plugin-foo:hook_bar', { mode: 'group' })
 ```
 
 :::info
-从 `v1.0.0` 开始，钩子调用需要指明钩子前缀，即是谁创建的这个钩子，而实现这个钩子的时候也需要指名是哪个插件定义的钩子，如果不指定，当多个插件定义了同名钩子时会引起混乱。而且一旦定义方明确指定了钩子前缀，则实现方如果不指定，是识别不到的。这个规范需要定义方和实现方一起遵守。
+Starting from `v1.0.0`, hook invocation requires specifying the hook prefix, indicating who created the hook. When implementing the hook, it's necessary to specify which plugin defined the hook. Failure to specify may cause confusion when multiple plugins define hooks with the same name. Once the defining party explicitly specifies the hook prefix, the implementation party won't be recognized unless it also specifies it. Both parties need to adhere to this convention.
 :::
 
-## 钩子的实现
+## Hook Implementation
 
-钩子只能在指定的钩子目录才能得到识别，这个钩子目录在插件的 `.semorc.yml` 文件中配置 `hookDir`，然后识别里面的 `index.js`。
+Hooks can only be recognized in designated hook directories, which are configured in the `.semorc.yml` file of the plugin under the `hookDir` key, and then recognized inside the `index.js`.
 
-目前存在两种风格的实现钩子的方式：
+Currently, there are two styles for implementing hooks:
 
-第一种，将钩子前缀放到导出的 key 前缀上，中间用短横线相连。
+The first style prefixes the hook with the hook prefix, separated by hyphens.
 
 ```js
 exports.semo_plugin_foo__hook_bar = () => {}
 ```
 
-第二种，将钩子前缀使用 `Semo` 的内置钩子类对象的方式声明。
+The second style declares the hook prefix using `Semo`'s built-in hook class object.
 
 ```js
 exports.hook_bar = new Utils.Hook('semo-plugin-foo', () => {})
 ```
 
-当真的有多个插件定义同名钩子时，如果恰好你也同时都需要，你还可以这样使用第二种：
+When multiple plugins define hooks with the same name and you need them all, you can use the second style like this:
 
 ```js
 exports.hook_bar = new Utils.Hook({
@@ -44,7 +44,7 @@ exports.hook_bar = new Utils.Hook({
 })
 ```
 
-第三方插件在实现钩子的时候，如果需要用 `Utils.Hook` 意味着需要添加 `@semo/core` 依赖，可以采用另一种风格，省掉这个依赖。
+For third-party plugins, if they need to use `Utils.Hook`, which requires adding a dependency on `@semo/core`, another style can be used to omit this dependency.
 
 ```js
 export = (Utils) {
@@ -57,42 +57,42 @@ export = (Utils) {
 }
 ```
 
-## 钩子的返回值
+## Hook Return Values
 
-钩子实现的目的主要是为程序执行节点进行某种操作，或者提供某些信息，为了灵活性，这里支持直接返回对象 `{}`，也支持返回一个函数，甚至是一个 `Promise` 函数，如果是函数，会得到函数的执行结果再合并。 `Promise` 的钩子用途很广泛，因为这样就可以执行一些异步操作，包括但不限于数据库，网络，Redis, ES 等。
+The main purpose of hook implementation is to perform certain operations at program execution nodes or provide certain information. For flexibility, direct object `{}` returns, functions, or even `Promise` functions are supported. If it's a function, the result of the function's execution will be merged. `Promise` hooks are widely used because they allow for asynchronous operations, including but not limited to database, network, Redis, and Elasticsearch operations.
 
-如果钩子定义的目的是搜集信息，那么定义方可能有各种合并需求，目前支持一下几种，默认是 `assign`
+If the purpose of a hook definition is to collect information, the defining party may have various merging requirements. Currently, the following merging methods are supported, with `assign` being the default:
 
-* assign，这种会基于返回的对象的 key 进行覆盖
-* replace, 这种会相互覆盖，只保留最后一个钩子的返回值
-* group，这种基于插件名进行分组
-* push，这种会把所有返回值放到一个数组里，一般返回的是基本数据类型
-* merge，这种会进行深度合并
+- `assign`: Overrides based on the keys of the returned object
+- `replace`: Mutual override, retaining only the last hook's return value
+- `group`: Grouping based on plugin names
+- `push`: Places all return values into an array, generally used for basic data types
+- `merge`: Performs deep merging
 
-## 核心内置钩子说明
+## Explanation of Core Built-in Hooks
 
-由于钩子的定义方来决定钩子的用途，以及返回值格式，所以定义方有义务在明确的位置说明这些信息，让插件的使用方可以在自己的插件或者应用中进行扩展。以下是核心钩子的说明：
+As the purpose and return value format of hooks are determined by the hook definition party, the defining party has the obligation to explicitly specify these details in a clear location, enabling plugin users to extend their own plugins or applications accordingly. Here are explanations of some core hooks:
 
-* `before_command`: 这个钩子在命令执行前触发，不搜集返回值
-* `after_command`: 这个钩子在命令执行后触发，不搜集返回值
-* `component`: 这个钩子用于搜集一些插件里定义的组件，一般是返回一个包含实例的对象，例如 `{ redis, db }`
-* `hook`: 这个钩子用于声明钩子以及用途，这不是强制的，但是是一个规范，让其他人知道定义了哪些钩子
-* `repl`: 用于向 repl 中注入信息，不会相互覆盖，一般用于调试，格式不固定
-* `repl_command`: 让第三方插件可以扩展 repl 里的命令
-* `status`: 用于向 `semo status` 命令注入新的属性信息
-* `create_project_template`: 用于给 `semo create` 命令的 `--template` 参数注入可选模板
+- `before_command`: Triggered before command execution, does not collect return values
+- `after_command`: Triggered after command execution, does not collect return values
+- `component`: Used to collect some components defined in plugins, generally returns an object containing instances, for example `{ redis, db }`
+- `hook`: Used to declare hooks and their purposes. While not mandatory, it's a convention that informs others of which hooks are defined
+- `repl`: Injects information into the REPL, does not override each other, typically used for debugging, format is not fixed
+- `repl_command`: Allows third-party plugins to extend commands in the REPL
+- `status`: Injects new property information into the `semo status` command
+- `create_project_template`: Injects optional templates into the `semo create` command's `--template` parameter
 
 :::tip
-在 `v1.15.1` 版本中，已经将 `before_command` 和 `after-command` 两个钩子设置为默认不执行。
+Starting from `v1.15.1`, the `before_command` and `after-command` hooks are set to not execute by default.
 
-启动命令时通过添加 `--enable-core-hook=before_command` 和 `--enable-core-hook=after_command` 来启用。
+To enable them during command startup, add `--enable-core-hook=before_command` and `--enable-core-hook=after_command`.
 :::
 
-部分核心钩子的用法示例
+Examples of using some core hooks
 
 ### `repl_command`
 
-在 REPL 模式里定义一个 .hello 命令，接收参数
+Defines a .hello command in REPL mode, accepting parameters
 
 ```js
 const hook_repl_command = new Utils.Hook('semo', () => {
@@ -103,10 +103,10 @@ const hook_repl_command = new Utils.Hook('semo', () => {
         this.clearBufferedCommand()
         console.log('hello1', name ? name : 'world')
         this.displayPrompt()
-      }
-    }
+      },
+    },
   }
 })
 ```
 
-其中，`this.clearBufferedCommand()` 和 `this.displayPrompt()` 都是 Node 的 REPL 类里的方法。注意两点：一个是这里的 action 是支持 `async/await` 的，还有就是为了 `this` 能够正确指向，这里不要写成箭头函数。
+Here, `this.clearBufferedCommand()` and `this.displayPrompt()` are methods of Node's REPL class. Note two things: one is that the `action` here supports `async/await`, and the other is that for `this` to correctly point to the REPL, arrow functions should not be used.

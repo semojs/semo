@@ -1,15 +1,15 @@
+import { Argv, ArgvExtraOptions, error, success } from '@semo/core'
+import { ensureDirSync } from 'fs-extra'
+import { existsSync, writeFileSync } from 'node:fs'
 import path from 'path'
-import { Utils } from '@semo/core'
-import fs from 'fs-extra'
 
 export const plugin = 'semo'
 export const command = 'command <name> [description]'
 export const desc = 'Generate a command template'
-export const aliases = ['com']
+export const aliases = ['c']
 
-export const builder = function (yargs) {
+export const builder = function (yargs: Argv) {
   yargs.option('extend', {
-    default: false,
     alias: 'E',
     describe: 'generate command in extend directory',
   })
@@ -24,9 +24,20 @@ export const builder = function (yargs) {
     alias: 'ts',
     describe: 'generate typescript style code',
   })
+
+  yargs.option('format', {
+    default: 'esm',
+    describe: 'command format, support cjs, esm, typescript, esm as default',
+    choices: ['cjs', 'esm', 'typescript'],
+  })
 }
 
-export const handler = function (argv: any) {
+export const handler = function (
+  argv: ArgvExtraOptions & { [key: string]: any }
+) {
+  if (argv.typescript || argv.ts) {
+    argv.format = 'typescript'
+  }
   const scriptName = argv.scriptName || 'semo'
   let commandDir: string
   if (argv.extend) {
@@ -53,64 +64,71 @@ export const handler = function (argv: any) {
   }
 
   if (!commandDir) {
-    Utils.error('"commandDir" missing in config file!')
+    error('"commandDir" missing in config file!')
   }
 
   const commandFilePath = path.resolve(
     commandDir,
-    `${argv.name}.${argv.typescript ? 'ts' : 'js'}`,
+    `${argv.name}.${argv.format === 'typescript' ? 'ts' : 'js'}`
   )
   const commandFileDir = path.dirname(commandFilePath)
 
-  fs.ensureDirSync(commandFileDir)
+  ensureDirSync(commandFileDir)
 
-  if (Utils.fileExistsSyncCache(commandFilePath)) {
-    Utils.error('Command file exist!')
+  if (existsSync(commandFilePath)) {
+    error('Command file exist!')
   }
 
   const name = argv.name.split('/').pop()
 
-  let handerTpl, code
-  if (argv.typescript) {
-    code = `export const disabled = false // Set to true to disable this command temporarily
-// export const plugin = '' // Set this for importing plugin config
-export const command = '${name}'
+  let code: string
+
+  switch (argv.format) {
+    case 'typescript':
+      code = `export const command = '${name}'
 export const desc = '${argv.description || name}'
-// export const aliases = ''
-// export const middleware = (argv) => {}
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
-  // yargs.commandDir('${name}')
 }
 
 export const handler = async function (argv: any) {
   console.log('Start to draw your dream code!')
 }
 `
-  } else {
-    handerTpl = `exports.handler = async function (argv) {
-  console.log('Start to draw your dream code!')
-}`
+      break
+    case 'esm':
+      code = `export const command = '${name}'
+export const desc = '${argv.description || name}'
 
-    code = `exports.disabled = false // Set to true to disable this command temporarily
-// exports.plugin = '' // Set this for importing plugin config
-exports.command = '${name}'
+export const builder = function (yargs) {
+  // yargs.option('option', { default, describe, alias })
+}
+
+export const handler = async function (argv) {
+  console.log('Start to draw your dream code!')
+}
+`
+      break
+    case 'cjs':
+      code = `exports.command = '${name}'
 exports.desc = '${argv.description || name}'
-// exports.aliases = ''
-// exports.middleware = (argv) => {}
 
 exports.builder = function (yargs) {
   // yargs.option('option', { default, describe, alias })
-  // yargs.commandDir('${name}')
 }
 
-${handerTpl}
+exports.handler = async function (argv) {
+  console.log('Start to draw your dream code!')
+}
 `
+      break
+    default:
+      error('Unsupported format!')
   }
 
-  if (!Utils.fileExistsSyncCache(commandFilePath)) {
-    fs.writeFileSync(commandFilePath, code)
-    console.log(Utils.success(`${commandFilePath} created!`))
+  if (!existsSync(commandFilePath)) {
+    writeFileSync(commandFilePath, code)
+    success(`${commandFilePath} created!`)
   }
 }

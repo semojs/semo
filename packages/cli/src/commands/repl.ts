@@ -1,223 +1,17 @@
-import repl from 'repl'
+import { error, formatRcOptions, splitComma, Utils } from '@semo/core'
+import { existsSync } from 'fs'
+import _ from 'lodash'
 import path from 'path'
-import { Utils, UtilsType, COMMON_OBJECT } from '@semo/core'
-import yParser from 'yargs-parser'
-import fs from 'fs-extra'
-
-let r // repl instance
-let v // yargs argv
-
-const importPackage = (name, force = false) => {
-  return Utils.importPackage(name, 'repl-package-cache', true, force)
-}
-
-const reload = async () => {
-  const scriptName = v.scriptName || 'semo'
-  let pluginsReturn = await Utils.invokeHook<COMMON_OBJECT>(
-    `${scriptName}:repl`,
-    Utils._.isBoolean(v.hook)
-      ? {
-          reload: true,
-          mode: 'group',
-        }
-      : {
-          mode: 'group',
-          include: Utils.splitComma(v.hook),
-          reload: true,
-        },
-  )
-
-  pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
-  r.context.Semo.hooks = Utils.formatRcOptions(pluginsReturn)
-
-  if (v.extract && v.extract.length > 0) {
-    v.extract.forEach(keyPath => {
-      r.context = Object.assign(
-        r.context,
-        Utils._.get(r.context, keyPath) || {},
-      )
-    })
-  }
-
-  const hookReplCommands =
-    await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
-  Object.keys(hookReplCommands)
-    .filter(command => {
-      return ![
-        'break',
-        'clear',
-        'editor',
-        'exit',
-        'help',
-        'history',
-        'load',
-        'reload',
-        'save',
-      ].includes(command)
-    })
-    .forEach(command => {
-      r.defineCommand(command, hookReplCommands[command])
-    })
-
-  console.log(Utils.success('Hooked files reloaded.'))
-}
-
-const extract = (obj, keys: string[] | string = []) => {
-  const keysCast = Utils._.castArray(keys)
-  Object.keys(obj).forEach(key => {
-    if (keys.length === 0 || keysCast.includes(key)) {
-      Object.defineProperty(r.context, key, { value: obj[key] })
-    }
-  })
-}
-
-const corepl = (cli: repl.REPLServer) => {
-  const originalEval = cli.eval
-
-  // @ts-ignore
-  cli.eval = function coEval(cmd, context, filename, callback) {
-    if (
-      cmd.match(/^await\s+/) ||
-      (cmd.match(/.*?await\s+/) && cmd.match(/^\s*\{/))
-    ) {
-      if (cmd.match(/=/)) {
-        cmd = '(async function() { (' + cmd + ') })()'
-      } else {
-        cmd = '(async function() { let _ = ' + cmd + '; return _;})()'
-      }
-    } else if (cmd.match(/\W*await\s+/)) {
-      cmd =
-        '(async function() { (' +
-        cmd.replace(/^\s*(var|let|const)\s+/, '') +
-        ') })()'
-    }
-
-    function done(val: any) {
-      return callback(null, val)
-    }
-
-    originalEval.call(cli, cmd, context, filename, function (err, res) {
-      if (err || !res || typeof res.then !== 'function') {
-        return callback(err, res)
-      } else {
-        return res.then(done, callback)
-      }
-    })
-  }
-
-  return cli
-}
+import { Argv } from 'yargs'
+import { importPackage, openRepl } from '../common/repl.js'
 
 export const plugin = 'semo'
 export const command = 'repl [replFile]'
 export const aliases = 'r'
 export const desc = 'Play with REPL'
+export const middlewares = []
 
-async function openRepl(context: any): Promise<any> {
-  const { Semo } = context
-  const argv = Semo.argv
-  r = repl.start({
-    prompt: argv.prompt,
-    ignoreUndefined: true,
-  })
-
-  r.defineCommand('reload', {
-    help: 'Reload hooked files',
-    async action(name) {
-      this.clearBufferedCommand()
-      try {
-        await reload()
-      } catch (e) {
-        Utils.error(e.message)
-      }
-      this.displayPrompt()
-    },
-  })
-
-  r.defineCommand('shell', {
-    help: 'Execute shell commands',
-    async action(cmd) {
-      this.clearBufferedCommand()
-      try {
-        Utils.exec(cmd)
-      } catch (e) {}
-      this.displayPrompt()
-    },
-  })
-
-  const requireAction = async function (input) {
-    // @ts-ignore
-    this.clearBufferedCommand()
-    try {
-      const opts = yParser(input)
-
-      const packages = {}
-      for (const part of opts._) {
-        const split = part.split(':')
-        if (split.length === 1) {
-          packages[part] = part
-        } else if (split.length > 1) {
-          packages[split[0]] = split[1]
-        }
-      }
-
-      for (const pack in packages) {
-        const imported = importPackage(pack)
-        Object.defineProperty(r.context, packages[pack], { value: imported })
-      }
-    } catch (e) {}
-
-    // @ts-ignore
-    this.displayPrompt()
-  }
-
-  // Add require and import command
-  r.defineCommand('require', {
-    help: 'Require npm packages',
-    action: requireAction,
-  })
-
-  r.defineCommand('import', {
-    help: 'import npm packages',
-    action: requireAction,
-  })
-
-  const hookReplCommands =
-    await Utils.invokeHook<COMMON_OBJECT>('semo:repl_command')
-  Object.keys(hookReplCommands)
-    .filter(command => {
-      return ![
-        'break',
-        'clear',
-        'editor',
-        'exit',
-        'help',
-        'history',
-        'load',
-        'reload',
-        'save',
-      ].includes(command)
-    })
-    .forEach(command => {
-      r.defineCommand(command, hookReplCommands[command])
-    })
-
-  const Home = process.env.HOME + `/.${argv.scriptName}`
-  fs.ensureDirSync(Home)
-  if (!Utils.fileExistsSyncCache(Home)) {
-    Utils.exec(`mkdir -p ${Home}`)
-  }
-  Utils.replHistory(r, `${Home}/.${argv.scriptName}_repl_history`)
-
-  // @ts-ignore
-  // context即为REPL中的上下文环境
-  r.context = Object.assign(r.context, context)
-  r.context.Semo.repl = r
-
-  corepl(r)
-}
-
-export const builder = function (yargs) {
+export const builder = function (yargs: Argv) {
   yargs.option('hook', {
     describe: 'If or not load all plugins repl hook',
   })
@@ -241,34 +35,55 @@ export const builder = function (yargs) {
 }
 
 export const handler = async function (argv: any) {
-  const VERSION = argv.$semo.VERSION
+  // get options from plugin config
+  argv.hook =
+    argv.hook ??
+    argv.$core.pluginConfig(
+      argv,
+      'repl.hook',
+      argv.$core.pluginConfig(argv, 'hook', false)
+    )
+  argv.prompt =
+    argv.prompt ??
+    argv.$core.pluginConfig(
+      argv,
+      'repl.prompt',
+      argv.$core.pluginConfig(argv, 'prompt', '>>> ')
+    )
+  argv.extract =
+    argv.extract ??
+    argv.$core.pluginConfig(
+      argv,
+      'repl.extract',
+      argv.$core.pluginConfig(argv, 'extract', '')
+    )
+  argv.require =
+    argv.require ??
+    argv.$core
+      .pluginConfig(argv, 'repl.require', [])
+      .concat(argv.$core.pluginConfig(argv, 'require', []))
+  argv.import =
+    argv.import ??
+    argv.$core
+      .pluginConfig(argv, 'repl.import', [])
+      .concat(argv.$core.pluginConfig(argv, 'import', []))
+
+  if (argv.extract && _.isString(argv.extract)) {
+    argv.extract = _.castArray(argv.extract)
+  }
+
   const scriptName = argv.scriptName || 'semo'
 
-  argv.hook = Utils.pluginConfig('repl.hook', Utils.pluginConfig('hook', false))
-  argv.prompt = Utils.pluginConfig(
-    'repl.prompt',
-    Utils.pluginConfig('prompt', '>>> '),
-  )
-  argv.extract = Utils.pluginConfig(
-    'repl.extract',
-    Utils.pluginConfig('extract', ''),
-  )
-  argv.require = Utils.pluginConfig('repl.require', []).concat(
-    Utils.pluginConfig('require', []),
-  )
-  argv.import = Utils.pluginConfig('repl.import', []).concat(
-    Utils.pluginConfig('import', []),
-  )
+  const requiredPackages = _.castArray(argv.require)
+  const importedPackages = _.castArray(argv.import)
 
-  const requiredPackages = Utils._.castArray(argv.require)
-  const importedPackages = Utils._.castArray(argv.import)
-  const concatPackages = Utils._.chain(requiredPackages)
+  const concatPackages = _.chain(requiredPackages)
     .concat(importedPackages)
     .uniq()
     .filter()
     .value()
   const packages = {}
-  concatPackages.forEach(item => {
+  concatPackages.forEach((item: string) => {
     const splited = item.split(':')
     if (splited.length === 1) {
       packages[item] = item
@@ -277,48 +92,41 @@ export const handler = async function (argv: any) {
     }
   })
 
-  if (Utils._.isString(argv.extract)) {
-    argv.extract = Utils._.castArray(argv.extract)
-  }
-  v = argv
   try {
-    let context: any = Object.assign(
+    const context: any = Object.assign(
       { await: true },
       {
         Semo: {
-          VERSION,
-          Utils,
           argv,
-          import: importPackage,
-          require: importPackage,
-          extract,
-          reload,
-          run: Utils.run,
+          import: importPackage(argv),
+          require: importPackage(argv),
+          Utils,
+          // run: Utils.run,
         },
-      },
+      }
     )
 
     for (const pack in packages) {
-      context[packages[pack]] = importPackage(pack)
+      context[packages[pack]] = importPackage(argv)(pack)
     }
 
     if (argv.hook) {
-      let pluginsReturn = await Utils.invokeHook<COMMON_OBJECT>(
+      let pluginsReturn = await argv.$core.invokeHook(
         `${scriptName}:repl`,
-        Utils._.isBoolean(argv.hook)
+        _.isBoolean(argv.hook)
           ? {
               mode: 'group',
             }
           : {
-              include: Utils.splitComma(argv.hook),
+              include: splitComma(argv.hook),
               mode: 'group',
-            },
+            }
       )
 
-      pluginsReturn = Utils._.omitBy(pluginsReturn, Utils._.isEmpty)
+      pluginsReturn = _.omitBy(pluginsReturn, _.isEmpty)
 
       const shortenKeysPluginsReturn = {}
-      Object.keys(pluginsReturn).forEach(plugin => {
+      Object.keys(pluginsReturn).forEach((plugin) => {
         let newKey = plugin
         const prefix = scriptName + '-plugin-'
         if (plugin.indexOf(prefix) > -1) {
@@ -327,27 +135,30 @@ export const handler = async function (argv: any) {
         shortenKeysPluginsReturn[newKey] = pluginsReturn[plugin]
       })
 
-      context.Semo.hooks = Utils.formatRcOptions(shortenKeysPluginsReturn) || {}
+      context.Semo.hooks = formatRcOptions(shortenKeysPluginsReturn) || {}
     }
 
-    if (Utils._.isArray(argv.extract)) {
+    if (_.isArray(argv.extract)) {
       if (argv.extract && argv.extract.length > 0) {
-        argv.extract.forEach(keyPath => {
-          context = Object.assign(
-            context,
-            Utils._.get(context.Semo.hooks, keyPath) || {},
-          )
+        argv.extract.forEach((keyPath: string) => {
+          const splitExtractKey = keyPath.split('.')
+          const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
+          if (!context[finalExtractKey]) {
+            context[finalExtractKey] = _.get(context.Semo.hooks, keyPath) || {}
+          }
         })
       }
     } else {
-      Object.keys(argv.extract).forEach(key => {
-        const extractKeys: string[] = Utils._.castArray(argv.extract[key])
-        extractKeys.forEach(extractKey => {
+      Object.keys(argv.extract).forEach((key) => {
+        const extractKeys: string[] = _.castArray(argv.extract[key])
+        extractKeys.forEach((extractKey) => {
           const splitExtractKey = extractKey.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
-          context[finalExtractKey] = Utils._.get(
+          if (!context[finalExtractKey]) {
+          }
+          context[finalExtractKey] = _.get(
             context.Semo.hooks,
-            `${key}.${extractKey}`,
+            `${key}.${extractKey}`
           )
         })
       })
@@ -355,18 +166,21 @@ export const handler = async function (argv: any) {
 
     if (argv.replFile) {
       const replFilePath = path.resolve(process.cwd(), argv.replFile)
-      if (argv.replFile && fs.existsSync(replFilePath)) {
+      if (argv.replFile && existsSync(replFilePath)) {
         try {
-          const replRequired = require(replFilePath)
-          if (
-            replRequired.handler &&
-            Utils._.isFunction(replRequired.handler)
-          ) {
-            await replRequired.handler(argv, context)
-          } else if (Utils._.isFunction(replRequired)) {
-            await replRequired(argv, context)
+          const replRequired = await import(replFilePath)
+          let replFileReturn = null
+          if (replRequired.handler && _.isFunction(replRequired.handler)) {
+            replFileReturn = await replRequired.handler(argv, context)
+          } else if (_.isFunction(replRequired)) {
+            replFileReturn = await replRequired(argv, context)
           }
-        } catch (e) {}
+          if (replFileReturn && _.isObject(replFileReturn)) {
+            Object.keys(replFileReturn).forEach((key) => {
+              context[key] = replFileReturn[key]
+            })
+          }
+        } catch {}
       }
     }
 
@@ -374,7 +188,7 @@ export const handler = async function (argv: any) {
 
     return false
   } catch (e) {
-    Utils.error(e.stack)
+    error(e.stack)
   }
 
   return true

@@ -1,23 +1,9 @@
 {
+  "extends": "../../tsconfig.json",
   "compilerOptions": {
-    "target": "ES2022",
-    "module": "Node16",
-    "lib": ["ES2022"],
-    "declaration": true,
-    "sourceMap": true,
-    "skipLibCheck": true,
     "outDir": "./lib",
-    "noImplicitAny": false,
-    "strictNullChecks": true,
-    "noImplicitThis": true,
-    "noUnusedLocals": false,
-    "noImplicitReturns": true,
-    "moduleResolution": "node16",
-    "resolveJsonModule": true,
-    "typeRoots": ["src/@types", "./node_modules/@types/"],
-    "esModuleInterop": true,
-    "allowSyntheticDefaultImports": true
+    "rootDir": "./src"
   },
-  "include": ["./src/**/*", "./src/**/.*.json", "./src/**/*.json"],
-  "exclude": ["node_modules"]
+  "include": ["src/**/*"],
+  "exclude": ["node_modules", "lib", "test"]
 }

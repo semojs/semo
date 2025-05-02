@@ -1,58 +1,57 @@
 {
   "name": "@semo/core",
   "version": "1.6.37",
-  "description": "The core of Semo",
-  "keywords": [
-    "cli",
-    "command",
-    "semo"
-  ],
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/semojs/semo"
+  "description": "Semo core",
+  "type": "module",
+  "main": "./lib/index.js",
+  "module": "./lib/index.js",
+  "types": "./lib/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./lib/index.js",
+      "types": "./lib/index.d.ts"
+    }
   },
-  "main": "lib/index.js",
-  "types": "lib/index.d.ts",
-  "license": "MIT",
+  "scripts": {
+    "clean": "rimraf lib *.tsbuildinfo",
+    "build": "tsc --build",
+    "dev": "tsc --build --watch",
+    "typecheck": "tsc --noEmit",
+    "docs:typedoc": "typedoc src/common/*",
+    "prepare": "npm run clean && npm run build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.8.1",
   "dependencies": {
-    "chalk": "^4.1.0",
-    "dayjs": "^1.10.8",
-    "debug": "^4.3.4",
-    "dotenv": "^16.4.5",
-    "dotenv-expand": "^11.0.6",
-    "envinfo": "^7.11.1",
-    "find-up": "5.0.0",
-    "fs-extra": "^11.2.0",
-    "get-stdin": "^8.0.0",
-    "glob": "^10.3.10",
-    "json-colorizer": "^2.2.2",
-    "json-stringify-pretty-compact": "^3.0.0",
+    "@inquirer/prompts": "^7.5.0",
+    "colorize-template": "^1.0.0",
+    "debug": "^4.4.0",
+    "dotenv": "^16.5.0",
+    "dotenv-expand": "^12.0.2",
+    "find-up": "^7.0.0",
+    "fs-extra": "^11.3.0",
+    "get-stdin": "^9.0.0",
+    "glob": "^11.0.1",
+    "json-colorizer": "^3.0.1",
+    "json-stringify-pretty-compact": "^4.0.0",
     "lodash": "^4.17.21",
-    "node-cache": "^5.1.2",
-    "object-hash": "^3.0.0",
-    "picocolors": "^1.0.0",
-    "shelljs": "^0.8.5",
-    "table": "^6.8.1",
-    "update-notifier": "^7.0.0",
-    "yaml": "^2.4.0",
-    "yargs": "^17.7.2"
+    "picocolors": "^1.1.1",
+    "shelljs": "^0.9.2",
+    "table": "^6.9.0",
+    "yaml": "^2.7.1",
+    "yargs": "18.0.0-candidate.7",
+    "yargs-parser": "^21.1.1"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
     "@types/fs-extra": "^11.0.4",
     "@types/glob": "^8.1.0",
-    "@types/lodash": "^4.14.202",
+    "@types/lodash": "^4.17.16",
     "@types/shelljs": "^0.8.15",
-    "@types/yargs": "^17.0.32",
-    "rimraf": "^5.0.5",
-    "typedoc": "^0.25.9"
-  },
-  "scripts": {
-    "watch": "tsc -w",
-    "dev": "tsc --build --watch",
-    "build": "tsc",
-    "prepare": "npm run clean && npm run build",
-    "clean": "rimraf lib",
-    "docs:typedoc": "typedoc src/common/*"
+    "@types/yargs": "^17.0.33",
+    "@types/yargs-parser": "^21.0.3",
+    "typedoc": "^0.28.3"
   }
 }

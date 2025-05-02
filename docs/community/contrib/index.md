@@ -1,24 +1,23 @@
-# 如何贡献
+# How to Contribute
 
-## 采纳和使用
+## Adoption and Use
 
-关于如果规范命令行实现方式，当然有很多种选择，而且总得来说，肯定是规范比不规范要强，如果你的团队已经有了自己的规范，那大可不比选择 `Semo` 这套规范，但是如果团队之前没有对命令行进行规范，不妨试试。如果你恰好也比较看好 `yargs`，那 `Semo` 的一些思路对你也可能有借鉴意义。
+There are many choices for standardizing command-line implementation methods. In general, having a standard is better than not having one. If your team already has its own standards, then there's no need to adopt `Semo`'s standard. However, if your team hasn't standardized command-line operations before, you might want to give `Semo` a try. If you happen to favor `yargs`, some of `Semo`'s ideas might be insightful to you as well.
 
-`Semo` 可以用在很多地方，开发，测试，部署，运维，甚至是非业务场景，比如爬虫...
+`Semo` can be used in many areas, including development, testing, deployment, operations, and even non-business scenarios like web scraping.
 
-## 编写文档
+## Writing Documentation
 
-`Semo` 的文档需要在大家的帮助下逐渐完善，有一些使用技巧文档中可能还没有提及，欢迎大家基于探索，并分享你的发现。
+The documentation for `Semo` needs to be gradually improved with everyone's help. Some usage tips may not be mentioned in the documentation yet, so feel free to explore and share your findings.
 
+## Writing Plugins
 
-## 编写插件
+There are two types of plugins here. One type can play a role in technology accumulation in enterprise-level projects by encapsulating common operations and logic into plugins. The other type is personal creative plugins, unrelated to business, which can implement and share creative works.
 
-这里的插件分两种，一种是可以在企业级项目中扮演沉淀技术的角色，把常用的操作和逻辑封装成插件；另一种是个人创意插件，业务无关，可以实现和共享一些创意作品。
+## Contributing Code
 
-## 贡献代码
+Contributing code, whether it's for using in business projects, creating creative plugins, or participating in the development of core features, is a great way to give back to the community.
 
-不管是在业务项目中使用还是比啊捏创意插件，或者参与核心功能的开发都是很好的回馈社区的方式。
+## Helping Identify Issues
 
-## 帮助发现问题
-
-不管是代码还是文档，都有可能隐藏了很多没被发现的问题，比如代码过时，文档错别字，由于不断改进和升级，导致部分文档失真，这些都需要大家用共建的方式来维护和改进。
+Whether it's code or documentation, many issues may remain undiscovered, such as outdated code, typos in documentation, or inaccuracies due to continuous improvement and upgrades. It requires everyone's collaborative efforts to maintain and improve them.

@@ -1,5 +1,4 @@
-semo-plugin-application
-------------------------
+## semo-plugin-application
 
 This is a convention plugin for application commands, this plugin suggest developers to put application level commands under `semo application` command, and keep `semo help` clean.
 

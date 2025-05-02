@@ -1,4 +1,7 @@
+node_modules
 lib
-*.md
-*.html
+coverage
+packages/*/lib
 pnpm-lock.yaml
+.env
+coverage

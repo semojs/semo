@@ -1,29 +1,28 @@
-import { Utils, COMMON_OBJECT } from '@semo/core'
+import { outputTable, type ArgvExtraOptions } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'status'
 export const aliases = 'st'
 export const desc = 'Show environment status info'
 
-export const builder = function (yargs) {}
+export const builder = function () {}
 
-export const handler = async function (argv: any) {
+export const handler = async function (argv: ArgvExtraOptions) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookStatus = await Utils.invokeHook<COMMON_OBJECT>(
-      `${scriptName}:status`,
-      { mode: 'group' },
-    )
+    const hookStatus = (await argv.$core?.invokeHook(`${scriptName}:status`, {
+      mode: 'group',
+    })) as Record<string, Record<string, string>>
 
-    Object.keys(hookStatus).forEach(key => {
+    Object.keys(hookStatus).forEach((key) => {
       const kvs = hookStatus[key] ? hookStatus[key] : {}
       const columns: string[][] = []
       if (Object.keys(kvs).length > 0) {
-        Object.keys(kvs).map(k => columns.push([k, kvs[k]]))
-        Utils.outputTable(columns, key === scriptName ? '' : key)
+        Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
+        outputTable(columns, key === scriptName ? '' : key)
       }
     })
   } catch (e) {
-    Utils.error(e.stack)
+    console.log(e)
   }
 }

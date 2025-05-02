@@ -11,23 +11,27 @@
     "type": "git",
     "url": "https://github.com/semojs/semo"
   },
+  "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
   "license": "MIT",
   "devDependencies": {
+    "@types/lodash": "^4.17.16",
+    "@types/yargs-parser": "^21.0.3",
     "rimraf": "^5.0.5"
   },
   "scripts": {
-    "watch": "tsc -w",
+    "clean": "rimraf lib *.tsbuildinfo",
+    "build": "tsc --build",
     "dev": "tsc --build --watch",
-    "build": "tsc",
-    "clean": "rimraf lib",
-    "prepare": "npm run clean && npm run build",
-    "test": "exit 0"
+    "prepublishOnly": "pnpm run build",
+    "prepare": "npm run clean && npm run build"
   },
   "dependencies": {
     "@semo/core": "workspace:^",
-    "dayjs": "^1.10.8",
+    "dayjs": "^1.11.13",
+    "lodash": "^4.17.21",
+    "shelljs": "^0.9.2",
     "yargs-parser": "^21.1.1"
   },
   "publishConfig": {

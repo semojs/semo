@@ -3,34 +3,35 @@ layout: home
 
 hero:
   name: Semo
-  text: 不止脚手架
-  tagline: 统一风格的命令行脚本解决方案
+  text: Not just CLI scaffold
+  tagline: Unified style command line script solution
   actions:
     - theme: brand
-      text: 快速上手 →
+      text: Get Started →
       link: /guide/quickstart/
-features:
-- title: 一致
-  details: 不管Node项目使用何种框架，或者如何抽象分层，都可以使用本框架来实现统一风格的命令行脚本。
-- title: 可扩展
-  details: 插件可以扩展，命令可以覆写，配置可以覆盖，使用钩子机制，可以与内置或第三方插件定义的钩子交互。
-- title: 高效
-  details: 因为规则简单，所以开发效率高，因为使用频繁，所以工作效率高。
 
+features:
+  - title: Consistent
+    details: Regardless of the framework used in the Node project or how abstraction is layered, this framework can be used to implement command-line scripts with a unified style.
+  - title: Extensible
+    details: Plugins can be extended, commands can be overridden, configurations can be overwritten, and hook mechanisms can interact with hooks defined by built-in or third-party plugins.
+  - title: Efficient
+    details: Due to its simple rules, development efficiency is high, and due to frequent use, work efficiency is high.
+footer: Standardized Command Line System Construction Specification for Enterprise-level Node Projects
 ---
 
 ```bash
-# 对于本地环境，一般推荐全局安装
+# For local environment, global installation is generally recommended
 npm install -g @semo/cli
 semo help
 
-# 首次在项目中整合
+# First integration in the project
 cd YOUR_PROJECT
 npm install @semo/cli
 semo init
 semo generate command test
 
-# 使用 application 命令行规范
+# Using the application command line specification
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 ```

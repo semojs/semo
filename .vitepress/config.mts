@@ -6,10 +6,14 @@ const host =
 
 const require = createRequire(import.meta.url)
 
+const latestVersion = '1.x'
+const defaultLanguage = 'en'
+
 // https://vitepress.dev/reference/site-config
 export default defineConfig({
   title: 'Semo',
-  description: '一个命令行工具',
+  description:
+    'A command line tool for building enterprise-level Node.js project command line systems',
   srcDir: './docs',
   ignoreDeadLinks: true,
   vite: {
@@ -20,19 +24,20 @@ export default defineConfig({
       },
     },
   },
+
   locales: {
-    root: {
+    cn: {
       label: '中文',
       lang: 'zh',
-      link: '/',
+      link: '/cn/',
       themeConfig: {
         footer: {
           message: '企业级Node项目命令行体系建设规范',
         },
         nav: [
-          { text: '首页', link: '/' },
-          { text: '指南', link: '/guide/' },
-          { text: '用法', link: '/usage/' },
+          { text: '首页', link: '/cn/' },
+          { text: '指南', link: '/cn/guide/' },
+          { text: '用法', link: '/cn/usage/' },
           { text: '参考', link: `http://${host}/typedoc/` },
         ],
         sidebar: [
@@ -42,31 +47,31 @@ export default defineConfig({
             items: [
               {
                 text: '介绍',
-                link: '/guide/',
+                link: '/cn/guide/',
               },
               {
                 text: '快速上手',
-                link: '/guide/quickstart/',
+                link: '/cn/guide/quickstart/',
               },
               {
                 text: '核心命令',
-                link: '/guide/core-commands/',
+                link: '/cn/guide/core-commands/',
               },
               {
                 text: '自定义命令',
-                link: '/guide/custom-commands/',
+                link: '/cn/guide/custom-commands/',
               },
               {
                 text: '配置管理',
-                link: '/guide/config/',
+                link: '/cn/guide/config/',
               },
               {
                 text: '钩子机制',
-                link: '/guide/hook/',
+                link: '/cn/guide/hook/',
               },
               {
                 text: '插件开发',
-                link: '/guide/plugin/',
+                link: '/cn/guide/plugin/',
               },
             ],
           },
@@ -76,23 +81,23 @@ export default defineConfig({
             items: [
               {
                 text: '概述',
-                link: '/usage/',
+                link: '/cn/usage/',
               },
               {
                 text: '插件',
-                link: '/usage/plugin/',
+                link: '/cn/usage/plugin/',
               },
               {
                 text: '项目整合',
-                link: '/usage/integration/',
+                link: '/cn/usage/integration/',
               },
               {
                 text: '解决方案',
-                link: '/usage/solution/',
+                link: '/cn/usage/solution/',
               },
               {
                 text: '发行版',
-                link: '/usage/distribution/',
+                link: '/cn/usage/distribution/',
               },
             ],
           },
@@ -102,29 +107,29 @@ export default defineConfig({
             items: [
               {
                 text: '如何贡献',
-                link: '/community/contrib/',
+                link: '/cn/community/contrib/',
               },
               {
                 text: '常见问题',
-                link: '/community/qa/',
+                link: '/cn/community/qa/',
               },
             ],
           },
         ],
       },
     },
-    en: {
+    root: {
       label: 'English',
       lang: 'en',
-      link: '/en/',
+      link: '/',
       themeConfig: {
         footer: {
-          message: 'Enterprise level CLI rules',
+          message: 'Enterprise level CLI solution',
         },
         nav: [
-          { text: 'Home', link: '/en/' },
-          { text: 'Guide', link: '/en/guide/' },
-          { text: 'Usage', link: '/en/usage/' },
+          { text: 'Home', link: '/' },
+          { text: 'Guide', link: '/guide/' },
+          { text: 'Usage', link: '/usage/' },
           { text: 'Reference', link: `http://${host}/typedoc/` },
         ],
         sidebar: [
@@ -134,31 +139,31 @@ export default defineConfig({
             items: [
               {
                 text: 'Introduction',
-                link: '/en/guide/',
+                link: '/guide/',
               },
               {
                 text: 'Quick Start',
-                link: '/en/guide/quickstart/',
+                link: '/guide/quickstart/',
               },
               {
                 text: 'Core Commands',
-                link: '/en/guide/core-commands/',
+                link: '/guide/core-commands/',
               },
               {
                 text: 'Custom Commands',
-                link: '/en/guide/core-commands/',
+                link: '/guide/core-commands/',
               },
               {
                 text: 'Configuration Management',
-                link: '/en/guide/config/',
+                link: '/guide/config/',
               },
               {
                 text: 'Hook Mechanism',
-                link: '/en/guide/hook/',
+                link: '/guide/hook/',
               },
               {
                 text: 'Plugin Development',
-                link: '/en/guide/plugin/',
+                link: '/guide/plugin/',
               },
             ],
           },
@@ -168,23 +173,23 @@ export default defineConfig({
             items: [
               {
                 text: 'Overview',
-                link: '/en/usage/',
+                link: '/usage/',
               },
               {
                 text: 'Plugins',
-                link: '/en/usage/plugin/',
+                link: '/usage/plugin/',
               },
               {
                 text: 'Project Integration',
-                link: '/en/usage/integration/',
+                link: '/usage/integration/',
               },
               {
                 text: 'Solutions',
-                link: '/en/usage/solution/',
+                link: '/usage/solution/',
               },
               {
                 text: 'Distribution',
-                link: '/en/usage/distribution/',
+                link: '/usage/distribution/',
               },
             ],
           },
@@ -194,11 +199,11 @@ export default defineConfig({
             items: [
               {
                 text: 'How to Contribute',
-                link: '/en/community/contrib/',
+                link: '/community/contrib/',
               },
               {
                 text: 'Frequently Asked Questions',
-                link: '/en/community/qa/',
+                link: '/community/qa/',
               },
             ],
           },

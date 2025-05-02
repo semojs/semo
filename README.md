@@ -1,6 +1,6 @@
-# Semo
+# Semo Monorepo
 
-Semo is a command line tools dispatcher based on Yargs. If you love Yargs, please give Semo a try. If you have other ideas to enhance Semo, please let me know.
+Semo is a wrapper of Yargs. It provides a simple and intuitive way to create command-line interfaces.
 
 # Get started
 
@@ -8,6 +8,12 @@ Semo is a command line tools dispatcher based on Yargs. If you love Yargs, pleas
 npm i -g @semo/cli
 semo help
 ```
+
+## Development
+
+- Clone the repository: `git clone https://github.com/semojs/semo.git`
+- Install dependencies: `pnpm install`
+- Start development server: `pnpm dev`
 
 # Documentation
 

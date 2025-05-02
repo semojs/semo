@@ -1,24 +1,24 @@
-# 概述
+# Overview
 
-由于 `Semo` 几乎不提供任何直接的好处，所以有必要详细介绍一下如果利用好 `Semo`，从设计的初衷来说。`Semo` 被设计用来提高企业级项目开发工作的效率，那么只要有什么地方可以通过代码解决的，都是 `Semo` 的用武之地。
+As `Semo` provides almost no direct benefits, it is necessary to elaborate on how to leverage `Semo` effectively, from its original design perspective. `Semo` is designed to improve the efficiency of enterprise-level project development, so anywhere that can be solved through code is a suitable application for `Semo`.
 
-## 从项目阶段划分
+## Division by Project Stage
 
-根据项目所处的阶段，`Semo` 可以在各个阶段发挥作用：
+Depending on the stage of the project, `Semo` can play a role in various phases:
 
-- 立项阶段：可以快速初始化项目
-- 开发阶段：通过快速访问核心方法，验证方法的输入输出，封装基础设施，减少重复造轮子的情况
-- 维护阶段：项目进入维护阶段，需要写大量的管理命令或者运维脚本
-- 线上排查问题：线上出了BUG，但是只有线上能够重现，通过 `REPL` 可以一步步接近真相
-- 线上运维：利用实现写好的脚本和命令，轻松解决需求方提出的各种要求，提高跨部门间的信任
+- Project initiation phase: Quick initialization of projects
+- Development phase: Validate input and output of methods, encapsulate infrastructure, and reduce wheel reinvention by accessing core methods quickly
+- Maintenance phase: Write a large number of management commands or operation and maintenance scripts
+- Online troubleshooting: When bugs occur online and can only be reproduced online, use `REPL` to step closer to the truth
+- Online operations and maintenance: Use well-written scripts and commands to easily solve various requirements proposed by stakeholders, thereby improving trust between departments
 
-## 从形式上划分
+## Division by Form
 
-`Semo` 充分考虑各种使用场景，不同的场景发挥的作用也不同：
+`Semo` fully considers various usage scenarios, and its role varies in different scenarios:
 
-- 开发插件：不同的插件功能不同，但代码风格一致
-- 项目整合：为项目提供命令行基础设施，如果配合其他插件，甚至整个项目都可以基于 `Semo` 构建
-- 解决方案：为各种业务场景提供脚手架，沉淀最佳实践，提高新项目的启动速度
-- 发行版：基于解决方案进一步整合而成，构建完整可用的产品，从而产生商业价值
+- Developing plugins: Different plugins have different functionalities but consistent code styles
+- Project integration: Provide command-line infrastructure for projects; if combined with other plugins, even the entire project can be built on `Semo`
+- Solutions: Provide scaffolding for various business scenarios, precipitate best practices, and improve the startup speed of new projects
+- Distribution: Based on solutions, further integrate to build complete and usable products, thus generating commercial value
 
-这里的划分方法不绝对，也没有哪个场景必须由 `Semo` 来解决，甚至，任何遇到的问题都有无数的解决方案，`Semo` 存在的目的是提供一致性，使得我们减少重复建设，提高沟通效率，沉淀最佳实践，不断夯实企业技术实力。
+The division here is not absolute, and there is no scenario that must be addressed by `Semo`. Moreover, there are countless solutions to any problem encountered. The purpose of `Semo` is to provide consistency, reduce redundant development, improve communication efficiency, and continuously solidify enterprise technical capabilities.

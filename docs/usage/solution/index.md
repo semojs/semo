@@ -1,21 +1,21 @@
-# 解决方案
+# Solutions
 
-`Semo` 解决方案首先是针对某一个场景做的解决方案，其次才是用了一些 `Semo` 的能力，如果不使用 `Semo` 那么其仍然是解决方案，就跟 `Semo` 没有什么关系了。
+`Semo` solutions are first and foremost solutions tailored to specific scenarios. Secondly, they leverage some of `Semo`'s capabilities. If `Semo` is not used, then it is still a solution, unrelated to `Semo`.
 
-## 企业级解决方案
+## Enterprise Solutions
 
 ```
-- 前端项目脚手架
-- 后端项目脚手架
-- 后台项目脚手架
-- 小程序开发脚手架
+- Frontend project scaffolding
+- Backend project scaffolding
+- Admin project scaffolding
+- Mini-program development scaffolding
 ...
 ```
 
-如果再加上不同类型的业务，比如电商类，财务类等等，是可以组合成很多变种的，同一种类型也可以有不同的解决方案，所以最终我们在企业内部是形成适合自己的技术积累，从而使得在企业发展过程中，获得规范化和技术沉淀。这种脚手架项目是为了提高企业内部的项目的一致性和开发效率，不见得需要开源以及满足其他公司的使用场景，但是在企业内部，通过脚手架可以减少重复建设，提高项目的一致性，后之后的开发和维护节省成本。
+If combined with different types of businesses, such as e-commerce, finance, and so on, various variants can be formed. Even the same type can have different solutions. Therefore, in the end, we accumulate technical expertise that suits our own enterprise, enabling us to achieve standardization and technological accumulation in the enterprise development process. These scaffolding projects are designed to improve the consistency and efficiency of internal projects in an enterprise. They may not necessarily need to be open-source or meet the usage scenarios of other companies. However, internally within the enterprise, scaffolding can reduce redundant construction, improve project consistency, and save costs for future development and maintenance.
 
-## 开源的解决方案
+## Open-Source Solutions
 
-虽然，上面说解决方案在不同的企业各有不同，但是也是可以有开源的解决方案的，比如 [antd 的脚手架市场](https://scaffold.ant.design/)，目前还没有基于 `Semo` 的开源脚手架，希望以后会有。
+Although solutions vary from one enterprise to another, there can still be open-source solutions. For example, [Ant Design's Scaffold Market](https://scaffold.ant.design/). Currently, there are no open-source scaffolding projects based on `Semo`, but hopefully, there will be in the future.
 
-通常我们认为一个解决方案如果能够开源会获得更好的质量，包括安全性，扩展性和功能等。
+Generally, we believe that an open-source solution would achieve better quality, including security, scalability, and functionality.

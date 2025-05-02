@@ -1,22 +1,31 @@
-import lodash from 'lodash'
-
-type HookItem = {
-  [key: string]: any
-}
+import _ from 'lodash'
+import { HookHandler, HookItem } from './types.js'
 
 export class Hook {
+  /**
+   * A class that manages hooks and their handlers
+   */
   private mappings: HookItem = {}
   private scriptName = 'semo'
 
-  constructor(name: string | HookItem[], handler: any = null) {
-    if (lodash.isString(name)) {
+  /**
+   * Constructor for Hook class
+   * @param name - Name of the hook or hook mapping object
+   * @param handler - Handler function or object for the hook
+   */
+  constructor(
+    name: string | HookItem,
+    handler: HookHandler | Record<string, unknown> | undefined = undefined
+  ) {
+    if (_.isString(name)) {
       name = this.convertName(name)
-      this.mappings[<string>name] = handler
-    } else if (lodash.isObject(name)) {
-      const newMappings = {}
-      Object.keys(name).forEach(n => {
+      if (!handler) return
+      this.mappings[name] = handler
+    } else if (_.isObject(name)) {
+      const newMappings: HookItem = {}
+      Object.keys(name).forEach((n: string) => {
         const nn = this.convertName(n)
-        newMappings[nn] = name[n]
+        newMappings[nn] = (name as HookItem)[n]
       })
       this.mappings = newMappings
     } else {
@@ -24,12 +33,22 @@ export class Hook {
     }
   }
 
+  /**
+   * Gets a hook handler by name
+   * @param name - Name of the hook to retrieve
+   * @returns The hook handler object
+   */
   public getHook(name: string) {
     name = this.convertName(name)
     return this.mappings[name] || {}
   }
 
-  private convertName(name) {
+  /**
+   * Converts a hook name to the standardized format
+   * @param name - Original hook name
+   * @returns Converted hook name with proper prefix
+   */
+  private convertName(name: string) {
     if (
       name !== this.scriptName &&
       name.indexOf(`${this.scriptName}-plugin-`) === -1

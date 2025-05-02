@@ -1,20 +1,20 @@
-# 插件
+# Plugins
 
-在 `基础->插件开发` 小节，已经介绍了插件开发的方法和注意事项，这里主要是介绍一些为什么开发插件，什么时候开发插件。
+In the section "Basics->Plugin Development," the method and considerations for plugin development have been introduced. Here, we mainly discuss why and when to develop plugins.
 
-## 业务插件
+## Business Plugins
 
-首先，如果没有插件， `Semo` 内置的几个命令对大家也没有多大用处，所有的价值都需要通过扩展 `Semo` 释放，其中插件就是最重要的一种形态。插件里最常见的就是定义命令，这不奇怪，因为 `Semo` 本身就是个命令，也被设计为命令行开发框架。这里的重点是命令可以定义到插件中，而插件作为独立的 Node 模块可以发布到 `npm` 或公司自建的 `registry`，从而使得一个命令可以被安装到多个项目。
+Firstly, without plugins, several built-in commands in `Semo` are not very useful. All the value needs to be unleashed through extending `Semo`, and plugins are the most important form of extension. The most common feature of plugins is defining commands, which is not surprising because `Semo` itself is a command and is designed as a command-line development framework. The key point here is that commands can be defined within plugins, and plugins, as independent Node modules, can be published to `npm` or a company's custom `registry`, allowing a command to be installed in multiple projects.
 
-我们很难保证一个项目可以在公司所有的项目中都有用，但是相同业务线的不同项目中是有可能有交集的，我们可以通过对插件名进一步规范来划分插件的适用范围，例如：
+It's challenging to ensure that a project is useful in all of the company's projects, but there may be intersections among different projects within the same business line. We can further standardize plugin names to delineate the scope of plugin applicability, for example:
 
 ```
-semo-plugin-[公司标识]-[业务线标识]-[用途标识]
+semo-plugin-[company_identifier]-[business_line_identifier]-[purpose_identifier]
 ```
 
-## 创新插件
+## Innovative Plugins
 
-另外，之前的文档中也提到，我们也可以开发非业务属性的插件，只要自己觉得有趣，有想法，都可以试试，例如：
+Additionally, as mentioned in previous documentation, we can develop plugins that are not related to business attributes. As long as they are interesting and have ideas, they can be tried, such as:
 
 ```
 semo-plugin-music-download
@@ -24,27 +24,27 @@ semo-plugin-puzzle-me
 semo-plugin-convert-a-to-b
 ```
 
-上面只是随便起一些名字，其实这些插件还都不存在。
+The above are just random names; in fact, these plugins do not exist yet.
 
-## 本地插件
+## Local Plugins
 
-不是所有的插件都必须要发布到 `npm` 的，我们可以开发很多只有自己知道的插件，满足自己的需求，这种插件一般都是放到 `~/.semo/node_modules` 的，这样可以在当前账户的任意位置调用。
+Not all plugins need to be published to `npm`. We can develop many plugins known only to ourselves to meet our own needs. These plugins are generally placed in `~/.semo/node_modules`, allowing them to be called from anywhere in the current account.
 
-## 社区插件
+## Community Plugins
 
-如果对自己的插件作品很满意，想分享给其他人使用，就可以把插件发布到 `npm` 上，然后告诉别人来用。当然，由于 `Semo` 只是充当一个命令调度的作用，其实很大概率上你不必非要基于 `Semo` 来写这种 `npm` 包，除非你是 `Semo` 的粉丝 ^_^。
+If you are satisfied with your plugin work and want to share it with others, you can publish the plugin to `npm` and then tell others to use it. Of course, since `Semo` only acts as a command dispatcher, in most cases, you don't necessarily have to write such `npm` packages based on `Semo`, unless you are a fan of `Semo` ^\_^.
 
-那么目前都有哪些社区插件了呢，目前的社区还没怎么建起来，插件还比较少，包括但不限于以下插件：（这里的核心指的是放到核心仓库和 `@semo/core` 一起维护的插件）
+So, what community plugins are available now? The community is still in its infancy, and plugins are relatively scarce, including but not limited to the following:
 
-* **semo-plugin-application**，【核心】定义了一个 Node 项目中可以使用的，给项目添加子命令的规范。
-* **semo-plugin-script**，【核心】定义了一个 Node 项目中可以使用的脚本规范。
-* **semo-plugin-plugin**，【核心】提供了 Semo 全局插件管理命令行工具。
-* **semo-plugin-shell**，【核心】提供了一个简单的命令行环境，可以少敲几个字母。
-* **semo-plugin-hook**，【核心】可以查看钩子相关的信息。
-* **semo-plugin-ssh**, 【扩展】提供了简单的 `SSH` 账户管理功能。
-* **semo-plugin-read**，【扩展】提供了将 URL 转换成 `Markdown`，进而转换成各种格式的工具。
-  * **semo-plugin-read-extend-format-wechat** 这是 read 插件的一个扩展，提供了微信公众号文章在线编辑器的功能，需要和 read 一起使用。
-  * ... 这里可能有很多相关子插件，就不一一列举了。
-* **semo-plugin-serve**，【扩展】提供了一个简单的 `HTTP` 服务器的功能，类似于 `serve`。
-* **semo-plugin-sequelize**, 【扩展】提供了对  `Sequelize` 的集成以提供数据库的访问能力
-* **semo-plugin-redis**，【扩展】提供了对 `Redis` 的集成已提供缓存的访问能力
+- **semo-plugin-application** - [Core] Defines a specification for adding subcommands to a Node project.
+- **semo-plugin-script** - [Core] Defines a specification for scripts in a Node project.
+- **semo-plugin-plugin** - [Core] Provides a global plugin management command-line tool for Semo.
+- **semo-plugin-shell** - [Core] Provides a simple command-line environment to save keystrokes.
+- **semo-plugin-hook** - [Core] Provides information related to hooks.
+- **semo-plugin-ssh** - [Extension] Provides simple `SSH` account management functionality.
+- **semo-plugin-read** - [Extension] Provides tools for converting URLs to `Markdown` and various other formats.
+  - **semo-plugin-read-extend-format-wechat** - This is an extension of the read plugin, providing functionality for editing WeChat Official Account articles online, to be used with read.
+  - ... There may be many related sub-plugins, which are not listed one by one.
+- **semo-plugin-serve** - [Extension] Provides functionality for a simple `HTTP` server, similar to `serve`.
+- **semo-plugin-sequelize** - [Extension] Integrates with `Sequelize` to provide database access capabilities.
+- **semo-plugin-redis** - [Extension] Integrates with `Redis` to provide cache access capabilities.

@@ -1,5 +1,4 @@
-semo-plugin-shell
-------------------------
+## semo-plugin-shell
 
 This is a semo plugin to give a shortcut to run semo commands even other multi level commands.
 
@@ -12,4 +11,4 @@ $ semo shell
 > status # semo status
 $ semo shell --prefix=git
 > log # git log
-``` 
+```
