@@ -22,7 +22,6 @@
     "clean": "rimraf lib *.tsbuildinfo",
     "build": "tsc --build",
     "dev": "tsc --build --watch",
-    "prepublishOnly": "pnpm run build",
     "prepare": "npm run clean && npm run build"
   },
   "dependencies": {

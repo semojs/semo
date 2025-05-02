@@ -23,6 +23,6 @@
       "@semo/*": ["packages/*"]
     }
   },
-  "include": ["**/*.ts"],
+  "include": ["bin/**/*.ts", "packages/**/*.ts"],
   "exclude": ["node_modules", "lib", "**/*.config.ts", "*.config.ts"]
 }

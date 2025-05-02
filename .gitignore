@@ -124,3 +124,8 @@ dist
 # custom
 /public
 docs/.vuepress/public/typedoc
+
+# IDE
+.vscode/*
+.trae/*
+.idea/*

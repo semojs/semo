@@ -8,11 +8,9 @@
     "semo": "./lib/bin.js"
   },
   "scripts": {
-    "start": "node ./lib/bin.js",
     "clean": "rimraf lib *.tsbuildinfo",
     "build": "tsc --build",
     "dev": "tsc --build --watch",
-    "prepublishOnly": "pnpm run build",
     "prepare": "npm run clean && npm run build"
   },
   "keywords": [],

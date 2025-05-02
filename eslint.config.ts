@@ -9,11 +9,12 @@ export default tseslint.config(
   {
     ignores: [
       '**/node_modules/**',
-      '**/dist/**',
+      '**/lib/**',
       '**/coverage/**',
       '**/.turbo/**',
       'pnpm-lock.yaml',
       '**/*.config.ts',
+      '.vitepress/**/*',
     ],
   },
 
