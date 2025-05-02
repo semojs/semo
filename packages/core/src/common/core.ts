@@ -1032,8 +1032,6 @@ export class Core {
     parsedArgv = Object.assign(parsedArgv, appConfig)
     this.setParsedArgv(parsedArgv)
 
-    this.setVersion(pkg.version as string)
-
     this.debugCore('Initialize Yargs instance.')
     const yargsObj = yargs(hideBin(process.argv))
     yargsObj
@@ -1054,6 +1052,8 @@ export class Core {
       .fail(false)
       .wrap(Math.min(120, yargsObj.terminalWidth()))
 
+    this.setVersion(pkg.version as string)
+    yargsObj.version(pkg.version as string)
     yargsObj.config(appConfig)
 
     this.debugCore('Register global middleware.')

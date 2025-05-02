@@ -19,6 +19,10 @@ semo help
 
 Please refer to http://semo.js.org
 
+# Roadmap
+
+- [ ] use pnpm catalog to manage packages dependencies, wait for npm-check-updates to support pnpm catalogs https://github.com/raineorshine/npm-check-updates/issues/1451
+
 # License
 
 MIT
