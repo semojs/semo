@@ -9,8 +9,6 @@ const __dirname = path.dirname(__filename)
 
 export const hook_hook = new Hook('semo', {
   before_command: 'Hook triggered before command execution.',
-  after_command: 'Hook triggered after command execution.',
-  component: 'Hook triggered when needing to fetch components',
   hook: 'Hook triggered in hook command.',
   repl: 'Hook triggered in repl command.',
   repl_command: 'Define custom repl command.',
@@ -43,7 +41,7 @@ export const hook_status = new Hook('semo', async (core: Core) => {
     await envinfo.run(
       {
         System: ['OS', 'Shell'],
-        Binaries: ['Node', 'Yarn', 'npm'],
+        Binaries: ['Node', 'Yarn', 'npm', 'pnpm'],
       },
       { json: true }
     )
@@ -66,6 +64,7 @@ export const hook_status = new Hook('semo', async (core: Core) => {
         node: info.Binaries.Node ? info.Binaries.Node.version : null,
         npm: info.Binaries.npm ? info.Binaries.npm.version : null,
         yarn: info.Binaries.Yarn ? info.Binaries.Yarn.version : null,
+        pnpm: info.Binaries.pnpm ? info.Binaries.pnpm.version : null,
         hostname: os.hostname(),
         home: process.env.HOME,
         shell: info.System.Shell.path,

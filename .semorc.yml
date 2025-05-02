@@ -10,5 +10,3 @@ $plugin:
   semo:
     repl:
       hook: true
-      extract:
-        - application

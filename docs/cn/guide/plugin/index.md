@@ -23,7 +23,7 @@ semo hi
 
 ## 添加命令
 
-需要注意的是，这个插件模板是基于 `Typescript`，因此你需要有一些 `Typescript` 基础，然后我们开发时建议开着 `yarn watch` 命令窗口，来实时编译，一边开发一边测试。
+需要注意的是，这个插件模板是基于 `Typescript`，因此你需要有一些 `Typescript` 基础，然后我们开发时建议开着 `pnpm watch` 命令窗口，来实时编译，一边开发一边测试。
 
 ```
 semo generate command xyz
@@ -60,14 +60,16 @@ export const semo__hook_create_project_template = {
 
 ```js
 // src/hooks/index.ts
-export const semo__hook_repl = () => {
-  return {
-    add: async (a, b) => {
-      return a + b
-    },
-    multiple: async (a, b) => {
-      return a * b
-    },
+export const hook_repl = {
+  semo: () {
+    return {
+      add: async (a, b) => {
+        return a + b
+      },
+      multiple: async (a, b) => {
+        return a * b
+      },
+    }
   }
 }
 ```
@@ -75,22 +77,22 @@ export const semo__hook_repl = () => {
 然后在 REPL 环境，就可以使用了:
 
 :::tip
-`hook_repl` 返回的信息都注入到了 REPL 里的 Semo 对象。
+`hook_repl` 返回的信息都注入到了 REPL 里的 Semo.hooks.application 对象。
 :::
 
 ```
 semo repl
->>> add
+>>> Semo.hooks.application.add
 [Function: add]
->>> await Semo.add(1, 2)
+>>> await Semo.hooks.application.add(1, 2)
 3
->>> multiple
+>>> Semo.hooks.application.multiple
 [Function: multiple]
->>> await Semo.multiple(3, 4)
+>>> await Semo.hooks.application.multiple(3, 4)
 12
 ```
 
-插件和业务项目在实现这个钩子时的出发点是不一样的，业务项目一般注入的是具体的业务逻辑，而插件一般注入的是公共的方法，具有一定的复用性，比如可以注入底层服务的实例方法，常用的库等等，比如核心注入的 `Utils` 里面就包含 `lodash` 库。
+插件和业务项目在实现这个钩子时的出发点是不一样的，业务项目一般注入的是具体的业务逻辑，而插件一般注入的是公共的方法，具有一定的复用性，比如可以注入底层服务的实例方法，常用的库等等。
 
 ## 暴露方法
 
@@ -111,28 +113,6 @@ semo repl
 // index.js
 export const func = () => {}
 ```
-
-这种方式没有任何问题，但是一般定义这种方式的模块也不需要遵守 `Semo` 的规范，只要遵守 `node` 和 `npm` 的规范即可。这里 `Semo` 定义了另外一种暴露方法的方式。基于钩子机制。
-
-```js
-// src/hooks/index.ts
-export const semo__hook_component = async () {
-  return {
-    a: 'b'
-  }
-}
-```
-
-使用
-
-```js
-import { Utils } from '@semo/core'
-const { a } = await Utils.invokeHook('semo:component')
-console.log(a)
-// -> 'b'
-```
-
-利用这种方式，我们可以封装一些业务项目的公共方法，然后跨项目进行使用，这些公共方法普遍偏底层，比如各种中间件，或者底层服务。
 
 ## 发布插件
 
@@ -187,7 +167,7 @@ Semo 的插件系统会扫描多个位置，以增加灵活性，每个层级对
 - 通过 `semo plugin install semo-plugin-xxx` 安装到家目录的 `.semo/home-plugin-cache` 目录，安装的插件命令也是全局可用的，某些情况下当前用户没有权限用 npm 的方式安装到全局，可以用这种方式。
 - 通过 `npm install semo-plugin-xxx` 安装到当前项目目录，这种方式的插件命令只有在当前项目才会生效。
 
-为什么有的插件会需要安装到全局呢？因为插件不仅仅可以实现我们项目的业务需求，也可以实现我们的开发工具链，甚至可以实现一些非业务的小功能，只要有想象力，任何终端功能都可以来一波，可以是完全手写，也可以是对其他优秀项目进行封装和整合，这里的优秀项目不局限于语言和语言的扩展包仓库。
+为什么有的插件会需要安装到全局呢？因为插件不仅仅可以实现我们项目的业务需求，也可以实现我们的开发工具链，甚至可以实现一些非业务的小功能，只要有想象力，任何终端功能都可以，可以是完全手写，也可以是对其他优秀项目进行封装和整合，这里的优秀项目不局限于语言和语言的扩展包仓库。
 
 ## 直接运行远程插件
 
@@ -199,17 +179,13 @@ semo run semo-plugin-serve
 
 这个插件的功能是提供简单的 HTTP 服务，首次运行是会下载，以后就会复用之前下载的插件，通过 --force 来进行强制更新。
 
-:::tip
-后续会开发清理插件缓存的功能
-:::
-
 ## 特殊的家目录插件
 
 > 此特性 `v0.8.0` 引入
 
 我们为了给 `Semo` 添加全局的配置，需要在 `~/.semo` 目录添加一个 `.semorc.yml` 配置文件，一旦这个配置文件建立，则 `.semo` 目录自动识别为一个全局插件（其他的全局插件都在 `~/.semo/home-plugin-cache` 目录），你可以在这个插件里定义一些你自己的命令，扩展其他插件的命令，扩展其他插件的钩子等等，这个特殊的插件在于全局可识别，同时，由于默认存在，如果你有一些逻辑是本地常用的，并且不想发布成 npm 包，则可以在这里快速开始。当然，要注意，其全局可用的特点，如果有错误，也会影响到本地全局。
 
-我们没有预设这个特殊插件的实现方式，也就是说你可以用 `js` 来写，也可以用 `typescript` 来写。你可以通过 `semo init` 命令来初始化基本的目录解构，也可以通过 `semo create .semo --template=pluging` 用模板重新生成一个 `.semo` 目录（需要提前备份 `.semo` 目录，之后再把里面的东西合并回来）
+我们没有预设这个特殊插件的实现方式，也就是说你可以用 `js` 来写，也可以用 `typescript` 来写。你可以通过 `semo init` 命令来初始化基本的目录结构，也可以通过 `semo create .semo --template=plugin` 用模板重新生成一个 `.semo` 目录（需要提前备份 `.semo` 目录，之后再把里面的东西合并回来）
 
 ## 识别任意目录里的插件
 
@@ -224,26 +200,6 @@ semo help --plugin-dir=dir1 --plugin-dir=dir2
 ```
 SEMO_PLUGIN_DIR=dir3 semo help
 ```
-
-## 应用内部定义的插件在 Typescript 模式下失效的问题
-
-这是由于 `tsc` 在编译时，只能识别 ts 和 js 相关文件，不能识别我们的 `yml` 格式，而且官方也不打算支持复制 ts 之外的文件，因为 ts 毕竟不是一个完整的构建工具，所以我们需要自己来把确实的文件拷过去，这件事用 `cpy-cli` 或者 `copyfiles` 都可以实现，以 `copyfiles` 为例：
-
-```json
-// package.json
-{
-  "scripts": {
-    "copyfiles": "copyfiles -u 1 -a src/**/*.yml dist -E"
-  }
-}
-```
-
-其中参数含义:
-
-- `-u` 表示去掉一层再拷贝
-- `-a` 表示支持隐藏文件
-- `dist` 是我们 ts 的 out 目录
-- `-E` 表示如果什么都没有 copy 时抛异常
 
 ## 插件的主动注册机制
 
@@ -260,7 +216,8 @@ $plugins:
   register:
     plugin-a: /绝对路径
     plugin-b: .相对路径
-    plugin-c: true
+    plugin-c: ~相对路径
+    plugin-d: true
 ```
 
-支持三种风格，绝对路径和相对路径比较好理解，第三种就是用 node.js 的模块加载机制来声明。作为 key 的插件名，这里可以省略 `semo-plugin-` 前缀。另外，这里也支持家目录的简写 `~`
+支持四种风格，绝对路径和相对路径比较好理解，第三种就是用 node.js 的模块加载机制来声明。作为 key 的插件名，这里可以省略 `semo-plugin-` 前缀。

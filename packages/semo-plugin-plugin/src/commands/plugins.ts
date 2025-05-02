@@ -12,7 +12,7 @@ export const aliases = 'p'
 
 export const builder = async function (yargs: Argv) {
   const argv = (await yargs.argv) as ArgvExtraOptions
-  argv.$core.extendSubCommand('plugin', 'semo-plugin-plugin', yargs, __dirname)
+  argv.$core?.extendSubCommand('plugin', 'semo-plugin-plugin', yargs, __dirname)
 }
 
 export const handler = async function (argv: any) {

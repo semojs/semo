@@ -1,48 +1,38 @@
 # Configuration Management
 
-A core concept of `Semo` is configuration. We can intervene in the configuration of `Semo` in multiple ways to influence the behavior of both the core and plugins.
+A core concept of `Semo` is configuration. We can influence `Semo`'s configuration through various methods, thereby affecting the behavior of the core and plugins.
 
 ## Global Configuration
 
-There is a global `Semo` directory in the home directory, containing a configuration file that will take effect globally under the current account, located at `~/.semo/.semorc.yml`.
+There is a global `Semo` directory in the home directory, containing a configuration file that takes effect globally for the current user account, located at `~/.semo/.semorc.yml`.
 
-This global configuration can adjust default values for some commands, allowing options to be omitted when using commands each time, for example:
+This global configuration can adjust the default values of some commands, so you don't have to write options every time when using the command. For example:
 
 ```yml
 $plugin:
   semo:
     create:
       repo: REPO_URL
-      branch: master
+      branch: main
 ```
 
-This means that the `semo create` command, which initializes a project based on a template project, would originally be written as follows:
+This means that the `semo create` command, when initializing a project based on a template project, would originally be written like this:
 
 ```
-semo create PROJECT_NAME PROJECT_REPO_URL master -f
+semo create PROJECT_NAME PROJECT_REPO_URL main -f
 ```
 
-However, with default configuration, we can omit two parameters and write:
+However, with the default configuration, we can omit two parameters and write it as:
 
 ```
 semo create PROJECT_NAME -f
 ```
 
-:::tip
-You can see that the configuration is placed under the `commandDefault` key. This is because if it's configured at the top level, it will affect all commands. If this is desired behavior, it can be placed at the top level. Otherwise, it can be placed under `commandDefault` to only affect a single command.
-:::
+We often use global configuration, especially for some functional commands. If we find ourselves passing certain parameters every time, we can fix them using global configuration. Another example:
 
-We often use global configuration, especially for some functional commands. If we find ourselves needing to pass certain parameters every time, we can fix them through global configuration. For example:
+When executing the `semo repl` command, there is a `--hook` parameter. If passed, it calls `hook_repl` to inject some business logic. However, the core default is `--hook=false` for slightly faster startup. But later, it was found that in business scenarios, `--hook=true` is needed every time. So, this configuration can be placed in the global configuration.
 
-When executing the `semo repl` command, there is a `--hook` parameter. If passed, it will call `hook_repl` to inject some business logic. However, the default for the core is `--hook=false`, which starts a bit faster, but later it was found that in the business scenario, `--hook=true` was needed every time. In this case, we can add this configuration to the global configuration.
-
-```yml
-commandDefault:
-  repl:
-    hook: true
-```
-
-Now, when executing the `repl` command, business logic will be injected by default.
+Now, executing the `repl` command will inject business logic by default.
 
 ```
 semo repl
@@ -50,7 +40,7 @@ semo repl
 
 ## Plugin Configuration
 
-There is also a `.semorc.yml` file under the plugin directory, with similar configuration file names and principles, but with fewer configurations that actually take effect. By default, only three are generated:
+The plugin directory also has a `.semorc.yml` file. The configuration filename and principles are similar, but fewer configuration items actually take effect. By default, only three are generated:
 
 ```json
 commandDir: src/commands
@@ -58,26 +48,11 @@ extendDir: src/extends
 hookDir: src/hooks
 ```
 
-As the project evolves, more configurations that can take effect here may be added. Currently, these three control the command directory, plugin extension command directory, and hook directory during plugin development.
-
-In addition to the commonly used plugin configurations mentioned above, plugins sometimes expose some configuration options externally. These configuration lines generally agree to be retrieved from both the root and the namespace of the plugin name.
-
-```yml
-semo-plugin-xxx:
-  foo: bar
-```
-
-The effectiveness of this configuration depends on the plugin's own implementation trying to retrieve it actively.
-
-```js
-const foo = Utils._.get(argv, 'semo-plugin-xxx.foo', argv.foo)
-```
-
-This provides an opportunity for plugins to flexibly agree on exclusive parameters internally. If a plugin uses too many top-level configuration parameters internally, it is likely to conflict with parameters from other plugins. This style of configuration agreement is a supplement to configurations like `commandDefault`. The focus of plugin configuration is configuration, while `commandDefault` is the override order from the perspective of command parameters. The former is actively obtained, while the latter can be automatically recognized. The specific plugin should clearly indicate which method it uses.
+As the project updates, more configuration items might become effective here. Currently, these three control the command directory, extended plugin command directory, and hook directory during plugin development, respectively.
 
 ## Project Configuration
 
-When we integrate `Semo` into a project, the project also has command directories, plugin extension command directories, and hook directories, but there are more, such as plugin directories and script directories:
+When we integrate `Semo` into a project, the project also has command, extended plugin command, and hook directories, but also more, such as plugin and script directories:
 
 ```yml
 commandDir: bin/semo/commands
@@ -88,53 +63,58 @@ hookDir: bin/semo/hooks
 ```
 
 :::tip
-The reason there is no plugin directory in the plugin is because we do not support the nested declaration of plugins in plugins, but we support defining plugins in projects.
+The reason there is no plugin directory within a plugin is that we do not support nested declaration methods like defining plugins within plugins. However, we do support defining plugins within a project.
 :::
 
-In addition to configuring some directories, we can also configure some options to override commands, such as the `repl` command option override mentioned above:
+Besides configuring directories, we can also configure options that override commands, such as the `repl` command option override mentioned earlier:
 
 ```yml
 hook: true
 ```
 
-For example, the `semo init` command has an `--typescript` option. If this option is added to initialize the directory structure, there will also be a corresponding override configuration in the project configuration. This way, when executing the `semo generate` command, many code generation commands that support both `js` and `ts` versions will be automatically generated as `typescript` style.
+Another example: the `semo init` command has an option `--typescript`. If this option is added when initializing the directory structure, the project configuration will also have a corresponding override configuration. This way, when executing the `semo generate` command, many code generation commands support both `js` and `ts` versions. Through this option, all automatically generated code will be in `typescript` style.
 
 ```json
 typescript: true
 ```
 
-Options configured in the project configuration only take effect in the current project directory. This is just a demonstration of usage. In fact, we can provide multiple options when developing plugins, and limit behaviors when using plugins in projects to support flexibility and personalization.
+Option overrides configured in the project configuration only take effect within the current project directory. This is just a demonstration of usage. In practice, we can provide various options during plugin development and limit behavior when using the plugin in a project, supporting both flexibility and personalization.
 
 ## Hidden Configuration
 
-`Semo` has some hidden options that are rarely used in ordinary times, which can be viewed by `semo help --show-hidden`:
+`Semo` has some hidden options that are rarely used. You can view them using `semo help --show-hidden`:
 
 ```
 Options:
-  --script-name                                       Rename script name.                    [string] [default: "semo"]
-  --plugin-prefix                                     Set plugin prefix.                              [default: "semo"]
+  --plugin-prefix                                     Set plugin prefix.                              [Default: "semo"]
   --disable-core-command, --disable-core              Disable core commands.
   --disable-completion-command, --disable-completion  Disable completion command.
   --hide-completion-command, --hide-completion        Hide completion command.
   --disable-global-plugin, --disable-global-plugins   Disable global plugins.
   --disable-home-plugin, --disable-home-plugins       Disable home plugins.
   --hide-epilog                                       Hide epilog.
-  --set-epilog                                        Set epilog.                                        [default: false]
+  --set-epilog                                        Set epilog.                                        [Default: false]
   --set-version                                       Set version.
-  --node-env-key, --node-env                          Set node env key                              [default: "NODE_ENV"]
+  --node-env-key, --node-env                          Set node env key                              [Default: "NODE_ENV"]
 ```
 
-As seen, by passing these options, we can change some core behaviors, and even change our own command names and versions. Here, two of them are emphasized:
+As you can see, by passing these options, we can change some core behaviors, even modifying our own command names and versions. Let's focus on two of them:
 
 ```yml
 --disable-global-plugin: true
 --disable-home-plugin: true
 ```
 
-We generally add these two configurations in project configuration, so that when scanning plugins and hooks, only the current project directory is scanned, which can slightly improve command performance.
+We generally add these two configurations in the project configuration so that plugin and hook scanning only scans the current project directory, which can slightly improve command performance.
+
+If Semo's built-in commands are no longer needed, they can also be disabled, calling only project-customized commands, as if the Semo built-in commands didn't exist.
+
+```yml
+--disable-core-command: true
+```
 
 :::tip
-In the Semo configuration environment, the following configurations are completely equivalent
+In the Semo configuration environment, the following configurations are completely equivalent:
 --foo-bar
 --foo--bar
 --fooBar
@@ -144,7 +124,7 @@ fooBar
 
 ## Modifying Configuration via Command Line
 
-Of course, we can modify the configuration by editing the configuration file, but Semo also provides a command line tool to edit the configuration. With this command line tool, we can customize certain configurations through scripts.
+We can certainly modify the configuration by editing the configuration file, but Semo also provides command-line tools for editing configurations. With the help of these tools, certain configurations can be customized using scripts.
 
 ```
 semo config set a.b.c d 'some comment' -g
@@ -158,37 +138,43 @@ semo config list --watch
 
 > This feature was introduced in `v0.8.0`
 
-In the application directory (usually the current directory where the semo command is run), we organize our project code using Semo's mechanism, such as command line tools, scheduled tasks, hook extensions, command extensions, scripts, etc. Previously, the system could only recognize the `.semorc.yml` configuration file, but the latest version can continue to load an environment configuration. For example, if the current `NODE_ENV=development` (default value), then `.semorc.development.yml` will also be recognized and loaded, and will override configurations with the same name in the main configuration (using Lodash's `_.merge`).
+In the application directory (usually the current directory where the `semo` command is run), we use Semo's mechanisms to organize our project code, such as command-line tools, scheduled tasks, hook extensions, command extensions, scripts, etc. Previously, the system could only recognize the `.semorc.yml` configuration file. The latest version can now load an additional environment configuration. For example, if the current `NODE_ENV=development` (default value), then `.semorc.development.yml`, if it exists, will also be recognized and loaded, overriding same-named configurations in the main configuration (using Lodash's `_.merge`).
+
+> This feature was introduced in `v2.0.2`
+
+Added support for `.semorc.local.yml`. This configuration file has the highest priority, mainly used to override sensitive information such as database passwords. This file should not be committed to git.
+
+So, in summary, the configuration priority order is: Parameters passed directly via command line > `.semorc.local.yml` > `.semorc.development.yml` > `.semorc.yml` > packageJson.semo > `~/.semo/.semorc.yml`
 
 ## Special Configuration Items
 
 > This feature was introduced in `v0.9.0`
 
-Semo's configuration and command line `argv` are closely coupled. The original intention of `argv` was only to store command line parameters. Semo further expands its capabilities, hoping it can take on the responsibility of project configuration management. Here, several configurations starting with `$` have special meanings:
+Semo's configuration is tightly coupled with the command line's `argv`. `argv` was originally intended only to store command-line parameters. Semo further extends it, hoping it can take on the important task of project configuration management. Several configurations starting with `$` are defined here with special meanings:
 
 ### `$plugin`
 
-This configuration defines plugin-level configuration items. Previously, commands could only agree on configurations through parameters, but there are some complex configurations that do not need to be declared as parameters. Therefore, this configuration item was designed:
+This configuration defines plugin-level configuration items. Previously, commands could only define configurations through parameters, but some complex configurations don't need to be declared as parameters, hence this configuration item was designed:
 
-Taking `$plugin.ssh.key = 1` as an example, it means that each command under the `semo-plugin-ssh` plugin is provided with a configuration `key=1`. Where does this configuration go? Semo has already helped assemble it into `argv.$config`, so you can retrieve `argv.$config` under the command of the ssh plugin, and all configurations obtained are under `$plugin.ssh`.
+Taking `$plugin.ssh.key = 1` as an example, it means providing a configuration `key=1` to every command under the `semo-plugin-ssh` plugin. Where is this configuration retrieved? Semo has already assembled it into `argv.$config`. So, the `argv.$config` you get under the ssh plugin's command contains the configurations under `$plugin.ssh`.
 
-To achieve this, each command adds a declaration like `export const plugin = 'ssh'` when declared.
+To achieve this, each command declaration adds a statement like `export const plugin = 'ssh'`.
 
 ### `$plugins`
 
-The `$plugin` mentioned above adds configurations for each specific plugin, while this one determines the effective plugins for the entire environment, supporting three configurations:
+The `$plugin` above adds configuration to specific plugins, while this determines the plugins that take effect in the entire environment. It supports three configurations:
 
-- `$plugins.register` determines whether to enable the active registration mechanism. If enabled, the automatic scanning mechanism is disabled. Refer to [Active Registration Mechanism for Plugins](../plugin/README.md).
-- `$plugins.include` performs secondary filtering on registered plugins. This is a whitelist and is an array that supports shorthand notation for plugin names.
-- `$plugins.exclude` performs secondary filtering on registered plugins. This is a blacklist and is an array that supports shorthand notation for plugin names.
+- `$plugins.register` Determines whether to enable the active registration mechanism. If enabled, the automatic scanning mechanism is disabled. Refer to [Plugin Active Registration Mechanism](../plugin/README.md)
+- `$plugins.include` Performs secondary filtering on registered plugins. This is a whitelist, an array, supporting shorthand forms of plugin names.
+- `$plugins.exclude` Performs secondary filtering on registered plugins. This is a blacklist, an array, supporting shorthand forms of plugin names.
 
 ### `$config`
 
-Automatically parsed plugin configurations. Generally, this is only needed during plugin development. If it is an application, it is recommended to use `$app` to manage configurations.
+Automatically parsed plugin configuration, generally only needed during plugin development. For applications, it is recommended to use `$app` to manage configuration.
 
 ### `$app` or `$application`
 
-There is no special function here. It is only suggested that the application's own configuration be grouped together to prevent confusion with command line options. For example:
+There's no special function here, it's just a recommendation to group application-specific configurations together to avoid confusion with command-line options. For example:
 
 ```yml
 $app:
@@ -197,25 +183,71 @@ $app:
 
 ### `$input`
 
-The purpose of this is when implementing commands that support piping, `$input` can automatically receive the output of previous commands, regardless of whether it is the output of Semo plugins, but the format of the output is uncertain and needs to be verified and constrained by the current command itself.
+When implementing commands that support piping, `$input` can automatically receive the output of the preceding command, regardless of whether it's the output of a Semo plugin. However, the output format is uncertain and needs to be validated and constrained by the current command itself.
 
 ### `$0`
 
-This is built into `yargs`, indicating the name of the current script being run.
+This is built-in with `yargs`, indicating the name of the currently running script.
 
 ### `$command`
 
-This contains information about the current command. Generally, its usefulness is not very significant.
+This contains information about the current command, generally not very useful.
 
-### `$semo`
+### `$core`
 
-This contains a reference to the utility function library `Utils`. The main reason for using this is that sometimes plugins also want to know and process internal information. However, if a plugin depends on and imports `@semo/core` internally, due to different positions, it actually occupies two separate memories, and the imported part is missing necessary information due to lack of initialization. By using `argv.$semo.Utils.getInternalCache().get('argv')`, you can correctly obtain the runtime data.
+`2.x` refactored the project structure, placing many strongly related methods into the `Core` class. This is the instance of Core.
 
-## Built-in Configuration Management Methods
+### Log Related
+
+Added in `2.x`, for convenient log output.
+
+```js
+argv.$log = log
+argv.$info = info
+argv.$error = error
+argv.$warn = warn
+argv.$success = success
+argv.$jsonLog = jsonLog
+argv.$colorfulLog = colorfulLog
+argv.$colorize = colorize
+```
+
+Only `argv.$colorize` is used for coloring text; the others are for outputting logs.
+
+### Debug Related
+
+```js
+argv.$debugCore = this.debugCore
+argv.$debugCoreChannel = this.debugCoreChannel
+argv.$debugChannel = this.debugChannel
+```
+
+If you use it with `DEBUG=*`, you will see debugging information printed by the core. If you also want to use this capability, you can use these APIs.
+
+### Prompt Related
+
+```js
+argv.$prompt = {
+  confirm,
+  checkbox,
+  expand,
+  input,
+  password,
+  rawlist,
+  select,
+  search,
+  editor,
+  number,
+}
+```
+
+This is a wrapper around @inquirer/prompts. You can refer to the inquirer documentation.
+
+## Built-in Configuration Management Related Methods
 
 ### `Utils.extendConfig`
 
-This method supports extending a new configuration file, which allows for configuration file groups without putting all configurations in `.semorc.yml`, while also supporting environment configurations. For example:
+This method supports extending a new configuration file, allowing for configuration file groups instead of putting all configurations into `.semorc.yml`. It also supports environment configuration, for example:
 
 ```js
 Utils.extendConfig('application.yml')
@@ -229,15 +261,15 @@ application.production.yml
 
 ### `Utils.config`
 
-This method is used to extract a section of the total configuration, with all sections extracted by default, based on Lodash's `_.get` method.
+This method is used to retrieve a segment of the total configuration, defaulting to retrieving everything. Based on Lodash's `_.get` method.
 
 ### `Utils.pluginConfig`
 
-This method is used to extract plugin configurations and only works in the `handler` of commands. By default, it still takes precedence over command line parameters, but if the command line parameters are not specified and there is no default value, plugin-level configurations can be obtained.
+This method is used to retrieve plugin configuration, only working within the command `handler`. By default, command-line parameters still take priority, but if a command-line parameter is not specified and has no default value, the plugin-level configuration can be retrieved.
 
-## Setting Environment Variables `.env`
+## Environment Variable Setting `.env`
 
-By integrating `dotenv`, we have introduced support for the `.env` file, which is enabled by default for command line tools. For programs, you need to enable it manually.
+By integrating `dotenv`, we introduced support for `.env` files. It is enabled by default for command-line tools. For programs, it needs to be enabled manually.
 
 ```typescript
 import { Utils } from '@semo/core'

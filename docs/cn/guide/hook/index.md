@@ -10,7 +10,9 @@
 
 ```js
 // 定义一个 hook_bar 钩子
-const hookData = Utils.invokeHook('semo-plugin-foo:hook_bar', { mode: 'group' })
+const hookData = argv.$core.invokeHook('semo-plugin-foo:hook_bar', {
+  mode: 'group',
+})
 ```
 
 :::info
@@ -19,20 +21,12 @@ const hookData = Utils.invokeHook('semo-plugin-foo:hook_bar', { mode: 'group' })
 
 ## 钩子的实现
 
-钩子只能在指定的钩子目录才能得到识别，这个钩子目录在插件的 `.semorc.yml` 文件中配置 `hookDir`，然后识别里面的 `index.js`。
-
-目前存在两种风格的实现钩子的方式：
-
-第一种，将钩子前缀放到导出的 key 前缀上，中间用短横线相连。
+钩子只能在指定的钩子目录才能得到识别，这个钩子目录在插件的 `.semorc.yml` 文件中配置 `hookDir`，然后识别里面的 `index.js`， 如果当前是 Typescript 项目，则 `index.ts` 文件会被识别， `index.js` 文件会被忽略。
 
 ```js
-exports.semo_plugin_foo__hook_bar = () => {}
-```
-
-第二种，将钩子前缀使用 `Semo` 的内置钩子类对象的方式声明。
-
-```js
-exports.hook_bar = new Utils.Hook('semo-plugin-foo', () => {})
+export const hook_bar = {
+  'semo-plugin-foo': (core, argv, options) => {},
+}
 ```
 
 当真的有多个插件定义同名钩子时，如果恰好你也同时都需要，你还可以这样使用第二种：
@@ -42,19 +36,6 @@ exports.hook_bar = new Utils.Hook({
   'semo-plugin-foo1': () => {},
   'semo-plugin-foo2': () => {},
 })
-```
-
-第三方插件在实现钩子的时候，如果需要用 `Utils.Hook` 意味着需要添加 `@semo/core` 依赖，可以采用另一种风格，省掉这个依赖。
-
-```js
-export = (Utils) {
-  return {
-    hook_bar: new Utils.Hook({
-      'semo-plugin-foo1': () => {},
-      'semo-plugin-foo2': () => {},
-    })
-  }
-}
 ```
 
 ## 钩子的返回值
@@ -74,8 +55,6 @@ export = (Utils) {
 由于钩子的定义方来决定钩子的用途，以及返回值格式，所以定义方有义务在明确的位置说明这些信息，让插件的使用方可以在自己的插件或者应用中进行扩展。以下是核心钩子的说明：
 
 - `before_command`: 这个钩子在命令执行前触发，不搜集返回值
-- `after_command`: 这个钩子在命令执行后触发，不搜集返回值
-- `component`: 这个钩子用于搜集一些插件里定义的组件，一般是返回一个包含实例的对象，例如 `{ redis, db }`
 - `hook`: 这个钩子用于声明钩子以及用途，这不是强制的，但是是一个规范，让其他人知道定义了哪些钩子
 - `repl`: 用于向 repl 中注入信息，不会相互覆盖，一般用于调试，格式不固定
 - `repl_command`: 让第三方插件可以扩展 repl 里的命令
@@ -83,9 +62,9 @@ export = (Utils) {
 - `create_project_template`: 用于给 `semo create` 命令的 `--template` 参数注入可选模板
 
 :::tip
-在 `v1.15.1` 版本中，已经将 `before_command` 和 `after-command` 两个钩子设置为默认不执行。
+在 `v1.15.1` 版本中，已经将 `before_command` 两个钩子设置为默认不执行。
 
-启动命令时通过添加 `--enable-core-hook=before_command` 和 `--enable-core-hook=after_command` 来启用。
+启动命令时通过添加 `--enable-core-hook=before_command` 来启用。
 :::
 
 部分核心钩子的用法示例
@@ -95,18 +74,20 @@ export = (Utils) {
 在 REPL 模式里定义一个 .hello 命令，接收参数
 
 ```js
-const hook_repl_command = new Utils.Hook('semo', () => {
-  return {
-    hello: {
-      help: 'hello',
-      action(name) {
-        this.clearBufferedCommand()
-        console.log('hello1', name ? name : 'world')
-        this.displayPrompt()
+const hook_repl_command = {
+  semo: () => {
+    return {
+      hello: {
+        help: 'hello',
+        action(name) {
+          this.clearBufferedCommand()
+          console.log('hello1', name ? name : 'world')
+          this.displayPrompt()
+        },
       },
-    },
-  }
-})
+    }
+  },
+}
 ```
 
 其中，`this.clearBufferedCommand()` 和 `this.displayPrompt()` 都是 Node 的 REPL 类里的方法。注意两点：一个是这里的 action 是支持 `async/await` 的，还有就是为了 `this` 能够正确指向，这里不要写成箭头函数。

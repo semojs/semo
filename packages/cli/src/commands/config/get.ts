@@ -17,7 +17,7 @@ export const handler = async function (argv: any) {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName = argv.$scriptName
+  const scriptName = argv.scriptName
   let configPath
   if (argv.global) {
     configPath = process.env.HOME

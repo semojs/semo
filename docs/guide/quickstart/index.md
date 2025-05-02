@@ -2,7 +2,7 @@
 
 ## Global Installation
 
-`Semo` command-line tool is also a tool for engineers' daily development, operation, and debugging. It is recommended to install it globally in the local environment. For specific usage instructions, you can refer to [here](https://semo.js.org).
+The `Semo` command-line tool is also a utility that assists engineers with daily development, operations, and debugging. Global installation in your local environment is recommended. For detailed usage instructions, please refer to [here](https://semo.js.org).
 
 ```
 $ npm i -g @semo/cli
@@ -38,71 +38,71 @@ Examples:
 Find more information at https://semo.js.org
 ```
 
-You can see that there are many built-in commands inside. However, it is important to note that these commands are scenario-specific. Without any plugins or specific business projects, they may not be very helpful. In the development process, the core of `Semo` mainly focuses on defining extension specifications, and specific business logic needs to be implemented by developers. The true value and functionality of `Semo` can only be realized when integrated with specific business logic.
+As you can see, there are many built-in commands. However, it's important to note that these commands are intended for specific use cases. They won't be very helpful without being combined with plugins or specific business projects. This is because the Semo core development primarily focuses on defining extension specifications. The actual business logic needs to be implemented by you. The role and value of Semo become more apparent only when integrated with specific business logic.
 
 ## Project Integration
 
-The main use case of `Semo` is to add a command-line mechanism to an existing business project. Without `Semo`, individual business projects can certainly develop their own command lines. However, this usually leads to redundant efforts, and the solutions implemented by different teams are bound to differ. This difference increases maintenance costs, and in enterprise-level development, reducing costs leads to increased profits.
+Semo's primary use case is adding a command-line mechanism to an existing business project. Without Semo, individual business projects can certainly develop their own command-line tools, but this often involves duplicated effort. Furthermore, solutions implemented by different teams will inevitably vary, leading to increased maintenance costs. In enterprise development, reducing costs directly improves profits.
 
 ```
 cd YOUR_PROJECT
 semo init
 ```
 
-If only the plugin dispatching method of Semo is used, it is not necessary to install `@semo/core`. If you want to use the methods in `@semo/core`, the business project needs to add `@semo/core` as a project dependency. Whether it should be added to `devDependencies` or `dependencies` depends on the actual situation. There are several usage patterns for business projects using `@semo/core`:
+If you only use Semo's plugin dispatch mechanism, installing `@semo/core` is not necessary. If you want to use methods from `@semo/core`, the business project must add `@semo/core` as a project dependency. Whether to place it in `devDependencies` or `dependencies` depends on the actual situation. There are several usage patterns when using `@semo/core` in a business project:
 
-- The core logic of the business project relies on `@semo/core`, which is invasive and must be added to `dependencies`.
-- The core logic of the business project does not rely on `@semo/core`, but `@semo/core` is used to define command lines or scripts, and the scripts need to be executed online: this is non-invasive, but since it needs to be executed online, it also needs to be added to `dependencies`.
-- The core logic of the business project does not rely on `@semo/core`, nor is `@semo/core` used to define command lines or scripts. It only uses the REPL extension mechanism to put common classes and functions of the project into the `REPL` environment to assist in development and debugging. This is also non-invasive and does not need to be executed online, so it can be added to `devDependencies`.
-- If `Semo` is not installed in the container environment itself, `@semo/cli` can also be added to the project dependencies, and then scheduled through `npx semo`.
+- The core logic of the business project service depends on `@semo/core`. This is invasive and must be added to `dependencies`.
+- The core logic of the business project service does not depend on `@semo/core`, but `@semo/core` is used to define command lines or scripts, and these scripts need to run in production: This is non-invasive, but since it needs to run in production, it also needs to be added to `dependencies`.
+- The core logic of the business project service does not depend on `@semo/core`, nor is `@semo/core` used to define command lines or scripts. It only uses the REPL extension mechanism to place the project's common classes and functions into the `REPL` environment to assist development and debugging. This is also non-invasive and does not need to run in production, so it can be placed in `devDependencies`.
+- If the container environment itself does not have `Semo` installed, you can also add `@semo/cli` to the project dependencies and then use `npx semo` to dispatch commands.
 
 ### Adding a Project Command
 
-When defining project commands, it's important to consider the future planning of project command-line tools. If there are many commands, it's best to divide them into hierarchies. Additionally, the first layer of sub-commands should be core commands. If all commands are placed in the first layer, it may be easy to confuse and misuse them.
+Here, consider the future planning of the project's command-line tools. If there will be many, it's best to establish a hierarchy. Also, the first-level subcommands include core commands. Placing all our commands at the first level can easily lead to confusion and misuse.
 
-**Defining a First-level Sub-command**
+**Define a first-level subcommand**
 
-```bash
+```
 semo generate command test
-semo test # Execute the newly added command
+semo test # Execute the command just added
 ```
 
-**Defining a Second-level Sub-command**
+**Define a second-level subcommand**
 
-```bash
+```
 npm install semo-plugin-application
 semo generate command application/test --extend=application
 semo application test
 ```
 
-To isolate project commands from those defined by core and plugins, it is recommended to add project commands using the second method above. Furthermore, for complex projects, it is recommended to further divide them into hierarchies. However, this approach increases the burden of memorization for command hierarchy and requires entering many preceding commands to find the command to execute. Therefore, it is generally necessary to add several `alias` to the `bashrc` of the runtime environment:
+To isolate project commands from those defined by the core and plugins, it is recommended to add project commands using the second method above. For complex projects, further hierarchy can be applied. Of course, this creates a problem: the increased memory burden due to the deeper command hierarchy, and having to type many preceding commands to find the one to execute. Therefore, generally, we also need to add a few `alias` entries to the runtime environment's `bashrc` in the project:
 
 **Assuming the production environment is deployed using Docker containers**
 
-```bash
+```
 // Dockerfile
 RUN echo 'alias semo="npx semo"' >> /home/node/.bashrc
 RUN echo 'alias app="npx semo app"' >> /home/node/.bashrc
 ```
 
-This command demonstrates a method to shorten the length of commands. In actual use, if the command hierarchy is particularly deep, more `alias` can be defined here.
+The commands above demonstrate how to shorten command length. In actual use, if the command hierarchy is particularly deep, you can define more `alias` here.
 
 ## Developing Plugins
 
-If you're not using `Semo` in a project but just want to quickly implement some script commands to improve your work efficiency, you can start quickly with `Semo`.
+If you are not using `Semo` within a project, but simply want to quickly implement some script commands to help improve your work efficiency, you can use `Semo` to get started quickly.
 
-```bash
-cd ~/.semo/node_modules # Plugins defined under this directory will be globally loaded
+```
+cd ~/.semo/node_modules # Plugins defined in this directory will be loaded globally
 semo create semo-plugin-xxx --template=plugin # Choose the plugin template
 cd semo-plugin-xxx
-semo hi # There is a sample command by default
-code . # Start development with Vscode
-yarn watch # Develop based on `Typescript` and require real-time compilation
+semo hi # # There is a default example command inside
+code . # Start developing with Vscode
+pnpm watch # Based on `Typescript` development, requires real-time compilation
 ```
 
 If you are satisfied with your plugin and want to share it with others, you can directly publish your code to `npm`.
 
-```bash
+```
 git remote add origin GIT_REPO_URL
 git add .
 git commit -m 'init'
@@ -111,35 +111,35 @@ npm version patch && npm publish
 ```
 
 :::warning
-Note that `Semo` does not guarantee the isolation of commands defined by each plugin. Therefore, if too many plugins are installed, there may be some command conflicts due to name duplication. However, this situation rarely occurs in daily use, and for simplicity, no special design has been made here.
+Note: `Semo` does not guarantee isolation between command definitions from different plugins. Therefore, if many plugins are installed, some commands might overwrite others due to naming conflicts. However, this rarely happens in everyday use. For simplicity, no special design has been implemented to prevent this.
 :::
 
 ## Installing Plugins Developed by Others
 
-```bash
+```
 npm i -g @semo/cli semo-plugin-xxx
 ```
 
-If someone else's plugin only defines some commands you need, you can install the commands globally. If someone else's plugin needs to be used in a business project, it needs to be placed in the project dependencies.
+If someone else's plugin only defines commands you need, you can install the commands globally. If someone else's plugin is needed in your business project, it should be placed in the project dependencies.
 
-```bash
+```
 cd YOUR_PROJECT
 npm install semo-plugin-xxx
-yarn add semo-plugin-xxx // Or
+pnpm add semo-plugin-xxx // or
 ```
 
-Since `Semo`'s plugins are also `Node` modules, we can also define some library functions in plugins and import them into projects by others.
+Since a `Semo` plugin is also an `NPM` module, we can also define library functions within the plugin to be imported by others in their projects:
 
-```javascript
+```js
 import lib from 'semo-plugin-xxx'
 ```
 
-By using the hook mechanism provided by `Semo`, another style of using business logic support provided by plugins can be achieved.
+Using the hook mechanism provided by `Semo`, you can also use another style to leverage the business logic support provided by plugins.
 
-```javascript
-import { Utils } from '@semo/core'
-
-const { xxx } = await Utils.invokeHook('semo:component')
+```js
+const { xxx } = await argv.$core.invokeHook('app:component')
 ```
 
-As seen in the latter approach, there is no need to explicitly import packages. This method uses directory scanning, which has poor performance and lacks support for IDE auto-completion. However, for the command line scenario, having a simple and unified code style is also good.
+As you can see, in the latter method, there's no need to explicitly import the package; simply installing it is enough. This method uses directory scanning, which has relatively poor performance and lacks IDE autocompletion support. However, for the command-line scenario, the simple and unified code style can also be beneficial.
+
+This method is only supported in scenarios where `argv` is accessible.

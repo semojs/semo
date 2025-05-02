@@ -151,7 +151,7 @@ export default defineConfig({
               },
               {
                 text: 'Custom Commands',
-                link: '/guide/core-commands/',
+                link: '/guide/custom-commands/',
               },
               {
                 text: 'Configuration Management',

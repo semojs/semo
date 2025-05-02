@@ -12,7 +12,7 @@ export const aliases = ['g', 'gen']
 
 export const builder = async function (yargs: Argv) {
   const argv = (await yargs.argv) as ArgvExtraOptions
-  argv.$core.extendSubCommand('generate', argv.$scriptName, yargs, __dirname)
+  argv.$core?.extendSubCommand('generate', argv.scriptName, yargs, __dirname)
 }
 
 export const handler = function (argv: ArgvExtraOptions) {

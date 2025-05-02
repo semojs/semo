@@ -13,13 +13,13 @@ $plugin:
   semo:
     create:
       repo: REPO_URL
-      branch: master
+      branch: main
 ```
 
 这里的意思是，`semo create` 命令基于模板项目初始化项目时本来应该是这么写的：
 
 ```
-semo create PROJECT_NAME PROJECT_REPO_URL master -f
+semo create PROJECT_NAME PROJECT_REPO_URL main -f
 ```
 
 但是，因为有了默认配置，我们就可以省略两个参数，而变成：
@@ -28,19 +28,9 @@ semo create PROJECT_NAME PROJECT_REPO_URL master -f
 semo create PROJECT_NAME -f
 ```
 
-:::tip
-可以看到，这里的配置是放到 `commandDefault` 这个 Key 下的，这是因为，如果配置的第一级，会对所有的命令都生效，如果这个是你希望的，就可以放到第一级。否则，可以在 `commandDefault` 下仅对单个命令生效。
-:::
-
 我们经常会用到全局配置，尤其是对一些功能命令，如果我们发现每次都要传一些参数，那么就可以通过全局配置固定下来，再举个例子：
 
 在我们执行 `semo repl` 命令时，有个 `--hook` 参数，如果传了就会调用 `hook_repl` 从而注入一些业务逻辑进来，但是核心默认是 `--hook=false`，这样启动可以稍微快一点，但是后来发现在业务场景中每次都需要传 `--hook=true`，那么就可以把这个配置放到全局配置中。
-
-```yml
-commandDefault:
-  repl:
-    hook: true
-```
 
 这时，执行 `repl` 命令就会默认注入业务逻辑了。
 
@@ -59,21 +49,6 @@ hookDir: src/hooks
 ```
 
 随着项目的更新，这里能够生效的配置项可能更多，目前这3个，分别控制了插件开发时的命令目录，扩展插件命令目录和钩子目录。
-
-除了以上常用的插件配置，插件有时会对外暴露一些配置项，这些配置行一般约定除了从根取以外，还会从插件名命名空间之下取。
-
-```yml
-semo-plugin-xxx:
-  foo: bar
-```
-
-这个配置的生效依赖于插件自身实现时的主动尝试获取
-
-```js
-const foo = Utils._.get(argv, 'semo-plugin-xxx.foo', argv.foo)
-```
-
-这样就给了插件内部一个灵活约定专属参数的机会，如果插件内部用了太多顶级配置参数，就很可能会跟其他插件的参数发生冲突。这种风格的配置约定是对 `commandDefault` 这种配置的一个补充，插件配置重点是配置，而 commandDefault 是从命令参数的角度的覆盖顺序，前者是主动获取，后者可以做到自动识别。具体插件用的是哪一种需要具体的插件明确给出说明。
 
 ## 项目配置
 
@@ -111,7 +86,6 @@ typescript: true
 
 ```
 选项：
-  --script-name                                       Rename script name.                    [字符串] [默认值: "semo"]
   --plugin-prefix                                     Set plugin prefix.                              [默认值: "semo"]
   --disable-core-command, --disable-core              Disable core commands.
   --disable-completion-command, --disable-completion  Disable completion command.
@@ -132,6 +106,12 @@ typescript: true
 ```
 
 我们一般在项目配置中加上这两个配置，使得在做插件和钩子扫描时可以只扫描当前项目目录，可以稍微提高一点命令的性能。
+
+如果已经不需要 Semo 内置命令了，也可以禁用掉，只调用项目自定义的命令，仿佛 Semo 内置命令不存在一样。
+
+```yml
+--disable-core-command: true
+```
 
 :::tip
 在 Semo 配置环境里以下配置是完全等价的
@@ -160,6 +140,12 @@ semo config list --watch
 
 在应用目录（一般是指运行 semo 命令的当前目录），我们会用 Semo 的机制组织我们的项目代码，比如命令行工具，计划任务，钩子扩展，命令扩展，脚本等等。之前系统只能识别 `.semorc.yml` 这个配置文件，最新的版本已经可以继续加载一个环境配置，比如当前 `NODE_ENV=development`(默认值)，则 `.semorc.development.yml` 如果存在也会识别和加载，并会覆盖主配置的同名配置（用的是 Lodash 的 `_.merge`）
 
+> 此特性 `v2.0.2` 引入
+
+增加了对 `.semorc.local.yml` 的支持，这个配置文件的优先级最高，主要用于覆盖一些敏感信息，比如数据库密码等。这个文件不应该被提交到 git 里。
+
+所以总的来说，配置优先级顺序是: 命令行直接传的参数 > `.semorc.local.yml` > `.semorc.development.yml` > `.semorc.yml` > packageJson.semo > `~/.semo/.semorc.yml`
+
 ## 特殊配置项
 
 > 此特性 `v0.9.0` 引入
@@ -179,8 +165,8 @@ Semo 的配置和命令行的 `argv` 是紧密耦合在一起的，argv 原本�
 上面的 `$plugin` 是给每个具体的插件添加配置的，而这个是决定整个环境生效的插件的，支持三个配置
 
 - `$plugins.register` 决定是否启用主动注册机制，如果启用，则自动扫描机制失效。参考[插件的主动注册机制](../plugin/README.md)
-- `$plugins.include` 对注册的插件进行二次过滤，这个是允许名单，是数组，支持插件名的简写形式。
-- `$plugins.exclude` 对注册的插件进行二次过滤，这个是禁止名单，是数组，支持插件名的简写形式。
+- `$plugins.include` 对注册的插件进行二次过滤，这个是白名单，是数组，支持插件名的简写形式。
+- `$plugins.exclude` 对注册的插件进行二次过滤，这个是黑名单，是数组，支持插件名的简写形式。
 
 ### `$config`
 
@@ -207,9 +193,55 @@ $app:
 
 这个里放的是当前命令的信息，一般来说用处不是很大
 
-### `$semo`
+### `$core`
 
-这里放的是对工具函数库 `Utils` 的引用，用这个主要原因是插件有时也想知道和处理内部信息，但是如果是在自己插件内部依赖和导入 `@semo/core` 由于位置不同，实际上是占用两份内存，而且自己导入这部分由于没有经过初始化，所以缺失必要的信息，通过 `argv.$semo.Utils.getInternalCache().get('argv')` 能够正确取到运行时的数据。
+`2.x` 重构了项目结构，很多强相关的方法放到了类 `Core` 里，这是 Core 的实例。
+
+### Log 相关
+
+`2.x` 新增，用于方便的输出 Log
+
+```js
+argv.$log = log
+argv.$info = info
+argv.$error = error
+argv.$warn = warn
+argv.$success = success
+argv.$jsonLog = jsonLog
+argv.$colorfulLog = colorfulLog
+argv.$colorize = colorize
+```
+
+其中只有 `argv.$colorize` 是用于给文本上色的，其他的都是用于输出日志的。
+
+### Debug 相关
+
+```js
+argv.$debugCore = this.debugCore
+argv.$debugCoreChannel = this.debugCoreChannel
+argv.$debugChannel = this.debugChannel
+```
+
+如果你使用时加上 `DEBUG=*`，会看到核心打印的调试信息，如果你也想用上这个能力，可以使用这几个 API。
+
+### Prompt 相关
+
+```js
+argv.$prompt = {
+  confirm,
+  checkbox,
+  expand,
+  input,
+  password,
+  rawlist,
+  select,
+  search,
+  editor,
+  number,
+}
+```
+
+这是对 @inquirer/prompts 的封装，可以参考 inquirer 的文档。
 
 ## 内置的配置管理相关方法
 

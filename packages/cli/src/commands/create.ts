@@ -86,7 +86,7 @@ export const handler = async function (
 ) {
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
-  argv.branch = argv.branch || 'master'
+  argv.branch = argv.branch || 'main'
   argv.tag = argv.tag ? _.castArray(argv.tag) : []
 
   try {
@@ -131,7 +131,7 @@ export const handler = async function (
               repo: repos[key],
               name: key.replace(/_/g, '-'),
               description: '',
-              branch: 'master',
+              branch: 'main',
               tags: [],
             }
           }
@@ -156,7 +156,7 @@ export const handler = async function (
             )
         if (template && repos[template]) {
           argv.repo = repos[template].repo || error('Repo not found')
-          argv.branch = repos[template].branch || 'master'
+          argv.branch = repos[template].branch || 'main'
         } else {
           const answer: any = await argv.$prompt.select({
             message: `Please choose a pre-defined repo to continue:`,
@@ -173,7 +173,7 @@ export const handler = async function (
           })
 
           argv.repo = repos[answer].repo || error('Repo not found')
-          argv.branch = repos[answer].branch || 'master'
+          argv.branch = repos[answer].branch || 'main'
         }
       } else if (argv.empty || !argv.repo) {
         shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
@@ -281,13 +281,18 @@ export const handler = async function (
 
     // init basic structure
     if (argv.initSemo) {
-      const initExtra = argv.yarn ? '--yarn' : ''
+      let initExtra: string = ''
+      if (yarnFound) {
+        initExtra = '--pm yarn'
+      } else if (pnpmFound) {
+        initExtra = '--pm pnpm'
+      } else if (npmFound) {
+        initExtra = '--pm npm'
+      }
       if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
-        shell.exec(
-          `${argv.scriptName} init --exec-mode --plugin --force ${initExtra}`
-        )
+        shell.exec(`${argv.scriptName} init --plugin --force ${initExtra}`)
       } else {
-        shell.exec(`${argv.scriptName} init --exec-mode --force  ${initExtra}`)
+        shell.exec(`${argv.scriptName} init --force  ${initExtra}`)
       }
       success('Initial basic structure complete!')
     }

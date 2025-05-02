@@ -11,7 +11,7 @@ export const aliases = 'app'
 
 export const builder = async function (yargs: Argv) {
   const argv = (await yargs.argv) as ArgvExtraOptions
-  argv.$core.extendSubCommand(
+  argv.$core?.extendSubCommand(
     'application',
     'semo-plugin-application',
     yargs,

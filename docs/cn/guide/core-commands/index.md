@@ -150,7 +150,6 @@ Create a create project from specific repo
 
 选项：
   --version      显示版本号                                                                                       [布尔]
-  --yarn         use yarn command                                                                        [默认值: false]
   --yes, -y      run npm/yarn init with --yes                                                             [默认值: true]
   --force, -F    force download, existed folder will be deleted!
   --merge, -M    merge config with exist project folder!
@@ -167,10 +166,10 @@ Create a create project from specific repo
 ### 从任意代码仓库初始化
 
 ```
-semo create PROJECT_NAME PROJECT_REPO_URL master -f
+semo create PROJECT_NAME PROJECT_REPO_URL main -f
 ```
 
-这里可以看出，我们用 create 命令可以从任意 git 仓库地址下载代码，任何代码仓库都可以是我们的项目模板。其中 `master` 是分支名，默认就是 `master` 所以可以省略，`-f` 的意思是如果目录已经存在，会先删除原来的，再重新创建。
+这里可以看出，我们用 create 命令可以从任意 git 仓库地址下载代码，任何代码仓库都可以是我们的项目模板。其中 `main` 是分支名，默认就是 `main` 所以可以省略，`-f` 的意思是如果目录已经存在，会先删除原来的，再重新创建。
 
 create 命令除了把代码下载下来，还帮着把原来的 `.git` 目录删除了，并且重新初始化了一个空的 `.git` 目录，然后把项目的依赖都自动下载下来了。
 
@@ -241,7 +240,7 @@ semo create PROJECT_NAME --template
 export const hook_create_project_template = {
   demo_repo: {
     repo: 'demo_repo.git',
-    branch: 'master',
+    branch: 'main',
     alias: ['demo'],
   },
 }
@@ -258,7 +257,7 @@ semo create PROJECT_NAME --template=demo_repo
 在创建业务项目或者插件时，不推荐从空项目开始，因为还要考虑很多工程化的问题，技术选型的问题，推荐归纳总结自己公司常用的脚手架项目，然后通过统一的方式进行初始化。比如内置的插件模板，初始化后，可以直接编写逻辑，然后代码上传到 `Github` 再执行 `npm version patch && npm publish` 即可发布到 npm 仓库了。关于如何开发一个插件并且发布到 `npm` 仓库，会单独写文档说明。另外，需要注意，这里的脚手架项目可以是任意语言实现的。
 :::
 
-剩余的其他几个选项也很好理解，`--yarn` 声明项目使用 `yarn` 来初始化和安装依赖，`--add` 和 `--add-dev` 用来在初始化时指定新的依赖包。`--merge` 是说不删除原来的项目，而是进入项目目录，然后应用 `--init`, `--add`, `--add-dev`。
+`--add` 和 `--add-dev` 用来在初始化时指定新的依赖包。`--merge` 是说不删除原来的项目，而是进入项目目录，然后应用 `--init`, `--add`, `--add-dev`。
 
 ## `semo generate <component>`
 
@@ -291,7 +290,7 @@ Generate component sample code
 semo generate command generate/test --extend=semo
 ```
 
-具体怎么实现这些代码生成命令，这里是没有做约束的，因为首先 es6 内置的模板字符串机制可以解决大多数问题，然后 `Semo` 还内置了 `lodash`，其 `_.template` 方法也比较灵活，最后只要把组装好的样板代码放到想放的位置即可。
+具体怎么实现这些代码生成命令，这里是没有做约束的，因为首先 es6 内置的模板字符串机制可以解决大多数问题，然后 `lodash` 其 `_.template` 方法也比较灵活，最后只要把组装好的样板代码放到想放的位置即可。
 
 因为这部分都是基于 `Semo` 的，所以相关的配置建议放到 `.semorc.yml` 文件，例如自动生成的配置里就有的：
 
@@ -341,36 +340,36 @@ REPL(read-eval-print-loop)：交互式解析器，每一个现代的编程语言
 
 ```js
 // src/hooks/index.ts
-export const hook_repl = () => {
-  return {
+export const hook_repl = {
+  semo: {
     add: async (a, b) => {
       return a + b
     },
     multiple: async (a, b) => {
       return a * b
     },
-  }
+  },
 }
 ```
 
 然后在 REPL 环境，就可以使用了:
 
 :::tip
-`hook_repl` 返回的信息都注入到了 REPL 里的 Semo 对象。
+`hook_repl` 返回的信息都注入到了 REPL 里的 Semo.hooks.application。
 :::
 
 ```
->>> add
+>>> Semo.hooks.application.add
 [Function: add]
 >>> await Semo.add(1, 2)
 3
->>> multiple
+>>> Semo.hooks.application.multiple
 [Function: multiple]
 >>> await Semo.multiple(3, 4)
 12
 ```
 
-在实际的业务项目中，会把项目中的公共方法，工具函数等等都注入进去，这对开发以及后面的排查问题都是很有帮助的。默认 `Semo` 把自己的 `Utils` 工具对象注入进去了，里面有一些是 `Semo` 自定义的工具函数，更多的是把 `Semo` 引入的依赖包暴露出来，比如 `lodash`。
+在实际的业务项目中，会把项目中的公共方法，工具函数等等都注入进去，这对开发以及后面的排查问题都是很有帮助的。默认 `Semo` 把自己的运行时对象注入进去了，比如 Semo.argv。
 
 :::tip
 在具体的实践中，我们把数据库，缓存，OSS，Consul, ElasticSearch 等等多种公司的基础设施注入了进来，写成插件，使得我们更容易的直接访问基础设施。
@@ -403,7 +402,7 @@ export const hook_repl = () => {
 ### 释放对象的属性到 REPL 环境
 
 ```
->>> Semo.extract(Semo)
+>>> Semo.extract(Semo, ['hooks.application.add', 'hooks.application.multiple'])
 ```
 
 这个操作的潜在风险就是会覆盖 REPL 环境里内置的对象，但是这个 API 的目的和作用是释放一些明确的对象，比如从 ORM 里释放一个数据库中所有的表模型。
@@ -413,10 +412,15 @@ export const hook_repl = () => {
 ```
 $plugin:
   semo:
-    extract: Semo
+    repl:
+      hook: true
+      extract:
+        Semo:
+          - hooks.application.add
+          - hooks.application.multiple
 ```
 
-这种方式会把 Semo 下的所有属性都注入进去，如果只想注入 `Utils`，支持这么写。
+如果只想注入 `Utils`，支持这么写。
 
 ```
 $plugin:
@@ -432,34 +436,36 @@ $plugin:
 - Semo.hooks 为了对各个插件的信息进行隔离，所有插件注入的信息按照插件名称注入到这里，各个插件不会相互干扰
 - Semo.argv 这个是进入命令的 `yargs` argv参数，有时可以用于看看配置合并是否生效，以及实验 yargs 的参数解析。
 - Semo.repl 当前 REPL 环境的对象实例
-- Semo.Utils 核心工具包，里面除了自定义的若干函数之外，会暴露出一些常用的第三方包，比如 `lodash`, `chalk` 等
+- Semo.Utils 核心工具包，里面除了自定义的若干函数之外 等
 - Semo.reload 重新执行 `hook_repl` 钩子，使用最新的钩子文件
 - Semo.import 用于临时实验一些 npm 包， 可以用 `semo cleanup` 清理缓存
-- Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo` 对象的一个补偿
+- Semo.extract 用于释放内部对象的键值到当前作用域，可以算作是把所有钩子的注入都放到 `Semo.hooks` 对象的一个补偿
 
-### 默认注入到全局作用域的方法
+### 注入到全局作用域的三个方法
 
-如果觉得默认的对象层次比较深，可以通过配置或者参数使得默认注入到 REPL 的全局作用域。方式就是 `--extract`
+如果觉得默认的对象层次比较深，可以通过配置或者参数使得默认注入到 REPL 的全局作用域。
+
+#### 方式一：是 `--extract` 选项
 
 ```
 semo repl --extract Semo.hooks
 ```
 
-配置的方式: 修改 `.semorc.yml`
+#### 方式二：是配置: 修改 `.semorc.yml`
 
 ```
 $plugin:
   semo:
-    extract: Semo.hooks
+    extract: Semo.hooks.application
 ```
 
-或
+#### 方式三：是在 REPL 里执行 Semo.extract
 
 ```
-CommandDefault:
-  repl:
-    extract: Semo.hooks
+>>> Semo.extract(Semo, ['hooks.application.add', 'hooks.application.multiple'])
 ```
+
+Semo.extract 很灵活，可以指定要导出哪些 key，也可以留空，默认导出所有的 key。
 
 ### 支持执行一个repl文件
 
@@ -473,15 +479,15 @@ exports.handler = async (argv, context) => {}
 module.exports = async (argv, context) => {}
 ```
 
-需要注意，只有通过 `context` 才能注入到 REPL，如果你的代码不放到函数当中，也是可以执行的，但是不能获取到之前其他逻辑注入到context中的内容，也不同获得 `argv` 对象，另外，必须通过 `global` 对象注入到REPL当中。
+既可以通过 context 添加，也可以返回一个对象来添加。
 
 这个机制有什么作用呢？主要用途是在我们开发调试时，有一些想在REPL里进行的调试是有许多前置逻辑的，如果都在REPL里一行一行的输入太麻烦，所以通过这种方式就可以把调试逻辑固化下来。
 
-还有一个角度是: `semo repl --require` 这种方式，如果全局设置会比较固定，不宜太多，而通过命令行设置又需要每次都输入，不够方便，利用执行脚本的方式，我们可以灵活的组织逻辑，将我们想要注入的常用工具库注入，甚至在注入之前还可以做一番设置，部分可以取代之前的 `--require` 机制和 hook 机制。
+repl 文件和 extract 的区别在于，extract 只能操作已经存在的对象，而 repl 文件可以添加任何需要的对象到 REPL，从这个角度讲，类似于 hook_repl，并且操作起来更加方便，不需要考虑钩子实现的格式。
 
 ## `semo run <PLUGIN> [COMMAND]`
 
-这个命令可以像 yarn create 一样，实现直接执行远程插件包里的命令的效果
+这个命令可以像 pnpm create 一样，实现直接执行远程插件包里的命令的效果
 
 例如：
 
@@ -512,13 +518,13 @@ semo run serve -- --public-dir=.
 如果你在 npm 的 semo 插件包也是在 scope 下的，在用 run 时需要指定 scope
 
 ```
-semo run xxx --SCOPE yyy
+semo run xxx --scope yyy
 ```
 
 `run` 命令运行的插件肯定是缓存到本地了，只不过不在全局插件目录 `.semo/node_modules`, 而是在 `.semo/run_plugin_cache/node_modules` 目录，默认如果存在就会用缓存里的插件，如果想更新需要用参数 --upgrade
 
 ```
-semo run serve --UPGRADE|--UP
+semo run serve --force
 ```
 
 有些插件可能依赖于另一些插件，如果有这种情况，就需要手动指定依赖插件，实现一起下载，为什么不能基于 npm 的依赖关系呢，可以看一下下面这个例子：
@@ -528,12 +534,10 @@ semo run serve --UPGRADE|--UP
 :::
 
 ```
-semo run read READ_URL --format=editor --DEP=read-extend-format-editor
+semo run read READ_URL --format=editor --with=read-extend-format-editor
 ```
 
 editor 这个插件在开发时是依赖于 read 的，但是在运行时，read 指定的参数却是 editor 这个插件实现的，所以只能手动指定依赖了。
-
-你可能已经发现这个命令的所有参数和选项都是大写的，这是为了减少与其他插件的冲突，我们最好约定所有的插件的参数和选项都用小写。
 
 ## `semo script [file]`
 
@@ -621,7 +625,6 @@ $ semo st
   os       :  macOS 10.15
   node     :  8.16.2
   npm      :  6.4.1
-  yarn     :  1.15.2
   hostname :  [MY_HOST]
   home     :  [MY_HOME]
   shell    :  [MY_SHELL]
@@ -633,6 +636,10 @@ $ semo st
 
 这个命令的作用是输出一段 `Shell` 脚本，放到 `.bashrc` 或者 `.zshrc` 里，就能够获得子命令的自动补全效果。
 
+```bash
+eval "$(semo completion)"
+```
+
 :::warning
-由于 `Semo` 的性能有些差，所以这个自动补全虽然能用，但是体验极差，不建议使用。
+由于 Semo 在执行时是实时扫描各个层级的插件定义的命令，所以一点环境中插件和命令过多，Semo 执行起来会比较慢，这种情况就不建议把 completion 放到 `.bashrc` 或者 `.zshrc` 里了。
 :::

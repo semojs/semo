@@ -208,3 +208,71 @@ export const isUsingTsRunner = function (): boolean {
     getNodeRuntime() === 'tsx'
   )
 }
+
+/**
+ * Clear console
+ */
+export const clearConsole = function () {
+  if (process.stdout.isTTY) {
+    process.stdout.write(
+      process.platform === 'win32' ? '\x1B[2J\x1B[0f' : '\x1B[2J\x1B[3J\x1B[H'
+    )
+  }
+}
+
+/**
+ * Moves the cursor to the top of the console.
+ */
+export const moveToTopConsole = function () {
+  if (process.stdout.isTTY) {
+    process.stdout.write(process.platform === 'win32' ? '\\x1B[0f' : '\\x1B[H')
+  }
+}
+
+/**
+ * Check if obj is a Promise
+ *
+ * Copy from `is-promise` npm module
+ */
+export const isPromise = (obj) => {
+  return (
+    !!obj &&
+    (typeof obj === 'object' || typeof obj === 'function') &&
+    typeof obj.then === 'function'
+  )
+}
+
+/**
+ * Used for get deep value from a object or function or Promise
+ *
+ * @param func a Promise, a Function or a literal object
+ * @param getPath a key path
+ * @param args arguments for function
+ */
+export const run = async (func, getPath = '', ...args) => {
+  let result
+  if (isPromise(func)) {
+    result = await func
+  } else if (_.isFunction(func)) {
+    result = await func(...args)
+  } else if (_.isArray(func) && _.isFunction(func[0])) {
+    const newFunc = func[0]
+    func.shift()
+    result = await newFunc(...func)
+  } else if (_.isObject(func)) {
+    result = func
+  } else {
+    throw new Error('invalid func')
+  }
+
+  const that = result
+
+  result = !getPath ? result : _.get(result, getPath)
+
+  if (_.isFunction(result)) {
+    // pass this obj to function/method call
+    result = await result.call(that, ...args)
+  }
+
+  return result
+}

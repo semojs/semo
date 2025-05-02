@@ -1,49 +1,49 @@
 # Project Integration
 
-Integrating with existing business projects was the original intention behind `Semo` development. If a project already has a custom and functional command-line tool, it should be carefully considered whether to switch to the `Semo` style. Fortunately, integrating with `Semo` is relatively simple. If the project lacks command-line infrastructure, it's recommended to give `Semo` a try.
+Integrating with existing business projects was the original intention of `Semo`'s development. If a project already has a custom command-line tool that works well, careful consideration should be given to whether switching to the `Semo` style is necessary. Fortunately, `Semo` integration is relatively simple. If the project previously lacked command-line infrastructure, trying `Semo` is recommended.
 
 ## Why Integrate
 
-- **Access to Command-line Infrastructure:** Every project has operations that are not suitable or feasible to perform in the backend. Through a command-line tool, interactions with the system and data become simpler.
-- **Access to Scripting Infrastructure:** Some scripts need to be executed, and common requirements include naming, location, and how to interact with business or data.
-- **Ability to Use Related Semo Plugins:** Configure and influence plugin behavior.
-- **Access to a Business-related REPL Environment:** Invoke methods encapsulated in the project or interact with encapsulated infrastructure.
+- Gain command-line infrastructure. A project always has some operations that are unsuitable for or haven't been implemented in the backend. A command-line tool allows for simpler interaction with the system and data.
+- Gain script infrastructure. There are always scripts that need execution. Common requirements include determining script names, locations, and how they interact with business logic or data.
+- Utilize relevant `Semo` plugins and influence/change their behavior through configuration.
+- Obtain a business-related `REPL` environment, allowing arbitrary calls to encapsulated methods within the project or interaction with encapsulated infrastructure.
 
 ## Project Integration Methods
 
-Not all features are necessarily needed; use them as needed.
+Not all features may be necessary; use them as needed.
 
-### 1. Add `Semo` as a Project Dependency
+### 1. Add `Semo` as a project dependency
 
-Using `yarn` as an example:
+Here's an example using `pnpm`:
 
 ```
-yarn add @semo/cli
+pnpm add -g @semo/cli
 ```
 
-### 2. Initialize in the Project Root Directory
+### 2. Initialize in the project root directory
 
 ```
 semo init [--typescript]
 ```
 
-Determine whether the project is based on TypeScript. If so, include the `--typescript` parameter. The initialization process creates a configuration file `.semorc.yml` in the project's root directory and adds a `bin/semo` directory. In theory, this should not conflict with existing projects.
+Check if the project is built using Typescript. If so, include the `--typescript` parameter. The initialization process creates a configuration file `.semorc.yml` in the project root directory and adds a `bin/semo` directory. Theoretically, this should not conflict with the existing project.
 
-### 3. Add Some Commands or Scripts
+### 3. Add some commands or scripts
 
 ```
 semo generate command xxx
-semo generate script yyy
+semo generate script yyy // Requires installing the semo-plugin-script plugin
 ```
 
-### 4. Define Project-specific Plugins
+### 4. Define project-specific plugins
 
-Following the progressive development concept, if a plugin is only intended for use within the project, it can be considered part of the project code. Once it matures, it can easily be converted into an npm package for sharing with other projects.
+Similar to the concept of progressive development, if a plugin is only used within its own project, it can be part of the project code. Once optimized and mature, it can easily be converted into an npm package format for sharing with other projects.
 
 ```
 semo generate plugin zzz
 ```
 
-### 5. Inject Business Code into the REPL Environment
+### 5. Inject business code into the REPL environment
 
-Refer to "Plugin Development->Example 2: Implement hook_repl" to see how methods are injected into the REPL. Note that all methods can only be injected into the Semo object in the REPL variable space, which protects the REPL variable space. For business methods, import them and return them according to the format requirements of `hook_repl`. To make the methods effective, you need to handle the dependencies of the methods on the environment, such as database connections.
+Refer to `Plugin Development -> Example 2: Implement hook_repl` to see how methods are injected into the `REPL`. Note that all methods can only be injected into the REPL's Semo object; this protects the REPL's variable namespace. For business methods, simply import them and return according to the format requirements of `hook_repl`. To make the methods effective, you also need to handle their environmental dependencies yourself, such as database connections, etc.

@@ -57,7 +57,6 @@ export const handler = async function (argv: ArgvExtraOptions) {
       info(
         `Use ${colorize('green', 'plugin install')} sub command to install plugins.`
       )
-      // Utils.info(`Use ${Utils.chalk.bold.green('plugin list --remote')} to see available plugins.`)
 
       return
     }

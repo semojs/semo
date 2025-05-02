@@ -17,7 +17,8 @@ export const builder = async function (yargs: Argv) {
     describe:
       'For reading/writing configs from/to global yml rc file, default is false',
   })
-  argv.$core.extendSubCommand('config', argv.$scriptName, yargs, __dirname)
+
+  argv.$core?.extendSubCommand('config', argv.scriptName, yargs, __dirname)
 }
 
 export const handler = async function () {}

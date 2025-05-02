@@ -17,7 +17,7 @@ import { ensureDirSync } from 'fs-extra'
 import getStdin from 'get-stdin'
 import { globSync } from 'glob'
 import _ from 'lodash'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -55,10 +55,12 @@ import {
   PluginConfig,
 } from './types.js'
 import {
+  exec,
   formatRcOptions,
   getAbsolutePath,
   getPackagePath,
   isUsingTsRunner,
+  md5,
 } from './utils.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -181,11 +183,7 @@ export class Core {
     key: string = '',
     defaultValue: unknown = undefined
   ): string | Record<string, unknown> {
-    let argv: Record<string, unknown> = {}
-
-    if (_.isEmpty(argv)) {
-      argv = this.getApplicationConfig() || {}
-    }
+    const argv = this.parsedArgv
 
     return key
       ? (_.get(argv, key, defaultValue) as string | Record<string, unknown>)
@@ -308,11 +306,7 @@ export class Core {
         applicationConfig.version = packageInfo.version
       }
 
-      // args > package > current rc
-      if (packageInfo.rc) {
-        packageInfo.rc = formatRcOptions(packageInfo.rc)
-        applicationConfig = Object.assign({}, applicationConfig, packageInfo.rc)
-      }
+      // args > package
       if (packageInfo[this.scriptName]) {
         packageInfo[this.scriptName] = formatRcOptions(
           packageInfo[this.scriptName]
@@ -580,6 +574,49 @@ export class Core {
   }
 
   /**
+   * Load plugin rc config
+   *
+   * @param name Plugin name
+   * @param location plugin installed directory name under ~/.semo
+   * @param home if load from HOME directory
+   */
+  loadPluginRc(name, location = '', home = true) {
+    const scriptName = this.scriptName
+
+    const downloadDir = home
+      ? process.env.HOME + `/.${scriptName}`
+      : process.cwd()
+    const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+    ensureDirSync(downloadDir)
+    ensureDirSync(downloadDirNodeModulesPath)
+
+    const packagePath = getPackagePath(name, [downloadDirNodeModulesPath])
+    const packageDirectory = path.dirname(packagePath)
+
+    const pluginConfig = this.parseRcFile(name, packageDirectory)
+    pluginConfig.dirname = packageDirectory
+
+    return pluginConfig
+  }
+
+  resolvePackage(name: string, location: string = '', home = true) {
+    const scriptName = this.scriptName
+    const downloadDir = home
+      ? process.env.HOME + `/.${scriptName}`
+      : process.cwd()
+    const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+
+    ensureDirSync(downloadDir)
+    ensureDirSync(downloadDirNodeModulesPath)
+
+    const pkgPath = require.resolve(name, {
+      paths: [downloadDirNodeModulesPath],
+    })
+    return pkgPath
+  }
+
+  /**
    * Load any package's package.json
    * @param {string} pkg package name
    * @param {array} paths search paths
@@ -662,6 +699,7 @@ export class Core {
 
     if (!_.isArray(pluginPrefixs)) {
       error('invalid --plugin-prefix')
+      return plugins
     }
 
     const topPluginPattern =
@@ -677,6 +715,7 @@ export class Core {
           '}'
         : pluginPrefixs.map((prefix) => `@*/${prefix}-plugin-*`).join(',')
 
+    // Scan plugins
     if (_.isEmpty(plugins) && enablePluginAutoScan) {
       plugins = {}
 
@@ -692,20 +731,22 @@ export class Core {
       // argv.packageDirectory not always exists, if not, plugins list will not include npm global plugins
       if (!argv.disableGlobalPlugin && argv.packageDirectory) {
         // process core same directory top level plugins
-        globSync(topPluginPattern, {
-          noext: true,
-          cwd: path.resolve(
-            argv.packageDirectory,
-            argv.orgMode ? '../../' : '../'
-          ),
-        }).forEach(function (plugin): void {
-          if (argv.packageDirectory) {
-            plugins[plugin] = path.resolve(
+        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+          globSync(pattern, {
+            noext: true,
+            cwd: path.resolve(
               argv.packageDirectory,
-              argv.orgMode ? '../../' : '../',
-              plugin
-            )
-          }
+              argv.orgMode ? '../../' : '../'
+            ),
+          }).forEach(function (plugin): void {
+            if (argv.packageDirectory) {
+              plugins[plugin] = path.resolve(
+                argv.packageDirectory,
+                argv.orgMode ? '../../' : '../',
+                plugin
+              )
+            }
+          })
         })
 
         // Only local dev needed: load sibling plugins in packageDirectory parent directory
@@ -724,23 +765,6 @@ export class Core {
             }
           })
         }
-
-        // Process core same directory org npm plugins
-        globSync(orgPluginPattern, {
-          noext: true,
-          cwd: path.resolve(
-            argv.packageDirectory,
-            argv.orgMode ? '../../' : '../'
-          ),
-        }).forEach(function (plugin): void {
-          if (argv.packageDirectory) {
-            plugins[plugin] = path.resolve(
-              argv.packageDirectory,
-              argv.orgMode ? '../../' : '../',
-              plugin
-            )
-          }
-        })
       }
 
       if (process.env.HOME && !argv.disableHomePlugin) {
@@ -761,77 +785,73 @@ export class Core {
           )
         }
 
-        // process home npm plugins
-        globSync(topPluginPattern, {
-          noext: true,
-          cwd: path.resolve(
-            process.env.HOME,
-            `.${scriptName}`,
-            'home-plugin-cache',
-            'node_modules'
-          ),
-        }).forEach(function (plugin): void {
-          if (process.env.HOME) {
-            plugins[plugin] = path.resolve(
+        // process home plugin-cache plugins
+        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+          globSync(pattern, {
+            noext: true,
+            cwd: path.resolve(
               process.env.HOME,
               `.${scriptName}`,
               'home-plugin-cache',
-              'node_modules',
-              plugin
-            )
-          }
+              'node_modules'
+            ),
+          }).forEach(function (plugin): void {
+            if (process.env.HOME) {
+              plugins[plugin] = path.resolve(
+                process.env.HOME,
+                `.${scriptName}`,
+                'home-plugin-cache',
+                'node_modules',
+                plugin
+              )
+            }
+          })
         })
 
-        // process home npm scope plugins
-        globSync(orgPluginPattern, {
-          noext: true,
-          cwd: path.resolve(process.env.HOME, `.${scriptName}`, 'node_modules'),
-        }).forEach(function (plugin): void {
-          if (process.env.HOME) {
-            plugins[plugin] = path.resolve(
+        // process home npm plugins
+        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+          globSync(pattern, {
+            noext: true,
+            cwd: path.resolve(
               process.env.HOME,
               `.${scriptName}`,
-              'node_modules',
-              plugin
-            )
-          }
+              'node_modules'
+            ),
+          }).forEach(function (plugin): void {
+            if (process.env.HOME) {
+              plugins[plugin] = path.resolve(
+                process.env.HOME,
+                `.${scriptName}`,
+                'node_modules',
+                plugin
+              )
+            }
+          })
         })
       }
 
       // process cwd(current directory) npm plugins
-      globSync(topPluginPattern, {
-        noext: true,
-        cwd: path.resolve(process.cwd(), 'node_modules'),
-      }).forEach(function (plugin) {
-        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+      ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+        globSync(pattern, {
+          noext: true,
+          cwd: path.resolve(process.cwd(), 'node_modules'),
+        }).forEach(function (plugin) {
+          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
+        })
       })
 
-      // process cwd(current directory) npm scope plugins
-      globSync(orgPluginPattern, {
-        noext: true,
-        cwd: path.resolve(process.cwd(), 'node_modules'),
-      }).forEach(function (plugin) {
-        plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-      })
-
+      // process local plugins
       const config = this.getApplicationConfig()
       const pluginDirs = _.castArray(config.pluginDir) as string[]
       pluginDirs.forEach((pluginDir) => {
         if (existsSync(pluginDir)) {
-          // process local plugins
-          globSync(topPluginPattern, {
-            noext: true,
-            cwd: path.resolve(process.cwd(), pluginDir),
-          }).forEach(function (plugin) {
-            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
-          })
-
-          // process local npm scope plugins
-          globSync(orgPluginPattern, {
-            noext: true,
-            cwd: path.resolve(process.cwd(), pluginDir),
-          }).forEach(function (plugin) {
-            plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+          ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+            globSync(pattern, {
+              noext: true,
+              cwd: path.resolve(process.cwd(), pluginDir),
+            }).forEach(function (plugin) {
+              plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
+            })
           })
         }
       })
@@ -854,7 +874,7 @@ export class Core {
       }
     }
 
-    // extraPluginDir plugins would not be in cache
+    // extraPluginDir comes from CLI, so it's dynamic.
     const extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
     if (
       extraPluginDirEnvName &&
@@ -863,20 +883,13 @@ export class Core {
     ) {
       const envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
 
-      // process cwd npm plugins
-      globSync(topPluginPattern, {
-        noext: true,
-        cwd: path.resolve(envDir),
-      }).forEach(function (plugin) {
-        plugins[plugin] = path.resolve(envDir, plugin)
-      })
-
-      // process cwd npm scope plugins
-      globSync(orgPluginPattern, {
-        noext: true,
-        cwd: path.resolve(envDir),
-      }).forEach(function (plugin) {
-        plugins[plugin] = path.resolve(envDir, plugin)
+      ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
+        globSync(pattern, {
+          noext: true,
+          cwd: path.resolve(envDir),
+        }).forEach(function (plugin) {
+          plugins[plugin] = path.resolve(envDir, plugin)
+        })
       })
     }
 
@@ -1059,8 +1072,6 @@ export class Core {
     this.debugCore('Register global middleware.')
     // add more internal values to argv using middleware
     yargsObj.middleware(async (argv) => {
-      argv.$scriptName = this.scriptName
-
       // For command use this instance
       argv.$core = this
 
@@ -1584,5 +1595,102 @@ export class Core {
       console.log(e.message)
     }
     return undefined
+  }
+
+  extendConfig(extendRcPath: string[] | string, prefix: string) {
+    let argv = this.parsedArgv
+
+    const extendRcPathArray = _.castArray(extendRcPath)
+
+    extendRcPathArray.forEach((rcPath) => {
+      rcPath = path.resolve(process.cwd(), rcPath)
+      if (rcPath && existsSync(rcPath)) {
+        try {
+          const rcFile = readFileSync(rcPath, 'utf8')
+          const parsedRc = yaml.parse(rcFile)
+          const extendRc = formatRcOptions(parsedRc)
+          if (prefix) {
+            const prefixPart = _.get(argv, prefix)
+            const mergePart = _.merge(prefixPart, extendRc)
+            argv = _.set(argv, prefix, mergePart)
+          } else {
+            argv = _.merge(argv, extendRc)
+          }
+        } catch (e) {
+          this.debugCore('load rc:', e)
+          warn(`Global ${rcPath} config load failed!`)
+        }
+      }
+
+      const nodeEnv = this.getNodeEnv(argv)
+      const extendRcEnvPath = path.resolve(
+        path.dirname(rcPath),
+        `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`
+      )
+      if (extendRcEnvPath && existsSync(extendRcEnvPath)) {
+        try {
+          const rcFile = readFileSync(extendRcEnvPath, 'utf8')
+          const parsedRc = yaml.parse(rcFile)
+          const extendRc = formatRcOptions(parsedRc)
+          if (prefix) {
+            const prefixPart = _.get(argv, prefix)
+            const mergePart = _.merge(prefixPart, extendRc)
+            argv = _.set(argv, prefix, mergePart)
+          } else {
+            argv = _.merge(argv, extendRc)
+          }
+        } catch (e) {
+          this.debugCore('load rc:', e)
+          warn(`Global ${extendRcEnvPath} config load failed!`)
+        }
+      }
+    })
+
+    return argv
+  }
+
+  /**
+   * Console Reader
+   *
+   * Mostly use less mode, if HOME can not be detected, it will fallback to console.log
+   *
+   * @param content The content to read
+   * @param plugin Plugin name, used to make up cache path
+   * @param identifier The content identifier, used to make up cache path
+   */
+  consoleReader(
+    content: string,
+    opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {}
+  ) {
+    const scriptName = this.scriptName
+
+    opts.plugin = opts.plugin || scriptName
+    opts.identifier = opts.identifier || Math.random() + ''
+
+    if (process.env.HOME) {
+      const tmpPath = path.resolve(
+        process.env.HOME,
+        `.${scriptName}/cache`,
+        <string>opts.plugin,
+        md5(opts.identifier)
+      )
+      ensureDirSync(path.dirname(tmpPath))
+      writeFileSync(tmpPath, content)
+
+      if (opts.tmpPathOnly) {
+        return tmpPath
+      }
+
+      exec(`cat ${tmpPath} | less -r`)
+
+      // Maybe the file already removed
+      if (existsSync(tmpPath)) {
+        unlinkSync(tmpPath)
+      }
+    } else {
+      console.log(content)
+    }
+
+    return true
   }
 }

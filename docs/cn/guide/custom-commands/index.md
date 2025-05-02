@@ -39,7 +39,7 @@ export const disabled = false // Set to true to disable this command temporarily
 export const command = 'test'
 export const desc = 'test description'
 // export const aliases = ''
-// export const middleware = (argv) => {}
+// export const middlewares = (argv) => {}
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
@@ -55,7 +55,7 @@ export const handler = async function (argv: any) {
 
 ## 命令行的属性说明
 
-### `disabled`
+### `disabled` 或者 `disable`
 
 这个是标识是否有禁用这个命令，当禁用时不光看不见，也不起作用。主要是用于想禁用命令又不想说删除代码的场景。
 
@@ -63,7 +63,9 @@ export const handler = async function (argv: any) {
 
 这几个属性都是 `yargs` 命令规范里的，很好理解，无需赘述。可以参考 [yargs 相关文档](https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module)
 
-### `middleware`
+`desc` 也可以写成 `description` 或者 `describe`
+
+### `middlewares`
 
 没错，这里是支持中间件的，好处是什么呢，就是你可以把相似的处理逻辑，提取成中间件，然后在多个命令中复用代码，一般只在复杂的业务场景下需要。
 
@@ -87,15 +89,6 @@ const a = Utils.pluginConfig('a', 1)
 
 这里内部会计算从哪个插件配置里取值。
 
-## 关于 `handler` 的返回值
-
-由于 `Semo` 统一了入口，如果真的需要通过 `onFinishCommand` 回收资源的化，命令行无法直接调用，但是可以通过启用 `after_command` 这个钩子来实现。同时命令的返回值也会参与逻辑。
-
-- return true 或 什么都不返回，效果都是执行 `onFinishCommand`
-- return false，不执行 `onFinishCommand`，此时即使启用了 `after_command` 钩子也不会执行。
-
-命令行的资源回收要交给 `after_command` 这个钩子来实现。
-
 ## 关于子命令
 
 注意到，代码模板里有一行：
@@ -107,11 +100,12 @@ yargs.commandDir('test')
 这一行的效果是去 test 目录去找子命令。这里有一个缺陷，当插件想让其他插件扩展这个子命令时，其他插件没办法做到，那怎么做呢，`Semo` 基于这个方法封装了一下。
 
 ```
-Utils.extendSubCommand('test', 'test-plugin', yargs, __dirname)
+const argv = await yargs.argv
+argv.$core?.extendSubCommand('test', 'semo-plugin-test', yargs, __dirname)
 ```
 
 这里重点是前两个参数要填写正确，然后其他插件怎么扩展子命令呢，在创建命令的时候这么写：
 
 ```
-semo generate command test/subcommand --extend=test-plugin
+semo generate command test/subcommand --extend=semo-plugin-test
 ```

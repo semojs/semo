@@ -17,7 +17,7 @@ export const builder = function (yargs: any) {
 }
 
 export const handler = async function (argv: any) {
-  const scriptName = argv.$scriptName
+  const scriptName = argv.scriptName
   let configPath: string
   if (argv.global) {
     configPath = process.env.HOME

@@ -15,10 +15,10 @@
 
 ### 1. 将 `Semo` 添加为项目依赖
 
-这里以 `yarn` 为例：
+这里以 `pnpm` 为例：
 
 ```
-yarn add @semo/cli
+pnpm add -g @semo/cli
 ```
 
 ### 2. 在项目根目录进行初始化
@@ -33,7 +33,7 @@ semo init [--typescript]
 
 ```
 semo generate command xxx
-semo generate script yyy
+semo generate script yyy // 需要安装 semo-plugin-script 插件
 ```
 
 ### 4. 定义项目自己的插件

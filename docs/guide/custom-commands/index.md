@@ -1,10 +1,10 @@
 # Custom Commands
 
-Whether it's developing plugins for `Semo` or building applications and utility scripts based on `Semo`, one thing that cannot be avoided is adding `Semo` command lines before encapsulating plugins. In order to achieve a smooth development experience, `Semo` has been continuously optimizing the entire process, which is still ongoing. This article will discuss how to define commands in `Semo`.
+Whether developing `Semo` plugins or building applications and tool scripts based on `Semo`, adding `Semo` command lines is almost unavoidable before encapsulating plugins. To achieve a smooth development experience, `Semo` has been continuously optimizing the entire process, and this is still ongoing. This article explains how to define commands under `Semo`.
 
-## Preparation Stage
+## Preparation Phase
 
-As mentioned later, we don't need to create command code templates ourselves, as it would be repetitive work. Therefore, a command line code generator is provided. But where should this code be placed? First, it needs to be declared. The configuration file recognized by `Semo` here is `.semorc.yml`, and the effective configuration is `commandDir`. Sometimes, if the project is based on TypeScript, you also need to configure a TypeScript command line directory `commandMakeDir`. If you are defining commands for other plugins, you need to define the corresponding `extandDir` and `extandMakeDir`.
+As will be mentioned later, we don't need to create command code templates ourselves; it's entirely repetitive work. Therefore, a command-line code generator is provided. But where should this code be placed? First, it needs to be declared. The configuration file recognized by `Semo` here is `.semorc.yml`, and the effective configuration is `commandDir`. Sometimes the project is based on TS, requiring configuration of a TS command-line directory `commandMakeDir`. Sometimes you are writing subcommands for commands defined by other plugins; in this case, the corresponding `extendDir` and `extendMakeDir` need to be defined.
 
 Taking plugin development as an example, the configuration file is roughly as follows:
 
@@ -17,17 +17,17 @@ extendDir: lib/extends
 extendMakeDir: src/extends
 ```
 
-## Creating a Command
+## The Command for Creating Commands
 
-`Semo` has a built-in code generation mechanism, including a command to generate code for adding new commands:
+`Semo` has a built-in code generation mechanism, including a code generation command for adding new commands:
 
 ```
 semo generate command COMMAND_NAME COMMAND_DESCRIPTION
 ```
 
-## Example Command Code Template
+## Command-line Code Template Example
 
-Here's an example of a TypeScript-based command:
+Here is an example using the TS version command:
 
 ```bash
 semo generate command test 'test description'
@@ -39,7 +39,7 @@ export const disabled = false // Set to true to disable this command temporarily
 export const command = 'test'
 export const desc = 'test description'
 // export const aliases = ''
-// export const middleware = (argv) => {}
+// export const middlewares = (argv) => {}
 
 export const builder = function (yargs: any) {
   // yargs.option('option', { default, describe, alias })
@@ -51,25 +51,27 @@ export const handler = async function (argv: any) {
 }
 ```
 
-You can see that there are some differences compared to commands in the yargs framework because `Semo` is based on `yargs`, so these differences are customized based on the extensibility of `yargs`.
+As you can see, compared to commands in the yargs framework, there are some differences. Since `Semo` is based on `yargs`, the differences here are customizations based on `yargs`'s extensibility.
 
-## Explanation of Command Properties
+## Explanation of Command-line Attributes
 
-### `disabled`
+### `disabled` or `disable`
 
-This indicates whether the command is disabled. When disabled, it is not visible or functional. It's mainly used in scenarios where you want to disable a command without deleting the code.
+This indicates whether the command is disabled. When disabled, it is not only invisible but also inactive. Mainly used in scenarios where you want to disable a command without deleting the code.
 
 ### `command`, `desc`, `aliases`, `builder`, `handler`
 
-These properties are all part of the `yargs` command specification and are straightforward. They can be referred to in the [yargs documentation](https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module).
+These attributes are part of the `yargs` command specification and are easy to understand, requiring no further explanation. You can refer to the [yargs related documentation](https://github.com/yargs/yargs/blob/master/docs/advanced.md#providing-a-command-module)
 
-### `middleware`
+`desc` can also be written as `description` or `describe`.
 
-Yes, middleware is supported here. The advantage is that you can extract similar processing logic into middleware and reuse the code in multiple commands. It's generally needed in complex business scenarios.
+### `middlewares`
+
+Yes, middlewares are supported here. The benefit is that you can extract similar processing logic into middlewares and reuse the code across multiple commands. Generally needed only in complex business scenarios.
 
 ### `plugin`
 
-This is an attribute exclusive to `Semo` plugins. If you define commands within a plugin, the benefit of declaring this attribute is that you can retrieve global configuration from the configuration file using `Utils.pluginConfig`.
+This is an attribute specific to `Semo` plugins. If you define a command within a plugin, declaring this allows you to retrieve specific configurations from the global configuration file via `Utils.pluginConfig`.
 
 ~/.semo/.semorc.yml
 
@@ -79,39 +81,31 @@ $plugin:
     a: 1
 ```
 
-In the code, you can use:
+In the code, you can:
 
 ```
 const a = Utils.pluginConfig('a', 1)
 ```
 
-Internally, it calculates from which plugin configuration to retrieve the value.
+Internally, it will calculate which plugin's configuration to retrieve the value from.
 
-## About the Return Value of `handler`
+## Regarding Subcommands
 
-Since `Semo` has unified entry points, if you really need to recycle resources through `onFinishCommand`, it cannot be directly called by the command line. However, you can achieve this by enabling the `after_command` hook. Additionally, the return value of the command also participates in the logic.
-
-- Returning `true` or nothing executes `onFinishCommand`.
-- Returning `false` doesn't execute `onFinishCommand`. Even if the `after_command` hook is enabled, it won't execute.
-
-Resource recycling for command lines should be implemented using the `after_command` hook.
-
-## About Subcommands
-
-Note the line in the code template:
+Notice the line in the code template:
 
 ```
 yargs.commandDir('test')
 ```
 
-The effect of this line is to look for subcommands in the `test` directory. There is a flaw here: when a plugin wants other plugins to extend this subcommand, other plugins cannot do so. How to do it then? `Semo` encapsulates this method based on this method.
+The effect of this line is to look for subcommands in the `test` directory. There is a drawback here: when a plugin wants other plugins to extend this subcommand, other plugins cannot do so. How can it be done? `Semo` has wrapped this method.
+
+```typescript
+const argv = await yargs.argv
+await argv.$core?.extendSubCommand('test', 'semo-plugin-test', yargs, __dirname)
+```
+
+The key here is that the first two parameters must be filled in correctly. Then, how do other plugins extend the subcommand? When creating the command, write it like this:
 
 ```
-Utils.extendSubCommand('test', 'test-plugin', yargs, __dirname)
-```
-
-The key here is to fill in the first two parameters correctly. Then, how do other plugins extend subcommands? When creating a command, write it like this:
-
-```
-semo generate command test/subcommand --extend=test-plugin
+semo generate command test/subcommand --extend=semo-plugin-test
 ```

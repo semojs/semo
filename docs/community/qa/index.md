@@ -4,77 +4,79 @@ sidebar: auto
 
 # Frequently Asked Questions
 
-## Why is `Semo` so slow and how can it be optimized?
+## `Semo` is a bit slow, how can I optimize it?
 
-Compared to some scripts with relatively simple and pure logic, Semo considers many flexible settings, including but not limited to multi-layer scanning of plugins, configuration override rules, hook mechanisms, and so on. Among them, the most significant impact comes from the IO burden of plugin scanning. Currently, some optimizations have been made (such as introducing internal caching), which have had some effects. If the scanning results of plugins are thoroughly persisted, further performance improvements can be achieved, but this is a double-edged sword and requires consideration of update mechanisms. Continuous optimization will be carried out in the future.
+Compared to some scripts with simpler and more straightforward logic, Semo considers many flexibility settings, including but not limited to multi-layer scanning of plugins, configuration override rules, hook mechanisms, etc. Among these, the biggest impact comes from the I/O burden of plugin scanning. Some optimizations have already shown some effect.
 
-Furthermore, up to now, various possibilities of `Semo` in business development are being explored, and the temporary performance issues have not had a significant impact. Therefore, more emphasis is placed on exploring and compatibility with various possibilities.
+Furthermore, up to now, the focus has been on exploring the various possibilities of `Semo` in business development. Performance issues haven't been a major concern yet, so the priority has been on exploring and accommodating various possibilities.
 
-Speed can be further improved by narrowing down the scope of plugin scanning:
+Speed can be further increased by narrowing the plugin scan scope:
 
-```bash
+```
 semo status --disable-global-plugin --disable-home-plugin
 ```
 
-If you don't want to enter it every time, you can put it in the `.semorc.yml` file:
+If you don't want to type this every time, you can put it in the `.semorc.yml` file:
 
-```yaml
+```yml
 --disable-global-plugin: true
 --disable-home-plugin: true
 ```
 
 or
 
-```yaml
+```yml
 disableGlobalPlugin: true
 disableHomePlugin: true
 ```
 
 ## Can `Semo` directly run `Typescript` commands?
 
-Simply put, no, if it could, wouldn't it be `Deno`? However, it is possible under special conditions. Here are the steps:
+Simply put, no. If it could, wouldn't it become `Deno`? However, under specific conditions, it is possible. Here are the steps:
 
-**1. There should be `typescript` and `ts-node` packages in the project**
+**1. Your project should have the `typescript` and `tsx` packages**
 
-```bash
-yarn add typescript ts-node -D
+`ts-node` could also be an option here, but testing showed `tsx` has better compatibility.
+
+```
+pnpm add typescript tsx -D
 ```
 
 **2. Initialize tsconfig.json**
 
-```bash
+```
 npx tsc --init
 ```
 
-**Configuration should be modified according to needs. The minimum required configuration here is:**
+**You can configure it as needed, but the minimum required change is:**
 
-```json
-"target": "es6"
+```
+"target": "es6",
 ```
 
-The reason is that the converted code contains `async/await`.
+The reason is that the transformed code contains `async/await`.
 
-**3. Configure a scripts command in package.json**
+**3. Configure a scripts command in `package.json`**
 
-```json
+```
 "scripts": {
-    "semo": "node --require ts-node/register ./node_modules/@semo/cli/lib/bin.js"
+    "semo": "tsx ./node_modules/@semo/cli/lib/bin.js"
 }
 ```
 
 **4. Modify `.semorc.yml`**
 
-Add support for Typescript
+Add support for typescript:
 
-```yaml
+```
 typescript: true
 ```
 
-**5. Finally, create a TypeScript command line script**
+**5. Finally, create a TypeScript command-line script**
 
-```bash
+```
 semo g command test
-yarn semo test
+pnpm semo test
 ```
 
-This approach is more suitable for defining local commands. The performance is slower than executing compiled code, but the development experience is better. Generally, the most commonly used method is to let Semo execute the compiled commands.
+Lastly, this method is more suitable for defining local commands. Performance is slower than executing compiled code, but the development experience is better. We can even choose not to build the Semo code at all and only execute it locally under tsx.

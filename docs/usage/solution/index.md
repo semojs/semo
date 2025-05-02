@@ -1,21 +1,21 @@
 # Solutions
 
-`Semo` solutions are first and foremost solutions tailored to specific scenarios. Secondly, they leverage some of `Semo`'s capabilities. If `Semo` is not used, then it is still a solution, unrelated to `Semo`.
+A `Semo` solution is primarily a solution designed for a specific scenario, and secondarily, it might leverage some of `Semo`'s capabilities. If `Semo` is not used, it remains a solution, just unrelated to `Semo`.
 
-## Enterprise Solutions
+## Enterprise-level Solutions
 
 ```
-- Frontend project scaffolding
-- Backend project scaffolding
-- Admin project scaffolding
-- Mini-program development scaffolding
+- Front-end project scaffold
+- Back-end project scaffold
+- Admin project scaffold
+- Mini-program development scaffold
 ...
 ```
 
-If combined with different types of businesses, such as e-commerce, finance, and so on, various variants can be formed. Even the same type can have different solutions. Therefore, in the end, we accumulate technical expertise that suits our own enterprise, enabling us to achieve standardization and technological accumulation in the enterprise development process. These scaffolding projects are designed to improve the consistency and efficiency of internal projects in an enterprise. They may not necessarily need to be open-source or meet the usage scenarios of other companies. However, internally within the enterprise, scaffolding can reduce redundant construction, improve project consistency, and save costs for future development and maintenance.
+If different types of businesses are added, such as e-commerce, finance, etc., many variations can be combined. Different solutions can exist for the same type. Therefore, the ultimate goal within an enterprise is to build suitable technology accumulation, enabling standardization and technological consolidation during the enterprise's growth. This type of scaffold project aims to improve the consistency and development efficiency of projects within the enterprise. It doesn't necessarily need to be open-source or meet the usage scenarios of other companies. However, within the enterprise, scaffolds can reduce repetitive construction, improve project consistency, and save costs in subsequent development and maintenance.
 
-## Open-Source Solutions
+## Open-source Solutions
 
-Although solutions vary from one enterprise to another, there can still be open-source solutions. For example, [Ant Design's Scaffold Market](https://scaffold.ant.design/). Currently, there are no open-source scaffolding projects based on `Semo`, but hopefully, there will be in the future.
+Although, as mentioned above, solutions differ across enterprises, open-source solutions can also exist, for example, [Ant Design's scaffold market](https://scaffold.ant.design/). Currently, there are no open-source scaffolds based on `Semo`, but hopefully, there will be in the future.
 
-Generally, we believe that an open-source solution would achieve better quality, including security, scalability, and functionality.
+Generally, it is believed that an open-source solution achieves better quality, including security, extensibility, and functionality.

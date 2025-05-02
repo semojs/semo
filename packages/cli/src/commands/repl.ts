@@ -1,4 +1,4 @@
-import { error, formatRcOptions, splitComma, Utils } from '@semo/core'
+import { error, formatRcOptions, run, splitComma, Utils } from '@semo/core'
 import { existsSync } from 'fs'
 import _ from 'lodash'
 import path from 'path'
@@ -101,7 +101,7 @@ export const handler = async function (argv: any) {
           import: importPackage(argv),
           require: importPackage(argv),
           Utils,
-          // run: Utils.run,
+          run,
         },
       }
     )
@@ -144,7 +144,7 @@ export const handler = async function (argv: any) {
           const splitExtractKey = keyPath.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
           if (!context[finalExtractKey]) {
-            context[finalExtractKey] = _.get(context.Semo.hooks, keyPath) || {}
+            context[finalExtractKey] = _.get(context, keyPath) || {}
           }
         })
       }
@@ -154,12 +154,7 @@ export const handler = async function (argv: any) {
         extractKeys.forEach((extractKey) => {
           const splitExtractKey = extractKey.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
-          if (!context[finalExtractKey]) {
-          }
-          context[finalExtractKey] = _.get(
-            context.Semo.hooks,
-            `${key}.${extractKey}`
-          )
+          context[finalExtractKey] = _.get(context, `${key}.${extractKey}`)
         })
       })
     }

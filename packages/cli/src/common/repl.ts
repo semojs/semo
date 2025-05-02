@@ -125,14 +125,42 @@ export const reload = async (
 export const extract = (
   repl: repl.REPLServer,
   obj: Record<string, any>,
-  keys: string[] | string = []
+  keys: string[] | string = [],
+  newObjName: string = ''
 ) => {
-  const keysCast = _.castArray(keys)
-  Object.keys(obj).forEach((key) => {
-    if (keys.length === 0 || keysCast.includes(key)) {
-      Object.defineProperty(repl.context, key, { value: obj[key] })
-    }
-  })
+  if (!keys || keys.length === 0) {
+    // If keys empty, extract all keys from obj
+    Object.keys(obj).forEach((key) => {
+      const value = _.get(obj, `${key}`)
+      if (value) {
+        Object.defineProperty(repl.context, key, {
+          value,
+        })
+      }
+    })
+  } else {
+    const keysCast = _.castArray(keys)
+
+    keysCast.forEach((key) => {
+      const splitExtractKey = key.split('.')
+      const finalExtractKey = splitExtractKey.at(-1)
+      const value = _.get(obj, `${key}`)
+      if (value) {
+        if (!newObjName) {
+          Object.defineProperty(repl.context, finalExtractKey, {
+            value,
+          })
+        } else {
+          if (!repl.context[newObjName]) {
+            repl.context[newObjName] = {}
+          }
+          Object.defineProperty(repl.context[newObjName], finalExtractKey, {
+            value,
+          })
+        }
+      }
+    })
+  }
 }
 
 export async function openRepl(context: Record<string, any>): Promise<any> {
@@ -236,6 +264,13 @@ export async function openRepl(context: Record<string, any>): Promise<any> {
   // context即为REPL中的上下文环境
   r.context = Object.assign(r.context, context)
   r.context.Semo.repl = r
+  r.context.Semo.extract = (
+    obj,
+    keys: string[] | string = [],
+    newObjName: string = ''
+  ) => {
+    extract(r, obj, keys, newObjName)
+  }
 
   corepl(r)
 }

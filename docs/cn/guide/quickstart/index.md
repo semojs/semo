@@ -97,13 +97,13 @@ semo create semo-plugin-xxx --template=plugin # 选择插件模板
 cd semo-plugin-xxx
 semo hi # # 默认里面有一个示例命令
 code . # 用 Vscode 开始开发
-yarn watch # 基于 `Typescript` 开发，需要实时编译
+pnpm watch # 基于 `Typescript` 开发，需要实时编译
 ```
 
 如果你对插件很满意，想和其他人分享，你直接将你的代码发布到 `npm`。
 
 ```
-git remove add origin GIT_REPO_URL
+git remote add origin GIT_REPO_URL
 git add .
 git commit -m 'init'
 npm login
@@ -125,10 +125,10 @@ npm i -g @semo/cli semo-plugin-xxx
 ```
 cd YOUR_PROJECT
 npm install semo-plugin-xxx
-yarn add semo-plugin-xxx // 或
+pnpm add semo-plugin-xxx // 或
 ```
 
-由于 `Semo` 的插件同时也是一个 `Node` 模块，因此，我们也可以在插件中定义一些库函数，被别人在项目中引入
+由于 `Semo` 的插件同时也是一个 `NPM` 模块，因此，我们也可以在插件中定义一些库函数，被别人在项目中引入
 
 ```js
 import lib from 'semo-plugin-xxx'
@@ -137,9 +137,9 @@ import lib from 'semo-plugin-xxx'
 利用 `Semo` 提供的钩子机制，也可以使用另一种风格来使用插件提供的业务逻辑支持。
 
 ```js
-import { Utils } from '@semo/core'
-
-const { xxx } = await Utils.invokeHook('semo:component')
+const { xxx } = await argv.$core.invokeHook('app:component')
 ```
 
 可以看到，在后面这种方式中，不需要显示引入包，只需要安装了即可，这种方式是使用的目录扫描的方式，性能是比较差的，而且没有IDE自动提示的支持，但是对命令行这个场景来说，代码风格简单统一也不错。
+
+这种方式只支持在能获取到 argv 的场景中使用。

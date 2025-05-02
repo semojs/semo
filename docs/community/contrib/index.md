@@ -1,23 +1,23 @@
 # How to Contribute
 
-## Adoption and Use
+## Adoption and Usage
 
-There are many choices for standardizing command-line implementation methods. In general, having a standard is better than not having one. If your team already has its own standards, then there's no need to adopt `Semo`'s standard. However, if your team hasn't standardized command-line operations before, you might want to give `Semo` a try. If you happen to favor `yargs`, some of `Semo`'s ideas might be insightful to you as well.
+Regarding how to standardize command-line implementation, there are certainly many options. Generally speaking, having a standard is definitely better than not having one. If your team already has its own standards, there's no need to adopt the `Semo` standard. However, if your team hasn't standardized command-line scripts before, consider trying it. If you also happen to favor `yargs`, some of `Semo`'s ideas might be insightful for you.
 
-`Semo` can be used in many areas, including development, testing, deployment, operations, and even non-business scenarios like web scraping.
+`Semo` can be used in many places: development, testing, deployment, operations, and even non-business scenarios like web crawlers...
 
 ## Writing Documentation
 
-The documentation for `Semo` needs to be gradually improved with everyone's help. Some usage tips may not be mentioned in the documentation yet, so feel free to explore and share your findings.
+`Semo`'s documentation needs everyone's help to gradually improve. Some usage tips might not yet be mentioned in the documentation. We welcome you to explore and share your discoveries.
 
 ## Writing Plugins
 
-There are two types of plugins here. One type can play a role in technology accumulation in enterprise-level projects by encapsulating common operations and logic into plugins. The other type is personal creative plugins, unrelated to business, which can implement and share creative works.
+Plugins here fall into two categories: one type can play a role in consolidating technology within enterprise projects, encapsulating common operations and logic into plugins; the other type is personal creative plugins, unrelated to business, which can implement and share some creative works.
 
 ## Contributing Code
 
-Contributing code, whether it's for using in business projects, creating creative plugins, or participating in the development of core features, is a great way to give back to the community.
+Whether using it in business projects, developing creative plugins, or participating in core feature development, these are all great ways to give back to the community.
 
-## Helping Identify Issues
+## Helping Find Issues
 
-Whether it's code or documentation, many issues may remain undiscovered, such as outdated code, typos in documentation, or inaccuracies due to continuous improvement and upgrades. It requires everyone's collaborative efforts to maintain and improve them.
+Both code and documentation might contain many undiscovered issues, such as outdated code, typos in documentation, or parts of the documentation becoming inaccurate due to continuous improvements and upgrades. These all require everyone to maintain and improve them through collaborative efforts.
