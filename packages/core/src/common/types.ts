@@ -24,7 +24,7 @@ export type ArgvOptions = {
   setEpilog?: string | string[]
   setVersion?: string
   cwd?: string
-  [key: string]: unknown
+  [key: string]: any
 } & InitOptions
 
 export interface ArgvWithPlugin extends ArgvOptions {
