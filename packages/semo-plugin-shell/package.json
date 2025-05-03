@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-shell",
-  "version": "2.0.8",
+  "version": "2.0.9",
   "description": "A semo plugin to provide a quick shell.",
   "keywords": [
     "cli",
