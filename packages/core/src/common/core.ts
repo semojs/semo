@@ -220,12 +220,8 @@ export class Core {
     return pluginConfig
   }
 
-  pluginConfig(
-    argv: ArgvExtraOptions,
-    key: string,
-    defaultValue: any = undefined
-  ) {
-    argv = !_.isEmpty(argv) ? argv : this.parsedArgv
+  getPluginConfig(key: string, defaultValue: any = undefined) {
+    const argv = this.parsedArgv
     return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
       ? argv[key]
       : !_.isEmpty(argv.$config)

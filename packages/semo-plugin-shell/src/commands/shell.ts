@@ -23,9 +23,9 @@ export const builder = function (yargs: any) {
 
 export const handler = async function (argv: ArgvExtraOptions) {
   const scriptName = argv.scriptName || 'semo'
-  argv.prefix = argv.$core.pluginConfig(argv, 'prefix', scriptName)
-  argv.prompt = argv.$core.pluginConfig(argv, 'prompt', '$ ')
-  argv.debug = argv.$core.pluginConfig(argv, 'debug', false)
+  argv.prefix = argv.$core.getPluginConfig('prefix', scriptName)
+  argv.prompt = argv.$core.getPluginConfig('prompt', '$ ')
+  argv.debug = argv.$core.getPluginConfig('debug', false)
 
   try {
     const context = { argv }

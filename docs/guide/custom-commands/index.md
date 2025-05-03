@@ -71,7 +71,7 @@ Yes, middlewares are supported here. The benefit is that you can extract similar
 
 ### `plugin`
 
-This is an attribute specific to `Semo` plugins. If you define a command within a plugin, declaring this allows you to retrieve specific configurations from the global configuration file via `Utils.pluginConfig`.
+This is an attribute specific to `Semo` plugins. If you define a command within a plugin, declaring this allows you to retrieve specific configurations from the global configuration file via `argv.$core.getPluginConfig`.
 
 ~/.semo/.semorc.yml
 
@@ -84,7 +84,7 @@ $plugin:
 In the code, you can:
 
 ```
-const a = Utils.pluginConfig('a', 1)
+const a = argv.$core.getPluginConfig('a', 1)
 ```
 
 Internally, it will calculate which plugin's configuration to retrieve the value from.

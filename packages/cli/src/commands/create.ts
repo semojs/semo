@@ -109,10 +109,7 @@ export const handler = async function (
           `${scriptName}:create_project_template`
         )
         // Combine repos with config
-        Object.assign(
-          repos,
-          argv.$core.pluginConfig(argv, 'create.template', {})
-        )
+        Object.assign(repos, argv.$core.getPluginConfig('create.template', {}))
 
         if (Object.keys(repos).length === 0) {
           error('No pre-defined repos available.')

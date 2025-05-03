@@ -263,7 +263,7 @@ application.production.yml
 
 This method is used to retrieve a segment of the total configuration, defaulting to retrieving everything. Based on Lodash's `_.get` method.
 
-### `argv.$core.pluginConfig`
+### `argv.$core.getPluginConfig`
 
 This method is used to retrieve plugin configuration, only working within the command `handler`. By default, command-line parameters still take priority, but if a command-line parameter is not specified and has no default value, the plugin-level configuration can be retrieved.
 

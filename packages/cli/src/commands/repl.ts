@@ -38,35 +38,32 @@ export const handler = async function (argv: any) {
   // get options from plugin config
   argv.hook =
     argv.hook ??
-    argv.$core.pluginConfig(
-      argv,
+    argv.$core.getPluginConfig(
       'repl.hook',
-      argv.$core.pluginConfig(argv, 'hook', false)
+      argv.$core.getPluginConfig('hook', false)
     )
   argv.prompt =
     argv.prompt ??
-    argv.$core.pluginConfig(
-      argv,
+    argv.$core.getPluginConfig(
       'repl.prompt',
-      argv.$core.pluginConfig(argv, 'prompt', '>>> ')
+      argv.$core.getPluginConfig('prompt', '>>> ')
     )
   argv.extract =
     argv.extract ??
-    argv.$core.pluginConfig(
-      argv,
+    argv.$core.getPluginConfig(
       'repl.extract',
-      argv.$core.pluginConfig(argv, 'extract', '')
+      argv.$core.getPluginConfig('extract', '')
     )
   argv.require =
     argv.require ??
     argv.$core
-      .pluginConfig(argv, 'repl.require', [])
-      .concat(argv.$core.pluginConfig(argv, 'require', []))
+      .getPluginConfig('repl.require', [])
+      .concat(argv.$core.getPluginConfig('require', []))
   argv.import =
     argv.import ??
     argv.$core
-      .pluginConfig(argv, 'repl.import', [])
-      .concat(argv.$core.pluginConfig(argv, 'import', []))
+      .getPluginConfig('repl.import', [])
+      .concat(argv.$core.getPluginConfig('import', []))
 
   if (argv.extract && _.isString(argv.extract)) {
     argv.extract = _.castArray(argv.extract)

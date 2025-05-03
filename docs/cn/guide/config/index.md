@@ -263,7 +263,7 @@ application.production.yml
 
 这个方法用于取出总配置里的一段，默认取出所有，基于 Lodash 的 `_.get` 方法。
 
-### `argv.$core.pluginConfig`
+### `argv.$core.getPluginConfig`
 
 这个方法用于取出插件配置，只能在命令 `handler` 下工作，默认取出还是命令行参数优先，但是如果命令行参数没有指定并且没有默认值，则可以取插件级别的配置。
 

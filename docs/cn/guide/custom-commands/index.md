@@ -71,7 +71,7 @@ export const handler = async function (argv: any) {
 
 ### `plugin`
 
-这个是专属于 `Semo` 插件的属性，如果你在一个插件里定义命令，那么声明这个的好处是，你可以通过 `Utils.pluginConfig` 获取到全局配置文件里的专属配置。
+这个是专属于 `Semo` 插件的属性，如果你在一个插件里定义命令，那么声明这个的好处是，你可以通过 `argv.getPluginConfig` 获取到全局配置文件里的专属配置。
 
 ~/.semo/.semorc.yml
 
@@ -84,7 +84,7 @@ $plugin:
 在代码中可以
 
 ```
-const a = Utils.pluginConfig('a', 1)
+const a = argv.$core.getPluginConfig('a', 1)
 ```
 
 这里内部会计算从哪个插件配置里取值。
