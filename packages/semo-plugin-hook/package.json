@@ -1,6 +1,6 @@
 {
   "name": "semo-plugin-hook",
-  "version": "2.0.7",
+  "version": "2.0.8",
   "description": "A semo plugin to provide hook management.",
   "keywords": [
     "cli",
