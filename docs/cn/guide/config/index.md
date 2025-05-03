@@ -245,12 +245,12 @@ argv.$prompt = {
 
 ## 内置的配置管理相关方法
 
-### `Utils.extendConfig`
+### `argv.$core.extendConfig`
 
 这个方法支持扩展一个新的配置文件，这样可以支持配置文件组，不用把所有的配置都放到 `.semorc.yml` 里，同时支持环境配置，例如：
 
 ```js
-Utils.extendConfig('application.yml')
+argv.$core.extendConfig('application.yml')
 ```
 
 ```
@@ -259,11 +259,11 @@ application.development.yml
 application.production.yml
 ```
 
-### `Utils.config`
+### `argv.$core.config`
 
 这个方法用于取出总配置里的一段，默认取出所有，基于 Lodash 的 `_.get` 方法。
 
-### `Utils.pluginConfig`
+### `argv.$core.pluginConfig`
 
 这个方法用于取出插件配置，只能在命令 `handler` 下工作，默认取出还是命令行参数优先，但是如果命令行参数没有指定并且没有默认值，则可以取插件级别的配置。
 
@@ -272,7 +272,7 @@ application.production.yml
 通过整合 `dotenv`，我们引入了对 `.env` 文件的支持，对于命令行工具来说是默认开启的。对于程序来说需要手动开启。
 
 ```typescript
-import { Utils } from '@semo/core'
-
-Utils.useDotEnv()
+import { Core } from '@semo/core'
+const core = new Core()
+core.useDotEnv()
 ```

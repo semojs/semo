@@ -71,6 +71,7 @@ export interface ArgvExtraOptions extends ArgvOptions {
   // Most common
   $scriptName?: string
   $core?: Core
+  $yargs?: Argv
 
   // From .semorc.yml
   $plugin?: {
@@ -1090,6 +1091,7 @@ export class Core {
     yargsObj.middleware(async (argv) => {
       // For command use this instance
       argv.$core = this
+      argv.$yargs = yargsObj
 
       // For piping input
       argv.$input = await getStdin()

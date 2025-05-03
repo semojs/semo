@@ -245,12 +245,12 @@ This is a wrapper around @inquirer/prompts. You can refer to the inquirer docume
 
 ## Built-in Configuration Management Related Methods
 
-### `Utils.extendConfig`
+### `argv.$core.extendConfig`
 
 This method supports extending a new configuration file, allowing for configuration file groups instead of putting all configurations into `.semorc.yml`. It also supports environment configuration, for example:
 
 ```js
-Utils.extendConfig('application.yml')
+argv.$core.extendConfig('application.yml')
 ```
 
 ```
@@ -259,11 +259,11 @@ application.development.yml
 application.production.yml
 ```
 
-### `Utils.config`
+### `argv.$core.config`
 
 This method is used to retrieve a segment of the total configuration, defaulting to retrieving everything. Based on Lodash's `_.get` method.
 
-### `Utils.pluginConfig`
+### `argv.$core.pluginConfig`
 
 This method is used to retrieve plugin configuration, only working within the command `handler`. By default, command-line parameters still take priority, but if a command-line parameter is not specified and has no default value, the plugin-level configuration can be retrieved.
 
@@ -272,7 +272,7 @@ This method is used to retrieve plugin configuration, only working within the co
 By integrating `dotenv`, we introduced support for `.env` files. It is enabled by default for command-line tools. For programs, it needs to be enabled manually.
 
 ```typescript
-import { Utils } from '@semo/core'
-
-Utils.useDotEnv()
+import { Core } from '@semo/core'
+const core = new Core()
+core.useDotEnv()
 ```
