@@ -647,6 +647,7 @@ export class Core {
 
     let plugins: Record<string, string> = {}
     const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+    // Process $plugins.register
     if (_.isEmpty(plugins)) {
       const registerPlugins: Record<string, unknown> =
         (this.config('$plugins.register') as Record<string, unknown>) || {}
@@ -1021,15 +1022,8 @@ export class Core {
 
     this.debugCore('Load core package information.')
     const pkg = this.loadCorePackageInfo()
-    this.debugCore('Load all plugins information.')
-    const allPlugins = this.getAllPluginsMapping(parsedArgv)
-    this.debugCore('Load combined config.')
-    const combinedConfig = this.getCombinedConfig(parsedArgv)
     this.debugCore('Load application config.')
     let appConfig = this.getApplicationConfig(parsedArgv)
-
-    this.allPlugins = allPlugins
-    this.combinedConfig = combinedConfig
     appConfig = Object.assign(appConfig, {
       scriptName: this.initOptions.scriptName,
       packageName: this.initOptions.packageName,
@@ -1042,8 +1036,30 @@ export class Core {
     })
 
     this.appConfig = appConfig
+    // compatible with both singular and plural
     parsedArgv = Object.assign(parsedArgv, appConfig)
+    parsedArgv.disableCoreCommand =
+      parsedArgv.disableCoreCommands ?? parsedArgv.disableCoreCommand
+    parsedArgv.disableCompletionCommand =
+      parsedArgv.disableCompletionCommands ??
+      parsedArgv.disableCompletionCommand
+    parsedArgv.disableCompletion =
+      parsedArgv.disableCompletions ?? parsedArgv.disableCompletion
+    parsedArgv.hideCompletionCommand =
+      parsedArgv.hideCompletionCommands ?? parsedArgv.hideCompletionCommand
+    parsedArgv.disableGlobalPlugin =
+      parsedArgv.disableGlobalPlugins ?? parsedArgv.disableGlobalPlugin
+    parsedArgv.disableHomePlugin =
+      parsedArgv.disableHomePlugins ?? parsedArgv.disableHomePlugin
     this.setParsedArgv(parsedArgv)
+
+    this.debugCore('Load all plugins information.')
+    const allPlugins = this.getAllPluginsMapping(parsedArgv)
+    this.debugCore('Load combined config.')
+    const combinedConfig = this.getCombinedConfig(parsedArgv)
+
+    this.allPlugins = allPlugins
+    this.combinedConfig = combinedConfig
 
     this.debugCore('Initialize Yargs instance.')
     const yargsObj = yargs(hideBin(process.argv))

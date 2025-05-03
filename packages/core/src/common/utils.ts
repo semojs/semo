@@ -181,11 +181,11 @@ export const formatRcOptions = function <T extends Record<string, unknown>>(
 export const getNodeRuntime = function (): string {
   const script = process.env.npm_lifecycle_script || ''
 
-  if (script.startsWith('tsx ')) {
+  if (script.includes('tsx ')) {
     return 'tsx'
   }
 
-  if (script.startsWith('jiti ')) {
+  if (script.includes('jiti ')) {
     return 'jiti'
   }
 
