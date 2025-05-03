@@ -91,6 +91,7 @@ export const handler = async function (
 
   if (shell.which(scriptName)) {
     argv.$debugCoreChannel(
+      'run',
       `Running: ${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(
         ' '
       )}`
@@ -100,6 +101,7 @@ export const handler = async function (
     )
   } else {
     argv.$debugCoreChannel(
+      'run',
       `Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
         ' '
       )}`

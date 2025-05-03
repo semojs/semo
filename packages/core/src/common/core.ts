@@ -431,7 +431,7 @@ export class Core {
       shell.exec(
         `npm install ${nameArray.join(
           ' '
-        )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
+        )} --prefix ${downloadDir} --force --no-package-lock --no-audit --no-fund --no-bin-links`
       )
     }
 
