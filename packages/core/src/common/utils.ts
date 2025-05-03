@@ -6,6 +6,8 @@ import path from 'node:path'
 import { getBorderCharacters, table } from 'table'
 import { info, log } from './log.js'
 import { CommonSpawnOptions, spawn, spawnSync } from 'node:child_process'
+import { ensureDirSync } from 'fs-extra'
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs'
 
 const require = createRequire(import.meta.url)
 /**
@@ -227,6 +229,50 @@ export const moveToTopConsole = function () {
   if (process.stdout.isTTY) {
     process.stdout.write(process.platform === 'win32' ? '\\x1B[0f' : '\\x1B[H')
   }
+}
+
+/**
+ * Console Reader
+ *
+ * Mostly use less mode, if HOME can not be detected, it will fallback to console.log
+ *
+ * @param content The content to read
+ * @param plugin Plugin name, used to make up cache path
+ * @param identifier The content identifier, used to make up cache path
+ */
+export const consoleReader = function (
+  content: string,
+  opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {},
+  scriptName: string = 'semo'
+) {
+  opts.plugin = opts.plugin || scriptName
+  opts.identifier = opts.identifier || Math.random() + ''
+
+  if (process.env.HOME) {
+    const tmpPath = path.resolve(
+      process.env.HOME,
+      `.${scriptName}/cache`,
+      <string>opts.plugin,
+      md5(opts.identifier)
+    )
+    ensureDirSync(path.dirname(tmpPath))
+    writeFileSync(tmpPath, content)
+
+    if (opts.tmpPathOnly) {
+      return tmpPath
+    }
+
+    exec(`cat ${tmpPath} | less -r`)
+
+    // Maybe the file already removed
+    if (existsSync(tmpPath)) {
+      unlinkSync(tmpPath)
+    }
+  } else {
+    console.log(content)
+  }
+
+  return true
 }
 
 /**

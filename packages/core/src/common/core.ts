@@ -17,7 +17,7 @@ import { ensureDirSync } from 'fs-extra'
 import getStdin from 'get-stdin'
 import { globSync } from 'glob'
 import _ from 'lodash'
-import { existsSync, readFileSync, unlinkSync, writeFileSync } from 'node:fs'
+import { existsSync, readFileSync, writeFileSync } from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
@@ -55,12 +55,10 @@ import {
   PluginConfig,
 } from './types.js'
 import {
-  exec,
   formatRcOptions,
   getAbsolutePath,
   getPackagePath,
   isUsingTsRunner,
-  md5,
 } from './utils.js'
 
 const __filename = fileURLToPath(import.meta.url)
@@ -1661,50 +1659,5 @@ export class Core {
     })
 
     return argv
-  }
-
-  /**
-   * Console Reader
-   *
-   * Mostly use less mode, if HOME can not be detected, it will fallback to console.log
-   *
-   * @param content The content to read
-   * @param plugin Plugin name, used to make up cache path
-   * @param identifier The content identifier, used to make up cache path
-   */
-  consoleReader(
-    content: string,
-    opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {}
-  ) {
-    const scriptName = this.scriptName
-
-    opts.plugin = opts.plugin || scriptName
-    opts.identifier = opts.identifier || Math.random() + ''
-
-    if (process.env.HOME) {
-      const tmpPath = path.resolve(
-        process.env.HOME,
-        `.${scriptName}/cache`,
-        <string>opts.plugin,
-        md5(opts.identifier)
-      )
-      ensureDirSync(path.dirname(tmpPath))
-      writeFileSync(tmpPath, content)
-
-      if (opts.tmpPathOnly) {
-        return tmpPath
-      }
-
-      exec(`cat ${tmpPath} | less -r`)
-
-      // Maybe the file already removed
-      if (existsSync(tmpPath)) {
-        unlinkSync(tmpPath)
-      }
-    } else {
-      console.log(content)
-    }
-
-    return true
   }
 }
