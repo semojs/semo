@@ -123,6 +123,71 @@ export const outputTable = function (
   log(table(columns, config))
 }
 
+interface ExecResult {
+  code: number | null
+  stdout: string
+  stderr: string
+}
+
+interface ExecOptions extends CommonSpawnOptions {
+  captureOutput?: boolean
+}
+
+export const execPromise = function (
+  cmd: string,
+  opts: ExecOptions = {
+    stdio: 'inherit',
+    shell: true,
+    captureOutput: false,
+  },
+  callback?: (result: ExecResult) => void
+): Promise<ExecResult> {
+  opts.stdio ??= 'inherit'
+  opts.shell ??= true
+  opts.captureOutput ??= false
+  return new Promise((resolve, reject) => {
+    let stdout = ''
+    let stderr = ''
+
+    // 如果需要捕获输出，修改 stdio 选项
+    if (opts.captureOutput) {
+      opts.stdio = 'pipe'
+    }
+
+    const process = spawn(cmd, opts)
+
+    // 如果需要捕获输出
+    if (opts.captureOutput) {
+      process.stdout?.on('data', (data) => {
+        stdout += data.toString()
+      })
+
+      process.stderr?.on('data', (data) => {
+        stderr += data.toString()
+      })
+    }
+
+    // 监听命令执行完成
+    process.on('close', (code) => {
+      const result: ExecResult = {
+        code,
+        stdout,
+        stderr,
+      }
+
+      if (callback) {
+        callback(result)
+      }
+      resolve(result)
+    })
+
+    // 监听错误
+    process.on('error', (err) => {
+      reject(err)
+    })
+  })
+}
+
 export const execSync = function (
   cmd: string,
   opts: CommonSpawnOptions = {
@@ -240,7 +305,7 @@ export const moveToTopConsole = function () {
  * @param plugin Plugin name, used to make up cache path
  * @param identifier The content identifier, used to make up cache path
  */
-export const consoleReader = function (
+export const consoleReader = async function (
   content: string,
   opts: { plugin?: string; identifier?: string; tmpPathOnly?: boolean } = {},
   scriptName: string = 'semo'
@@ -262,12 +327,12 @@ export const consoleReader = function (
       return tmpPath
     }
 
-    exec(`cat ${tmpPath} | less -r`)
-
-    // Maybe the file already removed
-    if (existsSync(tmpPath)) {
-      unlinkSync(tmpPath)
-    }
+    await execPromise(`cat ${tmpPath} | less -r`, undefined, () => {
+      // Maybe the file already removed
+      if (existsSync(tmpPath)) {
+        unlinkSync(tmpPath)
+      }
+    })
   } else {
     console.log(content)
   }
