@@ -1,6 +1,6 @@
 {
   "name": "@semo/cli",
-  "version": "2.0.10",
+  "version": "2.0.11",
   "description": "",
   "type": "module",
   "main": "lib/index.js",
