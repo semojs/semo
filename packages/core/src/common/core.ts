@@ -124,6 +124,7 @@ export class Core {
   allPlugins: Record<string, string> = {}
   combinedConfig: Record<string, any> = {}
   appConfig: Record<string, any> = {}
+  input: string = '' // stdin
 
   debugCore: (...rest: unknown[]) => void
   debugCoreChannel: (channel: string, ...rest: unknown[]) => void
@@ -1010,6 +1011,7 @@ export class Core {
     process.setMaxListeners(0)
 
     this.useDotEnv(true)
+    this.input = await getStdin()
 
     this.debugCore('Parse process.argv using yargs-parser.')
     let parsedArgv = yargsParser(process.argv.slice(2)) as ArgvOptions
@@ -1073,7 +1075,16 @@ export class Core {
         'sort-commands': true,
         'populate--': true,
       })
-      .fail(false)
+      // .fail(false)
+      .fail((msg, err) => {
+        if (msg) {
+          error(msg)
+        }
+        if (parsedArgv.verbose) {
+          error(err)
+        }
+        process.exit(1)
+      })
       .wrap(Math.min(120, yargsObj.terminalWidth()))
 
     this.setVersion(pkg.version as string)
@@ -1088,7 +1099,7 @@ export class Core {
       argv.$yargs = yargsObj
 
       // For piping input
-      argv.$input = await getStdin()
+      argv.$input = this.input
 
       // For logging
       argv.$log = log
@@ -1370,7 +1381,8 @@ export class Core {
 
     this.debugCore('Parse and launch')
     try {
-      await yargsObj.parse()
+      await yargsObj.parseAsync()
+      this.debugCore('Launch complete')
     } catch (e) {
       if (parsedArgv.verbose) {
         console.error(e)

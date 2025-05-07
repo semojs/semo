@@ -1,6 +1,8 @@
 import { ArgvExtraOptions, error, exec } from '@semo/core'
 import _ from 'lodash'
-import path from 'path'
+import { openSync, unlinkSync, writeFileSync } from 'node:fs'
+import os from 'node:os'
+import path from 'node:path'
 import shell from 'shelljs'
 
 export const noblank = true // run call another command so disable one blank line
@@ -89,27 +91,48 @@ export const handler = async function (
   }
   command = command.concat(argv['--'] || [])
 
-  if (shell.which(scriptName)) {
-    argv.$debugCoreChannel(
-      'run',
-      `Running: ${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(
-        ' '
-      )}`
-    )
-    exec(
-      `${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(' ')}`
-    )
-  } else {
-    argv.$debugCoreChannel(
-      'run',
-      `Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
-        ' '
-      )}`
-    )
-    exec(
-      `${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
-        ' '
-      )}`
-    )
+  const fifoPath = path.join(os.tmpdir(), `${scriptName}-stdin-${Date.now()}`)
+
+  try {
+    writeFileSync(fifoPath, argv.$input || '')
+    if (shell.which(scriptName)) {
+      argv.$debugCoreChannel(
+        'run',
+        `Running: ${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(
+          ' '
+        )}`
+      )
+      exec(
+        `${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(' ')}`,
+        {
+          stdio: [openSync(fifoPath, 'r'), 'inherit', 'inherit'],
+          shell: true,
+        }
+      )
+    } else {
+      argv.$debugCoreChannel(
+        'run',
+        `Running: ${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
+          ' '
+        )}`
+      )
+      exec(
+        `${extraPluginDirEnvName}=${runPluginDir} npx @semo/cli ${command.join(
+          ' '
+        )}`,
+        {
+          stdio: [openSync(fifoPath, 'r'), 'inherit', 'inherit'],
+          shell: true,
+        }
+      )
+    }
+  } catch (e) {
+    if (argv.verbose) {
+      error(e)
+    } else {
+      error(e.message)
+    }
+  } finally {
+    unlinkSync(fifoPath)
   }
 }

@@ -195,7 +195,7 @@ export const execSync = function (
     shell: true,
   }
 ) {
-  spawnSync(cmd, opts)
+  return spawnSync(cmd, opts)
 }
 export const exec = function (
   cmd: string,
@@ -204,7 +204,7 @@ export const exec = function (
     shell: true,
   }
 ) {
-  spawn(cmd, opts)
+  return spawn(cmd, opts)
 }
 
 /**
