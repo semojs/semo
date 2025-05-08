@@ -20,6 +20,11 @@ export const builder = function (yargs: any) {
   })
   yargs.option('scope', { default: '', describe: 'Set plugin npm scope' })
   yargs.option('with', { describe: 'Set plugin dependent plugins' })
+  yargs.option('pipe', {
+    describe: 'Pipe stdin to plugin command',
+    boolean: true,
+    default: false,
+  })
 }
 
 export const handler = async function (
@@ -105,7 +110,11 @@ export const handler = async function (
       exec(
         `${extraPluginDirEnvName}=${runPluginDir} ${scriptName} ${command.join(' ')}`,
         {
-          stdio: [openSync(fifoPath, 'r'), 'inherit', 'inherit'],
+          stdio: [
+            argv.pipe ? openSync(fifoPath, 'r') : 'inherit',
+            'inherit',
+            'inherit',
+          ],
           shell: true,
         }
       )
@@ -121,7 +130,11 @@ export const handler = async function (
           ' '
         )}`,
         {
-          stdio: [openSync(fifoPath, 'r'), 'inherit', 'inherit'],
+          stdio: [
+            argv.pipe ? openSync(fifoPath, 'r') : 'inherit',
+            'inherit',
+            'inherit',
+          ],
           shell: true,
         }
       )
