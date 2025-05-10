@@ -1,15 +1,3 @@
-import {
-  checkbox,
-  confirm,
-  editor,
-  expand,
-  input,
-  number,
-  password,
-  rawlist,
-  search,
-  select,
-} from '@inquirer/prompts'
 import dotenv, { DotenvConfigOptions } from 'dotenv'
 import { expand as dotenvExpand } from 'dotenv-expand'
 import { findUpSync } from 'find-up'
@@ -44,6 +32,18 @@ import {
   success,
   warn,
 } from './log.js'
+import {
+  checkbox,
+  confirm,
+  editor,
+  expand,
+  input,
+  number,
+  password,
+  rawlist,
+  search,
+  select,
+} from './prompts.js'
 import {
   ApplicationConfig,
   ArgvOptions,
@@ -219,8 +219,12 @@ export class Core {
     return pluginConfig
   }
 
-  getPluginConfig(key: string, defaultValue: any = undefined) {
-    const argv = this.parsedArgv
+  getPluginConfig(
+    key: string,
+    defaultValue: any = undefined,
+    argvSource: ArgvExtraOptions = undefined
+  ) {
+    const argv = argvSource || this.parsedArgv
     return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
       ? argv[key]
       : !_.isEmpty(argv.$config)
@@ -947,7 +951,7 @@ export class Core {
       extensions: ['ts', 'js'],
       exclude: /.d.ts$/,
       // Give each command an ability to disable temporarily
-      visit: this.visit,
+      visit: this.visit.bind(this),
     }
 
     // load default commands

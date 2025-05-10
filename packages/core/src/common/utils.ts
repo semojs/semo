@@ -10,6 +10,7 @@ import { ensureDirSync } from 'fs-extra'
 import { existsSync, unlinkSync, writeFileSync } from 'node:fs'
 
 const require = createRequire(import.meta.url)
+
 /**
  * Compute md5.
  * @param {string} s
