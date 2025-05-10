@@ -225,9 +225,8 @@ export class Core {
     plugin: string = ''
   ) {
     const argv = this.parsedArgv
-    const $config = !_.isEmpty(argv.$config)
-      ? argv.$config
-      : this.parsePluginConfig(plugin, argv)
+    // if plugin is not empty, parse plugin config dynamically
+    const $config = plugin ? this.parsePluginConfig(plugin, argv) : argv.$config
     return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
       ? argv[key]
       : !_.isEmpty($config)
