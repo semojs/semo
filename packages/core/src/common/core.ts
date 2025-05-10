@@ -228,7 +228,6 @@ export class Core {
     const $config = !_.isEmpty(argv.$config)
       ? argv.$config
       : this.parsePluginConfig(plugin, argv)
-    console.log('$config', $config)
     return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
       ? argv[key]
       : !_.isEmpty($config)
