@@ -117,8 +117,7 @@ export const handler = async function (argv: any) {
           : {
               include: splitComma(argv.hook),
               mode: 'group',
-            },
-        argv
+            }
       )
 
       pluginsReturn = _.omitBy(pluginsReturn, _.isEmpty)

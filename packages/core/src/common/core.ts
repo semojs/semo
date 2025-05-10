@@ -222,15 +222,16 @@ export class Core {
   getPluginConfig(
     key: string,
     defaultValue: any = undefined,
-    argvSource: ArgvExtraOptions = undefined
+    plugin: string = ''
   ) {
-    const argv = argvSource || this.parsedArgv
+    const argv = this.parsedArgv
+    const $config = argv.$config || this.parsePluginConfig(plugin, argv)
     return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
       ? argv[key]
-      : !_.isEmpty(argv.$config)
-        ? !_.isNull(argv.$config[key]) && !_.isUndefined(argv.$config[key])
-          ? argv.$config[key]
-          : _.get(argv.$config, key, defaultValue)
+      : !_.isEmpty($config)
+        ? !_.isNull($config[key]) && !_.isUndefined($config[key])
+          ? $config[key]
+          : _.get($config, key, defaultValue)
         : defaultValue
   }
 
@@ -475,7 +476,27 @@ export class Core {
     )
   }
 
-  visit(command: any, _pathTofile: string, _filename: string) {
+  parsePluginConfig(plugin: string, argv: ArgvExtraOptions = {}) {
+    let $config = {}
+    if (!plugin) {
+      return $config
+    }
+    const pluginNameBase = plugin.startsWith(argv.scriptName + '-plugin-')
+      ? plugin.substring((argv.scriptName + '-plugin-').length)
+      : plugin
+    if (argv.$plugin) {
+      if (argv.$plugin[pluginNameBase]) {
+        $config = formatRcOptions(argv.$plugin[pluginNameBase] || {})
+      } else if (argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase]) {
+        $config = formatRcOptions(
+          argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase] || {}
+        )
+      }
+    }
+    return $config
+  }
+
+  visit = (command: any, _pathTofile: string, _filename: string) => {
     const middleware = async (argv: ArgvWithPlugin) => {
       if (!command.noblank) {
         // Insert a blank line to terminal
@@ -485,25 +506,11 @@ export class Core {
       argv.$config = {}
       // Give command a plugin level config
       if (command.plugin) {
-        const pluginNameBase = command.plugin.startsWith(
-          argv.scriptName + '-plugin-'
-        )
-          ? command.plugin.substring(argv.scriptName + '-plugin-'.length)
-          : command.plugin
-        if (argv.$plugin) {
-          if (argv.$plugin[pluginNameBase]) {
-            argv.$config = formatRcOptions(argv.$plugin[pluginNameBase] || {})
-          } else if (
-            argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase]
-          ) {
-            argv.$config = formatRcOptions(
-              argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase] || {}
-            )
-          }
-        }
+        argv.$config = this.parsePluginConfig(command.plugin, argv)
       }
 
       argv.$command = command
+      this.setParsedArgv(argv)
     }
     if (command.middlewares && Array.isArray(command.middlewares)) {
       command.middlewares.unshift(middleware)
@@ -1133,6 +1140,8 @@ export class Core {
         editor,
         number,
       }
+
+      this.setParsedArgv(argv)
     })
 
     this.debugCore('Customize using argv options')
