@@ -1,13 +1,13 @@
 import crypto from 'crypto'
-import _ from 'lodash'
-import { createRequire } from 'node:module'
 import { findUpSync } from 'find-up'
+import { ensureDirSync } from 'fs-extra'
+import _ from 'lodash'
+import { CommonSpawnOptions, spawn, spawnSync } from 'node:child_process'
+import { existsSync, unlinkSync, writeFileSync } from 'node:fs'
+import { createRequire } from 'node:module'
 import path from 'node:path'
 import { getBorderCharacters, table } from 'table'
 import { info, log } from './log.js'
-import { CommonSpawnOptions, spawn, spawnSync } from 'node:child_process'
-import { ensureDirSync } from 'fs-extra'
-import { existsSync, unlinkSync, writeFileSync } from 'node:fs'
 
 const require = createRequire(import.meta.url)
 

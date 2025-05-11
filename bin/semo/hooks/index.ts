@@ -1,3 +1,5 @@
 export const hook_repl = {
-  semo: {},
+  semo: {
+    hello: 'world',
+  },
 }

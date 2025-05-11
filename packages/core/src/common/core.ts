@@ -117,14 +117,16 @@ export interface ArgvExtraOptions extends ArgvOptions {
 }
 
 export class Core {
-  version: string = ''
-  scriptName: string = ''
-  initOptions: InitOptions = {}
-  parsedArgv: ArgvExtraOptions = {}
-  allPlugins: Record<string, string> = {}
-  combinedConfig: Record<string, any> = {}
-  appConfig: Record<string, any> = {}
-  input: string = '' // stdin
+  private static instance: Core | null = null
+
+  public version: string = ''
+  public scriptName: string = ''
+  public initOptions: InitOptions = {}
+  public parsedArgv: ArgvExtraOptions = {}
+  public allPlugins: Record<string, string> = {}
+  public combinedConfig: Record<string, any> = {}
+  public appConfig: Record<string, any> = {}
+  public input: string = '' // stdin
 
   debugCore: (...rest: unknown[]) => void
   debugCoreChannel: (channel: string, ...rest: unknown[]) => void
@@ -140,12 +142,37 @@ export class Core {
   isDevelopment = () => this.getNodeEnv() === 'development'
 
   constructor(opts: InitOptions) {
+    // 如果实例已存在，直接返回已有实例
+    if (Core.instance) {
+      return Core.instance
+    }
+
     this.initOptions = opts
     this.setScriptName(opts.scriptName ?? 'semo')
 
     this.debugCore = debugCore(this.scriptName)
     this.debugCoreChannel = debugCoreChannel(this.scriptName)
     this.debugChannel = debugChannel(this.scriptName)
+
+    Core.instance = this
+  }
+
+  public static getInstance(): Core {
+    if (!Core.instance) {
+      throw new Error(
+        'Core has not been initialized. Please create an instance first.'
+      )
+    }
+    return Core.instance
+  }
+
+  /**
+   * Project depends Semo has it's own Semo env which is not initialized.
+   * So we need to set the instance manually.
+   * @param instance Core instance
+   */
+  public setInstance(instance: Core) {
+    Core.instance = instance
   }
 
   setVersion(version: string) {
@@ -1411,228 +1438,7 @@ export class Core {
     options: HookOption = { mode: 'assign' },
     opts: ArgvOptions = {}
   ): Promise<HookReturn> {
-    this.debugCore(`Invoke hook ${hook}`)
-    const splitHookName = hook.split(':')
-    let moduler, originModuler
-    if (splitHookName.length === 1) {
-      moduler = ''
-      originModuler = ''
-      hook = splitHookName[0]
-    } else if (splitHookName.length === 2) {
-      moduler = splitHookName[0]
-      hook = splitHookName[1]
-
-      originModuler = moduler
-      moduler = moduler.replace('-', '__').replace('/', '__').replace('@', '')
-    } else {
-      throw Error('Invalid hook name')
-    }
-
-    const argv = Object.assign(opts, this.parsedArgv)
-    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-    hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
-    options = Object.assign(
-      {
-        mode: 'assign',
-        useCache: false,
-        include: [],
-        exclude: [],
-        opts: {},
-      },
-      options
-    )
-    try {
-      // Make Application supporting hook invocation
-      const appConfig = this.appConfig
-      const combinedConfig = this.combinedConfig
-      // Make Semo core supporting hook invocation
-      const plugins = argv.packageDirectory
-        ? Object.assign(
-            {},
-            {
-              [scriptName]: path.resolve(argv.packageDirectory),
-            },
-            this.allPlugins
-          )
-        : this.allPlugins
-
-      if (
-        appConfig &&
-        appConfig.name !== scriptName &&
-        appConfig.name !== argv.packageName &&
-        !plugins[appConfig.name] &&
-        appConfig.applicationDir &&
-        appConfig.applicationDir !== argv.packageDirectory
-      ) {
-        plugins.application = appConfig.applicationDir
-      }
-
-      let pluginsReturn: HookReturn
-      switch (options.mode) {
-        case 'push':
-          pluginsReturn = []
-          break
-        case 'replace':
-          pluginsReturn = undefined
-          break
-        case 'group':
-        case 'assign':
-        case 'merge':
-        default:
-          pluginsReturn = {}
-          break
-      }
-      const hookCollected: unknown[] = []
-      const hookIndex: unknown[] = []
-      for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
-        const plugin = Object.keys(plugins)[i]
-
-        // Process include option
-        if (
-          _.isArray(options.include) &&
-          options.include.length > 0 &&
-          !options.include.includes(plugin)
-        ) {
-          continue
-        }
-
-        // Process exclude option
-        if (
-          _.isArray(options.exclude) &&
-          options.exclude.length > 0 &&
-          options.exclude.includes(plugin)
-        ) {
-          continue
-        }
-
-        try {
-          let pluginEntryPath: string // resolve plugin hook entry file path
-          let hookDir: string = '' // resolve plugin hook dir
-
-          switch (plugin) {
-            case scriptName:
-              const coreRcInfo = this.parseRcFile(plugin, plugins[plugin])
-              hookDir = (
-                coreRcInfo && coreRcInfo.hookDir ? coreRcInfo.hookDir : ''
-              ) as string
-              break
-
-            case 'application':
-              if (combinedConfig.hookDir) {
-                hookDir = combinedConfig.hookDir as string
-              }
-              break
-
-            default:
-              if (
-                combinedConfig.pluginConfigs &&
-                combinedConfig.pluginConfigs[plugin]
-              ) {
-                hookDir = combinedConfig.pluginConfigs[plugin].hookDir
-              }
-              break
-          }
-
-          let entryFileName = 'index.js'
-          if (
-            hookDir &&
-            existsSync(path.resolve(plugins[plugin], hookDir, entryFileName))
-          ) {
-            pluginEntryPath = path.resolve(
-              plugins[plugin],
-              hookDir,
-              entryFileName
-            )
-          }
-
-          if (!pluginEntryPath && isUsingTsRunner()) {
-            if (
-              hookDir &&
-              existsSync(path.resolve(plugins[plugin], hookDir, 'index.ts'))
-            ) {
-              pluginEntryPath = path.resolve(
-                plugins[plugin],
-                hookDir,
-                entryFileName
-              )
-              entryFileName = 'index.ts'
-            }
-          }
-
-          // pluginEntryPath resolve failed, means this plugin do not hook anything
-          if (!pluginEntryPath) {
-            continue
-          }
-
-          let loadedPlugin = await import(pluginEntryPath)
-          if (_.isFunction(loadedPlugin)) {
-            loadedPlugin = await loadedPlugin(this, argv)
-          } else if (_.isFunction(loadedPlugin.default)) {
-            loadedPlugin = await loadedPlugin.default(this, argv)
-          }
-
-          let forHookCollected: Hook | null = null
-          if (loadedPlugin[hook]) {
-            if (
-              !loadedPlugin[hook].getHook ||
-              !_.isFunction(loadedPlugin[hook].getHook)
-            ) {
-              forHookCollected = new Hook(loadedPlugin[hook])
-            } else {
-              forHookCollected = loadedPlugin[hook]
-            }
-          }
-
-          if (forHookCollected) {
-            const loadedPluginHook = forHookCollected.getHook(originModuler)
-            if (_.isFunction(loadedPluginHook)) {
-              hookCollected.push(loadedPluginHook(this, argv, options))
-            } else {
-              hookCollected.push(loadedPluginHook)
-            }
-            hookIndex.push(plugin)
-          }
-        } catch (e) {
-          console.log(e)
-        }
-      }
-
-      const hookResolved: unknown[] = await Promise.all(hookCollected)
-      hookResolved.forEach((pluginReturn, index) => {
-        switch (options.mode) {
-          case 'group':
-            pluginReturn = pluginReturn || {}
-            const plugin = hookIndex[index] as string
-            ;(pluginsReturn as Record<string, unknown>)[plugin] = pluginReturn
-            break
-          case 'push':
-            ;(pluginsReturn as unknown[]).push(pluginReturn)
-            break
-          case 'replace':
-            pluginsReturn = pluginReturn as HookReturn
-            break
-          case 'merge':
-            pluginReturn = pluginReturn || {}
-            pluginsReturn = _.merge(pluginsReturn, pluginReturn)
-            break
-          case 'assign':
-          default:
-            pluginReturn = (pluginReturn || {}) as HookReturn
-            pluginsReturn = Object.assign(
-              pluginsReturn as Record<string, unknown>,
-              pluginReturn
-            )
-            break
-        }
-      })
-
-      return pluginsReturn
-    } catch (e) {
-      // throw new Error(e.stack)
-
-      console.log(e.message)
-    }
-    return undefined
+    return await invokeHook(hook, options, opts)
   }
 
   extendConfig(extendRcPath: string[] | string, prefix: string) {
@@ -1686,4 +1492,234 @@ export class Core {
 
     return argv
   }
+}
+
+export const invokeHook = async (
+  hook: string,
+  options: HookOption = { mode: 'assign' },
+  opts: ArgvOptions = {}
+): Promise<HookReturn> => {
+  const $core = Core.getInstance()
+  $core.debugCore(`Invoke hook ${hook}`)
+  const splitHookName = hook.split(':')
+  let moduler, originModuler
+  if (splitHookName.length === 1) {
+    moduler = ''
+    originModuler = ''
+    hook = splitHookName[0]
+  } else if (splitHookName.length === 2) {
+    moduler = splitHookName[0]
+    hook = splitHookName[1]
+
+    originModuler = moduler
+    moduler = moduler.replace('-', '__').replace('/', '__').replace('@', '')
+  } else {
+    throw Error('Invalid hook name')
+  }
+
+  const argv = Object.assign(opts, $core.parsedArgv)
+  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
+  hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
+  options = Object.assign(
+    {
+      mode: 'assign',
+      useCache: false,
+      include: [],
+      exclude: [],
+      opts: {},
+    },
+    options
+  )
+  try {
+    // Make Application supporting hook invocation
+    const appConfig = $core.appConfig
+    const combinedConfig = $core.combinedConfig
+    // Make Semo core supporting hook invocation
+    const plugins = argv.packageDirectory
+      ? Object.assign(
+          {},
+          {
+            [scriptName]: path.resolve(argv.packageDirectory),
+          },
+          $core.allPlugins
+        )
+      : $core.allPlugins
+
+    if (
+      appConfig &&
+      appConfig.name !== scriptName &&
+      appConfig.name !== argv.packageName &&
+      !plugins[appConfig.name] &&
+      appConfig.applicationDir &&
+      appConfig.applicationDir !== argv.packageDirectory
+    ) {
+      plugins.application = appConfig.applicationDir
+    }
+
+    let pluginsReturn: HookReturn
+    switch (options.mode) {
+      case 'push':
+        pluginsReturn = []
+        break
+      case 'replace':
+        pluginsReturn = undefined
+        break
+      case 'group':
+      case 'assign':
+      case 'merge':
+      default:
+        pluginsReturn = {}
+        break
+    }
+    const hookCollected: unknown[] = []
+    const hookIndex: unknown[] = []
+    for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
+      const plugin = Object.keys(plugins)[i]
+
+      // Process include option
+      if (
+        _.isArray(options.include) &&
+        options.include.length > 0 &&
+        !options.include.includes(plugin)
+      ) {
+        continue
+      }
+
+      // Process exclude option
+      if (
+        _.isArray(options.exclude) &&
+        options.exclude.length > 0 &&
+        options.exclude.includes(plugin)
+      ) {
+        continue
+      }
+
+      try {
+        let pluginEntryPath: string // resolve plugin hook entry file path
+        let hookDir: string = '' // resolve plugin hook dir
+
+        switch (plugin) {
+          case scriptName:
+            const coreRcInfo = $core.parseRcFile(plugin, plugins[plugin])
+            hookDir = (
+              coreRcInfo && coreRcInfo.hookDir ? coreRcInfo.hookDir : ''
+            ) as string
+            break
+
+          case 'application':
+            if (combinedConfig.hookDir) {
+              hookDir = combinedConfig.hookDir as string
+            }
+            break
+
+          default:
+            if (
+              combinedConfig.pluginConfigs &&
+              combinedConfig.pluginConfigs[plugin]
+            ) {
+              hookDir = combinedConfig.pluginConfigs[plugin].hookDir
+            }
+            break
+        }
+
+        let entryFileName = 'index.js'
+        if (
+          hookDir &&
+          existsSync(path.resolve(plugins[plugin], hookDir, entryFileName))
+        ) {
+          pluginEntryPath = path.resolve(
+            plugins[plugin],
+            hookDir,
+            entryFileName
+          )
+        }
+
+        if (!pluginEntryPath && isUsingTsRunner()) {
+          if (
+            hookDir &&
+            existsSync(path.resolve(plugins[plugin], hookDir, 'index.ts'))
+          ) {
+            pluginEntryPath = path.resolve(
+              plugins[plugin],
+              hookDir,
+              entryFileName
+            )
+            entryFileName = 'index.ts'
+          }
+        }
+
+        // pluginEntryPath resolve failed, means this plugin do not hook anything
+        if (!pluginEntryPath) {
+          continue
+        }
+
+        let loadedPlugin = await import(pluginEntryPath)
+        if (_.isFunction(loadedPlugin)) {
+          loadedPlugin = await loadedPlugin(this, argv)
+        } else if (_.isFunction(loadedPlugin.default)) {
+          loadedPlugin = await loadedPlugin.default(this, argv)
+        }
+
+        let forHookCollected: Hook | null = null
+        if (loadedPlugin[hook]) {
+          if (
+            !loadedPlugin[hook].getHook ||
+            !_.isFunction(loadedPlugin[hook].getHook)
+          ) {
+            forHookCollected = new Hook(loadedPlugin[hook])
+          } else {
+            forHookCollected = loadedPlugin[hook]
+          }
+        }
+
+        if (forHookCollected) {
+          const loadedPluginHook = forHookCollected.getHook(originModuler)
+          if (_.isFunction(loadedPluginHook)) {
+            hookCollected.push(loadedPluginHook($core, argv, options))
+          } else {
+            hookCollected.push(loadedPluginHook)
+          }
+          hookIndex.push(plugin)
+        }
+      } catch (e) {
+        console.log(e)
+      }
+    }
+
+    const hookResolved: unknown[] = await Promise.all(hookCollected)
+    hookResolved.forEach((pluginReturn, index) => {
+      switch (options.mode) {
+        case 'group':
+          pluginReturn = pluginReturn || {}
+          const plugin = hookIndex[index] as string
+          ;(pluginsReturn as Record<string, unknown>)[plugin] = pluginReturn
+          break
+        case 'push':
+          ;(pluginsReturn as unknown[]).push(pluginReturn)
+          break
+        case 'replace':
+          pluginsReturn = pluginReturn as HookReturn
+          break
+        case 'merge':
+          pluginReturn = pluginReturn || {}
+          pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+          break
+        case 'assign':
+        default:
+          pluginReturn = (pluginReturn || {}) as HookReturn
+          pluginsReturn = Object.assign(
+            pluginsReturn as Record<string, unknown>,
+            pluginReturn
+          )
+          break
+      }
+    })
+
+    return pluginsReturn
+  } catch (e) {
+    // throw new Error(e.stack)
+
+    console.log(e.message)
+  }
+  return undefined
 }
