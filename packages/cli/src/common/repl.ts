@@ -13,12 +13,12 @@ import {
   readFileSync,
   statSync,
 } from 'fs'
-import yargsParser from 'yargs-parser'
 import { ensureDirSync } from 'fs-extra'
 import _ from 'lodash'
 import repl, { REPLServer } from 'repl'
 import shell from 'shelljs'
 import { Context } from 'vm'
+import yargsParser from 'yargs-parser'
 
 /**
  * Keep repl history
@@ -74,7 +74,7 @@ export const reload = async (
   argv: ArgvExtraOptions & { [key: string]: any }
 ) => {
   const scriptName = argv.scriptName || 'semo'
-  let pluginsReturn = await argv.$core.invokeHook(
+  let pluginsReturn = await argv.$core.invokeHook<Record<string, any>>(
     `${scriptName}:repl`,
     _.isBoolean(argv.hook)
       ? {
@@ -165,7 +165,7 @@ export const extract = (
 
 export async function openRepl(context: Record<string, any>): Promise<any> {
   const { Semo } = context
-  const argv = Semo.argv
+  const argv = Semo.argv as ArgvExtraOptions
   const r = repl.start({
     prompt: argv.prompt,
     ignoreUndefined: true,
@@ -234,7 +234,8 @@ export async function openRepl(context: Record<string, any>): Promise<any> {
     action: requireAction,
   })
 
-  const hookReplCommands = await argv.$core.invokeHook('semo:repl_command')
+  const hookReplCommands =
+    await argv.$core.invokeHook<Record<string, any>>('semo:repl_command')
   Object.keys(hookReplCommands)
     .filter((command) => {
       return ![

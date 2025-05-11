@@ -1,4 +1,11 @@
-import { error, formatRcOptions, run, splitComma, Utils } from '@semo/core'
+import {
+  ArgvExtraOptions,
+  error,
+  formatRcOptions,
+  run,
+  splitComma,
+  Utils,
+} from '@semo/core'
 import { existsSync } from 'fs'
 import _ from 'lodash'
 import path from 'path'
@@ -34,7 +41,7 @@ export const builder = function (yargs: Argv) {
   })
 }
 
-export const handler = async function (argv: any) {
+export const handler = async function (argv: ArgvExtraOptions) {
   // get options from plugin config
   argv.hook =
     argv.hook ??
@@ -108,7 +115,7 @@ export const handler = async function (argv: any) {
     }
 
     if (argv.hook) {
-      let pluginsReturn = await argv.$core.invokeHook(
+      let pluginsReturn = await argv.$core.invokeHook<Record<string, any>>(
         `${scriptName}:repl`,
         _.isBoolean(argv.hook)
           ? {

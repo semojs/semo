@@ -9,6 +9,7 @@ const __dirname = path.dirname(__filename)
 
 export const hook_hook = new Hook('semo', {
   before_command: 'Hook triggered before command execution.',
+  component: 'Hook triggered when needing to fetch components',
   hook: 'Hook triggered in hook command.',
   repl: 'Hook triggered in repl command.',
   repl_command: 'Define custom repl command.',

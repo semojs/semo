@@ -50,7 +50,6 @@ import {
   ArgvWithPlugin,
   CombinedConfig,
   HookOption,
-  HookReturn,
   InitOptions,
   PluginConfig,
 } from './types.js'
@@ -1433,12 +1432,12 @@ export class Core {
     }
   }
 
-  async invokeHook(
+  async invokeHook<T>(
     hook: string,
     options: HookOption = { mode: 'assign' },
     opts: ArgvOptions = {}
-  ): Promise<HookReturn> {
-    return await invokeHook(hook, options, opts)
+  ): Promise<T> {
+    return await invokeHook<T>(hook, options, opts)
   }
 
   extendConfig(extendRcPath: string[] | string, prefix: string) {
@@ -1494,11 +1493,11 @@ export class Core {
   }
 }
 
-export const invokeHook = async (
+export const invokeHook = async <T>(
   hook: string,
   options: HookOption = { mode: 'assign' },
   opts: ArgvOptions = {}
-): Promise<HookReturn> => {
+): Promise<T> => {
   const $core = Core.getInstance()
   $core.debugCore(`Invoke hook ${hook}`)
   const splitHookName = hook.split(':')
@@ -1556,7 +1555,7 @@ export const invokeHook = async (
       plugins.application = appConfig.applicationDir
     }
 
-    let pluginsReturn: HookReturn
+    let pluginsReturn
     switch (options.mode) {
       case 'push':
         pluginsReturn = []
@@ -1698,7 +1697,7 @@ export const invokeHook = async (
           ;(pluginsReturn as unknown[]).push(pluginReturn)
           break
         case 'replace':
-          pluginsReturn = pluginReturn as HookReturn
+          pluginsReturn = pluginReturn
           break
         case 'merge':
           pluginReturn = pluginReturn || {}
@@ -1706,7 +1705,7 @@ export const invokeHook = async (
           break
         case 'assign':
         default:
-          pluginReturn = (pluginReturn || {}) as HookReturn
+          pluginReturn = pluginReturn || {}
           pluginsReturn = Object.assign(
             pluginsReturn as Record<string, unknown>,
             pluginReturn
