@@ -171,7 +171,7 @@ export class Core {
    * So we need to set the instance manually.
    * @param instance Core instance
    */
-  public setInstance(instance: Core) {
+  public static setInstance(instance: Core) {
     Core.instance = instance
   }
 
