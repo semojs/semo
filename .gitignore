@@ -44,3 +44,4 @@ dist
 .claude
 
 semo-plugin-manifest.json
+/custom-location
