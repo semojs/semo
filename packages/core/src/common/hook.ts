@@ -1,32 +1,56 @@
-import _ from 'lodash'
 import { HookHandler, HookItem } from './types.js'
+
+let _globalScriptName = 'semo'
+
+/**
+ * Set the global script name used by Hook for name conversion.
+ * Called automatically by Core during initialization.
+ */
+export function setHookScriptName(name: string) {
+  _globalScriptName = name
+}
 
 export class Hook {
   /**
-   * A class that manages hooks and their handlers
+   * A class that manages hooks and their handlers.
+   *
+   * Recommended usage:
+   * ```typescript
+   * import { Hook } from '@semo/core'
+   *
+   * // Implement a hook defined by plugin 'semo'
+   * export const hook_repl = new Hook('semo', (core, argv) => {
+   *   return { myUtil: () => 'hello' }
+   * })
+   *
+   * // Implement hooks from multiple plugins
+   * export const hook_bar = new Hook({
+   *   'semo-plugin-foo': (core, argv) => { ... },
+   *   'semo-plugin-baz': (core, argv) => { ... },
+   * })
+   * ```
    */
   private mappings: HookItem = {}
-  private scriptName = 'semo'
 
   /**
    * Constructor for Hook class
-   * @param name - Name of the hook or hook mapping object
-   * @param handler - Handler function or object for the hook
+   * @param name - Plugin name (e.g. 'semo') or hook mapping object
+   * @param handler - Handler function (when name is a string)
    */
   constructor(
     name: string | HookItem,
     handler: HookHandler | Record<string, unknown> | undefined = undefined
   ) {
-    if (_.isString(name)) {
+    if (typeof name === 'string') {
       name = this.convertName(name)
       if (!handler) return
       this.mappings[name] = handler
-    } else if (_.isObject(name)) {
+    } else if (typeof name === 'object' && name !== null) {
       const newMappings: HookItem = {}
-      Object.keys(name).forEach((n: string) => {
+      for (const [n, handler] of Object.entries(name as HookItem)) {
         const nn = this.convertName(n)
-        newMappings[nn] = (name as HookItem)[n]
-      })
+        newMappings[nn] = handler
+      }
       this.mappings = newMappings
     } else {
       throw new Error('Invalid hook')
@@ -49,11 +73,9 @@ export class Hook {
    * @returns Converted hook name with proper prefix
    */
   private convertName(name: string) {
-    if (
-      name !== this.scriptName &&
-      name.indexOf(`${this.scriptName}-plugin-`) === -1
-    ) {
-      name = this.scriptName + '-plugin-' + name
+    const scriptName = _globalScriptName
+    if (name !== scriptName && !name.includes(`${scriptName}-plugin-`)) {
+      name = scriptName + '-plugin-' + name
     }
     return name
   }

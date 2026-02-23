@@ -1,15 +1,73 @@
 import crypto from 'crypto'
 import { findUpSync } from 'find-up'
-import { ensureDirSync } from 'fs-extra'
-import _ from 'lodash'
 import { CommonSpawnOptions, spawn, spawnSync } from 'node:child_process'
-import { existsSync, unlinkSync, writeFileSync } from 'node:fs'
+import {
+  closeSync,
+  createWriteStream,
+  existsSync,
+  mkdirSync,
+  openSync,
+  readFileSync,
+  statSync,
+  unlinkSync,
+  writeFileSync,
+} from 'node:fs'
 import { createRequire } from 'node:module'
 import path from 'node:path'
-import { getBorderCharacters, table } from 'table'
+// table is lazy-loaded in outputTable()
 import { info, log } from './log.js'
 
-const require = createRequire(import.meta.url)
+/** Get a nested value from an object by dot-separated path */
+export function deepGet(obj: any, path: string, defaultValue?: any): any {
+  if (!obj || !path) return defaultValue
+  const keys = path.split('.')
+  let result = obj
+  for (const key of keys) {
+    if (result == null) return defaultValue
+    result = result[key]
+  }
+  return result === undefined ? defaultValue : result
+}
+
+/** Set a nested value on an object by dot-separated path */
+export function deepSet(obj: any, path: string, value: any): any {
+  if (!path) return obj
+  const keys = path.split('.')
+  let current = obj
+  for (let i = 0; i < keys.length - 1; i++) {
+    const key = keys[i]
+    if (current[key] == null || typeof current[key] !== 'object') {
+      current[key] = {}
+    }
+    current = current[key]
+  }
+  current[keys[keys.length - 1]] = value
+  return obj
+}
+
+/** Deep merge source objects into target (mutates target) */
+export function deepMerge(target: any, ...sources: any[]): any {
+  for (const source of sources) {
+    if (!source || typeof source !== 'object') continue
+    for (const key of Object.keys(source)) {
+      const srcVal = source[key]
+      const tgtVal = target[key]
+      if (
+        srcVal &&
+        typeof srcVal === 'object' &&
+        !Array.isArray(srcVal) &&
+        tgtVal &&
+        typeof tgtVal === 'object' &&
+        !Array.isArray(tgtVal)
+      ) {
+        deepMerge(tgtVal, srcVal)
+      } else {
+        target[key] = srcVal
+      }
+    }
+  }
+  return target
+}
 
 /**
  * Compute md5.
@@ -51,12 +109,12 @@ export const splitByChar = function (
  * @returns {array} Package list
  */
 export const parsePackageNames = function (input: string | string[]): string[] {
-  if (_.isString(input)) {
+  if (typeof input === 'string') {
     return splitComma(input)
   }
 
-  if (_.isArray(input)) {
-    return _.flatten(input.map((item) => splitComma(item)))
+  if (Array.isArray(input)) {
+    return input.map((item) => splitComma(item)).flat()
   }
 
   return []
@@ -71,9 +129,17 @@ export const getPackagePath = function (
   pkg: string | undefined = undefined,
   paths: string[] = []
 ): string | undefined {
-  const packagePath = findUpSync('package.json', {
-    cwd: pkg ? path.dirname(require.resolve(pkg, { paths })) : process.cwd(),
-  })
+  let cwd: string
+  if (pkg) {
+    // createRequire needed for path-scoped require.resolve (import.meta.resolve doesn't support custom paths)
+    const localRequire = createRequire(
+      paths.length > 0 ? path.resolve(paths[0], '_virtual.js') : import.meta.url
+    )
+    cwd = path.dirname(localRequire.resolve(pkg))
+  } else {
+    cwd = process.cwd()
+  }
+  const packagePath = findUpSync('package.json', { cwd })
   return packagePath
 }
 
@@ -97,11 +163,12 @@ export const getAbsolutePath = function (filePath: string): string {
  * @param {string} caption Table caption
  * @param {object} borderOptions Border options
  */
-export const outputTable = function (
+export const outputTable = async function (
   columns: string[][],
   caption: string = '',
   borderOptions: object = {}
 ) {
+  const { table, getBorderCharacters } = await import('table')
   // table config
   const config = {
     drawHorizontalLine: () => {
@@ -155,21 +222,21 @@ export const execPromise = function (
       opts.stdio = 'pipe'
     }
 
-    const process = spawn(cmd, opts)
+    const child = spawn(cmd, opts)
 
     // 如果需要捕获输出
     if (opts.captureOutput) {
-      process.stdout?.on('data', (data) => {
+      child.stdout?.on('data', (data) => {
         stdout += data.toString()
       })
 
-      process.stderr?.on('data', (data) => {
+      child.stderr?.on('data', (data) => {
         stderr += data.toString()
       })
     }
 
     // 监听命令执行完成
-    process.on('close', (code) => {
+    child.on('close', (code) => {
       const result: ExecResult = {
         code,
         stdout,
@@ -183,7 +250,7 @@ export const execPromise = function (
     })
 
     // 监听错误
-    process.on('error', (err) => {
+    child.on('error', (err) => {
       reject(err)
     })
   })
@@ -224,7 +291,7 @@ export const exec = function (
 export const formatRcOptions = function <T extends Record<string, unknown>>(
   opts: T
 ): Record<string, unknown> {
-  if (!_.isObject(opts) || Array.isArray(opts)) {
+  if (typeof opts !== 'object' || opts === null || Array.isArray(opts)) {
     throw new Error('Not valid rc options! Expected an object.')
   }
 
@@ -235,7 +302,7 @@ export const formatRcOptions = function <T extends Record<string, unknown>>(
           .replace(/--+/g, '-')
           .replace(/^-/g, '')
           .replace(/-([a-z])/g, (_, p1) => p1.toUpperCase())
-          .replace('.', '_')
+          .replace(/\./g, '_')
         newOpts[newKey] = opts[key]
       } else {
         newOpts[key] = opts[key]
@@ -267,14 +334,77 @@ export const getNodeRuntime = function (): string {
 /**
  * Determines if the current Node.js process is using a TypeScript runner.
  *
+ * Checks npm_lifecycle_script (via getNodeRuntime), process.argv for tsx/ts-node/jiti,
+ * and Node.js --import/--loader flags pointing to TS loaders.
+ *
  * @returns {boolean} `true` if a TypeScript runner is detected, otherwise `false`.
  */
 export const isUsingTsRunner = function (): boolean {
-  return (
-    getNodeRuntime() === 'ts-node' ||
-    getNodeRuntime() === 'jiti' ||
-    getNodeRuntime() === 'tsx'
-  )
+  const runtime = getNodeRuntime()
+  if (runtime === 'ts-node' || runtime === 'jiti' || runtime === 'tsx') {
+    return true
+  }
+
+  // Check process.argv for TS runner binaries
+  const argv = process.argv
+  for (const arg of argv) {
+    if (
+      /\btsx\b/.test(arg) ||
+      /\bts-node\b/.test(arg) ||
+      /\bjiti\b/.test(arg)
+    ) {
+      return true
+    }
+  }
+
+  // Check Node.js --import or --loader flags pointing to TS loaders
+  const execArgv = process.execArgv
+  for (let i = 0; i < execArgv.length; i++) {
+    const arg = execArgv[i]
+    const nextArg = execArgv[i + 1] || ''
+    const value = arg.includes('=') ? arg.split('=')[1] : nextArg
+
+    if (arg.startsWith('--import') || arg.startsWith('--loader')) {
+      if (/tsx|ts-node|jiti/.test(value)) {
+        return true
+      }
+    }
+  }
+
+  return false
+}
+
+/**
+ * Determines if the current working directory is a TypeScript project.
+ *
+ * Checks for tsconfig.json and typescript in devDependencies/dependencies.
+ *
+ * @param cwd - Optional working directory to check, defaults to process.cwd()
+ * @returns {boolean} `true` if the project appears to use TypeScript.
+ */
+export const isTypeScriptProject = function (cwd?: string): boolean {
+  const dir = cwd || process.cwd()
+
+  // Check for tsconfig.json
+  if (existsSync(path.resolve(dir, 'tsconfig.json'))) {
+    return true
+  }
+
+  // Check package.json for typescript dependency
+  try {
+    const pkgPath = path.resolve(dir, 'package.json')
+    if (existsSync(pkgPath)) {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
+      const allDeps = { ...pkg.dependencies, ...pkg.devDependencies }
+      if (allDeps.typescript) {
+        return true
+      }
+    }
+  } catch {
+    // ignore parse errors
+  }
+
+  return false
 }
 
 /**
@@ -293,7 +423,7 @@ export const clearConsole = function () {
  */
 export const moveToTopConsole = function () {
   if (process.stdout.isTTY) {
-    process.stdout.write(process.platform === 'win32' ? '\\x1B[0f' : '\\x1B[H')
+    process.stdout.write(process.platform === 'win32' ? '\x1B[0f' : '\x1B[H')
   }
 }
 
@@ -321,18 +451,22 @@ export const consoleReader = async function (
       <string>opts.plugin,
       md5(opts.identifier)
     )
-    ensureDirSync(path.dirname(tmpPath))
+    mkdirSync(path.dirname(tmpPath), { recursive: true })
     writeFileSync(tmpPath, content)
 
     if (opts.tmpPathOnly) {
       return tmpPath
     }
 
-    await execPromise(`cat ${tmpPath} | less -r`, undefined, () => {
-      // Maybe the file already removed
-      if (existsSync(tmpPath)) {
-        unlinkSync(tmpPath)
-      }
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn('less', ['-r', tmpPath], { stdio: 'inherit' })
+      child.on('close', () => {
+        if (existsSync(tmpPath)) {
+          unlinkSync(tmpPath)
+        }
+        resolve()
+      })
+      child.on('error', reject)
     })
   } else {
     console.log(content)
@@ -346,7 +480,7 @@ export const consoleReader = async function (
  *
  * Copy from `is-promise` npm module
  */
-export const isPromise = (obj) => {
+export const isPromise = (obj: any) => {
   return (
     !!obj &&
     (typeof obj === 'object' || typeof obj === 'function') &&
@@ -361,17 +495,17 @@ export const isPromise = (obj) => {
  * @param getPath a key path
  * @param args arguments for function
  */
-export const run = async (func, getPath = '', ...args) => {
+export const run = async (func: any, getPath = '', ...args: any[]) => {
   let result
   if (isPromise(func)) {
     result = await func
-  } else if (_.isFunction(func)) {
+  } else if (typeof func === 'function') {
     result = await func(...args)
-  } else if (_.isArray(func) && _.isFunction(func[0])) {
+  } else if (Array.isArray(func) && typeof func[0] === 'function') {
     const newFunc = func[0]
     func.shift()
     result = await newFunc(...func)
-  } else if (_.isObject(func)) {
+  } else if (typeof func === 'object' && func !== null) {
     result = func
   } else {
     throw new Error('invalid func')
@@ -379,12 +513,64 @@ export const run = async (func, getPath = '', ...args) => {
 
   const that = result
 
-  result = !getPath ? result : _.get(result, getPath)
+  result = !getPath ? result : deepGet(result, getPath)
 
-  if (_.isFunction(result)) {
+  if (typeof result === 'function') {
     // pass this obj to function/method call
     result = await result.call(that, ...args)
   }
 
   return result
+}
+
+/**
+ * Keep repl history
+ * Shared utility for REPL and Shell plugins
+ */
+export const replHistory = function (
+  replServer: {
+    history?: string[]
+    historyIndex?: number
+    addListener: (...args: any[]) => void
+    output: { write: (...args: any[]) => void }
+    displayPrompt: (...args: any[]) => void
+    defineCommand: (...args: any[]) => void
+    [key: string]: any
+  },
+  file: string
+) {
+  try {
+    statSync(file)
+    replServer.history = readFileSync(file, 'utf-8').split('\n').reverse()
+    replServer.history.shift()
+    replServer.historyIndex = -1
+  } catch {}
+
+  const fd = openSync(file, 'a')
+  const wstream = createWriteStream(file, { fd })
+  wstream.on('error', function (err) {
+    throw err
+  })
+
+  replServer.addListener('line', function (code: string) {
+    if (code && code !== '.history') {
+      wstream.write(code + '\n')
+    } else {
+      replServer.historyIndex!++
+      replServer.history!.pop()
+    }
+  })
+
+  process.on('exit', function () {
+    closeSync(fd)
+  })
+
+  replServer.defineCommand('history', {
+    help: 'Show the history',
+    action: function () {
+      const out = [...replServer.history!]
+      replServer.output.write(out.reverse().join('\n') + '\n')
+      replServer.displayPrompt()
+    },
+  })
 }

@@ -1,7 +1,0 @@
-typescript: true
-commandDir: lib/commands
-extendDir: lib/extends
-hookDir: lib/hooks
-commandMakeDir: src/commands
-extendMakeDir: src/extends
-hookMakeDir: src/hooks

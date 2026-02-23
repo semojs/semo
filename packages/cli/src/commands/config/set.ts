@@ -1,9 +1,9 @@
-import _ from 'lodash'
+import { deepSet } from '@semo/core'
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'node:fs'
 import path from 'path'
 import yaml, { Document } from 'yaml'
+import { resolveConfigPath } from './utils.js'
 
-export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
 export const command =
   'set <configKey> <configValue> [configComment] [configType]'
@@ -14,24 +14,13 @@ export const builder = function (yargs: any) {
     default: 'string',
     choices: ['string', 'number', 'int', 'integer', 'boolean', 'bool'],
   })
-  // yargs.option('option', { default, describe, alias })
-}
-
-function ensureDirSync(dirPath: string) {
-  try {
-    mkdirSync(dirPath, { recursive: true })
-  } catch (error: any) {
-    if (error.code !== 'EEXIST') {
-      throw error
-    }
-  }
 }
 
 export const handler = async function (argv: any) {
   switch (argv.configType) {
     case 'bool':
     case 'boolean':
-      argv.configValue = Boolean(argv.configValue)
+      argv.configValue = argv.configValue === 'true' || argv.configValue === '1'
       break
     case 'int':
     case 'integer':
@@ -43,27 +32,15 @@ export const handler = async function (argv: any) {
       break
   }
 
-  if (_.isString(argv.configKey)) {
+  if (typeof argv.configKey === 'string') {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName = argv.scriptName
-  let configPath
-  if (argv.global) {
-    configPath = process.env.HOME
-      ? path.resolve(
-          process.env.HOME,
-          '.' + scriptName,
-          '.' + scriptName + 'rc.yml'
-        )
-      : ''
-  } else {
-    configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
-  }
+  const configPath = resolveConfigPath(argv.scriptName, argv.global)
 
   if (!argv.global && !existsSync(configPath)) {
     argv.$error(
-      'Config file not found. you need to create config file manually to prove you know what you are doing.'
+      'Config file not found. You need to create config file manually to prove you know what you are doing.'
     )
     return
   }
@@ -74,7 +51,7 @@ export const handler = async function (argv: any) {
   }
 
   if (argv.global && configPath && !existsSync(path.dirname(configPath))) {
-    ensureDirSync(path.dirname(configPath))
+    mkdirSync(path.dirname(configPath), { recursive: true })
   }
 
   let config
@@ -83,18 +60,18 @@ export const handler = async function (argv: any) {
     config = yaml.parseDocument(rcFile)
   } else {
     config = yaml.parseDocument('')
-
     config.commentBefore = ` THIS IS SEMO(@semo/cli)'s RC FILE.
  YOU CAN EDIT THIS FILE MANUALLY OR USE semo config COMMAND.
  RUN semo config help TO SEE RELATED COMMANDS.
 `
     config.add(config.createNode({}, undefined))
-    // config.contents = config.createNode({}, undefined)
   }
 
-  const tmpConfigObject = _.set({}, argv.configKey, argv.configValue)
-
-  // Recursively find and change
+  const tmpConfigObject = deepSet(
+    {},
+    argv.configKey.join('.'),
+    argv.configValue
+  )
   walk(config.contents, tmpConfigObject, config, argv.configComment)
 
   writeFileSync(configPath, config.toString())
@@ -114,8 +91,12 @@ const walk = (
     for (const pair of map.items) {
       if (pair.key.value === currentKey) {
         found = true
-        if (!_.isObject(configKey[pair.key.value])) {
-          console.log('pair.value', pair.value)
+        if (
+          !(
+            typeof configKey[pair.key.value] === 'object' &&
+            configKey[pair.key.value] !== null
+          )
+        ) {
           pair.value.value = configKey[pair.key.value]
           if (comment) {
             pair.value.comment = comment
@@ -131,15 +112,12 @@ const walk = (
     const pair = config.createPair(currentKey, configKey[currentKey])
     walkComment(pair.value, configKey[currentKey], comment)
 
-    if (map && _.isArray(map.items)) {
+    if (map && Array.isArray(map.items)) {
       map.items.push(pair)
     } else {
-      // config.contents = pair
       config.add(pair)
     }
   }
-
-  return
 }
 
 const walkComment = (
@@ -147,7 +125,7 @@ const walkComment = (
   configKey: Record<string, any>,
   comment: string
 ) => {
-  if (_.isString(configKey)) {
+  if (typeof configKey === 'string') {
     if (comment) {
       map.comment = comment
     }

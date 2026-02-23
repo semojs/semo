@@ -1,12 +1,20 @@
-import { Argv, ArgvExtraOptions, error, success } from '@semo/core'
-import { ensureDirSync } from 'fs-extra'
-import { existsSync, writeFileSync } from 'node:fs'
+import {
+  Argv,
+  ArgvExtraOptions,
+  error,
+  renderTemplate,
+  success,
+} from '@semo/core'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export const plugin = 'semo'
 export const command = 'command <name> [description]'
 export const desc = 'Generate a command template'
-export const aliases = ['c']
+export const aliases = 'c'
 
 export const builder = function (yargs: Argv) {
   yargs.option('extend', {
@@ -32,10 +40,10 @@ export const builder = function (yargs: Argv) {
   })
 }
 
-export const handler = function (
+export const handler = async function (
   argv: ArgvExtraOptions & { [key: string]: any }
 ) {
-  if (argv.typescript || argv.ts) {
+  if (argv.typescript) {
     argv.format = 'typescript'
   }
   const scriptName = argv.scriptName || 'semo'
@@ -44,7 +52,7 @@ export const handler = function (
     let extendName = argv.extend
     if (
       extendName !== scriptName &&
-      extendName.indexOf(`${scriptName}-plugin-`) === -1
+      !extendName.startsWith(`${scriptName}-plugin-`)
     ) {
       extendName = `${scriptName}-plugin-${extendName}`
     }
@@ -53,7 +61,7 @@ export const handler = function (
     }/${extendName}/src/commands`
   } else if (argv.plugin) {
     let pluginName = argv.plugin
-    if (pluginName.indexOf(`${scriptName}-plugin-`) !== 0) {
+    if (!pluginName.startsWith(`${scriptName}-plugin-`)) {
       pluginName = `${scriptName}-plugin-${pluginName}`
     }
     commandDir = `${
@@ -65,6 +73,7 @@ export const handler = function (
 
   if (!commandDir) {
     error('"commandDir" missing in config file!')
+    return
   }
 
   const commandFilePath = path.resolve(
@@ -73,62 +82,25 @@ export const handler = function (
   )
   const commandFileDir = path.dirname(commandFilePath)
 
-  ensureDirSync(commandFileDir)
+  mkdirSync(commandFileDir, { recursive: true })
 
   if (existsSync(commandFilePath)) {
     error('Command file exist!')
+    return
   }
 
   const name = argv.name.split('/').pop()
 
-  let code: string
+  const templatePath = path.resolve(
+    __dirname,
+    '../../../templates/command',
+    `${argv.format}.hbs`
+  )
+  const code = await renderTemplate(templatePath, {
+    name,
+    description: argv.description || name,
+  })
 
-  switch (argv.format) {
-    case 'typescript':
-      code = `export const command = '${name}'
-export const desc = '${argv.description || name}'
-
-export const builder = function (yargs: any) {
-  // yargs.option('option', { default, describe, alias })
-}
-
-export const handler = async function (argv: any) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-    case 'esm':
-      code = `export const command = '${name}'
-export const desc = '${argv.description || name}'
-
-export const builder = function (yargs) {
-  // yargs.option('option', { default, describe, alias })
-}
-
-export const handler = async function (argv) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-    case 'cjs':
-      code = `exports.command = '${name}'
-exports.desc = '${argv.description || name}'
-
-exports.builder = function (yargs) {
-  // yargs.option('option', { default, describe, alias })
-}
-
-exports.handler = async function (argv) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-    default:
-      error('Unsupported format!')
-  }
-
-  if (!existsSync(commandFilePath)) {
-    writeFileSync(commandFilePath, code)
-    success(`${commandFilePath} created!`)
-  }
+  writeFileSync(commandFilePath, code)
+  success(`${commandFilePath} created!`)
 }

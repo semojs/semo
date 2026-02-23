@@ -1,0 +1,12 @@
+import type { SemoCommand, ArgvExtraOptions } from '@semo/core'
+
+export default {
+  command: '{{name}}',
+  desc: '{{description}}',
+  builder: (yargs) => {
+    // yargs.option('option', { default, describe, alias })
+  },
+  handler: async (argv: ArgvExtraOptions) => {
+    console.log('Start to draw your dream code!')
+  },
+} satisfies SemoCommand

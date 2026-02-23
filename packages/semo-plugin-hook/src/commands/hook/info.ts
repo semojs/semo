@@ -1,8 +1,6 @@
-import { ArgvExtraOptions, error, jsonLog } from '@semo/core'
-import _ from 'lodash'
+import { ArgvExtraOptions, fatal, jsonLog } from '@semo/core'
 
 export const plugin = 'hook'
-export const disabled = false // Set to true to disable this command temporarily
 export const command = 'info <hook> [module]'
 export const desc = 'Show hookinfo'
 
@@ -12,7 +10,7 @@ export const handler = async function (
   argv: ArgvExtraOptions | { [key: string]: any }
 ) {
   if (!argv.hook) {
-    error('A hook is required.')
+    fatal('A hook is required.')
   }
 
   if (argv.hook.startsWith('hook_')) {
@@ -26,7 +24,7 @@ export const handler = async function (
     hookInfo = await argv.$core.invokeHook(
       argv.hook,
       {
-        include: _.castArray(argv.module),
+        include: Array.isArray(argv.module) ? argv.module : [argv.module],
         mode: 'replace',
       },
       argv

@@ -1,93 +1,197 @@
 # Hook Mechanism
 
-As a low-level command-line development framework, having a plugin system is essential, especially for a framework like `Semo` which itself doesn't directly provide business value. In addition to providing users with mechanisms for plugin scanning, command extension, and configuration management, the hook mechanism significantly enhances flexibility and extensibility, forming a part of the `Semo` plugin system.
+The hook mechanism is a key part of Semo's plugin system, enabling cross-plugin communication and extensibility. Hooks allow plugins to influence each other's behavior at defined execution points.
 
-The concept of hooks is actually easy to understand and ubiquitous, for example, Windows startup programs. When the startup process reaches a certain stage, it needs to check if other applications need to start together at this point in time. Achieving this effect certainly requires configuration; for systems like Windows, this can be configured in the registry or configuration files.
+## Hook Definition (Calling a Hook)
 
-`Semo`'s hook mechanism uses conventions for dynamic identification. Each plugin's hooks are determined whether to trigger during command execution, thus incurring performance overhead related to disk I/O and traversal. However, considering that command-line execution logic is generally not overly complex, this is currently considered sufficient. If complex hook call chains emerge later, optimization can be considered. Optimization typically involves converting dynamic to static or using caching to improve speed.
+To define and invoke a hook in your plugin/command:
 
-## Hook Definition
-
-```js
-// Define a hook_bar hook
-const hookData = argv.$core.invokeHook('semo-plugin-foo:hook_bar', {
-  mode: 'group',
-})
+```typescript
+const hookData = await argv.$core.invokeHook('semo:repl', { mode: 'assign' })
 ```
 
+Or using the standalone function:
+
+```typescript
+import { invokeHook } from '@semo/core'
+
+const hookData = await invokeHook('semo:repl', { mode: 'assign' })
+```
+
+The format is `<plugin>:<hook_name>`. The `hook_` prefix is automatically added if not present.
+
 :::info
-Starting from `v1.0.0`, hook invocation requires specifying the hook prefix, i.e., who created this hook. And when implementing this hook, it's also necessary to specify which plugin defined the hook. If not specified, confusion can arise when multiple plugins define hooks with the same name. Furthermore, once the definer explicitly specifies the hook prefix, if the implementer does not specify it, it won't be recognized. This specification needs to be adhered to by both the definer and the implementer.
+Since `v1.0.0`, hook invocation requires specifying the plugin prefix (who created the hook). Implementers must also specify which plugin's hook they're implementing, otherwise the hook won't be recognized.
 :::
 
 ## Hook Implementation
 
-Hooks can only be recognized in the specified hook directory. This hook directory is configured with `hookDir` in the plugin's `.semorc.yml` file, and then `index.js` within it is recognized. If the current project is a Typescript project, the `index.ts` file will be recognized, and the `index.js` file will be ignored.
+Hooks are implemented in the `hooks/index.ts` file of your plugin. With zero-config convention, Semo automatically detects `lib/hooks/index.js` (or `src/hooks/index.ts` in TS runner mode).
 
-```js
-export const hook_bar = {
-  'semo-plugin-foo': (core, argv, options) => {},
-}
-```
+There are three ways to implement hooks, each with its own advantages.
 
-When multiple plugins genuinely define hooks with the same name, if you happen to need both simultaneously, you can also use the second method like this:
+### Style 1: Plain object (zero-dependency)
 
-```js
-exports.hook_bar = new Utils.Hook({
-  'semo-plugin-foo1': () => {},
-  'semo-plugin-foo2': () => {},
-})
-```
+No import needed — ideal for application-level hooks or when you don't want to add `@semo/core` as a dependency.
 
-## Hook Return Values
-
-The primary purpose of implementing hooks is to perform certain operations or provide specific information at program execution nodes. For flexibility, returning an object `{}` directly, a function, or even a `Promise` function is supported. If it's a function, its execution result will be obtained and then merged. `Promise` hooks are widely used because they allow executing asynchronous operations, including but not limited to databases, networks, Redis, ES, etc.
-
-If the purpose of defining a hook is to collect information, the definer might have various merging requirements. Currently, the following methods are supported, with `assign` being the default:
-
-- assign: This type overrides based on the keys of the returned object.
-- replace: This type overwrites each other, retaining only the return value of the last hook.
-- group: This type groups based on the plugin name.
-- push: This type puts all return values into an array, typically used when returning primitive data types.
-- merge: This type performs a deep merge.
-
-## Explanation of Core Built-in Hooks
-
-Since the definer of the hook determines its purpose and return value format, the definer has the obligation to clearly state this information in a specific location, allowing users of the plugin to extend it in their own plugins or applications. Below is the explanation of the core hooks:
-
-- `before_command`: This hook triggers before command execution, does not collect return values.
-- `hook`: This hook is used to declare hooks and their purposes. It's not mandatory but is a convention to let others know which hooks are defined.
-- `repl`: Used to inject information into the repl. Does not overwrite each other, generally used for debugging, format is not fixed.
-- `repl_command`: Allows third-party plugins to extend commands within the repl.
-- `status`: Used to inject new attribute information into the `semo status` command.
-- `create_project_template`: Used to inject optional templates for the `--template` parameter of the `semo create` command.
-
-:::tip
-In version `v1.15.1`, the `before_command` hook has been set to not execute by default.
-
-Enable it by adding `--enable-core-hook=before_command` when starting the command.
-:::
-
-Usage Examples of Some Core Hooks
-
-### `repl_command`
-
-Define a .hello command in REPL mode that accepts parameters.
-
-```js
-const hook_repl_command = {
-  semo: () => {
-    return {
-      hello: {
-        help: 'hello',
-        action(name) {
-          this.clearBufferedCommand()
-          console.log('hello1', name ? name : 'world')
-          this.displayPrompt()
-        },
-      },
-    }
+```typescript
+// src/hooks/index.ts
+export const hook_repl = {
+  semo: (core, argv, options) => {
+    return { myUtil: () => 'hello' }
   },
 }
 ```
 
-Here, `this.clearBufferedCommand()` and `this.displayPrompt()` are both methods from Node's REPL class. Note two points: one is that the `action` here supports `async/await`, and the other is that to ensure `this` points correctly, do not write it as an arrow function.
+The object keys are plugin names that defined the hook. Use full names like `semo-plugin-foo` or the short name `semo` for core hooks.
+
+### Style 2: Hook class (type-safe, multi-plugin)
+
+Import the `Hook` class from `@semo/core` for automatic plugin name normalization and type hints. Especially useful when implementing hooks from multiple plugins.
+
+```typescript
+import { Hook } from '@semo/core'
+
+export const hook_repl = new Hook('semo', (core, argv, options) => {
+  return { myUtil: () => 'hello' }
+})
+```
+
+The `Hook` class normalizes plugin names automatically — passing `'foo'` is equivalent to `'semo-plugin-foo'`.
+
+For implementing hooks defined by multiple plugins at once:
+
+```typescript
+import { Hook } from '@semo/core'
+
+export const hook_bar = new Hook({
+  'semo-plugin-foo': (core, argv, options) => { ... },
+  'semo-plugin-baz': (core, argv, options) => { ... },
+})
+```
+
+### Style 3: Underscore prefix (inline namespace)
+
+Encode the plugin name into the export name using `__` as separator. No import needed.
+
+```typescript
+// 'semo' plugin's hook_create_project_template
+export const semo__hook_create_project_template = {
+  demo_repo: {
+    repo: 'demo_repo.git',
+    branch: 'master',
+    alias: ['demo'],
+  },
+}
+```
+
+This is convenient for static data hooks where the return value is not a function.
+
+### Which style to choose?
+
+| Style             | Needs `@semo/core`? | Best for                                            |
+| ----------------- | ------------------- | --------------------------------------------------- |
+| Plain object      | No                  | Simple hooks, application-level code                |
+| Hook class        | Yes                 | Type safety, multi-plugin hooks, name normalization |
+| Underscore prefix | No                  | Static data, single-plugin hooks                    |
+
+## Hook Return Values
+
+Hooks can return objects, functions, or Promises. If a function is returned, its execution result will be used.
+
+### Merge Modes
+
+When a hook collects data from multiple plugins, the merge mode determines how results are combined:
+
+| Mode               | Description                                                   |
+| ------------------ | ------------------------------------------------------------- |
+| `assign` (default) | `Object.assign()` — later values override earlier ones by key |
+| `merge`            | Deep merge of all results                                     |
+| `group`            | Group results by plugin name                                  |
+| `push`             | Collect all values into an array                              |
+| `replace`          | Only keep the last plugin's return value                      |
+
+```typescript
+// Example: group mode returns { pluginA: {...}, pluginB: {...} }
+const grouped = await invokeHook('semo:hook', { mode: 'group' })
+
+// Example: push mode returns [result1, result2, ...]
+const all = await invokeHook('semo:status', { mode: 'push' })
+```
+
+## Core Built-in Hooks
+
+| Hook                      | Description                                             |
+| ------------------------- | ------------------------------------------------------- |
+| `before_command`          | Fires before command execution (disabled by default)    |
+| `hook`                    | Declare available hooks and their descriptions          |
+| `repl`                    | Inject context into the REPL environment                |
+| `repl_command`            | Define custom REPL dot-commands                         |
+| `status`                  | Inject info into `semo status` output                   |
+| `create_project_template` | Register project templates for `semo create --template` |
+
+:::tip
+Since `v1.15.1`, `before_command` is disabled by default. Enable with `--enable-core-hook=before_command`.
+:::
+
+## Examples
+
+### `hook_repl` — Inject REPL utilities
+
+```typescript
+// Style 1: Plain object
+export const hook_repl = {
+  semo: () => ({
+    add: async (a, b) => a + b,
+    multiply: async (a, b) => a * b,
+  }),
+}
+
+// Style 2: Hook class
+import { Hook } from '@semo/core'
+
+export const hook_repl = new Hook('semo', () => ({
+  add: async (a, b) => a + b,
+  multiply: async (a, b) => a * b,
+}))
+```
+
+Use in REPL:
+
+```
+semo repl
+>>> await Semo.hooks.application.add(1, 2)
+3
+```
+
+### `hook_create_project_template` — Register templates
+
+```typescript
+// Style 3: Underscore prefix (static data, no import needed)
+export const semo__hook_create_project_template = {
+  my_template: {
+    repo: 'https://github.com/user/template.git',
+    branch: 'main',
+    alias: ['mt'],
+  },
+}
+```
+
+### `hook_repl_command` — Custom REPL commands
+
+```typescript
+export const hook_repl_command = {
+  semo: () => ({
+    hello: {
+      help: 'Say hello',
+      action(name) {
+        this.clearBufferedCommand()
+        console.log('hello', name || 'world')
+        this.displayPrompt()
+      },
+    },
+  }),
+}
+```
+
+Note: Use a regular function (not arrow function) for `action` to preserve `this` context.

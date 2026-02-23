@@ -1,4 +1,4 @@
-import { outputTable, type ArgvExtraOptions } from '@semo/core'
+import { error, outputTable, type ArgvExtraOptions } from '@semo/core'
 
 export const plugin = 'semo'
 export const command = 'status'
@@ -10,19 +10,20 @@ export const builder = function () {}
 export const handler = async function (argv: ArgvExtraOptions) {
   const scriptName = argv.scriptName || 'semo'
   try {
-    const hookStatus = (await argv.$core?.invokeHook(`${scriptName}:status`, {
+    const hookStatus = (await argv.$core.invokeHook(`${scriptName}:status`, {
       mode: 'group',
     })) as Record<string, Record<string, string>>
 
-    Object.keys(hookStatus).forEach((key) => {
-      const kvs = hookStatus[key] ? hookStatus[key] : {}
+    for (const [key, kvs] of Object.entries(hookStatus)) {
+      if (!kvs || Object.keys(kvs).length === 0) continue
       const columns: string[][] = []
-      if (Object.keys(kvs).length > 0) {
-        Object.keys(kvs).map((k) => columns.push([k, kvs[k]]))
-        outputTable(columns, key === scriptName ? '' : key)
+      for (const [k, v] of Object.entries(kvs)) {
+        columns.push([k, v])
       }
-    })
-  } catch (e) {
-    console.log(e)
+      outputTable(columns, key === scriptName ? '' : key)
+    }
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
+    error(msg)
   }
 }

@@ -1,5 +1,0 @@
-tsconfig.tsbuildinfo
-/src
-tsconfig.json
-lib/**/*.map
-lib/**/*.d.ts

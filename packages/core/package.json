@@ -4,14 +4,36 @@
   "description": "Semo core",
   "type": "module",
   "main": "./lib/index.js",
-  "module": "./lib/index.js",
   "types": "./lib/index.d.ts",
   "exports": {
     ".": {
-      "default": "./lib/index.js",
+      "types": "./lib/index.d.ts",
       "import": "./lib/index.js",
-      "require": "./lib/index.js",
-      "types": "./lib/index.d.ts"
+      "default": "./lib/index.js"
+    },
+    "./utils": {
+      "types": "./lib/common/utils.d.ts",
+      "import": "./lib/common/utils.js"
+    },
+    "./log": {
+      "types": "./lib/common/log.d.ts",
+      "import": "./lib/common/log.js"
+    },
+    "./hook": {
+      "types": "./lib/common/hook.d.ts",
+      "import": "./lib/common/hook.js"
+    },
+    "./prompts": {
+      "types": "./lib/common/prompts.d.ts",
+      "import": "./lib/common/prompts.js"
+    },
+    "./debug": {
+      "types": "./lib/common/debug.d.ts",
+      "import": "./lib/common/debug.js"
+    },
+    "./template": {
+      "types": "./lib/common/template.d.ts",
+      "import": "./lib/common/template.js"
     }
   },
   "scripts": {
@@ -25,7 +47,9 @@
   "keywords": [],
   "author": "",
   "license": "ISC",
-  "packageManager": "pnpm@10.8.1",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0"
+  },
   "dependencies": {
     "@inquirer/prompts": "^7.5.0",
     "colorize-template": "^1.0.0",
@@ -33,25 +57,18 @@
     "dotenv": "^16.5.0",
     "dotenv-expand": "^12.0.2",
     "find-up": "^7.0.0",
-    "fs-extra": "^11.3.0",
-    "get-stdin": "^9.0.0",
     "glob": "^11.0.1",
     "json-colorizer": "^3.0.1",
     "json-stringify-pretty-compact": "^4.0.0",
-    "lodash": "^4.17.21",
     "picocolors": "^1.1.1",
-    "shelljs": "^0.9.2",
     "table": "^6.9.0",
+    "handlebars": "^4.7.8",
     "yaml": "^2.7.1",
-    "yargs": "18.0.0-candidate.7",
-    "yargs-parser": "^21.1.1"
+    "yargs": "^18.0.0",
+    "yargs-parser": "^22.0.0"
   },
   "devDependencies": {
     "@types/debug": "^4.1.12",
-    "@types/fs-extra": "^11.0.4",
-    "@types/glob": "^8.1.0",
-    "@types/lodash": "^4.17.16",
-    "@types/shelljs": "^0.8.15",
     "@types/yargs": "^17.0.33",
     "@types/yargs-parser": "^21.0.3",
     "typedoc": "^0.28.3"

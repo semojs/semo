@@ -1,47 +1,49 @@
-import { Argv, error } from '@semo/core'
-import _ from 'lodash'
-import { existsSync } from 'node:fs'
-import { createRequire } from 'node:module'
-import path from 'path'
-import yargsParser from 'yargs-parser'
+import { ArgvExtraOptions, Argv, error } from '@semo/core'
 
-const require = createRequire(import.meta.url)
+import { existsSync } from 'node:fs'
+import path from 'path'
+import { pathToFileURL } from 'node:url'
+import yargsParser from 'yargs-parser'
 
 export const command = 'script [file]'
 export const aliases = 'scr'
 export const desc = 'Execute a script'
 
+function resolveFilePath(filePath: string): string {
+  if (!existsSync(filePath)) {
+    return path.resolve(process.cwd(), filePath)
+  }
+  return path.resolve(filePath)
+}
+
+async function loadScript(filePath: string) {
+  const fileUrl = pathToFileURL(filePath).href
+  return await import(fileUrl)
+}
+
 export const builder = async function (yargs: Argv) {
   const parsedArgv = yargsParser(process.argv.slice(2))
-  let filePath = parsedArgv._[1] as string
-  if (!existsSync(filePath)) {
-    filePath = path.resolve(process.cwd(), filePath)
-  } else {
-    filePath = path.resolve(filePath)
-  }
+  const filePath = resolveFilePath(parsedArgv._[1] as string)
 
-  const scriptModule = require(filePath)
-  if (_.isFunction(scriptModule.builder)) {
-    scriptModule.builder(yargs)
+  const scriptModule = await loadScript(filePath)
+  const mod = scriptModule.default || scriptModule
+  if (typeof mod.builder === 'function') {
+    mod.builder(yargs)
   }
   return false
 }
 
-export const handler = async function (argv) {
+export const handler = async function (argv: ArgvExtraOptions) {
   try {
-    let filePath = argv.file
-    if (!existsSync(filePath)) {
-      filePath = path.resolve(process.cwd(), argv.file)
-    } else {
-      filePath = path.resolve(argv.file)
-    }
+    const filePath = resolveFilePath(argv.file)
 
-    const scriptModule = require(filePath)
-    if (!_.isFunction(scriptModule.handler)) {
+    const scriptModule = await loadScript(filePath)
+    const mod = scriptModule.default || scriptModule
+    if (typeof mod.handler !== 'function') {
       throw new Error('Script handler not exist!')
     }
-    await scriptModule.handler(argv)
-  } catch (e) {
-    error(e.stack)
+    await mod.handler(argv)
+  } catch (e: unknown) {
+    error(e instanceof Error ? e.stack || e.message : String(e))
   }
 }

@@ -6,45 +6,34 @@ import {
   outputTable,
   warn,
 } from '@semo/core'
-import { existsSync } from 'fs'
-import path from 'path'
-import shell from 'shelljs'
+import { existsSync } from 'node:fs'
 import { createRequire } from 'node:module'
+import path from 'path'
 
 const require = createRequire(import.meta.url)
 
-export const disabled = false // Set to true to disable this command temporarily
 export const command = ['list', '$0']
 export const desc = 'List all plugins'
 export const aliases = ['l', 'ls']
-// export const middleware = (argv) => {}
 
 export const builder = function (yargs: Argv) {
   yargs.option('remote', { describe: 'List remote plugins' })
 }
 
-function cutstr(str, len) {
-  let str_length = 0
-  let str_len = 0
-  let str_cut = new String()
-  str_len = str.length
-  for (let i = 0; i < str_len; i++) {
-    const a = str.charAt(i)
-    str_length++
-    if (escape(a).length > 4) {
-      //中文字符的长度经编码之后大于4
-      str_length++
+function cutstr(str: string, len: number): string {
+  let displayWidth = 0
+  let result = ''
+  for (const char of str) {
+    displayWidth++
+    if (char.charCodeAt(0) > 127) {
+      displayWidth++
     }
-    str_cut = str_cut.concat(a)
-    if (str_length >= len) {
-      str_cut = str_cut.concat('...')
-      return str_cut
+    result += char
+    if (displayWidth >= len) {
+      return result + '...'
     }
   }
-  //如果给定字符串小于指定长度，则返回源字符串；
-  if (str_length < len) {
-    return str
-  }
+  return str
 }
 
 export const handler = async function (argv: ArgvExtraOptions) {
@@ -65,20 +54,18 @@ export const handler = async function (argv: ArgvExtraOptions) {
       colorize('green', item)
     )
     const rows = [headers]
-    Object.keys(plugins).forEach((plugin) => {
+    for (const [plugin, pluginPath] of Object.entries(plugins)) {
       let pluginVersion
-      if (existsSync(path.resolve(plugins[plugin], 'package.json'))) {
-        const pkgConfig: any = require(
-          path.resolve(plugins[plugin], 'package.json')
-        )
+      if (existsSync(path.resolve(pluginPath, 'package.json'))) {
+        const pkgConfig: any = require(path.resolve(pluginPath, 'package.json'))
         pluginVersion = pkgConfig.version || 'Unknown'
       }
 
       let pluginLocation
-      if (process.env.HOME && plugins[plugin].indexOf(process.env.HOME) === 0) {
-        pluginLocation = plugins[plugin].replace(process.env.HOME, '~')
+      if (process.env.HOME && pluginPath.startsWith(process.env.HOME)) {
+        pluginLocation = pluginPath.replace(process.env.HOME, '~')
       } else {
-        pluginLocation = plugins[plugin]
+        pluginLocation = pluginPath
       }
 
       rows.push([
@@ -87,7 +74,7 @@ export const handler = async function (argv: ArgvExtraOptions) {
         pluginLocation,
         'Installed',
       ])
-    })
+    }
     outputTable(rows)
   } else {
     const headers = ['Plugin', 'Version', 'Description', 'Status'].map((item) =>
@@ -95,12 +82,11 @@ export const handler = async function (argv: ArgvExtraOptions) {
     )
     const rows = [headers]
 
-    const searched = shell.exec(
-      'curl -s "https://api.npms.io/v2/search?from=0&q=semo-plugin&size=100"',
-      { silent: true }
+    const response = await fetch(
+      'https://api.npms.io/v2/search?from=0&q=semo-plugin&size=100'
     )
-
-    let { results } = JSON.parse(searched.stdout ? searched.stdout : '')
+    const data = (await response.json()) as { results: any[] }
+    let { results } = data
     results = [
       ...results
         .filter((item) => Boolean(plugins[item.package.name]))

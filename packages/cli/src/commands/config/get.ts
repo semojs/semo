@@ -1,35 +1,20 @@
-import _ from 'lodash'
+import { deepGet, deepSet } from '@semo/core'
 import { existsSync, readFileSync } from 'node:fs'
-import path from 'path'
 import yaml from 'yaml'
+import { resolveConfigPath } from './utils.js'
 
-export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
 export const command = 'get <configKey>'
 export const desc = 'Get configs by key'
 
-export const builder = function (_yargs: any) {
-  // yargs.option('option', { default, describe, alias })
-}
+export const builder = function (_yargs: any) {}
 
 export const handler = async function (argv: any) {
-  if (_.isString(argv.configKey)) {
+  if (typeof argv.configKey === 'string') {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName = argv.scriptName
-  let configPath
-  if (argv.global) {
-    configPath = process.env.HOME
-      ? path.resolve(
-          process.env.HOME,
-          '.' + scriptName,
-          '.' + scriptName + 'rc.yml'
-        )
-      : ''
-  } else {
-    configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
-  }
+  const configPath = resolveConfigPath(argv.scriptName, argv.global)
 
   if (!configPath || !existsSync(configPath)) {
     argv.$error('Config file not found.')
@@ -38,12 +23,13 @@ export const handler = async function (argv: any) {
 
   const rcFile = readFileSync(configPath, 'utf8')
   const config = yaml.parse(rcFile)
-  const found = _.get(config, argv.configKey)
+  const keyPath = argv.configKey.join('.')
+  const found = deepGet(config, keyPath)
 
   if (found) {
-    const tmpConfig = _.set({}, argv.configKey, found)
+    const tmpConfig = deepSet({}, keyPath, found)
     console.log(yaml.stringify(tmpConfig))
   } else {
-    argv.$warn('Config not found by key: ' + argv.configKey.join('.'))
+    argv.$warn('Config not found by key: ' + keyPath)
   }
 }

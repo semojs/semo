@@ -1,14 +1,35 @@
-import { error, success } from '@semo/core'
-import day from 'dayjs'
-import _ from 'lodash'
+import { error, renderTemplate, success } from '@semo/core'
 import { existsSync, writeFileSync } from 'node:fs'
 import path from 'path'
+import { fileURLToPath } from 'node:url'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
+
+const kebabCase = (str: string) =>
+  str
+    .replace(/([a-z])([A-Z])/g, '$1-$2')
+    .replace(/[\s_]+/g, '-')
+    .toLowerCase()
+
+function formatTimestamp(): string {
+  const now = new Date()
+  const pad = (n: number, len = 2) => String(n).padStart(len, '0')
+  return (
+    now.getFullYear().toString() +
+    pad(now.getMonth() + 1) +
+    pad(now.getDate()) +
+    pad(now.getHours()) +
+    pad(now.getMinutes()) +
+    pad(now.getSeconds()) +
+    pad(now.getMilliseconds(), 3)
+  )
+}
 
 export const command = 'script <name>'
 export const desc = 'Generate a script file'
 export const aliases = ['scr']
 
-export const builder = function (yargs) {
+export const builder = function (yargs: any) {
   yargs.option('typescript', {
     alias: 'ts',
     describe: 'generate typescript style code',
@@ -21,8 +42,8 @@ export const builder = function (yargs) {
   })
 }
 
-export const handler = function (argv: any) {
-  if (argv.typescript || argv.ts) {
+export const handler = async function (argv: any) {
+  if (argv.typescript) {
     argv.format = 'typescript'
   }
   const scriptDir = argv.scriptMakeDir || argv.scriptDir
@@ -33,52 +54,23 @@ export const handler = function (argv: any) {
     return
   }
 
-  const filePrefix = day().format('YYYYMMDDHHmmssSSS')
+  const filePrefix = formatTimestamp()
   const scriptFile = path.resolve(
     scriptDir,
-    `${filePrefix}_${_.kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`
+    `${filePrefix}_${kebabCase(argv.name)}.${argv.typescript ? 'ts' : 'js'}`
   )
   if (existsSync(scriptFile)) {
     error('Script file exist!')
     return
   }
-  let code: string
 
-  switch (argv.format) {
-    case 'cjs':
-      code = `exports.builder = function (yargs) {
-  // yargs.option('option', {default, describe, alias})
-}
+  const templatePath = path.resolve(
+    __dirname,
+    '../../../../../../templates/script',
+    `${argv.format}.hbs`
+  )
+  const code = await renderTemplate(templatePath, {})
 
-exports.handler = async function (argv) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-    case 'esm':
-      code = `export const builder = function (yargs) {
-  // yargs.option('option', {default, describe, alias})
-}
-
-export const handler = async function (argv) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-    case 'typescript':
-      code = `export const builder = function (yargs: any) {
-  // yargs.option('option', {default, describe, alias})
-}
-
-export const handler = async function (argv: any) {
-  console.log('Start to draw your dream code!')
-}
-`
-      break
-  }
-
-  if (!existsSync(scriptFile)) {
-    writeFileSync(scriptFile, code)
-    success(`${scriptFile} created!`)
-  }
+  writeFileSync(scriptFile, code)
+  success(`${scriptFile} created!`)
 }

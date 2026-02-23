@@ -31,8 +31,8 @@ export const handler = async function (argv: ArgvExtraOptions) {
     const context = { argv }
     await openRepl(context)
     return false
-  } catch (e) {
-    error(e.stack)
+  } catch (e: unknown) {
+    error(e instanceof Error ? e.stack || e.message : String(e))
   }
 
   return true

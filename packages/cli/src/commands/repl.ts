@@ -1,13 +1,14 @@
 import {
   ArgvExtraOptions,
+  deepGet,
   error,
   formatRcOptions,
   run,
   splitComma,
   Utils,
+  warn,
 } from '@semo/core'
-import { existsSync } from 'fs'
-import _ from 'lodash'
+import { existsSync } from 'node:fs'
 import path from 'path'
 import { Argv } from 'yargs'
 import { importPackage, openRepl } from '../common/repl.js'
@@ -16,25 +17,20 @@ export const plugin = 'semo'
 export const command = 'repl [replFile]'
 export const aliases = 'r'
 export const desc = 'Play with REPL'
-export const middlewares = []
 
 export const builder = function (yargs: Argv) {
   yargs.option('hook', {
     describe: 'If or not load all plugins repl hook',
   })
-
   yargs.option('prompt', {
     describe: 'Prompt for input. default is >>>',
   })
-
   yargs.option('extract', {
     describe: 'Auto extract k/v from Semo object by key path',
   })
-
   yargs.option('import', {
     describe: 'import package, same as require option, e.g. --import=lodash:_',
   })
-
   yargs.option('require', {
     describe: 'require package, same as import option, e.g. --require=lodash:_',
     alias: 'r',
@@ -42,7 +38,6 @@ export const builder = function (yargs: Argv) {
 }
 
 export const handler = async function (argv: ArgvExtraOptions) {
-  // get options from plugin config
   argv.hook =
     argv.hook ??
     argv.$core.getPluginConfig(
@@ -72,123 +67,126 @@ export const handler = async function (argv: ArgvExtraOptions) {
       .getPluginConfig('repl.import', [])
       .concat(argv.$core.getPluginConfig('import', []))
 
-  if (argv.extract && _.isString(argv.extract)) {
-    argv.extract = _.castArray(argv.extract)
+  if (argv.extract && typeof argv.extract === 'string') {
+    argv.extract = [argv.extract]
   }
 
   const scriptName = argv.scriptName || 'semo'
+  const pluginPrefix = scriptName + '-plugin-'
 
-  const requiredPackages = _.castArray(argv.require)
-  const importedPackages = _.castArray(argv.import)
+  const requiredPackages = Array.isArray(argv.require)
+    ? argv.require
+    : [argv.require]
+  const importedPackages = Array.isArray(argv.import)
+    ? argv.import
+    : [argv.import]
 
-  const concatPackages = _.chain(requiredPackages)
-    .concat(importedPackages)
-    .uniq()
-    .filter()
-    .value()
-  const packages = {}
-  concatPackages.forEach((item: string) => {
-    const splited = item.split(':')
-    if (splited.length === 1) {
-      packages[item] = item
-    } else {
-      packages[splited[0]] = splited[1]
-    }
-  })
+  const concatPackages = [
+    ...new Set(requiredPackages.concat(importedPackages)),
+  ].filter(Boolean)
+  const packages: Record<string, string> = {}
+  for (const item of concatPackages) {
+    const parts = (item as string).split(':')
+    packages[parts[0]] = parts.length > 1 ? parts[1] : parts[0]
+  }
 
   try {
-    const context: any = Object.assign(
-      { await: true },
-      {
-        Semo: {
-          argv,
-          import: importPackage(argv),
-          require: importPackage(argv),
-          Utils,
-          run,
-        },
-      }
-    )
+    const context: any = {
+      await: true,
+      Semo: {
+        argv,
+        import: importPackage(argv),
+        require: importPackage(argv),
+        Utils,
+        run,
+      },
+    }
 
-    for (const pack in packages) {
-      context[packages[pack]] = importPackage(argv)(pack)
+    for (const [pack, alias] of Object.entries(packages)) {
+      context[alias] = await importPackage(argv)(pack)
     }
 
     if (argv.hook) {
       let pluginsReturn = await argv.$core.invokeHook<Record<string, any>>(
         `${scriptName}:repl`,
-        _.isBoolean(argv.hook)
-          ? {
-              mode: 'group',
-            }
-          : {
-              include: splitComma(argv.hook),
-              mode: 'group',
-            }
+        typeof argv.hook === 'boolean'
+          ? { mode: 'group' }
+          : { include: splitComma(argv.hook), mode: 'group' }
       )
 
-      pluginsReturn = _.omitBy(pluginsReturn, _.isEmpty)
+      pluginsReturn = Object.fromEntries(
+        Object.entries(pluginsReturn).filter(
+          ([, val]) =>
+            !(
+              val == null ||
+              (typeof val === 'object' && Object.keys(val).length === 0)
+            )
+        )
+      )
 
-      const shortenKeysPluginsReturn = {}
-      Object.keys(pluginsReturn).forEach((plugin) => {
-        let newKey = plugin
-        const prefix = scriptName + '-plugin-'
-        if (plugin.indexOf(prefix) > -1) {
-          newKey = plugin.substring(prefix.length)
-        }
-        shortenKeysPluginsReturn[newKey] = pluginsReturn[plugin]
-      })
+      const shortenKeysPluginsReturn: Record<string, any> = {}
+      for (const [plugin, value] of Object.entries(pluginsReturn)) {
+        const newKey = plugin.startsWith(pluginPrefix)
+          ? plugin.substring(pluginPrefix.length)
+          : plugin
+        shortenKeysPluginsReturn[newKey] = value
+      }
 
       context.Semo.hooks = formatRcOptions(shortenKeysPluginsReturn) || {}
     }
 
-    if (_.isArray(argv.extract)) {
-      if (argv.extract && argv.extract.length > 0) {
-        argv.extract.forEach((keyPath: string) => {
-          const splitExtractKey = keyPath.split('.')
-          const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
-          if (!context[finalExtractKey]) {
-            context[finalExtractKey] = _.get(context, keyPath) || {}
-          }
-        })
+    if (Array.isArray(argv.extract)) {
+      for (const keyPath of argv.extract) {
+        const splitExtractKey = (keyPath as string).split('.')
+        const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
+        if (!context[finalExtractKey]) {
+          context[finalExtractKey] = deepGet(context, keyPath as string) || {}
+        }
       }
-    } else {
-      Object.keys(argv.extract).forEach((key) => {
-        const extractKeys: string[] = _.castArray(argv.extract[key])
-        extractKeys.forEach((extractKey) => {
+    } else if (argv.extract && typeof argv.extract === 'object') {
+      for (const [key, val] of Object.entries(argv.extract)) {
+        const extractKeys: string[] = Array.isArray(val) ? val : [val as string]
+        for (const extractKey of extractKeys) {
           const splitExtractKey = extractKey.split('.')
           const finalExtractKey = splitExtractKey[splitExtractKey.length - 1]
-          context[finalExtractKey] = _.get(context, `${key}.${extractKey}`)
-        })
-      })
+          context[finalExtractKey] = deepGet(context, `${key}.${extractKey}`)
+        }
+      }
     }
 
     if (argv.replFile) {
-      const replFilePath = path.resolve(process.cwd(), argv.replFile)
-      if (argv.replFile && existsSync(replFilePath)) {
+      const replFilePath = path.resolve(process.cwd(), argv.replFile as string)
+      if (existsSync(replFilePath)) {
         try {
           const replRequired = await import(replFilePath)
           let replFileReturn = null
-          if (replRequired.handler && _.isFunction(replRequired.handler)) {
+          if (
+            replRequired.handler &&
+            typeof replRequired.handler === 'function'
+          ) {
             replFileReturn = await replRequired.handler(argv, context)
-          } else if (_.isFunction(replRequired)) {
+          } else if (typeof replRequired === 'function') {
             replFileReturn = await replRequired(argv, context)
           }
-          if (replFileReturn && _.isObject(replFileReturn)) {
-            Object.keys(replFileReturn).forEach((key) => {
-              context[key] = replFileReturn[key]
-            })
+          if (
+            replFileReturn &&
+            typeof replFileReturn === 'object' &&
+            replFileReturn !== null
+          ) {
+            for (const [key, value] of Object.entries(replFileReturn)) {
+              context[key] = value
+            }
           }
-        } catch {}
+        } catch (e: unknown) {
+          const msg = e instanceof Error ? e.message : String(e)
+          warn(`Failed to load repl file: ${msg}`)
+        }
       }
     }
 
     await openRepl(context)
-
-    return false
-  } catch (e) {
-    error(e.stack)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.stack || e.message : String(e)
+    error(msg)
   }
-
-  return true
 }

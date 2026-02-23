@@ -1,93 +1,197 @@
 # 钩子机制
 
-作为一个偏底层的命令行开发框架，是一定要有插件系统的，尤其是像 `Semo` 这种本身其实并不提供直接的业务价值的框架，而插件系统除了要为用户提供插件扫描机制，命令扩展机制，配置管理机制之外，钩子机制也是一种极大的提升灵活性和扩展性的机制，属于 `Semo` 插件系统的一部分。
+钩子机制是 Semo 插件系统的重要组成部分，能够实现跨插件通信和扩展。钩子让插件可以在定义好的执行节点上相互影响行为。
 
-钩子这种思想其实很好理解，也随处可见，比如 Windows 的开机自启动，在开机进行到某个阶段的时候，需要看一下是否有其他应用程序需要在这个时间节点一起启动。而实现这个效果肯定是需要配置的，像 Windows 这种可以配置到注册表或者配置文件。
+## 钩子的定义（调用钩子）
 
-`Semo` 的钩子机制是通过约定动态识别的，每个插件的钩子在命令执行期间确定要不要触发，因此会有磁盘 IO 和遍历方面的性能损耗，不过考虑到一般命令行执行逻辑不会特别复杂，目前认为这样也是够用的，后续如果出现复杂的钩子调用链时可以考虑优化，优化无非就是动态转静态或者通过缓存来提速。
+在你的插件/命令中定义并调用一个钩子：
 
-## 钩子的定义
-
-```js
-// 定义一个 hook_bar 钩子
-const hookData = argv.$core.invokeHook('semo-plugin-foo:hook_bar', {
-  mode: 'group',
-})
+```typescript
+const hookData = await argv.$core.invokeHook('semo:repl', { mode: 'assign' })
 ```
 
+或使用独立函数：
+
+```typescript
+import { invokeHook } from '@semo/core'
+
+const hookData = await invokeHook('semo:repl', { mode: 'assign' })
+```
+
+格式为 `<插件名>:<钩子名>`。如果没有 `hook_` 前缀，会自动添加。
+
 :::info
-从 `v1.0.0` 开始，钩子调用需要指明钩子前缀，即是谁创建的这个钩子，而实现这个钩子的时候也需要指名是哪个插件定义的钩子，如果不指定，当多个插件定义了同名钩子时会引起混乱。而且一旦定义方明确指定了钩子前缀，则实现方如果不指定，是识别不到的。这个规范需要定义方和实现方一起遵守。
+从 `v1.0.0` 开始，钩子调用需要指明前缀（即谁创建了这个钩子）。实现方也需要指明是哪个插件定义的钩子，否则无法识别。
 :::
 
 ## 钩子的实现
 
-钩子只能在指定的钩子目录才能得到识别，这个钩子目录在插件的 `.semorc.yml` 文件中配置 `hookDir`，然后识别里面的 `index.js`， 如果当前是 Typescript 项目，则 `index.ts` 文件会被识别， `index.js` 文件会被忽略。
+钩子在插件的 `hooks/index.ts` 文件中实现。通过零配置约定，Semo 会自动检测 `lib/hooks/index.js`（TS 运行时模式下为 `src/hooks/index.ts`）。
 
-```js
-export const hook_bar = {
-  'semo-plugin-foo': (core, argv, options) => {},
-}
-```
+实现钩子有三种方式，各有优势。
 
-当真的有多个插件定义同名钩子时，如果恰好你也同时都需要，你还可以这样使用第二种：
+### 方式一：普通对象（零依赖）
 
-```js
-exports.hook_bar = new Utils.Hook({
-  'semo-plugin-foo1': () => {},
-  'semo-plugin-foo2': () => {},
-})
-```
+无需任何 import — 适合应用级钩子，或者不想把 `@semo/core` 加入依赖的场景。
 
-## 钩子的返回值
-
-钩子实现的目的主要是为程序执行节点进行某种操作，或者提供某些信息，为了灵活性，这里支持直接返回对象 `{}`，也支持返回一个函数，甚至是一个 `Promise` 函数，如果是函数，会得到函数的执行结果再合并。 `Promise` 的钩子用途很广泛，因为这样就可以执行一些异步操作，包括但不限于数据库，网络，Redis, ES 等。
-
-如果钩子定义的目的是搜集信息，那么定义方可能有各种合并需求，目前支持一下几种，默认是 `assign`
-
-- assign，这种会基于返回的对象的 key 进行覆盖
-- replace, 这种会相互覆盖，只保留最后一个钩子的返回值
-- group，这种基于插件名进行分组
-- push，这种会把所有返回值放到一个数组里，一般返回的是基本数据类型
-- merge，这种会进行深度合并
-
-## 核心内置钩子说明
-
-由于钩子的定义方来决定钩子的用途，以及返回值格式，所以定义方有义务在明确的位置说明这些信息，让插件的使用方可以在自己的插件或者应用中进行扩展。以下是核心钩子的说明：
-
-- `before_command`: 这个钩子在命令执行前触发，不搜集返回值
-- `hook`: 这个钩子用于声明钩子以及用途，这不是强制的，但是是一个规范，让其他人知道定义了哪些钩子
-- `repl`: 用于向 repl 中注入信息，不会相互覆盖，一般用于调试，格式不固定
-- `repl_command`: 让第三方插件可以扩展 repl 里的命令
-- `status`: 用于向 `semo status` 命令注入新的属性信息
-- `create_project_template`: 用于给 `semo create` 命令的 `--template` 参数注入可选模板
-
-:::tip
-在 `v1.15.1` 版本中，已经将 `before_command` 两个钩子设置为默认不执行。
-
-启动命令时通过添加 `--enable-core-hook=before_command` 来启用。
-:::
-
-部分核心钩子的用法示例
-
-### `repl_command`
-
-在 REPL 模式里定义一个 .hello 命令，接收参数
-
-```js
-const hook_repl_command = {
-  semo: () => {
-    return {
-      hello: {
-        help: 'hello',
-        action(name) {
-          this.clearBufferedCommand()
-          console.log('hello1', name ? name : 'world')
-          this.displayPrompt()
-        },
-      },
-    }
+```typescript
+// src/hooks/index.ts
+export const hook_repl = {
+  semo: (core, argv, options) => {
+    return { myUtil: () => 'hello' }
   },
 }
 ```
 
-其中，`this.clearBufferedCommand()` 和 `this.displayPrompt()` 都是 Node 的 REPL 类里的方法。注意两点：一个是这里的 action 是支持 `async/await` 的，还有就是为了 `this` 能够正确指向，这里不要写成箭头函数。
+对象的 key 是定义该钩子的插件名。核心钩子用 `semo`，插件钩子用完整名如 `semo-plugin-foo`。
+
+### 方式二：Hook 类（类型安全，多插件）
+
+从 `@semo/core` 导入 `Hook` 类，获得自动插件名规范化和类型提示。特别适合同时实现多个插件的钩子。
+
+```typescript
+import { Hook } from '@semo/core'
+
+export const hook_repl = new Hook('semo', (core, argv, options) => {
+  return { myUtil: () => 'hello' }
+})
+```
+
+`Hook` 类会自动规范化插件名 — 传 `'foo'` 等同于 `'semo-plugin-foo'`。
+
+同时实现多个插件定义的钩子：
+
+```typescript
+import { Hook } from '@semo/core'
+
+export const hook_bar = new Hook({
+  'semo-plugin-foo': (core, argv, options) => { ... },
+  'semo-plugin-baz': (core, argv, options) => { ... },
+})
+```
+
+### 方式三：下划线前缀（内联命名空间）
+
+用 `__` 作为分隔符将插件名编码到导出名中。无需 import。
+
+```typescript
+// 'semo' 插件的 hook_create_project_template
+export const semo__hook_create_project_template = {
+  demo_repo: {
+    repo: 'demo_repo.git',
+    branch: 'master',
+    alias: ['demo'],
+  },
+}
+```
+
+适合返回值是静态数据（非函数）的钩子。
+
+### 如何选择？
+
+| 方式       | 需要 `@semo/core`？ | 适用场景                         |
+| ---------- | ------------------- | -------------------------------- |
+| 普通对象   | 否                  | 简单钩子、应用级代码             |
+| Hook 类    | 是                  | 类型安全、多插件钩子、名称规范化 |
+| 下划线前缀 | 否                  | 静态数据、单插件钩子             |
+
+## 钩子的返回值
+
+钩子可以返回对象、函数或 Promise。如果返回函数，会使用函数的执行结果。
+
+### 合并模式
+
+当钩子从多个插件收集数据时，合并模式决定如何组合结果：
+
+| 模式             | 说明                                          |
+| ---------------- | --------------------------------------------- |
+| `assign`（默认） | `Object.assign()` — 后面的值按 key 覆盖前面的 |
+| `merge`          | 深度合并所有结果                              |
+| `group`          | 按插件名分组                                  |
+| `push`           | 所有返回值放入数组                            |
+| `replace`        | 只保留最后一个插件的返回值                    |
+
+```typescript
+// group 模式返回 { pluginA: {...}, pluginB: {...} }
+const grouped = await invokeHook('semo:hook', { mode: 'group' })
+
+// push 模式返回 [result1, result2, ...]
+const all = await invokeHook('semo:status', { mode: 'push' })
+```
+
+## 核心内置钩子说明
+
+| 钩子                      | 说明                                     |
+| ------------------------- | ---------------------------------------- |
+| `before_command`          | 命令执行前触发（默认禁用）               |
+| `hook`                    | 声明可用钩子及其用途                     |
+| `repl`                    | 向 REPL 环境注入上下文                   |
+| `repl_command`            | 定义自定义 REPL 点命令                   |
+| `status`                  | 向 `semo status` 输出注入信息            |
+| `create_project_template` | 为 `semo create --template` 注册项目模板 |
+
+:::tip
+从 `v1.15.1` 起，`before_command` 默认不执行。通过 `--enable-core-hook=before_command` 启用。
+:::
+
+## 使用示例
+
+### `hook_repl` — 注入 REPL 工具
+
+```typescript
+// 方式一：普通对象
+export const hook_repl = {
+  semo: () => ({
+    add: async (a, b) => a + b,
+    multiply: async (a, b) => a * b,
+  }),
+}
+
+// 方式二：Hook 类
+import { Hook } from '@semo/core'
+
+export const hook_repl = new Hook('semo', () => ({
+  add: async (a, b) => a + b,
+  multiply: async (a, b) => a * b,
+}))
+```
+
+在 REPL 中使用：
+
+```
+semo repl
+>>> await Semo.hooks.application.add(1, 2)
+3
+```
+
+### `hook_create_project_template` — 注册项目模板
+
+```typescript
+// 方式三：下划线前缀（静态数据，无需 import）
+export const semo__hook_create_project_template = {
+  my_template: {
+    repo: 'https://github.com/user/template.git',
+    branch: 'main',
+    alias: ['mt'],
+  },
+}
+```
+
+### `hook_repl_command` — 自定义 REPL 命令
+
+```typescript
+export const hook_repl_command = {
+  semo: () => ({
+    hello: {
+      help: '打招呼',
+      action(name) {
+        this.clearBufferedCommand()
+        console.log('hello', name || 'world')
+        this.displayPrompt()
+      },
+    },
+  }),
+}
+```
+
+注意：`action` 必须使用普通函数（非箭头函数）以保证 `this` 指向正确。

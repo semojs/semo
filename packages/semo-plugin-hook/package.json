@@ -14,10 +14,23 @@
   "type": "module",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./lib/index.d.ts",
+      "import": "./lib/index.js",
+      "default": "./lib/index.js"
+    }
+  },
   "license": "MIT",
+  "engines": {
+    "node": "^20.19.0 || ^22.12.0"
+  },
+  "files": [
+    "lib"
+  ],
   "devDependencies": {
-    "@types/lodash": "^4.17.16",
-    "rimraf": "^5.0.5"
+    "@semo/core": "workspace:^",
+    "rimraf": "^6.0.1"
   },
   "scripts": {
     "clean": "rimraf lib *.tsbuildinfo",
@@ -25,9 +38,8 @@
     "dev": "tsc --build --watch",
     "prepare": "npm run clean && npm run build"
   },
-  "dependencies": {
-    "@semo/core": "workspace:^",
-    "lodash": "^4.17.21"
+  "peerDependencies": {
+    "@semo/core": "^2.0.0"
   },
   "publishConfig": {
     "access": "public"

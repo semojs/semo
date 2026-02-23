@@ -4,7 +4,6 @@ import { fileURLToPath } from 'node:url'
 const __filename = fileURLToPath(import.meta.url)
 const __dirname = path.dirname(__filename)
 
-export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
 export const command = 'config [op]'
 export const desc = 'Manage rc config'

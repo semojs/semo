@@ -1,7 +1,5 @@
 import { ArgvExtraOptions } from '@semo/core'
-import _ from 'lodash'
 
-export const disabled = false // Set to true to disable this command temporarily
 export const command = 'install <plugin...>'
 export const desc = 'Install plugins'
 export const aliases = 'i'
@@ -16,9 +14,9 @@ export const handler = async function (
 ) {
   const scriptName = argv.scriptName || 'semo'
 
-  argv.plugin = _.castArray(argv.plugin)
+  argv.plugin = Array.isArray(argv.plugin) ? argv.plugin : [argv.plugin]
   argv.plugin = argv.plugin.map((plugin) => {
-    if (plugin.indexOf(`${scriptName}-plugin-`) === -1) {
+    if (!plugin.includes(`${scriptName}-plugin-`)) {
       plugin = `${scriptName}-plugin-${plugin}`
     }
 

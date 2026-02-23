@@ -5,14 +5,13 @@ import {
   Hook,
   outputTable,
 } from '@semo/core'
-import _ from 'lodash'
 
 export const plugin = 'hook'
 export const command = ['list', '$0']
 export const desc = 'Show hook list'
 export const aliases = ['ls']
 
-export const builder = function (_yargs) {}
+export const builder = function (_yargs: any) {}
 
 export const handler = async function (argv: ArgvExtraOptions) {
   const scriptName = argv.scriptName || 'semo'
@@ -28,23 +27,25 @@ export const handler = async function (argv: ArgvExtraOptions) {
     const columns = [
       ['Hook', 'Package', 'Description'].map((item) => colorize('green', item)),
     ]
-    Object.keys(hookInfo).map((k) => {
+    for (const [k, hookValue] of Object.entries(
+      hookInfo as Record<string, any>
+    )) {
       let hookHandler: any
       if (
-        hookInfo[k] instanceof Hook ||
-        (hookInfo[k].getHook && _.isFunction(hookInfo[k].getHook))
+        hookValue instanceof Hook ||
+        (hookValue.getHook && typeof hookValue.getHook === 'function')
       ) {
-        hookHandler = hookInfo[k].getHook(k)
+        hookHandler = hookValue.getHook(k)
       } else {
-        hookHandler = hookInfo[k]
+        hookHandler = hookValue
       }
 
-      Object.keys(hookHandler).map((hook) => {
-        columns.push([`hook_${hook}`, k, hookHandler[hook]])
-      })
-    })
+      for (const [hook, desc] of Object.entries(hookHandler)) {
+        columns.push([`hook_${hook}`, k, desc as string])
+      }
+    }
     outputTable(columns)
-  } catch (e) {
-    error(e.stack)
+  } catch (e: unknown) {
+    error(e instanceof Error ? e.stack || e.message : String(e))
   }
 }

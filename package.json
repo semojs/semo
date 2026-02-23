@@ -2,21 +2,19 @@
   "name": "semo-monorepo",
   "private": true,
   "description": "A monorepo for Semo",
-  "main": "index.js",
   "type": "module",
   "scripts": {
     "lerna": "lerna",
     "semo": "node ./packages/cli/lib/bin.js",
-    "tsx:semo": "tsx ./packages/cli/lib/bin.js",
+    "semo:tsx": "tsx ./packages/cli/src/bin.ts",
     "build": "pnpm --filter=./packages/core prepare && pnpm -r --stream --parallel --filter='./packages/*' build",
     "dev": "pnpm --filter=./packages/core build && pnpm -r --parallel --filter='./packages/*' dev",
     "test": "vitest run",
     "test:watch": "vitest ",
     "test:ui": "vitest --ui",
     "test:cov": "vitest run --coverage",
-    "cov": "c8 report --check-coverage",
-    "lint": "eslint . --ext .ts",
-    "lint:fix": "eslint . --ext .ts --fix",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
     "format": "prettier --write \"**/*.{ts,js}\"",
     "format:check": "prettier --check \"**/*.{ts,js}\"",
     "lerna:publish": "lerna publish from-git --yes --no-verify-access",
@@ -52,8 +50,5 @@
     "typescript-eslint": "^8.31.1",
     "vitepress": "^1.6.3",
     "vitest": "^3.1.2"
-  },
-  "dependencies": {
-    "@semo/core": "link:packages/core"
   }
 }

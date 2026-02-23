@@ -2,15 +2,13 @@ import {
   Argv,
   ArgvExtraOptions,
   error,
-  exec,
   info,
   parsePackageNames,
   warn,
 } from '@semo/core'
-import _ from 'lodash'
-import { existsSync, writeFileSync } from 'node:fs'
+import { spawnSync } from 'node:child_process'
+import { existsSync, mkdirSync, writeFileSync } from 'node:fs'
 import path from 'path'
-import shell from 'shelljs'
 import yaml from 'yaml'
 
 export const plugin = 'semo'
@@ -18,63 +16,66 @@ export const command = 'init'
 export const desc = 'Init basic config file and directories'
 export const aliases = 'i'
 
+function commandExists(cmd: string): boolean {
+  return spawnSync('which', [cmd], { stdio: 'ignore' }).status === 0
+}
+
 export const builder = function (yargs: Argv) {
   yargs.option('plugin', {
     alias: 'P',
     describe: 'Plugin mode',
   })
-
   yargs.option('force', {
     alias: 'f',
     describe: 'Force init!',
   })
-
   yargs.option('add', {
     alias: 'A',
     describe: 'Add npm package to package.json dependencies',
   })
-
   yargs.option('add-dev', {
     alias: 'D',
     describe: 'Add npm package to package.json devDependencies',
   })
-
   yargs.option('typescript', {
     alias: 'ts',
     describe: 'Generate typescript style code',
   })
-
   yargs.option('pm', {
     default: '',
     alias: 'p',
     choices: ['npm', 'yarn', 'pnpm', 'bun', ''],
-    describe: 'Package manger',
+    describe: 'Package manager',
   })
 }
 
 export const handler = async function (argv: ArgvExtraOptions) {
   try {
     const defaultRc: any = argv.plugin
-      ? _.pickBy({
-          typescript: argv.typescript ? true : null,
-          commandDir: argv.typescript ? 'lib/commands' : 'src/commands',
-          extendDir: argv.typescript ? 'lib/extends' : 'src/extends',
-          hookDir: argv.typescript ? 'lib/hooks' : 'src/hooks',
-          commandMakeDir: argv.typescript ? 'src/commands' : null,
-          extendMakeDir: argv.typescript ? 'src/extends' : null,
-          hookMakeDir: argv.typescript ? 'src/hooks' : null,
-        })
-      : _.pickBy({
-          typescript: argv.typescript ? true : null,
-          commandDir: `bin/${argv.scriptName}/commands`,
-          pluginDir: `bin/${argv.scriptName}/plugins`,
-          extendDir: `bin/${argv.scriptName}/extends`,
-          scriptDir: `bin/${argv.scriptName}/scripts`,
-          hookDir: `bin/${argv.scriptName}/hooks`,
-        })
+      ? Object.fromEntries(
+          Object.entries({
+            typescript: argv.typescript ? true : null,
+            commandDir: argv.typescript ? 'lib/commands' : 'src/commands',
+            extendDir: argv.typescript ? 'lib/extends' : 'src/extends',
+            hookDir: argv.typescript ? 'lib/hooks' : 'src/hooks',
+            commandMakeDir: argv.typescript ? 'src/commands' : null,
+            extendMakeDir: argv.typescript ? 'src/extends' : null,
+            hookMakeDir: argv.typescript ? 'src/hooks' : null,
+          }).filter(([, v]) => v != null)
+        )
+      : Object.fromEntries(
+          Object.entries({
+            typescript: argv.typescript ? true : null,
+            commandDir: `bin/${argv.scriptName}/commands`,
+            pluginDir: `bin/${argv.scriptName}/plugins`,
+            extendDir: `bin/${argv.scriptName}/extends`,
+            scriptDir: `bin/${argv.scriptName}/scripts`,
+            hookDir: `bin/${argv.scriptName}/hooks`,
+          }).filter(([, v]) => v != null)
+        )
 
-    const currentPath = path.resolve(process.cwd())
-    const configPath = `${currentPath}/.${argv.scriptName}rc.yml`
+    const currentPath = process.cwd()
+    const configPath = path.resolve(currentPath, `.${argv.scriptName}rc.yml`)
     const confirmed =
       existsSync(configPath) && !argv.force
         ? await argv.$prompt.confirm({
@@ -90,23 +91,19 @@ export const handler = async function (argv: ArgvExtraOptions) {
     writeFileSync(configPath, yaml.stringify(defaultRc, {}))
     info(`Default .${argv.scriptName}rc created!`)
 
-    const dirs = Object.keys(defaultRc).filter(
-      (item) => item.indexOf('Dir') > -1
-    )
-    dirs.forEach((dir) => {
-      const loc = defaultRc[dir]
-      if (!existsSync(`${currentPath}/${loc}`)) {
-        exec(`mkdir -p ${currentPath}/${loc}`)
-        info(`${currentPath}/${loc} created!`)
+    for (const key of Object.keys(defaultRc).filter((k) => k.endsWith('Dir'))) {
+      const loc = path.resolve(currentPath, defaultRc[key])
+      if (!existsSync(loc)) {
+        mkdirSync(loc, { recursive: true })
+        info(`${loc} created!`)
       }
-    })
-    // add packages
-    // choose package manager
+    }
+
+    // Package manager detection
     const packageJsonExists = existsSync(
-      path.join(process.cwd(), 'package.json')
+      path.resolve(currentPath, 'package.json')
     )
-    let pm = argv.pm
-    let operation = 'add'
+    let pm = argv.pm as string
     if (argv.add || argv.addDev || !packageJsonExists) {
       if (!pm) {
         const lockFiles = [
@@ -117,24 +114,23 @@ export const handler = async function (argv: ArgvExtraOptions) {
         ]
         let detectedPm = ''
         for (const lf of lockFiles) {
-          if (existsSync(path.join(process.cwd(), lf.name))) {
+          if (existsSync(path.resolve(currentPath, lf.name))) {
             detectedPm = lf.pm
             break
           }
         }
         if (detectedPm) {
-          pm = argv.pm = detectedPm
+          pm = detectedPm
           info(`Detected package manager: ${detectedPm}`)
         } else {
-          const choices = lockFiles.map((lf) => lf.pm)
-          const confirmedPm = await argv.$prompt.select({
+          const confirmedPm: string = await argv.$prompt.select({
             message:
-              'Choose your prefered package manager（npm/yarn/pnpm/bun):',
-            choices,
+              'Choose your preferred package manager (npm/yarn/pnpm/bun):',
+            choices: lockFiles.map((lf) => lf.pm),
             default: 'npm',
           })
           if (confirmedPm) {
-            pm = argv.pm = confirmedPm
+            pm = confirmedPm
           } else {
             warn('No package manager specified, operation aborted.')
             return
@@ -142,39 +138,41 @@ export const handler = async function (argv: ArgvExtraOptions) {
         }
       }
       if (!pm) {
-        return error('No package manager specified, operation aborted.')
-      }
-
-      if (!shell.which(`${pm}`)) {
-        error(`${pm} package manager not found.`)
+        error('No package manager specified, operation aborted.')
         return
       }
 
-      if (pm === 'npm') {
-        operation = 'install'
+      if (!commandExists(pm)) {
+        error(`${pm} package manager not found.`)
+        return
       }
     }
 
     if (!packageJsonExists) {
-      exec(`${pm} init ${pm === 'pnpm' ? '' : '--yes'}`)
+      const initArgs = pm === 'pnpm' ? ['init'] : ['init', '--yes']
+      spawnSync(pm, initArgs, { stdio: 'inherit' })
     }
 
-    // add packages
+    // Add packages
+    const op = pm === 'npm' ? 'install' : 'add'
     if (argv.add) {
-      const add = _.castArray(argv.add) as string[]
-      const addPackage = parsePackageNames(add as string[])
+      const add = (Array.isArray(argv.add) ? argv.add : [argv.add]) as string[]
+      const addPackage = parsePackageNames(add)
       if (addPackage.length > 0) {
-        exec(`${pm} ${operation} ${addPackage.join(' ')}`)
+        spawnSync(pm, [op, ...addPackage], { stdio: 'inherit' })
       }
     }
     if (argv.addDev) {
-      const addDev = _.castArray(argv.addDev) as string[]
-      const addPackageDev = parsePackageNames(addDev as string[])
+      const addDev = (
+        Array.isArray(argv.addDev) ? argv.addDev : [argv.addDev]
+      ) as string[]
+      const addPackageDev = parsePackageNames(addDev)
       if (addPackageDev.length > 0) {
-        exec(`${pm} ${operation} ${addPackageDev.join(' ')} -D`)
+        spawnSync(pm, [op, ...addPackageDev, '-D'], { stdio: 'inherit' })
       }
     }
-  } catch (e) {
-    return error(e.stack)
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.stack || e.message : String(e)
+    error(msg)
   }
 }

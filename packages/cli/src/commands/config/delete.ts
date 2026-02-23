@@ -1,36 +1,21 @@
-import _ from 'lodash'
+import { deepSet } from '@semo/core'
 import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import path from 'path'
 import yaml from 'yaml'
+import { resolveConfigPath } from './utils.js'
 
-export const disabled = false // Set to true to disable this command temporarily
 export const plugin = 'semo'
 export const command = 'delete <configKey>'
 export const desc = 'Delete configs by key'
 export const aliases = 'del'
 
-export const builder = function (_yargs: any) {
-  // yargs.option('option', { default, describe, alias })
-}
+export const builder = function (_yargs: any) {}
 
 export const handler = async function (argv: any) {
-  if (_.isString(argv.configKey)) {
+  if (typeof argv.configKey === 'string') {
     argv.configKey = argv.configKey.split('.')
   }
 
-  const scriptName = argv.scriptName
-  let configPath
-  if (argv.global) {
-    configPath = process.env.HOME
-      ? path.resolve(
-          process.env.HOME,
-          '.' + scriptName,
-          '.' + scriptName + 'rc.yml'
-        )
-      : ''
-  } else {
-    configPath = path.resolve(process.cwd(), '.' + scriptName + 'rc.yml')
-  }
+  const configPath = resolveConfigPath(argv.scriptName, argv.global)
 
   if (!configPath || !existsSync(configPath)) {
     argv.$error('Config file not found.')
@@ -40,7 +25,6 @@ export const handler = async function (argv: any) {
   const rcFile = readFileSync(configPath, 'utf8')
   const config = yaml.parseDocument(rcFile)
 
-  // 检查要删除的配置键是否存在
   const configExists = (map: any, configKey: string[]): boolean => {
     let current = map
     for (const key of configKey) {
@@ -69,9 +53,7 @@ export const handler = async function (argv: any) {
     return
   }
 
-  const tmpConfigObject = _.set({}, argv.configKey, 1)
-
-  // Recursively find and change
+  const tmpConfigObject = deepSet({}, argv.configKey.join('.'), 1)
   walk(config.contents, tmpConfigObject)
 
   writeFileSync(configPath, config.toString())
@@ -81,17 +63,21 @@ export const handler = async function (argv: any) {
 const walk = (map: any, configKey: Record<string, any>) => {
   const currentKey = Object.keys(configKey)[0]
   if (map.items) {
-    for (const pairKey in map.items) {
-      const pair = map.items[pairKey]
-      if (pair.key.value === currentKey) {
-        if (!_.isObject(configKey[pair.key.value])) {
-          map.items.splice(pairKey, 1)
-        } else if (pair.value.items) {
-          walk(pair.value, configKey[pair.key.value])
-        }
+    const index = map.items.findIndex(
+      (pair: any) => pair.key.value === currentKey
+    )
+    if (index !== -1) {
+      const pair = map.items[index]
+      if (
+        !(
+          typeof configKey[pair.key.value] === 'object' &&
+          configKey[pair.key.value] !== null
+        )
+      ) {
+        map.items.splice(index, 1)
+      } else if (pair.value.items) {
+        walk(pair.value, configKey[pair.key.value])
       }
     }
   }
-
-  return
 }

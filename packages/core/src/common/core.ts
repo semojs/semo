@@ -1,16 +1,7 @@
-import dotenv, { DotenvConfigOptions } from 'dotenv'
-import { expand as dotenvExpand } from 'dotenv-expand'
-import { findUpSync } from 'find-up'
-import { ensureDirSync } from 'fs-extra'
-import getStdin from 'get-stdin'
-import { globSync } from 'glob'
-import _ from 'lodash'
-import { existsSync, readFileSync, writeFileSync } from 'node:fs'
-import { createRequire } from 'node:module'
+import { EventEmitter } from 'node:events'
+import { existsSync } from 'node:fs'
 import path from 'node:path'
 import { fileURLToPath } from 'node:url'
-import shell from 'shelljs'
-import yaml from 'yaml'
 import yargs, {
   Argv,
   CommandBuilder,
@@ -20,11 +11,12 @@ import yargs, {
 import yargsParser from 'yargs-parser'
 import { hideBin } from 'yargs/helpers'
 import { debugChannel, debugCore, debugCoreChannel } from './debug.js'
-import { Hook } from './hook.js'
+import { Hook, setHookScriptName } from './hook.js'
 import {
   colorfulLog,
   colorize,
   error,
+  fatal,
   info,
   jsonLog,
   log,
@@ -49,20 +41,22 @@ import {
   ArgvOptions,
   ArgvWithPlugin,
   CombinedConfig,
+  HookHandler,
+  HookInvocationResult,
   HookOption,
   InitOptions,
   PluginConfig,
 } from './types.js'
-import {
-  formatRcOptions,
-  getAbsolutePath,
-  getPackagePath,
-  isUsingTsRunner,
-} from './utils.js'
+import { deepGet, deepMerge, isUsingTsRunner } from './utils.js'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-const require = createRequire(import.meta.url)
+// Extracted modules (composition)
+import * as ConfigManager from './config-manager.js'
+import * as PluginCache from './plugin-cache.js'
+import * as PluginLoader from './plugin-loader.js'
+import * as PackageManager from './package-manager.js'
+import * as CommandLoader from './command-loader.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 export interface ArgvExtraOptions extends ArgvOptions {
   // Most common
@@ -70,16 +64,16 @@ export interface ArgvExtraOptions extends ArgvOptions {
   $core?: Core
   $yargs?: Argv
 
-  // From .semorc.yml
+  // From .semorc.yml — plugin-specific config sections
   $plugin?: {
-    [key: string]: any
+    [key: string]: PluginConfig
   }
 
   // For pipe
   $input?: string
 
-  // If command has middulewares and plugin, this var will be filled.
-  $config?: Record<string, any>
+  // If command has middlewares and plugin, this var will be filled.
+  $config?: Record<string, unknown>
   $command?: CommandBuilder
 
   // For debug
@@ -89,6 +83,7 @@ export interface ArgvExtraOptions extends ArgvOptions {
 
   // For log
   $error?: (message: string | unknown, opts: LogOptions) => void
+  $fatal?: (message: string | unknown, exitCode?: number) => never
   $warn?: (message: string | unknown, opts: LogOptions) => void
   $info?: (message: string | unknown, opts: LogOptions) => void
   $log?: (message: string | unknown, opts: LogOptions) => void
@@ -123,9 +118,18 @@ export class Core {
   public initOptions: InitOptions = {}
   public parsedArgv: ArgvExtraOptions = {}
   public allPlugins: Record<string, string> = {}
-  public combinedConfig: Record<string, any> = {}
-  public appConfig: Record<string, any> = {}
+  public combinedConfig: CombinedConfig = {}
+  public appConfig: ApplicationConfig = {} as ApplicationConfig
   public input: string = '' // stdin
+  _cachedAppConfig: ApplicationConfig | null = null
+  _rcFileCache: Map<string, Record<string, unknown>> = new Map()
+  private _initialized: boolean = false
+  private _corePackageInfo: Record<string, unknown> = {}
+  private _dynamicHooks: Map<
+    string,
+    Array<{ pluginName: string; handler: HookHandler; targetModule: string }>
+  > = new Map()
+  private _emitter: EventEmitter = new EventEmitter()
 
   debugCore: (...rest: unknown[]) => void
   debugCoreChannel: (channel: string, ...rest: unknown[]) => void
@@ -141,8 +145,12 @@ export class Core {
   isDevelopment = () => this.getNodeEnv() === 'development'
 
   constructor(opts: InitOptions) {
-    // 如果实例已存在，直接返回已有实例
     if (Core.instance) {
+      if (opts.scriptName && opts.scriptName !== Core.instance.scriptName) {
+        warn(
+          `Core instance already exists with scriptName "${Core.instance.scriptName}", ignoring new opts with scriptName "${opts.scriptName}"`
+        )
+      }
       return Core.instance
     }
 
@@ -165,11 +173,6 @@ export class Core {
     return Core.instance
   }
 
-  /**
-   * Project depends Semo has it's own Semo env which is not initialized.
-   * So we need to set the instance manually.
-   * @param instance Core instance
-   */
   public static setInstance(instance: Core) {
     Core.instance = instance
   }
@@ -180,922 +183,361 @@ export class Core {
 
   setScriptName(scriptName: string) {
     this.scriptName = scriptName
+    setHookScriptName(scriptName)
   }
 
   setParsedArgv(parsedArgv: ArgvExtraOptions) {
     this.parsedArgv = parsedArgv
   }
 
-  /**
-   * Use dotenv style
-   * @param expand expand dotenv
-   * @param options dotenv options
-   */
-  useDotEnv(expand: true, _options: DotenvConfigOptions = {}) {
+  // --- dotenv (lazy-loaded) ---
+
+  async useDotEnv(doExpand: boolean = true) {
     try {
+      const dotenv = await import('dotenv')
       const myEnv = dotenv.config()
-      if (expand && !myEnv.error) {
-        dotenvExpand(myEnv)
+      if (doExpand && !myEnv.error) {
+        const { expand } = await import('dotenv-expand')
+        expand(myEnv)
       }
     } catch {
       // .env may not exist, it's not a serious bug
     }
   }
 
-  /**
-   * Get current argv config
-   */
-  config(
-    key: string = '',
-    defaultValue: unknown = undefined
-  ): string | Record<string, unknown> {
-    const argv = this.parsedArgv
+  // --- Config management (delegated to config-manager.ts) ---
 
-    return key
-      ? (_.get(argv, key, defaultValue) as string | Record<string, unknown>)
-      : argv
+  config<T = string | Record<string, unknown>>(
+    key: string = '',
+    defaultValue?: T
+  ): T {
+    const argv = this.parsedArgv
+    return (key ? deepGet(argv, key, defaultValue) : argv) as T
   }
 
   parseRcFile(plugin: string, pluginPath: string): Record<string, unknown> {
-    const pluginSemoYamlRcPath = path.resolve(
-      pluginPath,
-      `.${this.scriptName}rc.yml`
-    )
-    const pluginPackagePath = path.resolve(pluginPath, 'package.json')
-    let pluginConfig: Record<string, unknown> = {}
-    if (existsSync(pluginSemoYamlRcPath)) {
-      try {
-        const rcFileContent = readFileSync(pluginSemoYamlRcPath, 'utf8')
-        pluginConfig = formatRcOptions(yaml.parse(rcFileContent))
-
-        try {
-          const packageConfigContent = readFileSync(pluginPackagePath, 'utf8')
-          const packageConfig = JSON.parse(packageConfigContent)
-          pluginConfig.version = packageConfig.version
-        } catch {
-          pluginConfig.version = '0.0.0'
-        }
-      } catch (e) {
-        this.debugCore('load rc failed:', e)
-        warn(`Plugin ${plugin} .semorc.yml config load failed!`)
-        pluginConfig = {}
-      }
-    }
-
-    return pluginConfig
+    return ConfigManager.parseRcFile(this, plugin, pluginPath)
   }
 
-  getPluginConfig(
+  getPluginConfig<T = unknown>(
     key: string,
-    defaultValue: any = undefined,
+    defaultValue: T = undefined as T,
     plugin: string = ''
-  ) {
+  ): T {
     const argv = this.parsedArgv
-    // if plugin is not empty, parse plugin config dynamically
     const $config = plugin ? this.parsePluginConfig(plugin, argv) : argv.$config
-    return !_.isNull(argv[key]) && !_.isUndefined(argv[key])
-      ? argv[key]
-      : !_.isEmpty($config)
-        ? !_.isNull($config[key]) && !_.isUndefined($config[key])
-          ? $config[key]
-          : _.get($config, key, defaultValue)
-        : defaultValue
+    const result =
+      argv[key] != null
+        ? argv[key]
+        : $config && Object.keys($config).length > 0
+          ? $config[key] != null
+            ? $config[key]
+            : deepGet($config, key, defaultValue)
+          : defaultValue
+    return result as T
   }
 
-  /**
-   * Get application semo config only.
-   *
-   * @param pluginConfigcwd
-   * @param opts
-   *   opts.scriptName: set scriptName
-   */
   getApplicationConfig(opts?: ArgvOptions): ApplicationConfig {
-    opts = opts || {}
-
-    let applicationConfig: ApplicationConfig
-
-    const configPath = findUpSync(`.${this.scriptName}rc.yml`, {
-      cwd: opts.cwd,
-    })
-
-    const nodeEnv = this.getNodeEnv()
-    const configEnvPath = findUpSync([`.${this.scriptName}rc.${nodeEnv}.yml`], {
-      cwd: opts.cwd,
-    })
-
-    // Load home config if exists
-    const homeSemoYamlRcPath = process.env.HOME
-      ? path.resolve(
-          process.env.HOME,
-          `.${this.scriptName}`,
-          `.${this.scriptName}rc.yml`
-        )
-      : ''
-    if (homeSemoYamlRcPath && existsSync(homeSemoYamlRcPath)) {
-      try {
-        const rcFile = readFileSync(homeSemoYamlRcPath, 'utf8')
-        applicationConfig = formatRcOptions<ApplicationConfig>(
-          yaml.parse(rcFile)
-        ) as ApplicationConfig
-      } catch (e) {
-        this.debugCore('load rc failed:', e)
-        warn(`Global ${homeSemoYamlRcPath} config load failed!`)
-        applicationConfig = {} as ApplicationConfig
-      }
-    } else {
-      applicationConfig = {} as ApplicationConfig
-    }
-    applicationConfig.applicationDir = opts.cwd
-      ? opts.cwd
-      : configPath
-        ? path.dirname(configPath)
-        : process.cwd()
-
-    // Inject some core config, hard coded
-    applicationConfig = Object.assign({}, applicationConfig, opts, {
-      coreCommandDir: 'lib/commands',
-    })
-
-    // Load application rc, if same dir with core, it's a dup process, rare case.
-    if (
-      existsSync(path.resolve(applicationConfig.applicationDir, 'package.json'))
-    ) {
-      const packageInfoContent = readFileSync(
-        path.resolve(applicationConfig.applicationDir, 'package.json'),
-        'utf8'
-      )
-      const packageInfo = JSON.parse(packageInfoContent)
-
-      if (packageInfo.name) {
-        applicationConfig.name = packageInfo.name
-      }
-
-      if (packageInfo.version) {
-        applicationConfig.version = packageInfo.version
-      }
-
-      // args > package
-      if (packageInfo[this.scriptName]) {
-        packageInfo[this.scriptName] = formatRcOptions(
-          packageInfo[this.scriptName]
-        )
-        applicationConfig = Object.assign(
-          {},
-          applicationConfig,
-          packageInfo[this.scriptName]
-        )
-      }
-    }
-
-    // Load current directory main rc config
-    if (configPath) {
-      let semoRcInfo = {}
-
-      try {
-        if (configPath.endsWith('.yml')) {
-          const rcFile = readFileSync(configPath, 'utf8')
-          semoRcInfo = formatRcOptions(yaml.parse(rcFile))
-        } else {
-          const semoRcInfoContent = readFileSync(configPath, 'utf8')
-          semoRcInfo = JSON.parse(semoRcInfoContent)
-          semoRcInfo = formatRcOptions(semoRcInfo)
-        }
-        applicationConfig = _.merge(applicationConfig, semoRcInfo)
-      } catch (e) {
-        this.debugCore('load rc failed:', e)
-        warn('application rc config load failed!')
-      }
-    }
-
-    // Load current directory env rc config
-    if (configEnvPath) {
-      let semoEnvRcInfo = {}
-
-      try {
-        if (configEnvPath.endsWith('.yml')) {
-          const rcFile = readFileSync(configEnvPath, 'utf8')
-          semoEnvRcInfo = formatRcOptions(yaml.parse(rcFile))
-        } else {
-          const semoEnvRcInfoContent = readFileSync(configEnvPath, 'utf8')
-          semoEnvRcInfo = JSON.parse(semoEnvRcInfoContent)
-          semoEnvRcInfo = formatRcOptions(semoEnvRcInfo)
-        }
-        applicationConfig = _.merge(applicationConfig, semoEnvRcInfo)
-      } catch (e) {
-        this.debugCore('load rc failed:', e)
-        warn('application env rc config load failed!')
-      }
-    }
-
-    return applicationConfig
+    return ConfigManager.getApplicationConfig(this, opts)
   }
 
-  /**
-   * Get commbined config from whole environment.
-   */
-  getCombinedConfig(argv: ArgvOptions): CombinedConfig {
-    let combinedConfig: CombinedConfig = {}
-    const pluginConfigs: {
-      [key: string]: PluginConfig
-    } = {}
-
-    if (_.isEmpty(combinedConfig)) {
-      const plugins = this.getAllPluginsMapping(argv)
-      Object.keys(plugins).forEach((plugin) => {
-        const pluginConfig = this.parseRcFile(
-          plugin,
-          plugins[plugin]
-        ) as PluginConfig
-
-        const pluginConfigPick = _.pick(pluginConfig, [
-          'commandDir',
-          'extendDir',
-          'hookDir',
-          plugin,
-        ])
-        combinedConfig = _.merge(combinedConfig, pluginConfigPick)
-        if (pluginConfig) {
-          pluginConfigs[plugin] = pluginConfig
-        }
-      })
-
-      const applicatonConfig = this.getApplicationConfig()
-      combinedConfig = _.merge(combinedConfig, applicatonConfig)
-      combinedConfig.pluginConfigs = pluginConfigs
-    }
-
-    return combinedConfig || {}
-  }
-
-  /**
-   * convert pakcage.json to private, for internal use
-   * @param packageJsonPath package.json file path
-   */
-  convertToPrivate(packageJsonPath: string) {
-    try {
-      const pkg = require(packageJsonPath)
-      pkg.private = true
-      writeFileSync(packageJsonPath, JSON.stringify(pkg, null, 2))
-    } catch (e) {
-      warn(e.message)
-    }
-  }
-
-  installPackage(name: string, location = '', home = true, force = false) {
-    const nameArray = _.castArray(name)
-    const argv: any = this.parsedArgv
-    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-
-    let downloadDir = home
-      ? process.env.HOME + `/.${scriptName}`
-      : process.cwd()
-    downloadDir = location ? downloadDir + `/${location}` : downloadDir
-
-    ensureDirSync(downloadDir)
-
-    if (!existsSync(path.resolve(downloadDir, 'package.json'))) {
-      shell.exec(`cd ${downloadDir} && npm init -y`)
-      this.convertToPrivate(path.resolve(downloadDir, 'package.json'))
-    }
-
-    if (force) {
-      shell.exec(
-        `npm install ${nameArray.join(
-          ' '
-        )} --prefix ${downloadDir} --force --no-package-lock --no-audit --no-fund --no-bin-links`
-      )
-    }
-
-    nameArray.forEach((pkg) => {
-      try {
-        require.resolve(pkg, { paths: [downloadDir] })
-      } catch (err) {
-        if (err.code === 'MODULE_NOT_FOUND') {
-          shell.exec(
-            `npm install ${pkg} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
-          )
-        }
-      }
-    })
-  }
-
-  uninstallPackage(name: string, location = '', home = true) {
-    const nameArray = _.castArray(name)
-    const argv: any = this.parsedArgv
-    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-
-    let downloadDir = home
-      ? process.env.HOME + `/.${scriptName}`
-      : process.cwd()
-    downloadDir = location ? downloadDir + `/${location}` : downloadDir
-
-    ensureDirSync(downloadDir)
-
-    if (!existsSync(path.resolve(downloadDir, 'package.json'))) {
-      shell.exec(`cd ${downloadDir} && npm init -y`)
-      this.convertToPrivate(path.resolve(downloadDir, 'package.json'))
-    }
-
-    shell.exec(
-      `npm uninstall ${nameArray.join(
-        ' '
-      )} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
-    )
+  async getCombinedConfig(argv: ArgvOptions): Promise<CombinedConfig> {
+    return ConfigManager.getCombinedConfig(this, argv)
   }
 
   parsePluginConfig(plugin: string, argv: ArgvExtraOptions = {}) {
-    let $config = {}
-    if (!plugin) {
-      return $config
-    }
-    const pluginNameBase = plugin.startsWith(argv.scriptName + '-plugin-')
-      ? plugin.substring((argv.scriptName + '-plugin-').length)
-      : plugin
-    if (argv.$plugin) {
-      if (argv.$plugin[pluginNameBase]) {
-        $config = formatRcOptions(argv.$plugin[pluginNameBase] || {})
-      } else if (argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase]) {
-        $config = formatRcOptions(
-          argv.$plugin[argv.scriptName + '-plugin-' + pluginNameBase] || {}
-        )
-      }
-    }
-    return $config
+    return ConfigManager.parsePluginConfig(argv, plugin)
   }
 
-  visit = (command: any, _pathTofile: string, _filename: string) => {
-    const middleware = async (argv: ArgvWithPlugin) => {
-      if (!command.noblank) {
-        // Insert a blank line to terminal
-        console.log()
-      }
-
-      argv.$config = {}
-      // Give command a plugin level config
-      if (command.plugin) {
-        argv.$config = this.parsePluginConfig(command.plugin, argv)
-      }
-
-      argv.$command = command
-      this.setParsedArgv(argv)
-    }
-    if (command.middlewares && Array.isArray(command.middlewares)) {
-      command.middlewares.unshift(middleware)
-    }
-    // else {
-    //   command.middlewares = [middleware]
-    // }
-
-    // if (command.middleware) {
-    //   command.middlewares.push(command.middleware)
-    // }
-    return !(command.disabled === true || command.disable === true)
+  getNodeEnv(argv?: Record<string, unknown>) {
+    return ConfigManager.getNodeEnv(argv)
   }
 
-  /**
-   * Import a package on runtime
-   *
-   * If not exist, will install first,
-   *
-   * @param name Package name
-   * @param force Force install again
-   * @param location node_module directory by location
-   * @param home if true save modules to .semo, if false, save to cwd
-   */
-  importPackage(name: string, location = '', home = true, force = false) {
-    let pkg!: string, pkgPath: string
+  extendConfig(extendRcPath: string[] | string, prefix: string) {
+    return ConfigManager.extendConfigFromRc(
+      this,
+      this.parsedArgv,
+      extendRcPath,
+      prefix
+    )
+  }
 
-    const scriptName = this.scriptName
+  // --- Event emitter ---
 
-    let downloadDir = home
-      ? process.env.HOME + `/.${scriptName}`
-      : process.cwd()
-    downloadDir = location ? downloadDir + `/${location}` : downloadDir
-    const downloadDirNodeModulesPath = path.resolve(downloadDir, 'node_modules')
+  // EventEmitter listeners must accept `any[]` to match Node.js EventEmitter signature
+  on(event: string, listener: (...args: any[]) => void): this {
+    this._emitter.on(event, listener)
+    return this
+  }
 
-    ensureDirSync(downloadDir)
-    ensureDirSync(downloadDirNodeModulesPath)
+  once(event: string, listener: (...args: any[]) => void): this {
+    this._emitter.once(event, listener)
+    return this
+  }
 
-    if (!existsSync(path.resolve(downloadDir, 'package.json'))) {
-      shell.exec(`cd ${downloadDir} && npm init -y`)
-      this.convertToPrivate(path.resolve(downloadDir, 'package.json'))
+  off(event: string, listener: (...args: any[]) => void): this {
+    this._emitter.off(event, listener)
+    return this
+  }
+
+  emit(event: string, ...args: any[]): boolean {
+    return this._emitter.emit(event, ...args)
+  }
+
+  // --- Dynamic hook registration ---
+
+  addHook(
+    hookName: string,
+    handler: HookHandler,
+    pluginName: string = 'dynamic'
+  ): void {
+    const parsed = this._parseHookName(hookName)
+    const normalizedName = parsed.hook
+    const targetModule = parsed.originModuler
+    if (!this._dynamicHooks.has(normalizedName)) {
+      this._dynamicHooks.set(normalizedName, [])
+    }
+    this._dynamicHooks
+      .get(normalizedName)!
+      .push({ pluginName, handler, targetModule })
+  }
+
+  removeHook(hookName: string, pluginName?: string): void {
+    const parsed = this._parseHookName(hookName)
+    const normalizedName = parsed.hook
+    const targetModule = parsed.originModuler
+
+    if (!pluginName && !targetModule) {
+      // removeHook('query') → delete all handlers for hook_query
+      this._dynamicHooks.delete(normalizedName)
+      return
     }
 
-    if (force) {
-      shell.exec(
-        `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
-      )
-    }
-
-    try {
-      pkgPath = require.resolve(name, { paths: [downloadDir] })
-      pkg = require(pkgPath)
-    } catch (err) {
-      if (err.code === 'MODULE_NOT_FOUND') {
-        shell.exec(
-          `npm install ${name} --prefix ${downloadDir} --no-package-lock --no-audit --no-fund --no-bin-links`
-        )
-        try {
-          pkgPath = require.resolve(name, { paths: [downloadDir] })
-          pkg = require(pkgPath)
-        } catch {
-          warn(`Module ${name} not found, you may need to re-run the command`)
+    const handlers = this._dynamicHooks.get(normalizedName)
+    if (handlers) {
+      const filtered = handlers.filter((h) => {
+        if (pluginName && targetModule) {
+          // removeHook('ns:query', 'plugin-a') → both must match
+          return !(
+            h.pluginName === pluginName && h.targetModule === targetModule
+          )
         }
+        if (pluginName) {
+          // removeHook('query', 'plugin-a') → filter by pluginName
+          return h.pluginName !== pluginName
+        }
+        // removeHook('ns:query') → filter by targetModule
+        return h.targetModule !== targetModule
+      })
+      if (filtered.length === 0) {
+        this._dynamicHooks.delete(normalizedName)
+      } else {
+        this._dynamicHooks.set(normalizedName, filtered)
       }
     }
-
-    return pkg
   }
 
-  /**
-   * Load plugin rc config
-   *
-   * @param name Plugin name
-   * @param location plugin installed directory name under ~/.semo
-   * @param home if load from HOME directory
-   */
-  loadPluginRc(name, location = '', home = true) {
-    const scriptName = this.scriptName
+  // --- Package management (delegated to package-manager.ts) ---
 
-    const downloadDir = home
-      ? process.env.HOME + `/.${scriptName}`
-      : process.cwd()
-    const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
+  convertToPrivate(packageJsonPath: string) {
+    PackageManager.convertToPrivate(packageJsonPath)
+  }
 
-    ensureDirSync(downloadDir)
-    ensureDirSync(downloadDirNodeModulesPath)
+  async installPackage(
+    name: string,
+    location = '',
+    home = true,
+    force = false
+  ) {
+    return PackageManager.installPackage(this, name, location, home, force)
+  }
 
-    const packagePath = getPackagePath(name, [downloadDirNodeModulesPath])
-    const packageDirectory = path.dirname(packagePath)
+  async uninstallPackage(name: string, location = '', home = true) {
+    return PackageManager.uninstallPackage(this, name, location, home)
+  }
 
-    const pluginConfig = this.parseRcFile(name, packageDirectory)
-    pluginConfig.dirname = packageDirectory
+  async importPackage(name: string, location = '', home = true, force = false) {
+    return PackageManager.importPackage(this, name, location, home, force)
+  }
 
-    return pluginConfig
+  loadPluginRc(name: string, location = '', home = true) {
+    return PackageManager.loadPluginRc(this, name, location, home)
   }
 
   resolvePackage(name: string, location: string = '', home = true) {
-    const scriptName = this.scriptName
-    const downloadDir = home
-      ? process.env.HOME + `/.${scriptName}`
-      : process.cwd()
-    const downloadDirNodeModulesPath = path.resolve(downloadDir, location)
-
-    ensureDirSync(downloadDir)
-    ensureDirSync(downloadDirNodeModulesPath)
-
-    const pkgPath = require.resolve(name, {
-      paths: [downloadDirNodeModulesPath],
-    })
-    return pkgPath
+    return PackageManager.resolvePackage(this.scriptName, name, location, home)
   }
 
-  /**
-   * Load any package's package.json
-   * @param {string} pkg package name
-   * @param {array} paths search paths
-   */
   loadPackageInfo(
     pkg: string | undefined = undefined,
     paths: string[] = []
   ): Record<string, unknown> {
-    const packagePath = getPackagePath(pkg, paths)
-    if (!packagePath) return {}
-    const content = readFileSync(packagePath, 'utf-8')
-    return JSON.parse(content)
+    return PackageManager.loadPackageInfo(pkg, paths)
   }
 
   loadCorePackageInfo(): Record<string, unknown> {
-    const packagePath = findUpSync('package.json', {
-      cwd: path.resolve('../../', __dirname),
-    })
-    if (!packagePath) return {}
-
-    const content = readFileSync(packagePath, 'utf-8')
-    return JSON.parse(content)
+    return PackageManager.loadCorePackageInfo(__dirname)
   }
 
-  getAllPluginsMapping(argv?: ArgvOptions): Record<string, string> {
-    let enablePluginAutoScan = true
-    argv = argv || ({} as ArgvOptions)
+  // --- Plugin loading (delegated to plugin-loader.ts) ---
 
-    let plugins: Record<string, string> = {}
-    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-    // Process $plugins.register
-    if (_.isEmpty(plugins)) {
-      const registerPlugins: Record<string, unknown> =
-        (this.config('$plugins.register') as Record<string, unknown>) || {}
-      if (!_.isEmpty(registerPlugins)) {
-        enablePluginAutoScan = false
-      }
-      Object.keys(registerPlugins).forEach((plugin) => {
-        let pluginPath = registerPlugins[plugin]
-        if (
-          !plugin.startsWith('.') &&
-          plugin.indexOf(scriptName + '-plugin-') === -1
-        ) {
-          plugin = scriptName + '-plugin-' + plugin
-        }
+  async getAllPluginsMapping(
+    argv?: ArgvOptions
+  ): Promise<Record<string, string>> {
+    return PluginLoader.getAllPluginsMapping(this, __dirname, argv)
+  }
 
-        if (_.isBoolean(pluginPath) && pluginPath) {
-          try {
-            const packagePath = getPackagePath(plugin, [process.cwd()])
+  clearPluginCache(): void {
+    PluginLoader.clearPluginCache(this.scriptName)
+  }
 
-            if (packagePath) {
-              pluginPath = path.dirname(packagePath)
-              if (_.isString(pluginPath)) {
-                plugins[plugin] = pluginPath
-              }
-            }
-          } catch (e: unknown) {
-            warn(e)
-          }
-        } else if (
-          _.isString(pluginPath) &&
-          (pluginPath.startsWith('/') ||
-            pluginPath.startsWith('.') ||
-            pluginPath.startsWith('~'))
-        ) {
-          pluginPath = getAbsolutePath(pluginPath)
-          if (_.isString(pluginPath)) {
-            plugins[plugin] = pluginPath
-          }
-        } else {
-          // Means not register for now
-        }
-      })
+  getManifestPaths(): { local: string; global: string } {
+    return {
+      local: PluginCache.getLocalManifestPath(),
+      global: PluginCache.getGlobalManifestPath(this.scriptName),
     }
+  }
 
-    const pluginPrefix = (argv.pluginPrefix || 'semo') as string
-    let pluginPrefixs: string[] = []
-    if (_.isString(pluginPrefix)) {
-      pluginPrefixs = [pluginPrefix]
+  async generateManifest(opts?: {
+    global?: boolean
+    local?: boolean
+  }): Promise<Record<string, string>> {
+    const argv: ArgvOptions = { ...this.parsedArgv, noCache: true }
+    if (opts?.local) {
+      argv.disableGlobalPlugin = true
+      argv.disableHomePlugin = true
     }
-
-    if (!_.isArray(pluginPrefixs)) {
-      error('invalid --plugin-prefix')
-      return plugins
+    const plugins = await PluginLoader.getAllPluginsMapping(
+      this,
+      path.dirname(fileURLToPath(import.meta.url)),
+      argv
+    )
+    if (opts?.global) {
+      PluginCache.savePluginManifest(this.scriptName, this.version, plugins)
+    } else {
+      PluginCache.saveLocalPluginManifest(
+        this.scriptName,
+        this.version,
+        plugins
+      )
     }
-
-    const topPluginPattern =
-      pluginPrefixs.length > 1
-        ? '{' +
-          pluginPrefixs.map((prefix) => `${prefix}-plugin-*`).join(',') +
-          '}'
-        : pluginPrefixs.map((prefix) => `${prefix}-plugin-*`).join(',')
-    const orgPluginPattern =
-      pluginPrefixs.length > 1
-        ? '{' +
-          pluginPrefixs.map((prefix) => `@*/${prefix}-plugin-*`).join(',') +
-          '}'
-        : pluginPrefixs.map((prefix) => `@*/${prefix}-plugin-*`).join(',')
-
-    // Scan plugins
-    if (_.isEmpty(plugins) && enablePluginAutoScan) {
-      plugins = {}
-
-      // Process core plugins if needed
-      // Maybe core need to interact with some other plugins
-      globSync(topPluginPattern, {
-        noext: true,
-        cwd: path.resolve(__dirname, '../plugins'),
-      }).forEach(function (plugin): void {
-        plugins[plugin] = path.resolve(__dirname, '../plugins', plugin)
-      })
-
-      // argv.packageDirectory not always exists, if not, plugins list will not include npm global plugins
-      if (!argv.disableGlobalPlugin && argv.packageDirectory) {
-        // process core same directory top level plugins
-        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-          globSync(pattern, {
-            noext: true,
-            cwd: path.resolve(
-              argv.packageDirectory,
-              argv.orgMode ? '../../' : '../'
-            ),
-          }).forEach(function (plugin): void {
-            if (argv.packageDirectory) {
-              plugins[plugin] = path.resolve(
-                argv.packageDirectory,
-                argv.orgMode ? '../../' : '../',
-                plugin
-              )
-            }
-          })
-        })
-
-        // Only local dev needed: load sibling plugins in packageDirectory parent directory
-        // Only for orgMode = true, if orgMode = false, the result would be same as above search
-        if (argv.orgMode) {
-          globSync(topPluginPattern, {
-            noext: true,
-            cwd: path.resolve(argv.packageDirectory, '../'),
-          }).forEach(function (plugin): void {
-            if (argv.packageDirectory) {
-              plugins[plugin] = path.resolve(
-                argv.packageDirectory,
-                '../',
-                plugin
-              )
-            }
-          })
-        }
-      }
-
-      if (process.env.HOME && !argv.disableHomePlugin) {
-        // Semo home is a special directory
-        if (
-          existsSync(
-            path.resolve(
-              process.env.HOME,
-              '.' + scriptName,
-              `.${scriptName}rc.yml`
-            )
-          )
-        ) {
-          // So home plugin directory will not be overridden by other places normally.
-          plugins['.' + scriptName] = path.resolve(
-            process.env.HOME,
-            '.' + scriptName
-          )
-        }
-
-        // process home plugin-cache plugins
-        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-          globSync(pattern, {
-            noext: true,
-            cwd: path.resolve(
-              process.env.HOME,
-              `.${scriptName}`,
-              'home-plugin-cache',
-              'node_modules'
-            ),
-          }).forEach(function (plugin): void {
-            if (process.env.HOME) {
-              plugins[plugin] = path.resolve(
-                process.env.HOME,
-                `.${scriptName}`,
-                'home-plugin-cache',
-                'node_modules',
-                plugin
-              )
-            }
-          })
-        })
-
-        // process home npm plugins
-        ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-          globSync(pattern, {
-            noext: true,
-            cwd: path.resolve(
-              process.env.HOME,
-              `.${scriptName}`,
-              'node_modules'
-            ),
-          }).forEach(function (plugin): void {
-            if (process.env.HOME) {
-              plugins[plugin] = path.resolve(
-                process.env.HOME,
-                `.${scriptName}`,
-                'node_modules',
-                plugin
-              )
-            }
-          })
-        })
-      }
-
-      // process cwd(current directory) npm plugins
-      ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-        globSync(pattern, {
-          noext: true,
-          cwd: path.resolve(process.cwd(), 'node_modules'),
-        }).forEach(function (plugin) {
-          plugins[plugin] = path.resolve(process.cwd(), 'node_modules', plugin)
-        })
-      })
-
-      // process local plugins
-      const config = this.getApplicationConfig()
-      const pluginDirs = _.castArray(config.pluginDir) as string[]
-      pluginDirs.forEach((pluginDir) => {
-        if (existsSync(pluginDir)) {
-          ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-            globSync(pattern, {
-              noext: true,
-              cwd: path.resolve(process.cwd(), pluginDir),
-            }).forEach(function (plugin) {
-              plugins[plugin] = path.resolve(process.cwd(), pluginDir, plugin)
-            })
-          })
-        }
-      })
-
-      // Process plugin project
-      // If project name contains `-plugin-`, then current directory should be plugin too.
-      if (existsSync(path.resolve(process.cwd(), 'package.json'))) {
-        const pkgConfigContent = readFileSync(
-          path.resolve(process.cwd(), 'package.json'),
-          'utf-8'
-        )
-        const pkgConfig = JSON.parse(pkgConfigContent)
-        const matchPluginProject = pluginPrefixs
-          .map((prefix) => `${prefix}-plugin-`)
-          .join('|')
-        const regExp = new RegExp(`^(@[^/]+\/)?(${matchPluginProject})`)
-        if (pkgConfig.name && regExp.test(pkgConfig.name)) {
-          plugins[pkgConfig.name] = path.resolve(process.cwd())
-        }
-      }
-    }
-
-    // extraPluginDir comes from CLI, so it's dynamic.
-    const extraPluginDirEnvName = _.upperCase(scriptName) + '_PLUGIN_DIR'
-    if (
-      extraPluginDirEnvName &&
-      process.env[extraPluginDirEnvName] &&
-      existsSync(getAbsolutePath(process.env[extraPluginDirEnvName] as string))
-    ) {
-      const envDir = getAbsolutePath(String(process.env[extraPluginDirEnvName]))
-
-      ;[topPluginPattern, orgPluginPattern].forEach((pattern) => {
-        globSync(pattern, {
-          noext: true,
-          cwd: path.resolve(envDir),
-        }).forEach(function (plugin) {
-          plugins[plugin] = path.resolve(envDir, plugin)
-        })
-      })
-    }
-
-    // Second filter for registered or scanned plugins
-    const includePlugins = (this.config('$plugins.include') || []) as string[]
-    const excludePlugins = (this.config('$plugins.exclude') || []) as string[]
-
-    if (_.isArray(includePlugins) && includePlugins.length > 0) {
-      plugins = _.pickBy(plugins, (pluginPath, plugin) => {
-        if (plugin.indexOf(scriptName + '-plugin-') === 0) {
-          plugin = plugin.substring((scriptName + '-plugin-').length)
-        }
-        return (
-          includePlugins.includes(plugin) ||
-          includePlugins.includes(scriptName + '-plugin-' + plugin)
-        )
-      })
-    }
-
-    if (_.isArray(excludePlugins) && excludePlugins.length > 0) {
-      plugins = _.omitBy(plugins, (pluginPath, plugin) => {
-        if (plugin.indexOf(scriptName + '-plugin-') === 0) {
-          plugin = plugin.substring((scriptName + '-plugin-').length)
-        }
-        return (
-          excludePlugins.includes(plugin) ||
-          excludePlugins.includes(scriptName + '-plugin-' + plugin)
-        )
-      })
-    }
-
     return plugins
   }
 
-  /**
-   * Get current node env setting
-   *
-   * You can change the node-env-key in command args or semo rc file
-   */
-  getNodeEnv(argv?: Record<string, unknown>) {
-    if (!argv) {
-      return process.env.NODE_ENV || 'development'
-    }
-    const nodeEnvKey = (argv.nodeEnvKey || argv.nodeEnv || 'NODE_ENV') as string
-    return process.env[nodeEnvKey] || 'development'
+  clearLocalPluginCache(): void {
+    PluginCache.clearLocalPluginManifest()
   }
+
+  // --- Command loading (delegated to command-loader.ts) ---
+
+  visit = CommandLoader.createVisitor(this)
 
   extendSubCommand(
     command: string,
     moduleName: string,
+    // Must remain `any`: Yargs instance type varies across versions and configurations
     yargs: any,
     basePath: string
   ): void {
-    const plugins = this.allPlugins
-    const config = this.combinedConfig
-    const opts: RequireDirectoryOptions = {
-      // try to use ts command with ts-node/register
-      extensions: ['ts', 'js'],
-      exclude: /.d.ts$/,
-      // Give each command an ability to disable temporarily
-      visit: this.visit.bind(this),
+    CommandLoader.extendSubCommand(this, command, moduleName, yargs, basePath)
+  }
+
+  // --- Init (SDK mode) ---
+
+  get initialized(): boolean {
+    return this._initialized
+  }
+
+  async init(): Promise<void> {
+    if (this._initialized) return
+    this.emit('init:start')
+    await this.setupEnvironment()
+    this.emit('init:env')
+    await this.loadConfiguration()
+    this.emit('init:config')
+    this._initialized = true
+    await this.invokeHook(`${this.scriptName}:plugin_ready`, { mode: 'assign' })
+    this.emit('init:done')
+  }
+
+  async destroy(): Promise<void> {
+    if (!this._initialized) return
+    this.emit('destroy:start')
+    await this.invokeHook(`${this.scriptName}:plugin_destroy`, {
+      mode: 'assign',
+    })
+    this._initialized = false
+    this._dynamicHooks.clear()
+    this.emit('destroy:done')
+  }
+
+  private async setupEnvironment(): Promise<void> {
+    process.setMaxListeners(20)
+
+    if (!this.initOptions.skipDotEnv) {
+      await this.useDotEnv(true)
     }
 
-    // load default commands
-    const currentCommand: string | undefined = command.split('/').pop()
-    if (currentCommand && existsSync(path.resolve(basePath, currentCommand))) {
-      yargs.commandDir(path.resolve(basePath, currentCommand), opts)
-    }
-
-    // Load plugin commands
-    if (plugins) {
-      Object.keys(plugins).forEach(function (plugin): void {
-        if (
-          config.pluginConfigs[plugin] &&
-          config.pluginConfigs[plugin].extendDir
-        ) {
-          if (
-            existsSync(
-              path.resolve(
-                plugins[plugin],
-                `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`,
-                command
-              )
-            )
-          ) {
-            yargs.commandDir(
-              path.resolve(
-                plugins[plugin],
-                `${config.pluginConfigs[plugin].extendDir}/${moduleName}/src/commands`,
-                command
-              ),
-              opts
-            )
-          }
-        }
-      })
-    }
-
-    // Load application commands
-    if (
-      config.extendDir &&
-      existsSync(
-        path.resolve(
-          process.cwd(),
-          `${config.extendDir}/${moduleName}/src/commands`,
-          command
-        )
-      )
-    ) {
-      yargs.commandDir(
-        path.resolve(
-          process.cwd(),
-          `${config.extendDir}/${moduleName}/src/commands`,
-          command
-        ),
-        opts
-      )
+    // Only read stdin when piped (non-TTY), avoid blocking in interactive mode
+    if (this.initOptions.skipStdin) {
+      this.input = ''
+    } else if (!process.stdin.isTTY) {
+      const chunks: Buffer[] = []
+      for await (const chunk of process.stdin) {
+        chunks.push(chunk as Buffer)
+      }
+      this.input = Buffer.concat(chunks).toString('utf8')
+    } else {
+      this.input = ''
     }
   }
 
-  async launch(): Promise<void> {
-    process.setMaxListeners(0)
-
-    this.useDotEnv(true)
-    this.input = await getStdin()
-
+  private async loadConfiguration(): Promise<void> {
     this.debugCore('Parse process.argv using yargs-parser.')
-    let parsedArgv = yargsParser(process.argv.slice(2)) as ArgvOptions
+    const rawArgv = this.initOptions.argv ?? process.argv.slice(2)
+    let parsedArgv = yargsParser(rawArgv) as ArgvOptions
     parsedArgv = Object.assign(parsedArgv, this.initOptions)
 
     this.debugCore('Load core package information.')
     const pkg = this.loadCorePackageInfo()
+    this._corePackageInfo = pkg
+
     this.debugCore('Load application config.')
     let appConfig = this.getApplicationConfig(parsedArgv)
     appConfig = Object.assign(appConfig, {
       scriptName: this.initOptions.scriptName,
       packageName: this.initOptions.packageName,
       packageDirectory: this.initOptions.packageDirectory,
-      orgMode: this.initOptions.orgMode, // Means my package publish under npm orgnization scope
+      orgMode: this.initOptions.orgMode,
       [`$${this.initOptions.scriptName || 'semo'}`]: {
         VERSION: pkg.version,
       },
-      originalArgv: process.argv.slice(2),
+      originalArgv: rawArgv,
     })
 
     this.appConfig = appConfig
-    // compatible with both singular and plural
     parsedArgv = Object.assign(parsedArgv, appConfig)
-    parsedArgv.disableCoreCommand =
-      parsedArgv.disableCoreCommands ?? parsedArgv.disableCoreCommand
-    parsedArgv.disableCompletionCommand =
-      parsedArgv.disableCompletionCommands ??
-      parsedArgv.disableCompletionCommand
-    parsedArgv.disableCompletion =
-      parsedArgv.disableCompletions ?? parsedArgv.disableCompletion
-    parsedArgv.hideCompletionCommand =
-      parsedArgv.hideCompletionCommands ?? parsedArgv.hideCompletionCommand
-    parsedArgv.disableGlobalPlugin =
-      parsedArgv.disableGlobalPlugins ?? parsedArgv.disableGlobalPlugin
-    parsedArgv.disableHomePlugin =
-      parsedArgv.disableHomePlugins ?? parsedArgv.disableHomePlugin
     this.setParsedArgv(parsedArgv)
+    this.setVersion(pkg.version as string)
 
     this.debugCore('Load all plugins information.')
-    const allPlugins = this.getAllPluginsMapping(parsedArgv)
+    this.allPlugins = await this.getAllPluginsMapping(parsedArgv)
     this.debugCore('Load combined config.')
-    const combinedConfig = this.getCombinedConfig(parsedArgv)
+    this.combinedConfig = await this.getCombinedConfig(parsedArgv)
+  }
 
-    this.allPlugins = allPlugins
-    this.combinedConfig = combinedConfig
+  // --- Launch ---
 
+  async launch(): Promise<void> {
+    await this.init()
+    const yargsObj = this.createYargsInstance()
+    this.setupMiddleware(yargsObj)
+    await this.configureYargsOptions(yargsObj)
+    await this.loadCommands(yargsObj)
+    await this.execute(yargsObj)
+  }
+
+  private createYargsInstance(): Argv {
     this.debugCore('Initialize Yargs instance.')
     const yargsObj = yargs(hideBin(process.argv))
     yargsObj
@@ -1113,48 +555,46 @@ export class Core {
         'sort-commands': true,
         'populate--': true,
       })
-      // .fail(false)
       .fail((msg, err) => {
         if (msg) {
           error(msg)
         }
-        if (parsedArgv.verbose) {
+        if (this.parsedArgv.verbose) {
           error(err)
         }
         process.exit(1)
       })
       .wrap(Math.min(120, yargsObj.terminalWidth()))
 
-    this.setVersion(pkg.version as string)
-    yargsObj.version(pkg.version as string)
-    yargsObj.config(appConfig)
+    yargsObj.version(this.version)
+    yargsObj.config(this.appConfig)
 
+    return yargsObj
+  }
+
+  private setupMiddleware(yargsObj: Argv): void {
     this.debugCore('Register global middleware.')
-    // add more internal values to argv using middleware
     yargsObj.middleware(async (argv) => {
-      // For command use this instance
       argv.$core = this
       argv.$yargs = yargsObj
 
-      // For piping input
       argv.$input = this.input
 
-      // For logging
       argv.$log = log
       argv.$info = info
       argv.$error = error
+      argv.$fatal = fatal
       argv.$warn = warn
       argv.$success = success
       argv.$jsonLog = jsonLog
       argv.$colorfulLog = colorfulLog
       argv.$colorize = colorize
 
-      // For debugging
       argv.$debugCore = this.debugCore
       argv.$debugCoreChannel = this.debugCoreChannel
       argv.$debugChannel = this.debugChannel
 
-      // For prmopts
+      // For prompts (each function lazy-loads @inquirer/prompts on first call)
       argv.$prompt = {
         confirm,
         checkbox,
@@ -1170,12 +610,22 @@ export class Core {
 
       this.setParsedArgv(argv)
     })
+  }
+
+  private async configureYargsOptions(yargsObj: Argv): Promise<void> {
+    const parsedArgv = this.parsedArgv
 
     this.debugCore('Customize using argv options')
     yargsObj.scriptName(parsedArgv.scriptName)
     yargsObj.hide('plugin-prefix').option('plugin-prefix', {
       default: 'semo',
       describe: 'Set plugin prefix.',
+    })
+
+    yargsObj.hide('no-cache').option('no-cache', {
+      type: 'boolean',
+      default: false,
+      describe: 'Disable plugin manifest cache.',
     })
 
     yargsObj.hide('enable-core-hook').option('enable-core-hook', {
@@ -1192,9 +642,9 @@ export class Core {
       const beforeHooks = (await this.invokeHook(
         `${parsedArgv.scriptName}:before_command`
       )) as Record<string, (argv: ArgvWithPlugin, yargs: Argv) => void>
-      Object.keys(beforeHooks).forEach(function (hook) {
-        beforeHooks[hook](parsedArgv, yargsObj)
-      })
+      for (const handler of Object.values(beforeHooks)) {
+        handler(parsedArgv, yargsObj)
+      }
     }
 
     if (!parsedArgv.disableCoreCommand && !parsedArgv.disableCore) {
@@ -1228,16 +678,14 @@ export class Core {
       }
     }
 
-    if (!parsedArgv.disableGlobalPlugin && !parsedArgv.disableGlobalPlugins) {
+    if (!parsedArgv.disableGlobalPlugin) {
       yargsObj.hide('disable-global-plugin').option('disable-global-plugin', {
-        alias: 'disable-global-plugins',
         describe: 'Disable global plugins.',
       })
     }
 
-    if (!parsedArgv.disableHomePlugin && !parsedArgv.disableHomePlugins) {
+    if (!parsedArgv.disableHomePlugin) {
       yargsObj.hide('disable-home-plugin').option('disable-home-plugin', {
-        alias: 'disable-home-plugins',
         describe: 'Disable home plugins.',
       })
     }
@@ -1253,9 +701,9 @@ export class Core {
 
       yargsObj.epilog(
         ((epilog: string | string[] | undefined): string => {
-          if (epilog && _.isString(epilog)) {
+          if (epilog && typeof epilog === 'string') {
             return epilog
-          } else if (_.isArray(epilog)) {
+          } else if (Array.isArray(epilog)) {
             const pop = epilog.pop()
             if (pop) {
               return pop
@@ -1280,13 +728,17 @@ export class Core {
       alias: 'node-env',
       describe: 'Set node env key',
     })
+  }
+
+  private async loadCommands(yargsObj: Argv): Promise<void> {
+    const parsedArgv = this.parsedArgv
+    const appConfig = this.appConfig
+    const pkg = this._corePackageInfo
 
     this.debugCore('Load commands by commandDir')
     const yargsOpts: RequireDirectoryOptions = {
-      // try to use ts command with ts-node/register
       extensions: isUsingTsRunner() ? ['ts', 'js'] : ['js'],
       exclude: /.d.ts$/,
-      // Give each command an ability to disable temporarily
       visit: this.visit,
     }
 
@@ -1295,7 +747,6 @@ export class Core {
       this.initOptions.packageDirectory &&
       pkg.name !== parsedArgv.scriptName
     ) {
-      // Load core commands
       this.debugCore('Load core commands')
       yargsObj.commandDir(
         path.resolve(
@@ -1306,33 +757,27 @@ export class Core {
       )
     }
 
-    // Load plugin commands
-    if (allPlugins) {
+    if (this.allPlugins) {
       this.debugCore('Load plugins commands')
-      Object.keys(allPlugins).forEach(function (plugin) {
+      const allPlugins = this.allPlugins
+      const combinedConfig = this.combinedConfig
+      for (const [plugin, pluginPath] of Object.entries(allPlugins)) {
         if (
           combinedConfig.pluginConfigs &&
           combinedConfig.pluginConfigs[plugin] &&
-          combinedConfig.pluginConfigs[plugin].commandDir &&
-          existsSync(
-            path.resolve(
-              allPlugins[plugin],
-              combinedConfig.pluginConfigs[plugin].commandDir
-            )
-          )
+          combinedConfig.pluginConfigs[plugin].commandDir
         ) {
-          yargsObj.commandDir(
-            path.resolve(
-              allPlugins[plugin],
-              combinedConfig.pluginConfigs[plugin].commandDir
-            ),
-            yargsOpts
+          const cmdDir = path.resolve(
+            pluginPath,
+            combinedConfig.pluginConfigs[plugin].commandDir
           )
+          if (existsSync(cmdDir)) {
+            yargsObj.commandDir(cmdDir, yargsOpts)
+          }
         }
-      })
+      }
     }
 
-    // Load application commands
     if (
       appConfig.commandDir &&
       existsSync(path.resolve(process.cwd(), appConfig.commandDir))
@@ -1358,11 +803,9 @@ export class Core {
       process.argv[2] &&
       existsSync(path.resolve(process.cwd(), process.argv[2]))
     ) {
-      // if command exist but process.arg[2] also exist, but not a command js module
-      // here will throw an exception, so ignore this error to make existed command can run
       try {
         let command =
-          require(path.resolve(process.cwd(), process.argv[2])) || {}
+          (await import(path.resolve(process.cwd(), process.argv[2]))) || {}
         if (command.default) {
           command = command.default
         }
@@ -1375,7 +818,7 @@ export class Core {
         if (command.builder) {
           defaultCommand.builder = command.builder
         }
-      } catch (e) {
+      } catch (e: unknown) {
         if (this.parsedArgv.verbose) {
           error(e)
         }
@@ -1398,7 +841,7 @@ export class Core {
     this.debugCore('Add version command')
     if (!parsedArgv.disableCoreCommand) {
       yargsObj.command('version', 'Show version number', () => {
-        log(pkg.version)
+        log(this.version)
       })
     }
 
@@ -1418,131 +861,66 @@ export class Core {
         ['$0 clean all', 'Clean all cache files and installed npm packages.'],
       ])
     }
+  }
 
+  private async execute(yargsObj: Argv): Promise<void> {
     this.debugCore('Parse and launch')
     try {
       await yargsObj.parseAsync()
       this.debugCore('Launch complete')
-    } catch (e) {
-      if (parsedArgv.verbose) {
+    } catch (e: unknown) {
+      if (this.parsedArgv.verbose) {
         console.error(e)
       } else {
-        return error(e.message)
+        const msg = e instanceof Error ? e.message : String(e)
+        return error(msg)
       }
     }
   }
 
-  async invokeHook<T>(
+  // --- Hook invocation ---
+
+  private _parseHookName(hook: string): {
+    hook: string
+    originModuler: string
+  } {
+    const splitHookName = hook.split(':')
+    let originModuler: string
+    if (splitHookName.length === 1) {
+      originModuler = ''
+      hook = splitHookName[0]
+    } else if (splitHookName.length === 2) {
+      originModuler = splitHookName[0]
+      hook = splitHookName[1]
+    } else {
+      throw Error('Invalid hook name')
+    }
+    hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
+    return { hook, originModuler }
+  }
+
+  private _collectFileHooks(
     hook: string,
-    options: HookOption = { mode: 'assign' },
-    opts: ArgvOptions = {}
-  ): Promise<T> {
-    return await invokeHook<T>(hook, options, opts)
-  }
-
-  extendConfig(extendRcPath: string[] | string, prefix: string) {
-    let argv = this.parsedArgv
-
-    const extendRcPathArray = _.castArray(extendRcPath)
-
-    extendRcPathArray.forEach((rcPath) => {
-      rcPath = path.resolve(process.cwd(), rcPath)
-      if (rcPath && existsSync(rcPath)) {
-        try {
-          const rcFile = readFileSync(rcPath, 'utf8')
-          const parsedRc = yaml.parse(rcFile)
-          const extendRc = formatRcOptions(parsedRc)
-          if (prefix) {
-            const prefixPart = _.get(argv, prefix)
-            const mergePart = _.merge(prefixPart, extendRc)
-            argv = _.set(argv, prefix, mergePart)
-          } else {
-            argv = _.merge(argv, extendRc)
-          }
-        } catch (e) {
-          this.debugCore('load rc:', e)
-          warn(`Global ${rcPath} config load failed!`)
-        }
-      }
-
-      const nodeEnv = this.getNodeEnv(argv)
-      const extendRcEnvPath = path.resolve(
-        path.dirname(rcPath),
-        `${path.basename(rcPath, '.yml')}.${nodeEnv}.yml`
-      )
-      if (extendRcEnvPath && existsSync(extendRcEnvPath)) {
-        try {
-          const rcFile = readFileSync(extendRcEnvPath, 'utf8')
-          const parsedRc = yaml.parse(rcFile)
-          const extendRc = formatRcOptions(parsedRc)
-          if (prefix) {
-            const prefixPart = _.get(argv, prefix)
-            const mergePart = _.merge(prefixPart, extendRc)
-            argv = _.set(argv, prefix, mergePart)
-          } else {
-            argv = _.merge(argv, extendRc)
-          }
-        } catch (e) {
-          this.debugCore('load rc:', e)
-          warn(`Global ${extendRcEnvPath} config load failed!`)
-        }
-      }
-    })
-
-    return argv
-  }
-}
-
-export const invokeHook = async <T>(
-  hook: string,
-  options: HookOption = { mode: 'assign' },
-  opts: ArgvOptions = {}
-): Promise<T> => {
-  const $core = Core.getInstance()
-  $core.debugCore(`Invoke hook ${hook}`)
-  const splitHookName = hook.split(':')
-  let moduler, originModuler
-  if (splitHookName.length === 1) {
-    moduler = ''
-    originModuler = ''
-    hook = splitHookName[0]
-  } else if (splitHookName.length === 2) {
-    moduler = splitHookName[0]
-    hook = splitHookName[1]
-
-    originModuler = moduler
-    moduler = moduler.replace('-', '__').replace('/', '__').replace('@', '')
-  } else {
-    throw Error('Invalid hook name')
-  }
-
-  const argv = Object.assign(opts, $core.parsedArgv)
-  const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
-  hook = !hook.startsWith('hook_') ? `hook_${hook}` : hook
-  options = Object.assign(
-    {
-      mode: 'assign',
-      useCache: false,
-      include: [],
-      exclude: [],
-      opts: {},
-    },
-    options
-  )
-  try {
-    // Make Application supporting hook invocation
+    originModuler: string,
+    options: HookOption,
+    argv: ArgvOptions,
+    $core: Core,
+    catchErrors: boolean = true
+  ): {
+    hookCollected: unknown[]
+    hookIndex: string[]
+    errors: Array<{ plugin: string; error: Error }>
+  } {
+    const scriptName = argv && argv.scriptName ? argv.scriptName : 'semo'
     const appConfig = $core.appConfig
     const combinedConfig = $core.combinedConfig
-    // Make Semo core supporting hook invocation
     const plugins = argv.packageDirectory
       ? Object.assign(
           {},
-          {
-            [scriptName]: path.resolve(argv.packageDirectory),
-          },
+          { [scriptName]: path.resolve(argv.packageDirectory) },
           $core.allPlugins
         )
-      : $core.allPlugins
+      : { ...$core.allPlugins }
 
     if (
       appConfig &&
@@ -1555,38 +933,24 @@ export const invokeHook = async <T>(
       plugins.application = appConfig.applicationDir
     }
 
-    let pluginsReturn
-    switch (options.mode) {
-      case 'push':
-        pluginsReturn = []
-        break
-      case 'replace':
-        pluginsReturn = undefined
-        break
-      case 'group':
-      case 'assign':
-      case 'merge':
-      default:
-        pluginsReturn = {}
-        break
-    }
     const hookCollected: unknown[] = []
-    const hookIndex: unknown[] = []
-    for (let i = 0, length = Object.keys(plugins).length; i < length; i++) {
-      const plugin = Object.keys(plugins)[i]
+    const hookIndex: string[] = []
+    const errors: Array<{ plugin: string; error: Error }> = []
+    const pluginKeys = Object.keys(plugins)
 
-      // Process include option
+    for (let i = 0, length = pluginKeys.length; i < length; i++) {
+      const plugin = pluginKeys[i]
+
       if (
-        _.isArray(options.include) &&
+        Array.isArray(options.include) &&
         options.include.length > 0 &&
         !options.include.includes(plugin)
       ) {
         continue
       }
 
-      // Process exclude option
       if (
-        _.isArray(options.exclude) &&
+        Array.isArray(options.exclude) &&
         options.exclude.length > 0 &&
         options.exclude.includes(plugin)
       ) {
@@ -1594,8 +958,8 @@ export const invokeHook = async <T>(
       }
 
       try {
-        let pluginEntryPath: string // resolve plugin hook entry file path
-        let hookDir: string = '' // resolve plugin hook dir
+        let pluginEntryPath: string
+        let hookDir: string = ''
 
         switch (plugin) {
           case scriptName:
@@ -1638,60 +1002,176 @@ export const invokeHook = async <T>(
             hookDir &&
             existsSync(path.resolve(plugins[plugin], hookDir, 'index.ts'))
           ) {
+            entryFileName = 'index.ts'
             pluginEntryPath = path.resolve(
               plugins[plugin],
               hookDir,
               entryFileName
             )
-            entryFileName = 'index.ts'
           }
         }
 
-        // pluginEntryPath resolve failed, means this plugin do not hook anything
         if (!pluginEntryPath) {
           continue
         }
 
-        let loadedPlugin = await import(pluginEntryPath)
-        if (_.isFunction(loadedPlugin)) {
-          loadedPlugin = await loadedPlugin(this, argv)
-        } else if (_.isFunction(loadedPlugin.default)) {
-          loadedPlugin = await loadedPlugin.default(this, argv)
-        }
+        const loadedPlugin = import(pluginEntryPath)
+        hookCollected.push(
+          // Dynamic plugin import — module shape is unknown at compile time
+          loadedPlugin
+            .then(async (mod: any) => {
+              if (typeof mod === 'function') {
+                mod = await mod(this, argv)
+              } else if (typeof mod.default === 'function') {
+                mod = await mod.default(this, argv)
+              }
 
-        let forHookCollected: Hook | null = null
-        if (loadedPlugin[hook]) {
-          if (
-            !loadedPlugin[hook].getHook ||
-            !_.isFunction(loadedPlugin[hook].getHook)
-          ) {
-            forHookCollected = new Hook(loadedPlugin[hook])
-          } else {
-            forHookCollected = loadedPlugin[hook]
-          }
-        }
+              let forHookCollected: Hook | null = null
+              if (mod[hook]) {
+                if (
+                  !mod[hook].getHook ||
+                  typeof mod[hook].getHook !== 'function'
+                ) {
+                  forHookCollected = new Hook(mod[hook])
+                } else {
+                  forHookCollected = mod[hook]
+                }
+              }
 
-        if (forHookCollected) {
-          const loadedPluginHook = forHookCollected.getHook(originModuler)
-          if (_.isFunction(loadedPluginHook)) {
-            hookCollected.push(loadedPluginHook($core, argv, options))
-          } else {
-            hookCollected.push(loadedPluginHook)
-          }
-          hookIndex.push(plugin)
+              if (forHookCollected) {
+                const loadedPluginHook = forHookCollected.getHook(originModuler)
+                if (typeof loadedPluginHook === 'function') {
+                  return loadedPluginHook($core, argv, options)
+                } else {
+                  return loadedPluginHook
+                }
+              }
+              return undefined
+            })
+            .catch((e: unknown) => {
+              if (!catchErrors) {
+                throw e
+              }
+              const err = e instanceof Error ? e : new Error(String(e))
+              errors.push({ plugin, error: err })
+              if (options.strict) {
+                throw err
+              }
+              warn(e)
+              return undefined
+            })
+        )
+        hookIndex.push(plugin)
+      } catch (e: unknown) {
+        const err = e instanceof Error ? e : new Error(String(e))
+        errors.push({ plugin, error: err })
+        if (options.strict) {
+          throw err
         }
-      } catch (e) {
-        console.log(e)
+        warn(e)
       }
     }
 
-    const hookResolved: unknown[] = await Promise.all(hookCollected)
-    hookResolved.forEach((pluginReturn, index) => {
-      switch (options.mode) {
+    return { hookCollected, hookIndex, errors }
+  }
+
+  private _collectDynamicHooks(
+    hook: string,
+    originModuler: string,
+    options: HookOption,
+    argv: ArgvOptions,
+    $core: Core,
+    catchErrors: boolean = true
+  ): {
+    hookCollected: unknown[]
+    hookIndex: string[]
+    errors: Array<{ plugin: string; error: Error }>
+  } {
+    const hookCollected: unknown[] = []
+    const hookIndex: string[] = []
+    const errors: Array<{ plugin: string; error: Error }> = []
+    const dynamicHandlers = this._dynamicHooks.get(hook) || []
+
+    for (const { pluginName, handler, targetModule } of dynamicHandlers) {
+      // Namespace isolation for dynamic hooks:
+      // - originModuler set && targetModule set && mismatch → skip
+      // - originModuler set && targetModule empty → skip (strict mode)
+      // - otherwise → pass through
+      if (originModuler) {
+        if (targetModule && targetModule !== originModuler) {
+          continue
+        }
+        if (!targetModule) {
+          continue
+        }
+      }
+
+      if (
+        Array.isArray(options.include) &&
+        options.include.length > 0 &&
+        !options.include.includes(pluginName)
+      ) {
+        continue
+      }
+
+      if (
+        Array.isArray(options.exclude) &&
+        options.exclude.length > 0 &&
+        options.exclude.includes(pluginName)
+      ) {
+        continue
+      }
+
+      try {
+        hookCollected.push(handler($core, argv, options))
+        hookIndex.push(pluginName)
+      } catch (e: unknown) {
+        if (!catchErrors) {
+          // Wrap sync errors as rejected promises for allSettled
+          hookCollected.push(Promise.reject(e))
+          hookIndex.push(pluginName)
+        } else {
+          const err = e instanceof Error ? e : new Error(String(e))
+          errors.push({ plugin: pluginName, error: err })
+          if (options.strict) {
+            throw err
+          }
+          warn(e)
+        }
+      }
+    }
+
+    return { hookCollected, hookIndex, errors }
+  }
+
+  private _mergeHookResults(
+    hookResolved: unknown[],
+    hookIndex: string[],
+    mode: string
+  ): unknown {
+    let pluginsReturn: unknown
+    switch (mode) {
+      case 'push':
+        pluginsReturn = []
+        break
+      case 'replace':
+        pluginsReturn = undefined
+        break
+      case 'group':
+      case 'assign':
+      case 'merge':
+      default:
+        pluginsReturn = {}
+        break
+    }
+
+    for (let i = 0; i < hookResolved.length; i++) {
+      let pluginReturn = hookResolved[i]
+      switch (mode) {
         case 'group':
           pluginReturn = pluginReturn || {}
-          const plugin = hookIndex[index] as string
-          ;(pluginsReturn as Record<string, unknown>)[plugin] = pluginReturn
+          ;(pluginsReturn as Record<string, unknown>)[hookIndex[i]] =
+            pluginReturn
           break
         case 'push':
           ;(pluginsReturn as unknown[]).push(pluginReturn)
@@ -1701,7 +1181,7 @@ export const invokeHook = async <T>(
           break
         case 'merge':
           pluginReturn = pluginReturn || {}
-          pluginsReturn = _.merge(pluginsReturn, pluginReturn)
+          pluginsReturn = deepMerge(pluginsReturn, pluginReturn)
           break
         case 'assign':
         default:
@@ -1712,13 +1192,231 @@ export const invokeHook = async <T>(
           )
           break
       }
-    })
+    }
 
     return pluginsReturn
-  } catch (e) {
-    // throw new Error(e.stack)
-
-    console.log(e.message)
   }
-  return undefined
+
+  async invokeHook<T>(
+    hook: string,
+    options: HookOption = { mode: 'assign' },
+    opts: ArgvOptions = {}
+  ): Promise<T | undefined> {
+    const $core = Core.getInstance()
+    const originalHook = hook
+    $core.debugCore(`Invoke hook ${hook}`)
+
+    const parsed = this._parseHookName(hook)
+    hook = parsed.hook
+    const originModuler = parsed.originModuler
+
+    const argv = Object.assign({}, opts, $core.parsedArgv)
+    options = Object.assign(
+      {
+        mode: 'assign',
+        useCache: false,
+        include: [],
+        exclude: [],
+        opts: {},
+      },
+      options
+    )
+
+    this.emit('hook:before', originalHook)
+
+    try {
+      // Collect file-based hooks
+      const fileResult = this._collectFileHooks(
+        hook,
+        originModuler,
+        options,
+        argv,
+        $core
+      )
+
+      // Collect dynamic hooks
+      const dynamicResult = this._collectDynamicHooks(
+        hook,
+        originModuler,
+        options,
+        argv,
+        $core
+      )
+
+      const allCollected = [
+        ...fileResult.hookCollected,
+        ...dynamicResult.hookCollected,
+      ]
+      const allIndex = [...fileResult.hookIndex, ...dynamicResult.hookIndex]
+
+      // Handle strict errors from collection phase
+      const allErrors = [...fileResult.errors, ...dynamicResult.errors]
+      if (options.strict && allErrors.length > 0) {
+        throw allErrors[0].error
+      }
+
+      const hookResolved: unknown[] = await Promise.all(allCollected)
+      // Filter out undefined entries from file hooks that didn't match
+      const filteredResolved: unknown[] = []
+      const filteredIndex: string[] = []
+      for (let i = 0; i < hookResolved.length; i++) {
+        if (
+          hookResolved[i] !== undefined ||
+          i >= fileResult.hookCollected.length
+        ) {
+          filteredResolved.push(hookResolved[i])
+          filteredIndex.push(allIndex[i])
+        }
+      }
+
+      const result = this._mergeHookResults(
+        filteredResolved,
+        filteredIndex,
+        options.mode || 'assign'
+      ) as T
+
+      this.emit('hook:after', originalHook, result)
+      return result
+    } catch (e: unknown) {
+      this.emit('hook:error', originalHook, e)
+      if (options.strict) {
+        throw e
+      }
+      const msg = e instanceof Error ? e.message : String(e)
+      error(msg)
+    }
+    return undefined
+  }
+
+  async invokeHookDetailed<T>(
+    hook: string,
+    options: HookOption = { mode: 'assign' },
+    opts: ArgvOptions = {}
+  ): Promise<HookInvocationResult<T>> {
+    const $core = Core.getInstance()
+    const originalHook = hook
+    $core.debugCore(`Invoke hook detailed ${hook}`)
+
+    const parsed = this._parseHookName(hook)
+    hook = parsed.hook
+    const originModuler = parsed.originModuler
+
+    const argv = Object.assign({}, opts, $core.parsedArgv)
+    options = Object.assign(
+      {
+        mode: 'assign',
+        useCache: false,
+        include: [],
+        exclude: [],
+        opts: {},
+      },
+      options
+    )
+
+    const allErrors: Array<{ plugin: string; error: Error }> = []
+    this.emit('hook:before', originalHook)
+
+    try {
+      const fileResult = this._collectFileHooks(
+        hook,
+        originModuler,
+        { ...options, strict: false },
+        argv,
+        $core,
+        false
+      )
+      const dynamicResult = this._collectDynamicHooks(
+        hook,
+        originModuler,
+        { ...options, strict: false },
+        argv,
+        $core,
+        false
+      )
+
+      allErrors.push(...fileResult.errors, ...dynamicResult.errors)
+
+      const allCollected = [
+        ...fileResult.hookCollected,
+        ...dynamicResult.hookCollected,
+      ]
+      const allIndex = [...fileResult.hookIndex, ...dynamicResult.hookIndex]
+
+      const settled = await Promise.allSettled(allCollected)
+      const resolvedValues: unknown[] = []
+      const resolvedIndex: string[] = []
+
+      for (let i = 0; i < settled.length; i++) {
+        const s = settled[i]
+        if (s.status === 'fulfilled') {
+          if (s.value !== undefined || i >= fileResult.hookCollected.length) {
+            resolvedValues.push(s.value)
+            resolvedIndex.push(allIndex[i])
+          }
+        } else {
+          const err =
+            s.reason instanceof Error ? s.reason : new Error(String(s.reason))
+          allErrors.push({ plugin: allIndex[i], error: err })
+          this.emit('hook:error', originalHook, err, allIndex[i])
+        }
+      }
+
+      const result = this._mergeHookResults(
+        resolvedValues,
+        resolvedIndex,
+        options.mode || 'assign'
+      ) as T
+      this.emit('hook:after', originalHook, result)
+
+      return { result, errors: allErrors }
+    } catch (e: unknown) {
+      const err = e instanceof Error ? e : new Error(String(e))
+      this.emit('hook:error', originalHook, err)
+      allErrors.push({ plugin: 'unknown', error: err })
+
+      let defaultResult: unknown
+      switch (options.mode) {
+        case 'push':
+          defaultResult = []
+          break
+        case 'replace':
+          defaultResult = undefined
+          break
+        default:
+          defaultResult = {}
+          break
+      }
+      return { result: defaultResult as T, errors: allErrors }
+    }
+  }
+}
+
+// --- Convenience exports (backward compatible) ---
+
+export const invokeHook = async <T>(
+  hook: string,
+  options: HookOption = { mode: 'assign' },
+  opts: ArgvOptions = {}
+): Promise<T | undefined> => {
+  const $core = Core.getInstance()
+  return $core.invokeHook(hook, options, opts)
+}
+
+export const extendSubCommand = (
+  command: string,
+  moduleName: string,
+  // Must remain `any`: Yargs instance type varies across versions and configurations
+  yargs: any,
+  basePath: string
+): void => {
+  const $core = Core.getInstance()
+  $core.extendSubCommand(command, moduleName, yargs, basePath)
+}
+
+export const extendConfig = (
+  extendRcPath: string[] | string,
+  prefix: string
+) => {
+  const $core = Core.getInstance()
+  return $core.extendConfig(extendRcPath, prefix)
 }

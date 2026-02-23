@@ -1,8 +1,5 @@
 import picocolors from 'picocolors'
 import { createColorize } from 'colorize-template'
-import { colorize as colorizeJson } from 'json-colorizer'
-import stringify from 'json-stringify-pretty-compact'
-import _ from 'lodash'
 
 const colorizeTemplate = createColorize({
   ...picocolors,
@@ -12,6 +9,31 @@ const colorizeTemplate = createColorize({
   info: picocolors.blue,
 })
 
+// Lazy-loaded modules for jsonLog (rarely used at startup)
+let _colorizeJson: ((input: string) => string) | null = null
+let _stringify: ((obj: any) => string) | null = null
+
+async function getJsonModules() {
+  if (!_colorizeJson) {
+    const [colorizer, stringifier] = await Promise.all([
+      import('json-colorizer'),
+      import('json-stringify-pretty-compact'),
+    ])
+    _colorizeJson = colorizer.colorize
+    _stringify = stringifier.default
+  }
+  return { colorizeJson: _colorizeJson!, stringify: _stringify! }
+}
+
+// Synchronous stringify fallback (used in log/info/error/warn/success when message is object)
+function simpleStringify(obj: any): string {
+  try {
+    return JSON.stringify(obj, null, 2)
+  } catch {
+    return String(obj)
+  }
+}
+
 /**
  * Logs a message to the console. If the message is an array or an object,
  * it will be stringified and colorized before being logged. Otherwise,
@@ -19,10 +41,14 @@ const colorizeTemplate = createColorize({
  *
  * @param message - The message to log. It can be an array, an object, or a string.
  */
-export const jsonLog = (
+export const jsonLog = async (
   message: unknown[] | Record<string, unknown> | string
 ) => {
-  if (_.isArray(message) || _.isObject(message)) {
+  if (
+    Array.isArray(message) ||
+    (typeof message === 'object' && message !== null && !Array.isArray(message))
+  ) {
+    const { colorizeJson, stringify } = await getJsonModules()
     console.log(colorizeJson(stringify(message)))
   } else {
     console.log(message)
@@ -56,8 +82,12 @@ export type LogOptions = {
  * @param opts.type - The type of console method to use for logging (e.g., 'log', 'error', 'warn'). Defaults to `'log'`.
  */
 export const log = (message: string | unknown = '', opts: LogOptions = {}) => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
 
   opts.exitCode ??= 0
@@ -85,8 +115,12 @@ export const log = (message: string | unknown = '', opts: LogOptions = {}) => {
  * @param opts.inverseColor - Whether to use inverse color display
  */
 export const info = (message: string | unknown = '', opts: LogOptions = {}) => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
   opts.type = 'info'
   log(`{info ${message}}`, opts)
@@ -105,8 +139,12 @@ export const success = (
   message: string | unknown = '',
   opts: LogOptions = {}
 ) => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
   opts.type = 'log'
   log(`{success ${message}}`, opts)
@@ -125,8 +163,12 @@ export const error = (
   message: string | unknown = '',
   opts: LogOptions = {}
 ) => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
   opts.type = 'error'
   log(`{error ${message}}`, opts)
@@ -142,8 +184,12 @@ export const error = (
  * @param opts.inverseColor - Whether to use inverse color display
  */
 export const warn = (message: string | unknown = '', opts: LogOptions = {}) => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
   opts.type = 'warn'
   log(`{warn ${message}}`, opts)
@@ -170,6 +216,21 @@ export const colorfulLog = (
 }
 
 /**
+ * Logs an error message and immediately exits the process.
+ * Use this instead of error() + return when you want to halt execution.
+ *
+ * @param message - The error message to log before exiting
+ * @param exitCode - The process exit code (default: 1)
+ */
+export const fatal = (
+  message: string | unknown = '',
+  exitCode: number = 1
+): never => {
+  error(message)
+  process.exit(exitCode)
+}
+
+/**
  * Returns a colorized version of a message string using the specified color.
  *
  * @param color - The color to apply to the message
@@ -177,8 +238,12 @@ export const colorfulLog = (
  * @returns The colorized message string
  */
 export const colorize = (color: string, message: string | unknown = '') => {
-  if (_.isObject(message)) {
-    message = stringify(message)
+  if (
+    typeof message === 'object' &&
+    message !== null &&
+    !Array.isArray(message)
+  ) {
+    message = simpleStringify(message)
   }
   return colorizeTemplate`{${color} ${message}}`
 }

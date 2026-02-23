@@ -7,16 +7,64 @@ import {
   success,
   warn,
 } from '@semo/core'
+import { spawnSync } from 'node:child_process'
+import {
+  existsSync,
+  mkdirSync,
+  readFileSync,
+  rmSync,
+  writeFileSync,
+} from 'node:fs'
 import path from 'path'
-import shell from 'shelljs'
 import { Argv } from 'yargs'
-import _ from 'lodash'
-import { existsSync } from 'node:fs'
 
 export const plugin = 'semo'
 export const command = 'create <name> [repo] [branch]'
 export const aliases = 'c'
 export const desc = 'Create a new project from specific repo'
+
+function commandExists(cmd: string): boolean {
+  return spawnSync('which', [cmd], { stdio: 'ignore' }).status === 0
+}
+
+function detectPackageManager(cwd: string): 'yarn' | 'pnpm' | 'npm' {
+  if (existsSync(path.resolve(cwd, 'yarn.lock'))) return 'yarn'
+  if (existsSync(path.resolve(cwd, 'pnpm-lock.yaml'))) return 'pnpm'
+  return 'npm'
+}
+
+function runInstall(pm: string, cwd: string): void {
+  if (pm !== 'npm' && !commandExists(pm)) {
+    warn(`${pm} not found, use npm instead`)
+    pm = 'npm'
+  }
+  spawnSync(pm, ['install'], { stdio: 'inherit', cwd })
+}
+
+function addPackages(
+  pm: string,
+  packages: string[],
+  dev: boolean,
+  cwd: string
+): void {
+  if (packages.length === 0) return
+  if (pm !== 'npm' && !commandExists(pm)) {
+    warn(`${pm} not found, use npm instead`)
+    pm = 'npm'
+  }
+  if (pm === 'yarn') {
+    spawnSync('yarn', dev ? ['add', ...packages, '-D'] : ['add', ...packages], {
+      stdio: 'inherit',
+      cwd,
+    })
+  } else {
+    spawnSync(
+      pm,
+      dev ? ['install', ...packages, '--save-dev'] : ['install', ...packages],
+      { stdio: 'inherit', cwd }
+    )
+  }
+}
 
 export const builder = function (yargs: Argv) {
   yargs.positional('name', {
@@ -30,51 +78,42 @@ export const builder = function (yargs: Argv) {
     alias: 'y',
     describe: 'Run dep install with --yes',
   })
-
   yargs.option('force', {
     boolean: true,
     default: false,
     alias: 'F',
     describe: 'Force download, existed folder will be deleted!',
   })
-
   yargs.option('merge', {
     alias: 'M',
     describe: 'Merge config with exist project folder!',
   })
-
   yargs.option('empty', {
     alias: 'E',
     describe: 'Force empty project, ignore repo',
   })
-
   yargs.option('template', {
     alias: 'T',
     describe: 'Select from registered project template repos',
   })
-
   yargs.option('template-tag', {
     alias: 'tag',
     describe: 'Registered project template tag, work with --template',
   })
-
   yargs.option('add', {
     default: false,
     alias: 'A',
     describe: 'Add npm package to package.json dependencies',
   })
-
   yargs.option('add-dev', {
     default: false,
     alias: 'D',
     describe: 'Add npm package to package.json devDependencies',
   })
-
   yargs.option('init-semo', {
     alias: 'i',
     describe: 'Init new project',
   })
-
   yargs.option('init-git', {
     default: true,
     describe: 'Init a git repo',
@@ -87,21 +126,23 @@ export const handler = async function (
   const scriptName = argv.scriptName || 'semo'
   argv.repo = argv.repo || ''
   argv.branch = argv.branch || 'main'
-  argv.tag = argv.tag ? _.castArray(argv.tag) : []
+  argv.tag = argv.tag ? (Array.isArray(argv.tag) ? argv.tag : [argv.tag]) : []
 
   try {
-    if (existsSync(path.resolve(process.cwd(), argv.name))) {
+    const projectDir = path.resolve(process.cwd(), argv.name)
+
+    if (existsSync(projectDir)) {
       if (argv.force) {
-        shell.rm('-rf', path.resolve(process.cwd(), argv.name))
+        rmSync(projectDir, { recursive: true, force: true })
         warn(`Existed ${argv.name} is deleted before creating a new one!`)
       } else if (!argv.merge) {
-        error(`Destination existed, command abort!`)
+        error('Destination existed, command abort!')
+        return
       }
     }
 
     if (argv.merge) {
-      // Nothing happened.
-      shell.cd(argv.name)
+      process.chdir(projectDir)
     } else {
       if (argv.template) {
         // Fetch repos from hook
@@ -113,54 +154,59 @@ export const handler = async function (
 
         if (Object.keys(repos).length === 0) {
           error('No pre-defined repos available.')
+          return
         }
 
-        Object.keys(repos).forEach((key) => {
-          if (_.isObject(repos[key] as any)) {
-            repos[key].tags = repos[key].tags
-              ? _.castArray(repos[key].tags)
+        for (const [key, value] of Object.entries(repos)) {
+          if (typeof value === 'object' && value !== null) {
+            const repo = value as any
+            repo.tags = repo.tags
+              ? Array.isArray(repo.tags)
+                ? repo.tags
+                : [repo.tags]
               : []
-            if (!repos[key].name) {
-              repos[key].name = key.replace(/_/g, '-')
+            if (!repo.name) {
+              repo.name = key.replace(/_/g, '-')
             }
-          } else if (_.isString(repos[key])) {
+          } else if (typeof value === 'string') {
             repos[key] = {
-              repo: repos[key],
+              repo: value,
               name: key.replace(/_/g, '-'),
               description: '',
               branch: 'main',
               tags: [],
             }
           }
-        })
+        }
 
-        if (argv.tag && argv.tag.length > 0) {
-          repos = _.pickBy(repos, (repo) => {
-            if (repo.tags) {
-              repo.tags = _.castArray(repo.tags)
-              return _.intersection(repo.tags, argv.tag).length > 0
-            } else {
-              return false
-            }
-          })
+        if (argv.tag.length > 0) {
+          repos = Object.fromEntries(
+            Object.entries(repos).filter(([, repo]: [string, any]) => {
+              return repo.tags?.some((tag: string) => argv.tag.includes(tag))
+            })
+          )
         }
 
         const template = repos[argv.template]
           ? argv.template
-          : Object.keys(repos).find(
-              (key) =>
-                repos[key].name && repos[key].name.indexOf(argv.template) > -1
+          : Object.keys(repos).find((key) =>
+              repos[key].name?.includes(argv.template)
             )
+
         if (template && repos[template]) {
-          argv.repo = repos[template].repo || error('Repo not found')
+          if (!repos[template].repo) {
+            error('Repo not found')
+            return
+          }
+          argv.repo = repos[template].repo
           argv.branch = repos[template].branch || 'main'
         } else {
           const answer: any = await argv.$prompt.select({
-            message: `Please choose a pre-defined repo to continue:`,
+            message: 'Please choose a pre-defined repo to continue:',
             choices: Object.keys(repos).map((key) => {
               return {
                 name: `${colorize('green', repos[key].name)} ${repos[key].tags
-                  .map((tag) => colorize('white.bgGreen', ` ${tag} `))
+                  .map((tag: string) => colorize('white.bgGreen', ` ${tag} `))
                   .join(' ')}: ${colorize('white', repos[key].repo)}${
                   repos[key].description ? '\n  ' + repos[key].description : ''
                 }`,
@@ -169,146 +215,102 @@ export const handler = async function (
             }),
           })
 
-          argv.repo = repos[answer].repo || error('Repo not found')
+          if (!repos[answer].repo) {
+            error('Repo not found')
+            return
+          }
+          argv.repo = repos[answer].repo
           argv.branch = repos[answer].branch || 'main'
         }
       } else if (argv.empty || !argv.repo) {
-        shell.mkdir('-p', path.resolve(process.cwd(), argv.name))
-        shell.cd(argv.name)
+        mkdirSync(projectDir, { recursive: true })
 
-        if (argv.yarn) {
-          if (argv.yes) {
-            shell.exec('yarn init -y')
-          } else {
-            shell.exec('yarn init')
-          }
-        } else {
-          if (argv.yes) {
-            shell.exec('npm init -y')
-          } else {
-            shell.exec('npm init')
-          }
-        }
-
-        shell.exec(`echo "node_modules" > .gitignore`)
+        const initArgs = argv.yes ? ['init', '-y'] : ['init']
+        spawnSync('npm', initArgs, { stdio: 'inherit', cwd: projectDir })
+        writeFileSync(path.resolve(projectDir, '.gitignore'), 'node_modules\n')
 
         if (argv.initGit) {
-          shell.exec('git init')
+          spawnSync('git', ['init'], { stdio: 'inherit', cwd: projectDir })
           success('New .git directory has been created!')
         }
+
+        process.chdir(projectDir)
       }
 
       if (argv.repo && argv.name) {
         info(`Downloading from ${argv.repo}`)
-        try {
-          shell.exec(
-            `git clone ${argv.repo} ${argv.name} --single-branch --depth=1 --branch ${argv.branch} --progress`
-          )
 
-          success('Succeeded!')
-          shell.cd(argv.name)
-          const packageFound = existsSync('package.json')
-          const yarnFound = existsSync('yarn.lock')
-          const pnpmFound = existsSync('pnpm-lock.yaml')
-          const npmFound = existsSync('package-lock.json')
-          shell.rm('-rf', path.resolve(process.cwd(), `.git`))
-          success('.git directory removed!')
+        const cloneResult = spawnSync(
+          'git',
+          [
+            'clone',
+            argv.repo,
+            argv.name,
+            '--single-branch',
+            '--depth=1',
+            '--branch',
+            argv.branch,
+            '--progress',
+          ],
+          { stdio: 'inherit' }
+        )
 
-          if (packageFound) {
-            if (yarnFound) {
-              if (shell.which('yarn')) {
-                shell.exec('yarn')
-              } else {
-                warn('yarn not found, use npm instead')
-                shell.exec('npm install')
-              }
-            } else if (pnpmFound) {
-              if (shell.which('pnpm')) {
-                shell.exec('pnpm install')
-              } else {
-                warn('pnpm not found, use npm instead')
-                shell.exec('npm install')
-              }
-            } else if (npmFound) {
-              shell.exec('npm install')
-            } else {
-              shell.exec('npm install')
-            }
-          }
+        if (cloneResult.status !== 0) {
+          error('Git clone failed!')
+          return
+        }
 
-          if (argv.initGit) {
-            shell.exec('git init')
-            success('New .git directory has been created!')
-          }
-        } catch (e) {
-          if (argv.verbose) {
-            error(e)
-          } else {
-            error(e.message)
-          }
+        success('Succeeded!')
+        process.chdir(projectDir)
+
+        const hasPackageJson = existsSync('package.json')
+        rmSync(path.resolve(projectDir, '.git'), {
+          recursive: true,
+          force: true,
+        })
+        success('.git directory removed!')
+
+        if (hasPackageJson) {
+          const pm = detectPackageManager(projectDir)
+          runInstall(pm, projectDir)
+        }
+
+        if (argv.initGit) {
+          spawnSync('git', ['init'], { stdio: 'inherit', cwd: projectDir })
+          success('New .git directory has been created!')
         }
       }
     }
 
-    // add packages
-    const addPackage = parsePackageNames(argv.add)
-    const addPackageDev = parsePackageNames(argv.addDev)
-    const yarnFound = existsSync('yarn.lock')
-    const pnpmFound = existsSync('pnpm-lock.yaml')
-    const npmFound = existsSync('package-lock.json')
-    if (addPackage.length > 0) {
-      if (yarnFound) {
-        shell.exec(`yarn add ${addPackage.join(' ')}`)
-      } else if (pnpmFound) {
-        shell.exec(`pnpm install ${addPackage.join(' ')}`)
-      } else if (npmFound) {
-        shell.exec(`npm install ${addPackage.join(' ')}`)
-      }
-    }
+    // Add packages
+    const pm = detectPackageManager(process.cwd())
+    addPackages(pm, parsePackageNames(argv.add), false, process.cwd())
+    addPackages(pm, parsePackageNames(argv.addDev), true, process.cwd())
 
-    if (addPackageDev.length > 0) {
-      if (yarnFound) {
-        shell.exec(`yarn add ${addPackageDev.join(' ')} -D`)
-      } else if (pnpmFound) {
-        shell.exec(`pnpm install ${addPackageDev.join(' ')} --save-dev`)
-      } else if (npmFound) {
-        shell.exec(`npm install ${addPackageDev.join(' ')} --save-dev`)
-      }
-    }
-
-    // init basic structure
+    // Init semo structure
     if (argv.initSemo) {
-      let initExtra: string = ''
-      if (yarnFound) {
-        initExtra = '--pm yarn'
-      } else if (pnpmFound) {
-        initExtra = '--pm pnpm'
-      } else if (npmFound) {
-        initExtra = '--pm npm'
-      }
-      if (argv.name.indexOf(`${argv.scriptName}-plugin-`) === 0) {
-        shell.exec(`${argv.scriptName} init --plugin --force ${initExtra}`)
-      } else {
-        shell.exec(`${argv.scriptName} init --force  ${initExtra}`)
-      }
+      const isPlugin = argv.name.startsWith(`${scriptName}-plugin-`)
+      spawnSync(
+        scriptName,
+        ['init', '--force', ...(isPlugin ? ['--plugin'] : []), '--pm', pm],
+        { stdio: 'inherit' }
+      )
       success('Initial basic structure complete!')
     }
 
-    if (process.platform === 'win32') {
-      // TODO: fix this
-    } else if (process.platform === 'darwin') {
-      // change package.json attributes
-      shell.exec(
-        `sed -i '' 's/"name": ".*"/"name": "${argv.name}"/' package.json`
-      )
-    } else {
-      shell.exec(`sed -i 's/"name": ".*"/"name": "${argv.name}"/' package.json`)
+    // Update package name in package.json
+    const pkgPath = path.resolve(process.cwd(), 'package.json')
+    if (existsSync(pkgPath)) {
+      const pkg = JSON.parse(readFileSync(pkgPath, 'utf8'))
+      pkg.name = argv.name
+      writeFileSync(pkgPath, JSON.stringify(pkg, null, 2) + '\n')
     }
-  } catch (e) {
+  } catch (e: unknown) {
+    const msg = e instanceof Error ? e.message : String(e)
     if (argv.verbose) {
       error(e)
     } else {
-      error(e.message)
+      error(msg)
     }
   }
 }

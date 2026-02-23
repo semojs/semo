@@ -1,12 +1,12 @@
-import { Argv, ArgvExtraOptions, error, exec, warn } from '@semo/core'
-import { existsSync } from 'node:fs'
+import { Argv, ArgvExtraOptions, error, execPromise, warn } from '@semo/core'
+import { spawnSync } from 'node:child_process'
+import { existsSync, mkdirSync, rmSync } from 'node:fs'
 import path from 'path'
-import shell from 'shelljs'
 
 export const plugin = 'semo'
 export const command = 'plugin <name>'
 export const desc = 'Generate a plugin structure'
-export const aliases = ['p']
+export const aliases = 'p'
 
 export const builder = function (yargs: Argv) {
   yargs.option('force', {
@@ -15,7 +15,7 @@ export const builder = function (yargs: Argv) {
   })
 }
 
-export const handler = function (
+export const handler = async function (
   argv: ArgvExtraOptions & { [key: string]: any }
 ) {
   const pluginDir = argv.pluginMakeDir || argv.pluginDir
@@ -23,11 +23,13 @@ export const handler = function (
     error(
       '"pluginDir" missing in config file or not exist in current directory!'
     )
+    return
   }
 
-  const namePattern = /[a-z][a-z0-9-]+/
+  const namePattern = /^[a-z][a-z0-9-]+$/
   if (!namePattern.test(argv.name)) {
     error('Plugin name invalid!')
+    return
   }
 
   const scriptName = argv.scriptName || 'semo'
@@ -40,18 +42,21 @@ export const handler = function (
       warn(
         `Existed ${scriptName}-plugin-${argv.name} is deleted before creating a new one!`
       )
-      shell.rm('-rf', pluginPath)
+      rmSync(pluginPath, { recursive: true, force: true })
     } else {
       error(`Destination existed, command abort!`)
+      return
     }
   }
 
-  shell.mkdir('-p', pluginPath)
-  shell.cd(pluginPath)
-  if (!shell.which(scriptName)) {
+  mkdirSync(pluginPath, { recursive: true })
+
+  const result = spawnSync('which', [scriptName], { stdio: 'ignore' })
+  if (result.status !== 0) {
     error(`Script ${scriptName} not found!`)
+    return
   }
-  shell.exec('npm init --yes', () => {
-    exec(`${scriptName} init --pm npm --plugin`)
-  })
+
+  await execPromise('npm init --yes', { cwd: pluginPath })
+  await execPromise(`${scriptName} init --pm npm --plugin`, { cwd: pluginPath })
 }

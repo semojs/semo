@@ -1,64 +1,8 @@
-import { error, splitByChar, success, warn } from '@semo/core'
-import { ensureDirSync } from 'fs-extra'
-import {
-  closeSync,
-  createWriteStream,
-  openSync,
-  readFileSync,
-  statSync,
-} from 'node:fs'
+import { error, replHistory, splitByChar, success, warn } from '@semo/core'
+import { execSync } from 'node:child_process'
+import { mkdirSync } from 'node:fs'
+import path from 'node:path'
 import repl from 'node:repl'
-import { REPLServer } from 'node:repl'
-import shell from 'shelljs'
-
-/**
- * Keep repl history
- *
- */
-export const replHistory = function (
-  repl: REPLServer & { [key: string]: any },
-  file: string
-) {
-  try {
-    statSync(file)
-    repl.history = readFileSync(file, 'utf-8').split('\n').reverse()
-    repl.history.shift()
-    repl.historyIndex = -1 // will be incremented before pop
-  } catch {}
-
-  const fd = openSync(file, 'a')
-  const wstream = createWriteStream(file, {
-    fd,
-  })
-  wstream.on('error', function (err) {
-    throw err
-  })
-
-  repl.addListener('line', function (code) {
-    if (code && code !== '.history') {
-      wstream.write(code + '\n')
-    } else {
-      repl.historyIndex++
-      repl.history.pop()
-    }
-  })
-
-  process.on('exit', function () {
-    closeSync(fd)
-  })
-
-  repl.defineCommand('history', {
-    help: 'Show the history',
-    action: function () {
-      const out: any = []
-      repl.history.forEach(function (v) {
-        out.push(v)
-      })
-      repl.output.write(out.reverse().join('\n') + '\n')
-      repl.displayPrompt()
-    },
-  })
-}
 
 export function corepl(cli: repl.REPLServer) {
   // @ts-ignore
@@ -105,14 +49,16 @@ export function corepl(cli: repl.REPLServer) {
 
     try {
       if (cmd) {
-        shell.exec(cmd)
+        execSync(cmd, { stdio: 'inherit' })
       }
-    } catch (e) {
-      if (argv.debug) {
-        error(e.stack)
-      } else {
-        error(e.message)
-      }
+    } catch (e: unknown) {
+      const msg =
+        e instanceof Error
+          ? argv.debug
+            ? e.stack || e.message
+            : e.message
+          : String(e)
+      error(msg)
     }
 
     return callback()
@@ -135,13 +81,13 @@ export async function openRepl(context: any): Promise<any> {
     },
   })
 
-  const Home = process.env.HOME + `/.${argv.scriptName}`
-  ensureDirSync(Home)
-  replHistory(r, `${Home}/.${argv.scriptName}_shell_history`)
+  const homeDir = path.resolve(process.env.HOME || '', `.${argv.scriptName}`)
+  mkdirSync(homeDir, { recursive: true })
+  replHistory(r, path.resolve(homeDir, `.${argv.scriptName}_shell_history`))
 
-  Object.keys(context).forEach((key) => {
-    r.context[key] = context[key]
-  })
+  for (const [key, value] of Object.entries(context)) {
+    r.context[key] = value
+  }
 
   corepl(r)
 }

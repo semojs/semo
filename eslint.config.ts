@@ -15,6 +15,7 @@ export default tseslint.config(
       'pnpm-lock.yaml',
       '**/*.config.ts',
       '.vitepress/**/*',
+      'examples/**',
     ],
   },
 
