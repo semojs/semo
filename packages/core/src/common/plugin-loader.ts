@@ -1,5 +1,5 @@
 import { glob } from 'glob'
-import { existsSync, readFileSync } from 'node:fs'
+import { existsSync, readFileSync, statSync } from 'node:fs'
 import path from 'node:path'
 import { error, warn } from './log.js'
 import { ArgvOptions } from './types.js'
@@ -121,7 +121,14 @@ export async function getAllPluginsMapping(
     for (const pattern of patterns) {
       const matches = await glob(pattern, { noext: true, cwd })
       for (const match of matches) {
-        plugins[match] = path.resolve(cwd, match)
+        const fullPath = path.resolve(cwd, match)
+        // Only treat directories as plugins (skip files like semo-plugin-manifest.json)
+        try {
+          if (!statSync(fullPath).isDirectory()) continue
+        } catch {
+          continue
+        }
+        plugins[match] = fullPath
       }
     }
   }
